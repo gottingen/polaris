@@ -8,7 +8,7 @@
 #pragma once
 
 #include <cublas_v2.h>
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/gpu/utils/NoTypeTensor.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 

@@ -12,39 +12,39 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 
-#include <polaris/Index2Layer.h>
-#include <polaris/IndexAdditiveQuantizer.h>
-#include <polaris/IndexAdditiveQuantizerFastScan.h>
-#include <polaris/IndexBinary.h>
-#include <polaris/IndexBinaryFlat.h>
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexHNSW.h>
+#include <polaris/index_2layer.h>
+#include <polaris/index_additive_quantizer.h>
+#include <polaris/index_additive_quantizer_fast_scan.h>
+#include <polaris/index_binary.h>
+#include <polaris/index_binary_flat.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_hnsw.h>
 #include <polaris/index_ivf.h>
-#include <polaris/IndexIVFAdditiveQuantizerFastScan.h>
-#include <polaris/IndexIVFFlat.h>
-#include <polaris/IndexIVFPQ.h>
-#include <polaris/IndexIVFPQFastScan.h>
-#include <polaris/IndexIVFPQR.h>
-#include <polaris/IndexIVFSpectralHash.h>
-#include <polaris/IndexLSH.h>
-#include <polaris/IndexLattice.h>
-#include <polaris/IndexNSG.h>
-#include <polaris/IndexPQ.h>
-#include <polaris/IndexPQFastScan.h>
-#include <polaris/IndexPreTransform.h>
-#include <polaris/IndexRefine.h>
-#include <polaris/IndexRowwiseMinMax.h>
-#include <polaris/IndexScalarQuantizer.h>
+#include <polaris/index_ivf_additive_quantizer_fast_scan.h>
+#include <polaris/index_ivf_flat.h>
+#include <polaris/index_ivf_pq.h>
+#include <polaris/index_ivf_pq_fast_scan.h>
+#include <polaris/index_ivf_pqr.h>
+#include <polaris/index_ivf_spectral_hash.h>
+#include <polaris/index_lsh.h>
+#include <polaris/index_lattice.h>
+#include <polaris/index_nsg.h>
+#include <polaris/index_pq.h>
+#include <polaris/index_pq_fast_scan.h>
+#include <polaris/index_pre_transform.h>
+#include <polaris/index_refine.h>
+#include <polaris/index_rowwise_minmax.h>
+#include <polaris/index_scalar_quantizer.h>
 
-#include <polaris/MetaIndexes.h>
-#include <polaris/VectorTransform.h>
+#include <polaris/meta_indexes.h>
+#include <polaris/vector_transform.h>
 
-#include <polaris/impl/LocalSearchQuantizer.h>
+#include <polaris/impl/local_search_quantizer.h>
 #include <polaris/impl/ProductQuantizer.h>
-#include <polaris/impl/ResidualQuantizer.h>
-#include <polaris/impl/ScalarQuantizer.h>
+#include <polaris/impl/residual_quantizer.h>
+#include <polaris/impl/scalar_quantizer.h>
 #include <polaris/impl/pq4_fast_scan.h>
 
 #include <polaris/invlists/BlockInvertedLists.h>

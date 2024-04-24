@@ -65,86 +65,86 @@ typedef uint64_t size_t;
 #endif
 
 
-#include <polaris/IndexFlat.h>
-#include <polaris/VectorTransform.h>
-#include <polaris/IndexPreTransform.h>
-#include <polaris/IndexLSH.h>
-#include <polaris/IndexPQ.h>
-#include <polaris/IndexAdditiveQuantizer.h>
+#include <polaris/index_flat.h>
+#include <polaris/vector_transform.h>
+#include <polaris/index_pre_transform.h>
+#include <polaris/index_lsh.h>
+#include <polaris/index_pq.h>
+#include <polaris/index_additive_quantizer.h>
 #include <polaris/index_ivf.h>
-#include <polaris/IndexIVFPQ.h>
-#include <polaris/Index2Layer.h>
-#include <polaris/IndexIVFPQR.h>
-#include <polaris/IndexIVFFlat.h>
-#include <polaris/IndexIVFIndependentQuantizer.h>
+#include <polaris/index_ivf_pq.h>
+#include <polaris/index_2layer.h>
+#include <polaris/index_ivf_pqr.h>
+#include <polaris/index_ivf_flat.h>
+#include <polaris/index_ivf_independent_quantizer.h>
 
-#include <polaris/IndexFastScan.h>
-#include <polaris/IndexAdditiveQuantizerFastScan.h>
-#include <polaris/IndexPQFastScan.h>
+#include <polaris/index_fast_scan.h>
+#include <polaris/index_additive_quantizer_fast_scan.h>
+#include <polaris/index_pq_fast_scan.h>
 #include <polaris/utils/simdlib.h>
 #include <polaris/impl/simd_result_handlers.h>
 
-#include <polaris/IndexIVFFastScan.h>
-#include <polaris/IndexIVFAdditiveQuantizerFastScan.h>
-#include <polaris/IndexIVFPQFastScan.h>
+#include <polaris/index_ivf_fast_scan.h>
+#include <polaris/index_ivf_additive_quantizer_fast_scan.h>
+#include <polaris/index_ivf_pq_fast_scan.h>
 #include <polaris/utils/quantize_lut.h>
 
-#include <polaris/IndexScalarQuantizer.h>
-#include <polaris/IndexIVFAdditiveQuantizer.h>
-#include <polaris/IndexIVFSpectralHash.h>
-#include <polaris/impl/ThreadedIndex.h>
-#include <polaris/IndexShards.h>
-#include <polaris/IndexShardsIVF.h>
-#include <polaris/IndexReplicas.h>
-#include <polaris/impl/HNSW.h>
-#include <polaris/IndexHNSW.h>
+#include <polaris/index_scalar_quantizer.h>
+#include <polaris/index_ivf_additive_quantizer.h>
+#include <polaris/index_ivf_spectral_hash.h>
+#include <polaris/impl/threaded_index.h>
+#include <polaris/index_shards.h>
+#include <polaris/index_shards_ivf.h>
+#include <polaris/index_replicas.h>
+#include <polaris/impl/hnsw.h>
+#include <polaris/index_hnsw.h>
 
 #include <polaris/impl/kmeans1d.h>
 
-#include <polaris/impl/NNDescent.h>
-#include <polaris/IndexNNDescent.h>
+#include <polaris/impl/nn_descent.h>
+#include <polaris/index_nn_descent.h>
 
-#include <polaris/impl/NSG.h>
-#include <polaris/IndexNSG.h>
+#include <polaris/impl/nsg.h>
+#include <polaris/index_nsg.h>
 
-#include <polaris/MetaIndexes.h>
-#include <polaris/IndexIDMap.h>
-#include <polaris/IndexRefine.h>
+#include <polaris/meta_indexes.h>
+#include <polaris/index_id_map.h>
+#include <polaris/index_refine.h>
 
-#include <polaris/IndexRowwiseMinMax.h>
+#include <polaris/index_rowwise_minmax.h>
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 
-#include <polaris/IndexBinaryFlat.h>
-#include <polaris/IndexBinaryIVF.h>
-#include <polaris/IndexBinaryFromFloat.h>
-#include <polaris/IndexBinaryHNSW.h>
-#include <polaris/IndexBinaryHash.h>
+#include <polaris/index_binary_flat.h>
+#include <polaris/index_binary_ivf.h>
+#include <polaris/index_binary_from_float.h>
+#include <polaris/index_binary_hnsw.h>
+#include <polaris/index_binary_hash.h>
 
 #include <polaris/impl/io.h>
 #include <polaris/index_io.h>
 #include <polaris/clone_index.h>
 
-#include <polaris/IVFlib.h>
+#include <polaris/ivf_lib.h>
 #include <polaris/utils/utils.h>
 
 #include <polaris/utils/sorting.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/extra_distances.h>
 #include <polaris/utils/random.h>
-#include <polaris/utils/Heap.h>
-#include <polaris/utils/AlignedTable.h>
+#include <polaris/utils/heap.h>
+#include <polaris/utils/aligned_table.h>
 #include <polaris/utils/partitioning.h>
-#include <polaris/impl/AuxIndexStructures.h>
-#include <polaris/impl/IDSelector.h>
-#include <polaris/impl/DistanceComputer.h>
-#include <polaris/impl/AdditiveQuantizer.h>
-#include <polaris/impl/ResidualQuantizer.h>
+#include <polaris/impl/aux_index_structures.h>
+#include <polaris/impl/id_selector.h>
+#include <polaris/impl/distance_computer.h>
+#include <polaris/impl/additive_quantizer.h>
+#include <polaris/impl/residual_quantizer.h>
 #include <polaris/impl/residual_quantizer_encode_steps.h>
 
-#include <polaris/impl/LocalSearchQuantizer.h>
-#include <polaris/impl/ProductAdditiveQuantizer.h>
-#include <polaris/impl/CodePacker.h>
+#include <polaris/impl/local_search_quantizer.h>
+#include <polaris/impl/product_additive_quantizer.h>
+#include <polaris/impl/code_packer.h>
 
 #include <polaris/invlists/BlockInvertedLists.h>
 
@@ -152,17 +152,17 @@ typedef uint64_t size_t;
 #include <polaris/invlists/OnDiskInvertedLists.h>
 #endif // !_MSC_VER
 
-#include <polaris/Clustering.h>
+#include <polaris/clustering.h>
 
 #include <polaris/utils/hamming.h>
 #include <polaris/utils/hamming_distance/common.h>
 
-#include <polaris/AutoTune.h>
-#include <polaris/MatrixStats.h>
+#include <polaris/auto_tune.h>
+#include <polaris/matrix_stats.h>
 #include <polaris/index_factory.h>
 
 #include <polaris/impl/lattice_Zn.h>
-#include <polaris/IndexLattice.h>
+#include <polaris/index_lattice.h>
 
 
 %}

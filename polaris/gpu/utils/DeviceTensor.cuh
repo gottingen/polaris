@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/Index.h> // idx_t
+#include <polaris/index.h> // idx_t
 #include <polaris/gpu/GpuResources.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 

@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "IndexIVFFlat_c.h"
-#include <polaris/IndexIVFFlat.h>
+#include <polaris/index_ivf_flat.h>
 #include "Clustering_c.h"
 #include "Index_c.h"
 #include "macros_impl.h"

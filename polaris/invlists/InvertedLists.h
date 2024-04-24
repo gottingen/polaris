@@ -15,7 +15,7 @@
  * the interface.
  */
 
-#include <polaris/MetricType.h>
+#include <polaris/metric_type.h>
 #include <vector>
 
 namespace polaris {

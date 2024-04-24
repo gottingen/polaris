@@ -7,8 +7,8 @@
 
 #include <polaris/invlists/BlockInvertedLists.h>
 
-#include <polaris/impl/CodePacker.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/code_packer.h>
+#include <polaris/impl/faiss_assert.h>
 
 #include <polaris/impl/io.h>
 #include <polaris/impl/io_macros.h>

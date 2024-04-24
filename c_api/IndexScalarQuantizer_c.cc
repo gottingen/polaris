@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include "IndexScalarQuantizer_c.h"
-#include <polaris/IndexScalarQuantizer.h>
-#include <polaris/impl/ScalarQuantizer.h>
+#include <polaris/index_scalar_quantizer.h>
+#include <polaris/impl/scalar_quantizer.h>
 #include "macros_impl.h"
 
 using polaris::Index;

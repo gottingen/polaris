@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <random>
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexIVFFlat.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_ivf_flat.h>
 
 using idx_t = polaris::idx_t;
 

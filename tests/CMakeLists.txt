@@ -5,33 +5,33 @@
 # LICENSE file in the root directory of this source tree.
 
 set(FAISS_TEST_SRC
-  test_binary_flat.cpp
-  test_dealloc_invlists.cpp
-  test_ivfpq_codec.cpp
-  test_ivfpq_indexing.cpp
-  test_lowlevel_ivf.cpp
-  test_ivf_index.cpp
-  test_merge.cpp
-  test_omp_threads.cpp
-  test_ondisk_ivf.cpp
-  test_pairs_decoding.cpp
-  test_params_override.cpp
-  test_pq_encoding.cpp
-  test_sliding_ivf.cpp
-  test_threaded_index.cpp
-  test_transfer_invlists.cpp
-  test_mem_leak.cpp
-  test_cppcontrib_sa_decode.cpp
-  test_cppcontrib_uintreader.cpp
-  test_simdlib.cpp
-  test_approx_topk.cpp
-  test_RCQ_cropping.cpp
-  test_distances_simd.cpp
-  test_heap.cpp
-  test_code_distance.cpp
-  test_hnsw.cpp
-  test_partitioning.cpp
-  test_fastscan_perf.cpp
+  test_binary_flat.cc
+  test_dealloc_invlists.cc
+  test_ivfpq_codec.cc
+  test_ivfpq_indexing.cc
+  test_lowlevel_ivf.cc
+  test_ivf_index.cc
+  test_merge.cc
+  test_omp_threads.cc
+  test_ondisk_ivf.cc
+  test_pairs_decoding.cc
+  test_params_override.cc
+  test_pq_encoding.cc
+  test_sliding_ivf.cc
+  test_threaded_index.cc
+  test_transfer_invlists.cc
+  test_mem_leak.cc
+  test_cppcontrib_sa_decode.cc
+  test_cppcontrib_uintreader.cc
+  test_simdlib.cc
+  test_approx_topk.cc
+  test_RCQ_cropping.cc
+  test_distances_simd.cc
+  test_heap.cc
+  test_code_distance.cc
+  test_hnsw.cc
+  test_partitioning.cc
+  test_fastscan_perf.cc
 )
 
 add_executable(polaris_test ${FAISS_TEST_SRC})

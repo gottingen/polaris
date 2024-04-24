@@ -18,7 +18,7 @@
 
 #include <arm_neon.h>
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 
 namespace polaris {
 

@@ -7,7 +7,7 @@
 
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <math_constants.h> // in CUDA SDK, for CUDART_NAN_F
 #include <polaris/gpu/impl/VectorResidual.cuh>
 #include <polaris/gpu/utils/ConversionOperators.cuh>

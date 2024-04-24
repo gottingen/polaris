@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/MetricType.h>
+#include <polaris/metric_type.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/AuxIndexStructures.h>
+#include <polaris/impl/aux_index_structures.h>
 #include <polaris/gpu/impl/DistanceUtils.cuh>
 #include <polaris/gpu/utils/BlockSelectKernel.cuh>
 #include <polaris/gpu/utils/ConversionOperators.cuh>

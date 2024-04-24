@@ -10,8 +10,8 @@
 #include <cassert>
 #include <cmath>
 
-#include <polaris/impl/FaissAssert.h>
-#include <polaris/utils/AlignedTable.h>
+#include <polaris/impl/faiss_assert.h>
+#include <polaris/utils/aligned_table.h>
 #include <polaris/utils/ordered_key_value.h>
 #include <polaris/utils/simdlib.h>
 

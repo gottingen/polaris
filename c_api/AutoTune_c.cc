@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "AutoTune_c.h"
-#include <polaris/AutoTune.h>
+#include <polaris/auto_tune.h>
 #include <cstring>
 #include "macros_impl.h"
 

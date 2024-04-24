@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/impl/L2Select.cuh>
 
 #include <polaris/gpu/utils/DeviceUtils.h>

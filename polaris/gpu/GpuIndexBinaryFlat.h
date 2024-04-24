@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/IndexBinaryFlat.h>
+#include <polaris/index_binary_flat.h>
 #include <polaris/gpu/GpuIndex.h>
 #include <polaris/gpu/GpuResources.h>
 #include <memory>

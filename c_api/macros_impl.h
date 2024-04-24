@@ -13,7 +13,7 @@
 #ifndef MACROS_IMPL_H
 #define MACROS_IMPL_H
 
-#include <polaris/impl/FaissException.h>
+#include <polaris/impl/faiss_exception.h>
 #include <iostream>
 #include <stdexcept>
 #include "error_impl.h"

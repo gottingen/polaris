@@ -23,8 +23,8 @@
 #include <polaris/gpu/GpuDistance.h>
 #include <polaris/gpu/GpuResources.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/FaissAssert.h>
-#include <polaris/utils/Heap.h>
+#include <polaris/impl/faiss_assert.h>
+#include <polaris/utils/heap.h>
 #include <polaris/gpu/impl/Distance.cuh>
 #include <polaris/gpu/utils/ConversionOperators.cuh>
 #include <polaris/gpu/utils/CopyUtils.cuh>

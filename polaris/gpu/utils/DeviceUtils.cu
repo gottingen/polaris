@@ -7,7 +7,7 @@
 
 #include <cuda_profiler_api.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <mutex>
 #include <unordered_map>

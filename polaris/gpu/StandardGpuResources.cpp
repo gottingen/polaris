@@ -31,7 +31,7 @@
 #include <polaris/gpu/StandardGpuResources.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <iostream>
 #include <limits>
 #include <sstream>

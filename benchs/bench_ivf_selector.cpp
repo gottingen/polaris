@@ -9,9 +9,9 @@
 #include <unistd.h>
 #include <memory>
 
-#include <polaris/IVFlib.h>
+#include <polaris/ivf_lib.h>
 #include <polaris/index_ivf.h>
-#include <polaris/impl/IDSelector.h>
+#include <polaris/impl/id_selector.h>
 #include <polaris/index_factory.h>
 #include <polaris/index_io.h>
 #include <polaris/utils/random.h>

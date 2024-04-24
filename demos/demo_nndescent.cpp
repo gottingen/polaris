@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <random>
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexNNDescent.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_nn_descent.h>
 
 using namespace std::chrono;
 

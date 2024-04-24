@@ -7,7 +7,7 @@
 
 #include <polaris/gpu/impl/InterleavedCodes.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 
 namespace polaris {
 namespace gpu {

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <polaris/Index.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/index.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 #include <initializer_list>
 

@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/utils/approx_topk/mode.h>
 
 namespace polaris {

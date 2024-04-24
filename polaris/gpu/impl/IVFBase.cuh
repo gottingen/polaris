@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <polaris/Index.h>
-#include <polaris/MetricType.h>
+#include <polaris/index.h>
+#include <polaris/metric_type.h>
 #include <polaris/gpu/GpuIndicesOptions.h>
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/DeviceVector.cuh>

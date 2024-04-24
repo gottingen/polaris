@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "error_impl.h"
-#include <polaris/impl/FaissException.h>
+#include <polaris/impl/faiss_exception.h>
 #include <exception>
 #include "error_c.h"
 

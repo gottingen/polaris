@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/gpu/StandardGpuResources.h>
 #include <polaris/gpu/test/TestUtils.h>
 #include <polaris/gpu/utils/DeviceUtils.h>

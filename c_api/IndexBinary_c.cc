@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "IndexBinary_c.h"
-#include <polaris/IndexBinary.h>
+#include <polaris/index_binary.h>
 #include "macros_impl.h"
 
 extern "C" {

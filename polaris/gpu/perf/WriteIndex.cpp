@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexIVFFlat.h>
-#include <polaris/IndexIVFPQ.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_ivf_flat.h>
+#include <polaris/index_ivf_pq.h>
 #include <polaris/gpu/test/TestUtils.h>
 #include <polaris/index_io.h>
 #include <gflags/gflags.h>

@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <polaris/impl/platform_macros.h>
-#include <polaris/utils/Heap.h>
+#include <polaris/utils/heap.h>
 
 namespace polaris {
 

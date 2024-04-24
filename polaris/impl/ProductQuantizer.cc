@@ -16,9 +16,9 @@
 
 #include <algorithm>
 
-#include <polaris/IndexFlat.h>
-#include <polaris/VectorTransform.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/index_flat.h>
+#include <polaris/vector_transform.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/utils/distances.h>
 
 extern "C" {

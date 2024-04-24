@@ -10,7 +10,7 @@
 #include <polaris/index_io.h>
 #include <polaris/invlists/InvertedLists.h>
 #include <polaris/invlists/InvertedListsIOHook.h>
-#include <polaris/utils/AlignedTable.h>
+#include <polaris/utils/aligned_table.h>
 
 namespace polaris {
 

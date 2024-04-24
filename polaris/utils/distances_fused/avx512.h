@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include <polaris/impl/ResultHandler.h>
+#include <polaris/impl/result_handler.h>
 #include <polaris/impl/platform_macros.h>
 
-#include <polaris/utils/Heap.h>
+#include <polaris/utils/heap.h>
 
 #ifdef __AVX512F__
 

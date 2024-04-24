@@ -16,15 +16,15 @@
 #include <tuple>
 #include <vector>
 
-#include <polaris/Index.h>
-#include <polaris/Index2Layer.h>
-#include <polaris/IndexIVFPQ.h>
-#include <polaris/IndexPQ.h>
+#include <polaris/index.h>
+#include <polaris/index_2layer.h>
+#include <polaris/index_ivf_pq.h>
+#include <polaris/index_pq.h>
 #include <polaris/impl/io.h>
 #include <polaris/index_factory.h>
 #include <polaris/index_io.h>
 
-#include <polaris/IndexRowwiseMinMax.h>
+#include <polaris/index_rowwise_minmax.h>
 #include <polaris/cppcontrib/SaDecodeKernels.h>
 
 // train a dataset

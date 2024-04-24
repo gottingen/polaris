@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <polaris/AutoTune.h>
-#include <polaris/Index.h>
+#include <polaris/auto_tune.h>
+#include <polaris/index.h>
 
 namespace polaris {
 namespace gpu {

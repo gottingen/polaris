@@ -8,7 +8,7 @@
 #include <polaris/gpu/impl/IcmEncoder.cuh>
 
 #include <polaris/gpu/GpuResources.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/impl/L2Norm.cuh>
 #include <polaris/gpu/utils/CopyUtils.cuh>
 #include <polaris/gpu/utils/DeviceDefs.cuh>

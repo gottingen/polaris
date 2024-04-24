@@ -6,10 +6,10 @@
 
 #include "RocksDBInvertedLists.h"
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexIVFFlat.h>
-#include <polaris/impl/AuxIndexStructures.h>
-#include <polaris/impl/FaissException.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_ivf_flat.h>
+#include <polaris/impl/aux_index_structures.h>
+#include <polaris/impl/faiss_exception.h>
 #include <polaris/utils/random.h>
 
 using namespace polaris;

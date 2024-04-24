@@ -5,14 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/IndexFlat.h>
+#include <polaris/index_flat.h>
 #include <polaris/index_ivf.h>
 #include <polaris/gpu/GpuCloner.h>
 #include <polaris/gpu/GpuIndexFlat.h>
 #include <polaris/gpu/GpuIndexIVF.h>
 #include <polaris/gpu/impl/IndexUtils.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/impl/IVFBase.cuh>
 #include <polaris/gpu/utils/CopyUtils.cuh>
 

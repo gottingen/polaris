@@ -10,7 +10,7 @@
 #include <cuda.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <stdint.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 

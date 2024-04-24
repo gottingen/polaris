@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/impl/pq4_fast_scan.h>
 #include <polaris/impl/simd_result_handlers.h>
 

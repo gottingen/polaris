@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexIVFFlat.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_ivf_flat.h>
 #include <polaris/gpu/GpuIndexIVFFlat.h>
 #include <polaris/gpu/GpuIndicesOptions.h>
 #include <polaris/gpu/StandardGpuResources.h>

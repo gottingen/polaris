@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/gpu/GpuResources.h>
 
 namespace polaris {

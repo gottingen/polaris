@@ -6,7 +6,7 @@
  */
 
 #include "IndexReplicas_c.h"
-#include <polaris/IndexReplicas.h>
+#include <polaris/index_replicas.h>
 #include "macros_impl.h"
 
 using polaris::Index;

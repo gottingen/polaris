@@ -12,9 +12,9 @@
 
 #include <sys/time.h>
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexIVFFlat.h>
-#include <polaris/IndexPQ.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_ivf_flat.h>
+#include <polaris/index_pq.h>
 #include <polaris/index_io.h>
 
 double elapsed() {

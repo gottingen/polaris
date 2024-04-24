@@ -20,10 +20,10 @@
 #include <immintrin.h>
 #endif
 
-#include <polaris/impl/AuxIndexStructures.h>
-#include <polaris/impl/FaissAssert.h>
-#include <polaris/impl/IDSelector.h>
-#include <polaris/impl/ResultHandler.h>
+#include <polaris/impl/aux_index_structures.h>
+#include <polaris/impl/faiss_assert.h>
+#include <polaris/impl/id_selector.h>
+#include <polaris/impl/result_handler.h>
 
 #include <polaris/utils/distances_fused/distances_fused.h>
 

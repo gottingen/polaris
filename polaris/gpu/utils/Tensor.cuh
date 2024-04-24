@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <polaris/Index.h> // idx_t
+#include <polaris/index.h> // idx_t
 #include <stdint.h>
 #include <initializer_list>
 #include <vector>

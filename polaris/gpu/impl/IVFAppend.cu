@@ -7,7 +7,7 @@
 
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/impl/IVFAppend.cuh>
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <polaris/gpu/utils/Float16.cuh>

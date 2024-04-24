@@ -6,22 +6,22 @@
  */
 
 #include <polaris/gpu/GpuCloner.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <memory>
 #include <typeinfo>
 
 #include <polaris/gpu/StandardGpuResources.h>
 
-#include <polaris/IndexBinaryFlat.h>
-#include <polaris/IndexFlat.h>
+#include <polaris/index_binary_flat.h>
+#include <polaris/index_flat.h>
 #include <polaris/index_ivf.h>
-#include <polaris/IndexIVFFlat.h>
-#include <polaris/IndexIVFPQ.h>
-#include <polaris/IndexPreTransform.h>
-#include <polaris/IndexReplicas.h>
-#include <polaris/IndexScalarQuantizer.h>
-#include <polaris/IndexShardsIVF.h>
-#include <polaris/MetaIndexes.h>
+#include <polaris/index_ivf_flat.h>
+#include <polaris/index_ivf_pq.h>
+#include <polaris/index_pre_transform.h>
+#include <polaris/index_replicas.h>
+#include <polaris/index_scalar_quantizer.h>
+#include <polaris/index_shards_ivf.h>
+#include <polaris/meta_indexes.h>
 #include <polaris/gpu/GpuIndex.h>
 #include <polaris/gpu/GpuIndexBinaryFlat.h>
 #include <polaris/gpu/GpuIndexFlat.h>
@@ -29,7 +29,7 @@
 #include <polaris/gpu/GpuIndexIVFPQ.h>
 #include <polaris/gpu/GpuIndexIVFScalarQuantizer.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/index_io.h>
 
 namespace polaris {

@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 
 namespace polaris {
 

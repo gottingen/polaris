@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <polaris/Index.h>
-#include <polaris/IndexBinary.h>
+#include <polaris/index.h>
+#include <polaris/index_binary.h>
 
 namespace polaris {
 

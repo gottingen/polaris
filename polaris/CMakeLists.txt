@@ -5,65 +5,65 @@
 # LICENSE file in the root directory of this source tree.
 
 set(FAISS_SRC
-        AutoTune.cc
-        Clustering.cc
-        IVFlib.cc
-        Index.cc
-        Index2Layer.cc
-        IndexAdditiveQuantizer.cc
-        IndexBinary.cc
-        IndexBinaryFlat.cc
-        IndexBinaryFromFloat.cc
-        IndexBinaryHNSW.cc
-        IndexBinaryHash.cc
-        IndexBinaryIVF.cc
-        IndexFlat.cc
-        IndexFlatCodes.cc
-        IndexHNSW.cc
-        IndexIDMap.cc
+        auto_tune.cc
+        clustering.cc
+        ivf_lib.cc
+        index.cc
+        index_2layer.cc
+        index_additive_quantizer.cc
+        index_binary.cc
+        index_binary_flat.cc
+        index_binary_from_float.cc
+        index_binary_hnsw.cc
+        index_binary_hash.cc
+        index_binary_ivf.cc
+        index_flat.cc
+        index_flat_codes.cc
+        index_hnsw.cc
+        index_id_map.cc
         index_ivf.cc
-        IndexIVFAdditiveQuantizer.cc
-        IndexIVFFlat.cc
-        IndexIVFPQ.cc
-        IndexIVFFastScan.cc
-        IndexIVFAdditiveQuantizerFastScan.cc
-        IndexIVFPQFastScan.cc
-        IndexIVFPQR.cc
-        IndexIVFSpectralHash.cc
-        IndexLSH.cc
-        IndexNNDescent.cc
-        IndexLattice.cc
-        IndexNSG.cc
-        IndexPQ.cc
-        IndexFastScan.cc
-        IndexAdditiveQuantizerFastScan.cc
-        IndexIVFIndependentQuantizer.cc
-        IndexPQFastScan.cc
-        IndexPreTransform.cc
-        IndexRefine.cc
-        IndexReplicas.cc
-        IndexRowwiseMinMax.cc
-        IndexScalarQuantizer.cc
-        IndexShards.cc
-        IndexShardsIVF.cc
-        MatrixStats.cc
-        MetaIndexes.cc
-        VectorTransform.cc
+        index_ivf_additive_quantizer.cc
+        index_ivf_flat.cc
+        index_ivf_pq.cc
+        index_ivf_fast_scan.cc
+        index_ivf_additive_quantizer_fast_scan.cc
+        index_ivf_pq_fast_scan.cc
+        index_ivf_pqr.cc
+        index_ivf_spectral_hash.cc
+        index_lsh.cc
+        index_nn_descent.cc
+        index_lattice.cc
+        index_nsg.cc
+        index_pq.cc
+        index_fast_scan.cc
+        index_additive_quantizer_fast_scan.cc
+        index_ivf_independent_quantizer.cc
+        index_pq_fast_scan.cc
+        index_pre_transform.cc
+        index_refine.cc
+        index_replicas.cc
+        index_rowwise_minmax.cc
+        index_scalar_quantizer.cc
+        index_shards.cc
+        index_shards_ivf.cc
+        matrix_stats.cc
+        meta_indexes.cc
+        vector_transform.cc
         clone_index.cc
         index_factory.cc
-        impl/AuxIndexStructures.cc
-        impl/CodePacker.cc
-        impl/IDSelector.cc
-        impl/FaissException.cc
-        impl/HNSW.cc
-        impl/NSG.cc
-        impl/PolysemousTraining.cc
+        impl/aux_index_structures.cc
+        impl/code_packer.cc
+        impl/id_selector.cc
+        impl/faiss_exception.cc
+        impl/hnsw.cc
+        impl/nsg.cc
+        impl/polysemous_training.cc
         impl/ProductQuantizer.cc
-        impl/AdditiveQuantizer.cc
-        impl/ResidualQuantizer.cc
-        impl/LocalSearchQuantizer.cc
-        impl/ProductAdditiveQuantizer.cc
-        impl/ScalarQuantizer.cc
+        impl/additive_quantizer.cc
+        impl/residual_quantizer.cc
+        impl/local_search_quantizer.cc
+        impl/product_additive_quantizer.cc
+        impl/scalar_quantizer.cc
         impl/index_read.cc
         impl/index_write.cc
         impl/io.cc
@@ -75,13 +75,13 @@ set(FAISS_SRC
         impl/residual_quantizer_encode_steps.cc
         impl/io.cc
         impl/lattice_Zn.cc
-        impl/NNDescent.cc
+        impl/nn_descent.cc
         invlists/BlockInvertedLists.cc
         invlists/DirectMap.cc
         invlists/InvertedLists.cc
         invlists/InvertedListsIOHook.cc
-        utils/Heap.cc
-        utils/WorkerThread.cc
+        utils/heap.cc
+        utils/worker_thread.cc
         utils/distances.cc
         utils/distances_simd.cc
         utils/extra_distances.cc
@@ -97,76 +97,76 @@ set(FAISS_SRC
 )
 
 set(FAISS_HEADERS
-        AutoTune.h
-        Clustering.h
-        IVFlib.h
-        Index.h
-        Index2Layer.h
-        IndexAdditiveQuantizer.h
-        IndexBinary.h
-        IndexBinaryFlat.h
-        IndexBinaryFromFloat.h
-        IndexBinaryHNSW.h
-        IndexBinaryHash.h
-        IndexBinaryIVF.h
-        IndexFlat.h
-        IndexFlatCodes.h
-        IndexHNSW.h
-        IndexIDMap.h
+        auto_tune.h
+        clustering.h
+        ivf_lib.h
+        index.h
+        index_2layer.h
+        index_additive_quantizer.h
+        index_binary.h
+        index_binary_flat.h
+        index_binary_from_float.h
+        index_binary_hnsw.h
+        index_binary_hash.h
+        index_binary_ivf.h
+        index_flat.h
+        index_flat_codes.h
+        index_hnsw.h
+        index_id_map.h
         index_ivf.h
-        IndexIVFAdditiveQuantizer.h
-        IndexIVFIndependentQuantizer.h
-        IndexIVFFlat.h
-        IndexIVFPQ.h
-        IndexIVFFastScan.h
-        IndexIVFAdditiveQuantizerFastScan.h
-        IndexIVFPQFastScan.h
-        IndexIVFPQR.h
-        IndexIVFSpectralHash.h
-        IndexLSH.h
-        IndexLattice.h
-        IndexNNDescent.h
-        IndexNSG.h
-        IndexPQ.h
-        IndexFastScan.h
-        IndexAdditiveQuantizerFastScan.h
-        IndexPQFastScan.h
-        IndexPreTransform.h
-        IndexRefine.h
-        IndexReplicas.h
-        IndexRowwiseMinMax.h
-        IndexScalarQuantizer.h
-        IndexShards.h
-        IndexShardsIVF.h
-        MatrixStats.h
-        MetaIndexes.h
-        MetricType.h
-        VectorTransform.h
+        index_ivf_additive_quantizer.h
+        index_ivf_independent_quantizer.h
+        index_ivf_flat.h
+        index_ivf_pq.h
+        index_ivf_fast_scan.h
+        index_ivf_additive_quantizer_fast_scan.h
+        index_ivf_pq_fast_scan.h
+        index_ivf_pqr.h
+        index_ivf_spectral_hash.h
+        index_lsh.h
+        index_lattice.h
+        index_nn_descent.h
+        index_nsg.h
+        index_pq.h
+        index_fast_scan.h
+        index_additive_quantizer_fast_scan.h
+        index_pq_fast_scan.h
+        index_pre_transform.h
+        index_refine.h
+        index_replicas.h
+        index_rowwise_minmax.h
+        index_scalar_quantizer.h
+        index_shards.h
+        index_shards_ivf.h
+        matrix_stats.h
+        meta_indexes.h
+        metric_type.h
+        vector_transform.h
         clone_index.h
         index_factory.h
         index_io.h
-        impl/AdditiveQuantizer.h
-        impl/AuxIndexStructures.h
-        impl/CodePacker.h
-        impl/IDSelector.h
-        impl/DistanceComputer.h
-        impl/FaissAssert.h
-        impl/FaissException.h
-        impl/HNSW.h
-        impl/LocalSearchQuantizer.h
-        impl/ProductAdditiveQuantizer.h
-        impl/LookupTableScaler.h
-        impl/NNDescent.h
-        impl/NSG.h
-        impl/PolysemousTraining.h
-        impl/ProductQuantizer-inl.h
+        impl/additive_quantizer.h
+        impl/aux_index_structures.h
+        impl/code_packer.h
+        impl/id_selector.h
+        impl/distance_computer.h
+        impl/faiss_assert.h
+        impl/faiss_exception.h
+        impl/hnsw.h
+        impl/local_search_quantizer.h
+        impl/product_additive_quantizer.h
+        impl/lookup_table_scaler.h
+        impl/nn_descent.h
+        impl/nsg.h
+        impl/polysemous_training.h
+        impl/product_quantizer-inl.h
         impl/ProductQuantizer.h
-        impl/Quantizer.h
-        impl/ResidualQuantizer.h
-        impl/ResultHandler.h
-        impl/ScalarQuantizer.h
-        impl/ThreadedIndex-inl.h
-        impl/ThreadedIndex.h
+        impl/quantizer.h
+        impl/residual_quantizer.h
+        impl/result_handler.h
+        impl/scalar_quantizer.h
+        impl/threaded_index-inl.h
+        impl/threaded_index.h
         impl/io.h
         impl/io_macros.h
         impl/kmeans1d.h
@@ -182,9 +182,9 @@ set(FAISS_HEADERS
         invlists/DirectMap.h
         invlists/InvertedLists.h
         invlists/InvertedListsIOHook.h
-        utils/AlignedTable.h
-        utils/Heap.h
-        utils/WorkerThread.h
+        utils/aligned_table.h
+        utils/heap.h
+        utils/worker_thread.h
         utils/distances.h
         utils/extra_distances-inl.h
         utils/extra_distances.h

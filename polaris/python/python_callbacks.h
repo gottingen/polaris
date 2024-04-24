@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/impl/IDSelector.h>
+#include <polaris/impl/id_selector.h>
 #include <polaris/impl/io.h>
 #include <polaris/invlists/InvertedLists.h>
 #include "Python.h"

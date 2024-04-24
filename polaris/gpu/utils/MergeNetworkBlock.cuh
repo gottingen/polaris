@@ -9,7 +9,7 @@
 
 #include <cuda.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <polaris/gpu/utils/MergeNetworkUtils.cuh>
 #include <polaris/gpu/utils/PtxUtils.cuh>

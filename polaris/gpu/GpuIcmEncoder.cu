@@ -8,7 +8,7 @@
 #include <polaris/gpu/GpuIcmEncoder.h>
 
 #include <polaris/gpu/StandardGpuResources.h>
-#include <polaris/utils/WorkerThread.h>
+#include <polaris/utils/worker_thread.h>
 #include <polaris/gpu/impl/IcmEncoder.cuh>
 
 #include <algorithm>

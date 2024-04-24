@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-#include <polaris/IndexFlat.h>
+#include <polaris/index_flat.h>
 #include <polaris/gpu/GpuDistance.h>
 #include <polaris/gpu/StandardGpuResources.h>
 #include <polaris/gpu/test/TestUtils.h>

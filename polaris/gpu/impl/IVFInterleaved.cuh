@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/MetricType.h>
+#include <polaris/metric_type.h>
 #include <polaris/gpu/GpuIndicesOptions.h>
 #include <polaris/gpu/GpuResources.h>
 #include <polaris/gpu/utils/DeviceUtils.h>

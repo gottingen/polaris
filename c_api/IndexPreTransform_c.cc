@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include "IndexPreTransform_c.h"
-#include <polaris/IndexPreTransform.h>
-#include <polaris/VectorTransform.h>
+#include <polaris/index_pre_transform.h>
+#include <polaris/vector_transform.h>
 #include "macros_impl.h"
 
 using polaris::Index;

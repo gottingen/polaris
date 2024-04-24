@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <random>
 
-#include <polaris/IndexFlat.h>
+#include <polaris/index_flat.h>
 #include <polaris/gpu/GpuIndexFlat.h>
 #include <polaris/gpu/GpuIndexIVFFlat.h>
 #include <polaris/gpu/StandardGpuResources.h>

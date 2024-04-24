@@ -14,10 +14,10 @@
 
 #include <vector>
 
-#include <polaris/Clustering.h>
-#include <polaris/impl/Quantizer.h>
+#include <polaris/clustering.h>
+#include <polaris/impl/quantizer.h>
 #include <polaris/impl/platform_macros.h>
-#include <polaris/utils/Heap.h>
+#include <polaris/utils/heap.h>
 
 namespace polaris {
 
@@ -240,6 +240,6 @@ struct PQDecoder16 {
 
 } // namespace polaris
 
-#include <polaris/impl/ProductQuantizer-inl.h>
+#include <polaris/impl/product_quantizer-inl.h>
 
 #endif

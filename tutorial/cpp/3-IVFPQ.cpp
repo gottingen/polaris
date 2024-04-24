@@ -9,8 +9,8 @@
 #include <cstdlib>
 #include <random>
 
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexIVFPQ.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_ivf_pq.h>
 
 using idx_t = polaris::idx_t;
 

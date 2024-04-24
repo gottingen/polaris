@@ -6,7 +6,7 @@
  */
 
 #include <polaris/gpu/impl/IndexUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <limits>
 

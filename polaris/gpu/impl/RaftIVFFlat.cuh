@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <polaris/impl/CodePacker.h>
+#include <polaris/impl/code_packer.h>
 #include <polaris/gpu/impl/GpuScalarQuantizer.cuh>
 #include <polaris/gpu/impl/IVFFlat.cuh>
 

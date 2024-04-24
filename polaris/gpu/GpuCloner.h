@@ -9,9 +9,9 @@
 
 #include <vector>
 
-#include <polaris/Clustering.h>
-#include <polaris/Index.h>
-#include <polaris/IndexBinary.h>
+#include <polaris/clustering.h>
+#include <polaris/index.h>
+#include <polaris/index_binary.h>
 #include <polaris/clone_index.h>
 #include <polaris/gpu/GpuClonerOptions.h>
 #include <polaris/gpu/GpuIndex.h>

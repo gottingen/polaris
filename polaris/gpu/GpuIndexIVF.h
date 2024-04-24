@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/Clustering.h>
+#include <polaris/clustering.h>
 #include <polaris/index_ivf.h> // for SearchParametersIVF
 #include <polaris/gpu/GpuIndex.h>
 #include <polaris/gpu/GpuIndexFlat.h>

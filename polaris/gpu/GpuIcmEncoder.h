@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/impl/LocalSearchQuantizer.h>
+#include <polaris/impl/local_search_quantizer.h>
 
 #include <memory>
 

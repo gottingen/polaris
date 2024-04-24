@@ -9,7 +9,7 @@
 #define GPU_FAISS_ASSERT_INCLUDED
 
 #include <cuda.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 
 ///
 /// Assertions

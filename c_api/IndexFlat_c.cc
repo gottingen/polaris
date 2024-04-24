@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include "IndexFlat_c.h"
-#include <polaris/IndexFlat.h>
-#include <polaris/IndexRefine.h>
+#include <polaris/index_flat.h>
+#include <polaris/index_refine.h>
 #include "macros_impl.h"
 
 extern "C" {

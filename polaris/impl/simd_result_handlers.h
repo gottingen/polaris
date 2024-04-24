@@ -11,13 +11,13 @@
 #include <type_traits>
 #include <vector>
 
-#include <polaris/utils/Heap.h>
+#include <polaris/utils/heap.h>
 #include <polaris/utils/simdlib.h>
 
-#include <polaris/impl/FaissAssert.h>
-#include <polaris/impl/ResultHandler.h>
+#include <polaris/impl/faiss_assert.h>
+#include <polaris/impl/result_handler.h>
 #include <polaris/impl/platform_macros.h>
-#include <polaris/utils/AlignedTable.h>
+#include <polaris/utils/aligned_table.h>
 #include <polaris/utils/partitioning.h>
 
 /** This file contains callbacks for kernels that compute distances.

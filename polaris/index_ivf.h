@@ -15,13 +15,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include <polaris/Clustering.h>
-#include <polaris/Index.h>
-#include <polaris/impl/IDSelector.h>
+#include <polaris/clustering.h>
+#include <polaris/index.h>
+#include <polaris/impl/id_selector.h>
 #include <polaris/impl/platform_macros.h>
 #include <polaris/invlists/DirectMap.h>
 #include <polaris/invlists/InvertedLists.h>
-#include <polaris/utils/Heap.h>
+#include <polaris/utils/heap.h>
 
 namespace polaris {
 

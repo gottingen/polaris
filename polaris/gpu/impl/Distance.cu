@@ -7,8 +7,8 @@
 
 #include <polaris/gpu/GpuResources.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/AuxIndexStructures.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/aux_index_structures.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/gpu/impl/BroadcastSum.cuh>
 #include <polaris/gpu/impl/Distance.cuh>
 #include <polaris/gpu/impl/DistanceUtils.cuh>

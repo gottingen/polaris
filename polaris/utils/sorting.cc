@@ -12,7 +12,7 @@
 #include <omp.h>
 #include <algorithm>
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/utils/utils.h>
 
 namespace polaris {

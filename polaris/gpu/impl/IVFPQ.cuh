@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <polaris/Index.h>
-#include <polaris/MetricType.h>
+#include <polaris/index.h>
+#include <polaris/metric_type.h>
 #include <polaris/gpu/impl/IVFBase.cuh>
 #include <polaris/gpu/utils/Float16.cuh>
 

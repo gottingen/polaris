@@ -14,8 +14,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <polaris/Index.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/index.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/impl/kmeans1d.h>
 
 namespace polaris {

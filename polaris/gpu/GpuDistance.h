@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 
 #pragma GCC visibility push(default)
 namespace polaris {

@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "VectorTransform_c.h"
-#include <polaris/VectorTransform.h>
+#include <polaris/vector_transform.h>
 #include "macros_impl.h"
 
 extern "C" {

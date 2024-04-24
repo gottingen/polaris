@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include "Clustering_c.h"
-#include <polaris/Clustering.h>
-#include <polaris/Index.h>
+#include <polaris/clustering.h>
+#include <polaris/index.h>
 #include <vector>
 #include "macros_impl.h"
 

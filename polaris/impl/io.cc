@@ -11,7 +11,7 @@
 #include <cassert>
 #include <cstring>
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/impl/io.h>
 
 namespace polaris {

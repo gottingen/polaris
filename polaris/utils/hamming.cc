@@ -29,9 +29,9 @@
 #include <memory>
 #include <vector>
 
-#include <polaris/impl/AuxIndexStructures.h>
-#include <polaris/impl/FaissAssert.h>
-#include <polaris/utils/Heap.h>
+#include <polaris/impl/aux_index_structures.h>
+#include <polaris/impl/faiss_assert.h>
+#include <polaris/utils/heap.h>
 #include <polaris/utils/approx_topk_hamming/approx_topk_hamming.h>
 #include <polaris/utils/utils.h>
 

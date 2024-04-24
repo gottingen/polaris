@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/Clustering.h>
+#include <polaris/clustering.h>
 #include <polaris/gpu/GpuIndexFlat.h>
 #include <polaris/gpu/StandardGpuResources.h>
 #include <polaris/gpu/perf/IndexWrapper.h>

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/IndexReplicas.h>
+#include <polaris/index_replicas.h>
 #include <polaris/gpu/StandardGpuResources.h>
 #include <functional>
 #include <memory>

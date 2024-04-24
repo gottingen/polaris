@@ -9,9 +9,9 @@
 // -*- c++ -*-
 
 #include "AuxIndexStructures_c.h"
-#include <polaris/impl/AuxIndexStructures.h>
-#include <polaris/impl/DistanceComputer.h>
-#include <polaris/impl/IDSelector.h>
+#include <polaris/impl/aux_index_structures.h>
+#include <polaris/impl/distance_computer.h>
+#include <polaris/impl/id_selector.h>
 #include <iostream>
 #include "../macros_impl.h"
 

@@ -17,7 +17,7 @@
 
 #include <sys/time.h>
 
-#include <polaris/AutoTune.h>
+#include <polaris/auto_tune.h>
 #include <polaris/index_factory.h>
 
 /**

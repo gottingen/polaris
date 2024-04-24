@@ -11,7 +11,7 @@
 #include <polaris/gpu/GpuResources.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <polaris/gpu/utils/StaticUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <thrust/execution_policy.h>
 #include <thrust/fill.h>
 #include <algorithm>

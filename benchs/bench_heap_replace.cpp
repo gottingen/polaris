@@ -8,8 +8,8 @@
 #include <omp.h>
 #include <cstdio>
 
-#include <polaris/impl/FaissAssert.h>
-#include <polaris/utils/Heap.h>
+#include <polaris/impl/faiss_assert.h>
+#include <polaris/utils/heap.h>
 #include <polaris/utils/random.h>
 #include <polaris/utils/utils.h>
 

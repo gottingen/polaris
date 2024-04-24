@@ -11,7 +11,7 @@
 #include <limits>
 #include <utility>
 
-#include <polaris/utils/Heap.h>
+#include <polaris/utils/heap.h>
 #include <polaris/utils/simdlib.h>
 
 namespace polaris {

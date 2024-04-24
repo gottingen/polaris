@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 
 namespace polaris {

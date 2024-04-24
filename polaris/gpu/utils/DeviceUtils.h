@@ -9,7 +9,7 @@
 
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <vector>
 
 namespace polaris {

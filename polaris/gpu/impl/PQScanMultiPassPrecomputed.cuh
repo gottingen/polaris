@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/gpu/GpuIndicesOptions.h>
 #include <polaris/gpu/utils/DeviceVector.cuh>
 #include <polaris/gpu/utils/NoTypeTensor.cuh>

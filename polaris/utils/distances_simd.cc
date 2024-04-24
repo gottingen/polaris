@@ -15,7 +15,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/simdlib.h>
 

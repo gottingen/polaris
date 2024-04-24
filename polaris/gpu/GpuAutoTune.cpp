@@ -8,10 +8,10 @@
 #include <polaris/gpu/GpuAutoTune.h>
 #include <typeinfo>
 
-#include <polaris/IndexPreTransform.h>
-#include <polaris/IndexReplicas.h>
-#include <polaris/IndexShards.h>
-#include <polaris/IndexShardsIVF.h>
+#include <polaris/index_pre_transform.h>
+#include <polaris/index_replicas.h>
+#include <polaris/index_shards.h>
+#include <polaris/index_shards_ivf.h>
 
 #include <polaris/gpu/GpuIndex.h>
 #include <polaris/gpu/GpuIndexFlat.h>
@@ -20,7 +20,7 @@
 #include <polaris/gpu/GpuIndexIVFScalarQuantizer.h>
 #include <polaris/gpu/impl/IndexUtils.h>
 #include <polaris/gpu/utils/DeviceUtils.h>
-#include <polaris/impl/FaissAssert.h>
+#include <polaris/impl/faiss_assert.h>
 
 namespace polaris {
 namespace gpu {

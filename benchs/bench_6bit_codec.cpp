@@ -9,7 +9,7 @@
 #include <cstdio>
 
 #include <benchmark/benchmark.h>
-#include <polaris/impl/ScalarQuantizer.h>
+#include <polaris/impl/scalar_quantizer.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/random.h>
 #include <polaris/utils/utils.h>

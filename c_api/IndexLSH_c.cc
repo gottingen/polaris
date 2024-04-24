@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "IndexLSH_c.h"
-#include <polaris/IndexLSH.h>
+#include <polaris/index_lsh.h>
 #include "macros_impl.h"
 
 using polaris::Index;

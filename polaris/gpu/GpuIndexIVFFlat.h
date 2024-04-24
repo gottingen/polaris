@@ -8,7 +8,7 @@
 #pragma once
 
 #include <polaris/gpu/GpuIndexIVF.h>
-#include <polaris/impl/ScalarQuantizer.h>
+#include <polaris/impl/scalar_quantizer.h>
 
 #include <memory>
 

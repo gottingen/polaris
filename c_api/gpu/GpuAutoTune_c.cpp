@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "GpuAutoTune_c.h"
-#include <polaris/Index.h>
+#include <polaris/index.h>
 #include <polaris/gpu/GpuAutoTune.h>
 #include <polaris/gpu/GpuCloner.h>
 #include <polaris/gpu/GpuClonerOptions.h>
