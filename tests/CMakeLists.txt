@@ -33,46 +33,16 @@ set(FAISS_TEST_SRC
   test_partitioning.cc
   test_fastscan_perf.cc
 )
+find_package(GTest REQUIRED PATHS /opt/EA/inf)
 
-add_executable(polaris_test ${FAISS_TEST_SRC})
-
-if(NOT FAISS_OPT_LEVEL STREQUAL "avx2" AND NOT FAISS_OPT_LEVEL STREQUAL "avx512")
-  target_link_libraries(polaris_test PRIVATE polaris)
-endif()
-
-if(FAISS_OPT_LEVEL STREQUAL "avx2")
-  if(NOT WIN32)
-    target_compile_options(polaris_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma>)
-  else()
-    target_compile_options(polaris_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
-  endif()
-  target_link_libraries(polaris_test PRIVATE polaris_avx2)
-endif()
-
-if(FAISS_OPT_LEVEL STREQUAL "avx512")
-  if(NOT WIN32)
-    target_compile_options(polaris_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mavx512f -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw>)
-  else()
-    target_compile_options(polaris_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX512>)
-  endif()
-  target_link_libraries(polaris_test PRIVATE polaris_avx2)
-endif()
-
-include(FetchContent)
-FetchContent_Declare(googletest
-  URL "https://github.com/google/googletest/archive/release-1.12.1.tar.gz")
-set(BUILD_GMOCK CACHE BOOL OFF)
-set(INSTALL_GTEST CACHE BOOL OFF)
-FetchContent_MakeAvailable(googletest)
-
-find_package(OpenMP REQUIRED)
-
-target_link_libraries(polaris_test PRIVATE
-  OpenMP::OpenMP_CXX
-  gtest_main
-  $<$<BOOL:${FAISS_ENABLE_RAFT}>:raft::raft>
+carbin_cc_test(
+        NAME polaris_test
+        MODULE run
+        SOURCES ${FAISS_TEST_SRC}
+        DEFINES ${POLARIS_CXX_DEFINES}
+        LINKS polaris::polaris_simd ${POLARIS_DEPS_LINKS} GTest::gtest GTest::gtest_main
+        CXXOPTS ${POLARIS_CXX_OPTIONS}
 )
 
-# Defines `gtest_discover_tests()`.
-include(GoogleTest)
-gtest_discover_tests(polaris_test)
+#gtest_discover_tests(polaris_test)
+

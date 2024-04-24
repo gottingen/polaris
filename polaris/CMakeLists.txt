@@ -1,10 +1,37 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-# All rights reserved.
 #
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
+# Copyright 2023 The titan-search Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+###########################################################################
+# below are examples, after initialization, modify it to your own.
+###########################################################################
+###carbin_example
+#[[
+carbin_cc_library(
+        NAMESPACE polaris
+        NAME object
+        SOURCES
+        object.cc
+        CXXOPTS
+        ${CARBIN_CXX_OPTIONS}
+        PLINKS
+        ${CARBIN_DEPS_LINK}
+        PUBLIC
+)
+]]
 
-set(FAISS_SRC
+set(POLARIS_SRC
         auto_tune.cc
         clustering.cc
         ivf_lib.cc
@@ -96,7 +123,8 @@ set(FAISS_SRC
         utils/distances_fused/simdlib_based.cc
 )
 
-set(FAISS_HEADERS
+
+set(POLARIS_HEADERS
         auto_tune.h
         clustering.h
         ivf_lib.h
@@ -222,145 +250,109 @@ set(FAISS_HEADERS
 )
 
 if (NOT WIN32)
-    list(APPEND FAISS_SRC invlists/OnDiskInvertedLists.cc)
-    list(APPEND FAISS_HEADERS invlists/OnDiskInvertedLists.h)
+    list(APPEND POLARIS_SRC invlists/OnDiskInvertedLists.cc)
+    list(APPEND POLARIS_HEADERS invlists/OnDiskInvertedLists.h)
 endif ()
 
-# Export FAISS_HEADERS variable to parent scope.
-set(FAISS_HEADERS ${FAISS_HEADERS} PARENT_SCOPE)
 
-add_library(polaris ${FAISS_SRC})
+# Export POLARIS_HEADERScc variable to parent scope.
+set(POLARIS_HEADERScc ${POLARIS_HEADERScc} PARENT_SCOPE)
 
-add_library(polaris_avx2 ${FAISS_SRC})
-if (NOT FAISS_OPT_LEVEL STREQUAL "avx2" AND NOT FAISS_OPT_LEVEL STREQUAL "avx512")
-    set_target_properties(polaris_avx2 PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif ()
-if (NOT WIN32)
-    target_compile_options(polaris_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mpopcnt>)
-else ()
-    # MSVC enables FMA with /arch:AVX2; no separate flags for F16C, POPCNT
-    # Ref. FMA (under /arch:AVX2): https://docs.microsoft.com/en-us/cpp/build/reference/arch-x64
-    # Ref. F16C (2nd paragraph): https://walbourn.github.io/directxmath-avx2/
-    # Ref. POPCNT: https://docs.microsoft.com/en-us/cpp/intrinsics/popcnt16-popcnt-popcnt64
-    target_compile_options(polaris_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
-    # we need bigobj for the swig wrapper
-    add_compile_options(/bigobj)
-endif ()
-
-add_library(faiss_avx512 ${FAISS_SRC})
-if (NOT FAISS_OPT_LEVEL STREQUAL "avx512")
-    set_target_properties(faiss_avx512 PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif ()
-if (NOT WIN32)
-    # All modern CPUs support F, CD, VL, DQ, BW extensions.
-    # Ref: https://en.wikipedia.org/wiki/AVX512
-    target_compile_options(faiss_avx512 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mpopcnt>)
-else ()
-    target_compile_options(faiss_avx512 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX512>)
-    # we need bigobj for the swig wrapper
-    add_compile_options(/bigobj)
-endif ()
-
-# Handle `#include <polaris/foo.h>`.
-target_include_directories(polaris PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
-# Handle `#include <polaris/foo.h>`.
-target_include_directories(polaris_avx2 PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
-# Handle `#include <polaris/foo.h>`.
-target_include_directories(faiss_avx512 PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
-
-set_target_properties(polaris PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        WINDOWS_EXPORT_ALL_SYMBOLS ON
-)
-set_target_properties(polaris_avx2 PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        WINDOWS_EXPORT_ALL_SYMBOLS ON
-)
-set_target_properties(faiss_avx512 PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        WINDOWS_EXPORT_ALL_SYMBOLS ON
+carbin_cc_library(
+        NAMESPACE polaris
+        NAME polaris
+        SOURCES
+        ${POLARIS_SRC}
+        DEFINES ${POLARIS_CXX_DEFINES}
+        CXXOPTS
+        ${POLARIS_CXX_NORMAL_OPTIONS}
+        PLINKS
+        ${POLARIS_DEPS_LINKS}
+        PUBLIC
 )
 
-if (WIN32)
-    target_compile_definitions(polaris PRIVATE FAISS_MAIN_LIB)
-    target_compile_definitions(polaris_avx2 PRIVATE FAISS_MAIN_LIB)
-    target_compile_definitions(faiss_avx512 PRIVATE FAISS_MAIN_LIB)
-endif ()
-
-target_compile_definitions(polaris PRIVATE FINTEGER=int)
-target_compile_definitions(polaris_avx2 PRIVATE FINTEGER=int)
-target_compile_definitions(faiss_avx512 PRIVATE FINTEGER=int)
-
-find_package(OpenMP REQUIRED)
-target_link_libraries(polaris PRIVATE OpenMP::OpenMP_CXX)
-target_link_libraries(polaris_avx2 PRIVATE OpenMP::OpenMP_CXX)
-target_link_libraries(faiss_avx512 PRIVATE OpenMP::OpenMP_CXX)
-
-find_package(MKL)
-if (MKL_FOUND)
-    target_link_libraries(polaris PRIVATE ${MKL_LIBRARIES})
-    target_link_libraries(polaris_avx2 PRIVATE ${MKL_LIBRARIES})
-    target_link_libraries(faiss_avx512 PRIVATE ${MKL_LIBRARIES})
-else ()
-    find_package(BLAS REQUIRED)
-    target_link_libraries(polaris PRIVATE ${BLAS_LIBRARIES})
-    target_link_libraries(polaris_avx2 PRIVATE ${BLAS_LIBRARIES})
-    target_link_libraries(faiss_avx512 PRIVATE ${BLAS_LIBRARIES})
-
-    find_package(LAPACK REQUIRED)
-    target_link_libraries(polaris PRIVATE ${LAPACK_LIBRARIES})
-    target_link_libraries(polaris_avx2 PRIVATE ${LAPACK_LIBRARIES})
-    target_link_libraries(faiss_avx512 PRIVATE ${LAPACK_LIBRARIES})
-endif ()
-
-install(TARGETS polaris
-        EXPORT polaris-targets
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+carbin_cc_library(
+        NAMESPACE polaris
+        NAME polaris_simd
+        SOURCES
+        ${POLARIS_SRC}
+        DEFINES ${POLARIS_CXX_DEFINES}
+        CXXOPTS
+        ${POLARIS_CXX_OPTIONS}
+        PLINKS
+        ${POLARIS_DEPS_LINKS}
+        PUBLIC
 )
-if (FAISS_OPT_LEVEL STREQUAL "avx2")
-    install(TARGETS polaris_avx2
-            EXPORT polaris-targets
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-endif ()
-if (FAISS_OPT_LEVEL STREQUAL "avx512")
-    install(TARGETS polaris_avx2 polaris_avx512
-            EXPORT polaris-targets
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-endif ()
 
-foreach (header ${FAISS_HEADERS})
+foreach (header ${POLARIS_HEADERS})
     get_filename_component(dir ${header} DIRECTORY)
     install(FILES ${header}
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/polaris/${dir}
     )
 endforeach ()
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-        "${PROJECT_BINARY_DIR}/cmake/polaris-config-version.cmake"
-        VERSION ${CMAKE_PROJECT_VERSION}
-        COMPATIBILITY AnyNewerVersion
+set(POLARIS_C_SRC
+        capi/auto_tune_c.cc
+        capi/clustering_c.cc
+        capi/index_flat_c.cc
+        capi/index_ivf_flat_c.cc
+        capi/index_ivf_c.cc
+        capi/index_lsh_c.cc
+        capi/index_pre_transform_c.cc
+        capi/vector_transform_c.cc
+        capi/index_shards_c.cc
+        capi/index_replicas_c.cc
+        capi/index_c.cc
+        capi/index_binary_c.cc
+        capi/index_scalar_quantizer_c.cc
+        capi/meta_indexes_c.cc
+        capi/clone_index_c.cc
+        capi/error_impl.cc
+        capi/index_factory_c.cc
+        capi/index_io_c.cc
+        capi/impl/auxIndex_structures_c.cc
+        capi/utils/distances_c.cc
 )
 
-configure_file(${PROJECT_SOURCE_DIR}/cmake/polaris-config.cmake.in
-        ${PROJECT_BINARY_DIR}/cmake/polaris-config.cmake
-        COPYONLY
-)
-install(FILES ${PROJECT_BINARY_DIR}/cmake/polaris-config.cmake
-        ${PROJECT_BINARY_DIR}/cmake/polaris-config-version.cmake
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/polaris
+carbin_cc_library(
+        NAMESPACE polaris
+        NAME polaris_c
+        SOURCES
+        ${POLARIS_C_SRC}
+        DEFINES ${POLARIS_CXX_DEFINES}
+        CXXOPTS
+        ${POLARIS_CXX_NORMAL_OPTIONS}
+        PLINKS
+        ${POLARIS_DEPS_LINKS} polaris::polaris
+        PUBLIC
 )
 
-install(EXPORT polaris-targets
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/polaris
+carbin_cc_library(
+        NAMESPACE polaris
+        NAME polaris_c_simd
+        SOURCES
+        ${POLARIS_C_SRC}
+        DEFINES ${POLARIS_CXX_DEFINES}
+        CXXOPTS
+        ${POLARIS_CXX_OPTIONS}
+        PLINKS
+        ${POLARIS_DEPS_LINKS} polaris::polaris_simd
+        PUBLIC
 )
+
+function(polaris_install_headers headers p)
+    foreach(h ${headers})
+        get_filename_component(f ${h} DIRECTORY)
+        install(FILES ${h}
+                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/polaris/${p}/${f}
+        )
+    endforeach()
+endfunction()
+
+file(GLOB POLARIS_C_API_HEADERS
+        RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+        "capi/*.h"
+        "capi/impl/*.h"
+        "capi/utils/*.h")
+
+polaris_install_headers("${POLARIS_C_API_HEADERS}" c_api)

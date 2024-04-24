@@ -1,95 +1,167 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-# All rights reserved.
 #
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
-
-# =============================================================================
-# Copyright (c) 2023, NVIDIA CORPORATION.
+# Copyright 2023 The titan-search Authors.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License. You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#    https://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-# or implied. See the License for the specific language governing permissions and limitations under
-# the License.
-# =============================================================================
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+####################################################################################
+# generate by carbin package manager tools for titan-search
+# https://github.com/gottingen/carbin
+####################################################################################
+cmake_minimum_required(VERSION 3.24)
 
-cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
+project(polaris CXX)
 
-set(FAISS_LANGUAGES CXX)
+option(${PROJECT_NAME}_IS_TOP_PROJECT "polaris project is the top level project or not" ON)
 
-if(POLARIS_ENABLE_GPU)
-  list(APPEND FAISS_LANGUAGES CUDA)
-endif()
+get_property(not_top DIRECTORY PROPERTY PARENT_DIRECTORY)
+if (not_top)
+    set(${PROJECT_NAME}_IS_TOP_PROJECT OFF)
+endif ()
+message(STATUS ${PROJECT_NAME}_IS_TOP_PROJECT)
 
-if(FAISS_ENABLE_RAFT)
-include(cmake/thirdparty/fetch_rapids.cmake)
-include(rapids-cmake)
-include(rapids-cpm)
-include(rapids-cuda)
-include(rapids-export)
-include(rapids-find)
+set(PROJECT_DESCRIPTION "polaris is an realtime vector search library based on faiss.")
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 1)
+set(PROJECT_VERSION_PATCH 1)
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
-rapids_cuda_init_architectures(polaris)
-rapids_cuda_init_architectures(pypolaris)
-rapids_cuda_init_architectures(polaris_c_library)
-endif()
+set(${PROJECT_NAME}_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(${PROJECT_NAME}_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(${PROJECT_NAME}_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(${PROJECT_NAME}_VERSION ${PROJECT_VERSION})
 
-project(polaris
-  VERSION 1.8.0
-  DESCRIPTION "A library for efficient similarity search and clustering of dense vectors."
-  HOMEPAGE_URL "https://github.com/facebookresearch/faiss"
-  LANGUAGES ${FAISS_LANGUAGES})
-include(GNUInstallDirs)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CARBIN_VERSION 0.5.0)
+set(CARBIN_CMAKE_VERSION 0.5.0)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/carbin_cmake)
+##################################################################
+# add this for ${PROJECT_NAME} 's cmake include
+##################################################################
+list(APPEND CMAKE_MODULE_PATH ${${PROJECT_NAME}_SOURCE_DIR}/cmake)
+#################################################################
+#
+# modify the CARBIN_DEPS_PREFIX to you prefix if needed.
+# for example when you install you deps to "/opt/handsome/guy
+# modify as set(CARBIN_DEPS_PREFIX /opt/handsome/guy)
+# this should be PROJECT_SOURCE_DIR, only install libraries
+# deps to top level project
+#################################################################
+set(CARBIN_DEPS_PREFIX ${PROJECT_SOURCE_DIR}/carbin)
+#######################################################################
+# warning
+# in carbin_cmake directory, caution to modify files in that dir
+######################################################################
+include(carbin_module)
 
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-
-# Valid values are "generic", "avx2", "avx512".
-option(FAISS_OPT_LEVEL "" "generic")
-option(POLARIS_ENABLE_GPU "Enable support for GPU indexes." OFF)
-option(FAISS_ENABLE_RAFT "Enable RAFT for GPU indexes." OFF)
-option(FAISS_ENABLE_PYTHON "Build Python extension." OFF)
-option(POLARIS_ENABLE_C_API "Build C API." ON)
-
-if(POLARIS_ENABLE_GPU)
-  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
-  enable_language(CUDA)
-endif()
-
-if(FAISS_ENABLE_RAFT AND NOT TARGET raft::raft)
-   find_package(raft COMPONENTS compiled distributed)
- endif()
+##################################################################
+#
+# your cmake directory ${PROJECT_SOURCE_DIR}/cmake, do things here
+#################################################################
+include(polaris_deps)
+include(polaris_cxx_config)
+include(polaris_test)
 
 add_subdirectory(polaris)
+#add_subdirectory(c_api)
+####################################################################
+# belows are auto, edit it be cation
+####################################################################
+if (CARBIN_BUILD_TEST)
+    add_subdirectory(tests)
+endif ()
 
-if(POLARIS_ENABLE_GPU)
-  add_subdirectory(polaris/gpu)
-endif()
+if (CARBIN_BUILD_BENCHMARK)
+    #add_subdirectory(benchmark)
+endif ()
 
-if(FAISS_ENABLE_PYTHON)
-  add_subdirectory(polaris/python)
-endif()
+if (CARBIN_BUILD_EXAMPLES)
+    #add_subdirectory(examples)
+endif ()
 
-if(POLARIS_ENABLE_C_API)
-  add_subdirectory(c_api)
-endif()
+##############################################
+# header installing
+#############################################
+install(DIRECTORY ${PROJECT_NAME}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING
+        PATTERN "*.inc"
+        PATTERN "*.h"
+        )
 
-add_subdirectory(demos)
-add_subdirectory(benchs)
-add_subdirectory(tutorial/cpp)
+# Layout. This works for all platforms:
+#   * <prefix>/lib*/cmake/<PROJECT-NAME>
+#   * <prefix>/lib*/
+#   * <prefix>/include/
+set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
-# CTest must be included in the top level to enable `make test` target.
-include(CTest)
-if(BUILD_TESTING)
-  add_subdirectory(tests)
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-  if(POLARIS_ENABLE_GPU)
-    add_subdirectory(polaris/gpu/test)
-  endif()
-endif()
+# Configuration
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+# Include module with fuction 'write_basic_package_version_file'
+include(CMakePackageConfigHelpers)
+
+# Configure '<PROJECT-NAME>ConfigVersion.cmake'
+# Use:
+#   * PROJECT_VERSION
+write_basic_package_version_file(
+        "${version_config}" COMPATIBILITY SameMajorVersion
+)
+
+# Configure '<PROJECT-NAME>Config.cmake'
+# Use variables:
+#   * TARGETS_EXPORT_NAME
+#   * PROJECT_NAME
+configure_package_config_file(
+        "cmake/polaris_config.cmake.in"
+        "${project_config}"
+        INSTALL_DESTINATION "${config_install_dir}"
+)
+
+#Targets:
+#  * <prefix>/lib/libbar.a
+#  * <prefix>/lib/libbaz.a
+#  * header location after install: <prefix>/include/foo/Bar.hpp
+#  * headers can be included by C++ code `#include <foo/Bar.hpp>`
+
+
+# Config
+#   * <prefix>/lib/cmake/Foo/FooConfig.cmake
+#   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
+install(
+        FILES
+        "${project_config}" "${version_config}"
+        DESTINATION
+        "${config_install_dir}"
+)
+
+# Config
+#   * <prefix>/lib/cmake/Foo/FooTargets.cmake
+
+install(
+        EXPORT
+        "${TARGETS_EXPORT_NAME}"
+        NAMESPACE
+        "${namespace}"
+        DESTINATION
+        "${config_install_dir}"
+)
+configure_file(${PROJECT_SOURCE_DIR}/carbin_cmake/package/pkg_dump_template.pc.in
+        ${PROJECT_BINARY_DIR}/package/${PROJECT_NAME}.pc)
+
+install(FILES ${PROJECT_BINARY_DIR}/package/${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
+include(polaris_cpack_config)
