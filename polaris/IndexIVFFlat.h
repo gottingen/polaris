@@ -13,9 +13,9 @@
 #include <stdint.h>
 #include <unordered_map>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Inverted file with stored vectors. Here the inverted file
  * pre-selects the vectors to be searched, but they are not otherwise
@@ -104,6 +104,6 @@ struct IndexIVFFlatDedup : IndexIVFFlat {
     IndexIVFFlatDedup() {}
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

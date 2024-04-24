@@ -10,7 +10,7 @@
 #include <polaris/impl/FaissAssert.h>
 #include <chrono>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 KernelTimer::KernelTimer(cudaStream_t stream)
@@ -52,4 +52,4 @@ float CpuTimer::elapsedMilliseconds() {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

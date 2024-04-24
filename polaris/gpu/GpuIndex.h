@@ -25,7 +25,7 @@
 #include <polaris/Index.h>
 #include <polaris/gpu/GpuResources.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 struct GpuIndexConfig {
@@ -49,12 +49,12 @@ struct GpuIndexConfig {
 /// be used based on various conditions (such as unsupported architecture)
 bool should_use_raft(GpuIndexConfig config_);
 
-class GpuIndex : public faiss::Index {
+class GpuIndex : public polaris::Index {
    public:
     GpuIndex(
             std::shared_ptr<GpuResources> resources,
             int dims,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             GpuIndexConfig config);
 
@@ -88,7 +88,7 @@ class GpuIndex : public faiss::Index {
             idx_t n,
             const float* x,
             idx_t* labels,
-            // faiss::Index has idx_t for k
+            // polaris::Index has idx_t for k
             idx_t k = 1) const override;
 
     /// `x`, `distances` and `labels` can be resident on the CPU or any
@@ -96,7 +96,7 @@ class GpuIndex : public faiss::Index {
     void search(
             idx_t n,
             const float* x,
-            // faiss::Index has idx_t for k
+            // polaris::Index has idx_t for k
             idx_t k,
             float* distances,
             idx_t* labels,
@@ -107,7 +107,7 @@ class GpuIndex : public faiss::Index {
     void search_and_reconstruct(
             idx_t n,
             const float* x,
-            // faiss::Index has idx_t for k
+            // polaris::Index has idx_t for k
             idx_t k,
             float* distances,
             idx_t* labels,
@@ -129,10 +129,10 @@ class GpuIndex : public faiss::Index {
 
    protected:
     /// Copy what we need from the CPU equivalent
-    void copyFrom(const faiss::Index* index);
+    void copyFrom(const polaris::Index* index);
 
     /// Copy what we have to the CPU equivalent
-    void copyTo(faiss::Index* index) const;
+    void copyTo(polaris::Index* index) const;
 
     /// Does addImpl_ require IDs? If so, and no IDs are provided, we will
     /// generate them sequentially based on the order in which the IDs are added
@@ -191,13 +191,13 @@ class GpuIndex : public faiss::Index {
 };
 
 /// If the given index is a GPU index, this returns the index instance
-GpuIndex* tryCastGpuIndex(faiss::Index* index);
+GpuIndex* tryCastGpuIndex(polaris::Index* index);
 
 /// Is the given index instance a GPU index?
-bool isGpuIndex(faiss::Index* index);
+bool isGpuIndex(polaris::Index* index);
 
 /// Does the given CPU index instance have a corresponding GPU implementation?
-bool isGpuIndexImplemented(faiss::Index* index);
+bool isGpuIndexImplemented(polaris::Index* index);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

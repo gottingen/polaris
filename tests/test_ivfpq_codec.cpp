@@ -27,21 +27,21 @@ int d = 64;
 size_t nb = 8000;
 
 double eval_codec_error(long ncentroids, long m, const std::vector<float>& v) {
-    faiss::IndexFlatL2 coarse_quantizer(d);
-    faiss::IndexIVFPQ index(&coarse_quantizer, d, ncentroids, m, 8);
+    polaris::IndexFlatL2 coarse_quantizer(d);
+    polaris::IndexIVFPQ index(&coarse_quantizer, d, ncentroids, m, 8);
     index.pq.cp.niter = 10; // speed up train
     index.train(nb, v.data());
 
     // encode and decode to compute reconstruction error
 
-    std::vector<faiss::idx_t> keys(nb);
+    std::vector<polaris::idx_t> keys(nb);
     std::vector<uint8_t> codes(nb * m);
     index.encode_multiple(nb, keys.data(), v.data(), codes.data(), true);
 
     std::vector<float> v2(nb * d);
     index.decode_multiple(nb, keys.data(), codes.data(), v2.data());
 
-    return faiss::fvec_L2sqr(v.data(), v2.data(), nb * d);
+    return polaris::fvec_L2sqr(v.data(), v2.data(), nb * d);
 }
 
 } // namespace

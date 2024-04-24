@@ -35,7 +35,7 @@
 
 #include <polaris/utils/approx_topk/mode.h>
 
-namespace faiss {
+namespace polaris {
 
 /**************************************************
  * General bit vector functions
@@ -280,7 +280,7 @@ void unpack_bitstrings(
         size_t code_size,
         int32_t* unpacked);
 
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/utils/hamming-inl.h>
 

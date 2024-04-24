@@ -23,7 +23,7 @@
 /** This file contains callbacks for kernels that compute distances.
  */
 
-namespace faiss {
+namespace polaris {
 
 struct SIMDResultHandler {
     // used to dispatch templates
@@ -700,4 +700,4 @@ void dispatch_SIMDResultHanlder(
 }
 } // namespace simd_result_handlers
 
-} // namespace faiss
+} // namespace polaris

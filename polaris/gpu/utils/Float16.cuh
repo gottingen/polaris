@@ -18,7 +18,7 @@
 
 #include <cuda_fp16.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // 64 bytes containing 4 half (float16) values
@@ -70,4 +70,4 @@ inline bool getDeviceSupportsFloat16Math(int device) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

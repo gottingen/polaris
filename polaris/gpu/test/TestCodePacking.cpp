@@ -15,7 +15,7 @@
 #include <vector>
 
 TEST(TestCodePacking, NonInterleavedCodes_UnpackPack) {
-    using namespace faiss::gpu;
+    using namespace polaris::gpu;
 
     // We are fine using non-fixed seeds here, the results should be fully
     // deterministic
@@ -67,7 +67,7 @@ TEST(TestCodePacking, NonInterleavedCodes_UnpackPack) {
 }
 
 TEST(TestCodePacking, NonInterleavedCodes_PackUnpack) {
-    using namespace faiss::gpu;
+    using namespace polaris::gpu;
 
     // We are fine using non-fixed seeds here, the results should be fully
     // deterministic
@@ -105,7 +105,7 @@ TEST(TestCodePacking, NonInterleavedCodes_PackUnpack) {
 }
 
 TEST(TestCodePacking, InterleavedCodes_UnpackPack) {
-    using namespace faiss::gpu;
+    using namespace polaris::gpu;
 
     // We are fine using non-fixed seeds here, the results should be fully
     // deterministic
@@ -240,7 +240,7 @@ TEST(TestCodePacking, InterleavedCodes_UnpackPack) {
 }
 
 TEST(TestCodePacking, InterleavedCodes_PackUnpack) {
-    using namespace faiss::gpu;
+    using namespace polaris::gpu;
 
     // We are fine using non-fixed seeds here, the results should be fully
     // deterministic

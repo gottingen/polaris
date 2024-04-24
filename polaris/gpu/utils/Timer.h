@@ -10,7 +10,7 @@
 #include <cuda_runtime.h>
 #include <chrono>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Utility class for timing execution of a kernel
@@ -50,4 +50,4 @@ class CpuTimer {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

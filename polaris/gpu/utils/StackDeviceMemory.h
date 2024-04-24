@@ -14,7 +14,7 @@
 #include <tuple>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Device memory manager that provides temporary memory allocations
@@ -109,4 +109,4 @@ class StackDeviceMemory {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

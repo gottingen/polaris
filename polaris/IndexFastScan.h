@@ -10,7 +10,7 @@
 #include <polaris/Index.h>
 #include <polaris/utils/AlignedTable.h>
 
-namespace faiss {
+namespace polaris {
 
 struct CodePacker;
 struct NormTableScaler;
@@ -147,4 +147,4 @@ struct FastScanStats {
 
 FAISS_API extern FastScanStats FastScan_stats;
 
-} // namespace faiss
+} // namespace polaris

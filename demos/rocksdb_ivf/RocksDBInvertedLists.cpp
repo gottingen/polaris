@@ -4,7 +4,7 @@
 
 #include <polaris/impl/FaissAssert.h>
 
-using namespace faiss;
+using namespace polaris;
 
 namespace faiss_rocksdb {
 

@@ -10,7 +10,7 @@
 #include <immintrin.h>
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 
 inline uint16_t encode_fp16(float x) {
     __m128 xf = _mm_set1_ps(x);
@@ -25,4 +25,4 @@ inline float decode_fp16(uint16_t x) {
     return _mm_cvtss_f32(xf);
 }
 
-} // namespace faiss
+} // namespace polaris

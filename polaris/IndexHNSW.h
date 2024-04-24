@@ -17,7 +17,7 @@
 #include <polaris/impl/HNSW.h>
 #include <polaris/utils/utils.h>
 
-namespace faiss {
+namespace polaris {
 
 struct IndexHNSW;
 
@@ -148,4 +148,4 @@ struct IndexHNSW2Level : IndexHNSW {
             const SearchParameters* params = nullptr) const override;
 };
 
-} // namespace faiss
+} // namespace polaris

@@ -14,12 +14,12 @@
 #include <polaris/gpu/utils/CopyUtils.cuh>
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 GpuIndexIVFScalarQuantizer::GpuIndexIVFScalarQuantizer(
         GpuResourcesProvider* provider,
-        const faiss::IndexIVFScalarQuantizer* index,
+        const polaris::IndexIVFScalarQuantizer* index,
         GpuIndexIVFScalarQuantizerConfig config)
         : GpuIndexIVF(
                   provider,
@@ -40,8 +40,8 @@ GpuIndexIVFScalarQuantizer::GpuIndexIVFScalarQuantizer(
         GpuResourcesProvider* provider,
         int dims,
         idx_t nlist,
-        faiss::ScalarQuantizer::QuantizerType qtype,
-        faiss::MetricType metric,
+        polaris::ScalarQuantizer::QuantizerType qtype,
+        polaris::MetricType metric,
         bool encodeResidual,
         GpuIndexIVFScalarQuantizerConfig config)
         : GpuIndexIVF(provider, dims, metric, 0, nlist, config),
@@ -59,8 +59,8 @@ GpuIndexIVFScalarQuantizer::GpuIndexIVFScalarQuantizer(
         Index* coarseQuantizer,
         int dims,
         idx_t nlist,
-        faiss::ScalarQuantizer::QuantizerType qtype,
-        faiss::MetricType metric,
+        polaris::ScalarQuantizer::QuantizerType qtype,
+        polaris::MetricType metric,
         bool encodeResidual,
         GpuIndexIVFScalarQuantizerConfig config)
         : GpuIndexIVF(
@@ -120,7 +120,7 @@ void GpuIndexIVFScalarQuantizer::reserveMemory(size_t numVecs) {
 }
 
 void GpuIndexIVFScalarQuantizer::copyFrom(
-        const faiss::IndexIVFScalarQuantizer* index) {
+        const polaris::IndexIVFScalarQuantizer* index) {
     DeviceScope scope(config_.device);
 
     // Clear out our old data
@@ -163,7 +163,7 @@ void GpuIndexIVFScalarQuantizer::copyFrom(
 }
 
 void GpuIndexIVFScalarQuantizer::copyTo(
-        faiss::IndexIVFScalarQuantizer* index) const {
+        polaris::IndexIVFScalarQuantizer* index) const {
     DeviceScope scope(config_.device);
 
     // We must have the indices in order to copy to ourselves
@@ -280,4 +280,4 @@ void GpuIndexIVFScalarQuantizer::train(idx_t n, const float* x) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

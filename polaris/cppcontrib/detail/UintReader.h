@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 namespace detail {
 
@@ -270,4 +270,4 @@ using UintReaderRaw =
 
 } // namespace detail
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris

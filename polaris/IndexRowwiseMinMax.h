@@ -13,7 +13,7 @@
 #include <polaris/Index.h>
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /// Index wrapper that performs rowwise normalization to [0,1], preserving
 /// the coefficients. This is a vector codec index only.
@@ -96,4 +96,4 @@ struct IndexRowwiseMinMax : IndexRowwiseMinMaxBase {
 FAISS_API extern int rowwise_minmax_sa_encode_bs;
 FAISS_API extern int rowwise_minmax_sa_decode_bs;
 
-} // namespace faiss
+} // namespace polaris

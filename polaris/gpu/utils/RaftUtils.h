@@ -29,7 +29,7 @@
 #include <raft/distance/distance_types.hpp>
 
 #pragma GCC visibility push(default)
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 inline raft::distance::DistanceType metricFaissToRaft(
@@ -71,5 +71,5 @@ idx_t inplaceGatherFilteredRows(
         Tensor<float, 2, true>& vecs,
         Tensor<idx_t, 1, true>& indices);
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 #pragma GCC visibility pop

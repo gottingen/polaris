@@ -19,10 +19,10 @@ namespace {
 
 struct TestException : public std::exception {};
 
-using idx_t = faiss::idx_t;
+using idx_t = polaris::idx_t;
 
-struct MockIndex : public faiss::Index {
-    explicit MockIndex(idx_t d) : faiss::Index(d) {
+struct MockIndex : public polaris::Index {
+    explicit MockIndex(idx_t d) : polaris::Index(d) {
         resetMock();
     }
 
@@ -46,7 +46,7 @@ struct MockIndex : public faiss::Index {
             idx_t k,
             float* distances,
             idx_t* labels,
-            const faiss::SearchParameters* params) const override {
+            const polaris::SearchParameters* params) const override {
         FAISS_THROW_IF_NOT(!params);
         nCalled = n;
         xCalled = x;
@@ -67,11 +67,11 @@ struct MockIndex : public faiss::Index {
 };
 
 template <typename IndexT>
-struct MockThreadedIndex : public faiss::ThreadedIndex<IndexT> {
-    using idx_t = faiss::idx_t;
+struct MockThreadedIndex : public polaris::ThreadedIndex<IndexT> {
+    using idx_t = polaris::idx_t;
 
     explicit MockThreadedIndex(bool threaded)
-            : faiss::ThreadedIndex<IndexT>(threaded) {}
+            : polaris::ThreadedIndex<IndexT>(threaded) {}
 
     void add(idx_t, const float*) override {}
     void search(
@@ -80,7 +80,7 @@ struct MockThreadedIndex : public faiss::ThreadedIndex<IndexT> {
             idx_t,
             float*,
             idx_t*,
-            const faiss::SearchParameters*) const override {}
+            const polaris::SearchParameters*) const override {}
     void reset() override {}
 };
 
@@ -155,7 +155,7 @@ TEST(ThreadedIndex, MultipleException) {
 
         // Multiple indices threw an exception that was aggregated into a
         // FaissException
-        EXPECT_THROW(ti.runOnIndex(fn), faiss::FaissException);
+        EXPECT_THROW(ti.runOnIndex(fn), polaris::FaissException);
 
         // Index 2 should have processed
         EXPECT_TRUE(idxs[2]->flag);
@@ -171,7 +171,7 @@ TEST(ThreadedIndex, TestReplica) {
     // Try with threading and without
     for ([[maybe_unused]] const bool threaded : {true, false}) {
         std::vector<std::unique_ptr<MockIndex>> idxs;
-        faiss::IndexReplicas replica(d);
+        polaris::IndexReplicas replica(d);
 
         for (int i = 0; i < numReplicas; ++i) {
             idxs.emplace_back(new MockIndex(d));
@@ -180,7 +180,7 @@ TEST(ThreadedIndex, TestReplica) {
 
         std::vector<float> x(n * d);
         std::vector<float> distances(n * k);
-        std::vector<faiss::idx_t> labels(n * k);
+        std::vector<polaris::idx_t> labels(n * k);
 
         replica.add(n, x.data());
 
@@ -220,7 +220,7 @@ TEST(ThreadedIndex, TestShards) {
     // Try with threading and without
     for (bool threaded : {true, false}) {
         std::vector<std::unique_ptr<MockIndex>> idxs;
-        faiss::IndexShards shards(d, threaded);
+        polaris::IndexShards shards(d, threaded);
 
         for (int i = 0; i < numShards; ++i) {
             idxs.emplace_back(new MockIndex(d));
@@ -229,7 +229,7 @@ TEST(ThreadedIndex, TestShards) {
 
         std::vector<float> x(n * d);
         std::vector<float> distances(n * k);
-        std::vector<faiss::idx_t> labels(n * k);
+        std::vector<polaris::idx_t> labels(n * k);
 
         shards.add(n, x.data());
 

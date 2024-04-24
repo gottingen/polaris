@@ -12,7 +12,7 @@
 #include <polaris/gpu/utils/MathOperators.cuh>
 #include <polaris/gpu/utils/Pair.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -68,4 +68,4 @@ struct SegmentedReduce {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -19,7 +19,7 @@
 #include <polaris/gpu/utils/NoTypeTensor.cuh>
 #include <polaris/gpu/utils/WarpPackedBits.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // A basic implementation that works for the interleaved by vector layout for
@@ -295,7 +295,7 @@ void runMultiPassTile(
         Tensor<idx_t, 3, true>& heapIndices,
         int k,
         bool use64BitSelection,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         Tensor<float, 2, true>& outDistances,
         Tensor<idx_t, 2, true>& outIndices,
         cudaStream_t stream) {
@@ -542,7 +542,7 @@ void runPQScanMultiPassNoPrecomputed(
         DeviceVector<idx_t>& listLengths,
         idx_t maxListLength,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         // output
         Tensor<float, 2, true>& outDistances,
         // output
@@ -740,4 +740,4 @@ void runPQScanMultiPassNoPrecomputed(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

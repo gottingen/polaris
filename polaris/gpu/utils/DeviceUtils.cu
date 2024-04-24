@@ -12,7 +12,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 int getCurrentDevice() {
@@ -243,4 +243,4 @@ void CudaEvent::cpuWaitOnEvent() {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

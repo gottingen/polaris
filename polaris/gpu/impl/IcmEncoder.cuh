@@ -12,7 +12,7 @@
 
 #include <random>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 struct IcmEncoderImpl {
@@ -76,4 +76,4 @@ struct IcmEncoderImpl {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

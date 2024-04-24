@@ -16,11 +16,11 @@
 
 #include <polaris/AutoTune.h>
 #include <polaris/IVFlib.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/clone_index.h>
 #include <polaris/index_factory.h>
 
-using namespace faiss;
+using namespace polaris;
 
 // dimension of the vectors to index
 int d = 32;
@@ -79,7 +79,7 @@ void make_index_slices(
         Index* index = sub_indexes.back().get();
 
         auto xb = make_data(nb * d);
-        std::vector<faiss::idx_t> ids(nb);
+        std::vector<polaris::idx_t> ids(nb);
         std::mt19937 rng;
         std::uniform_int_distribution<> distrib;
         for (int j = 0; j < nb; j++) {

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -234,4 +234,4 @@ __host__ T HostTensor<T, Dim, InnerContig, IndexT, PtrTraits>::maxDiff(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

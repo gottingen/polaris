@@ -15,7 +15,7 @@
 
 #include <polaris/cppcontrib/detail/UintReader.h>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1621,5 +1621,5 @@ struct IndexPQDecoder {
 };
 
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris
 #endif // PQ_AVX2_INL_H

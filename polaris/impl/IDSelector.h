@@ -15,7 +15,7 @@
 /** IDSelector is intended to define a subset of vectors to handle (for removal
  * or as subset to search) */
 
-namespace faiss {
+namespace polaris {
 
 /** Encapsulates a set of ids to handle. */
 struct IDSelector {
@@ -170,4 +170,4 @@ struct IDSelectorXOr : IDSelector {
     virtual ~IDSelectorXOr() {}
 };
 
-} // namespace faiss
+} // namespace polaris

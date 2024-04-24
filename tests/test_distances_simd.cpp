@@ -23,7 +23,7 @@ void fvec_inner_products_ny_ref(
         size_t d,
         size_t ny) {
     for (size_t i = 0; i < ny; i++) {
-        ip[i] = faiss::fvec_inner_product(x, y, d);
+        ip[i] = polaris::fvec_inner_product(x, y, d);
         y += d;
     }
 }
@@ -35,7 +35,7 @@ void fvec_L2sqr_ny_ref(
         size_t d,
         size_t ny) {
     for (size_t i = 0; i < ny; i++) {
-        dis[i] = faiss::fvec_L2sqr(x, y, d);
+        dis[i] = polaris::fvec_L2sqr(x, y, d);
         y += d;
     }
 }
@@ -60,7 +60,7 @@ TEST(TestFvecL2sqrNy, D2) {
             }
 
             std::vector<float> distances(nrows, 0);
-            faiss::fvec_L2sqr_ny(
+            polaris::fvec_L2sqr_ny(
                     distances.data(), x.data(), y.data(), dim, nrows);
 
             std::vector<float> distances_ref(nrows, 0);
@@ -94,7 +94,7 @@ TEST(TestFvecInnerProductsNy, D2) {
             }
 
             std::vector<float> distances(nrows, 0);
-            faiss::fvec_inner_products_ny(
+            polaris::fvec_inner_products_ny(
                     distances.data(), x.data(), y.data(), dim, nrows);
 
             std::vector<float> distances_ref(nrows, 0);

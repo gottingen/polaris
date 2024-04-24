@@ -10,7 +10,7 @@
 #include <polaris/Index.h>
 #include <polaris/IndexBinary.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Build and index with the sequence of processing steps described in
  *  the string. */
@@ -24,4 +24,4 @@ FAISS_API extern int index_factory_verbose;
 
 IndexBinary* index_binary_factory(int d, const char* description);
 
-} // namespace faiss
+} // namespace polaris

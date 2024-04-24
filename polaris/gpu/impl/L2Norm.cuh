@@ -9,7 +9,7 @@
 
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 void runL2Norm(
@@ -27,4 +27,4 @@ void runL2Norm(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

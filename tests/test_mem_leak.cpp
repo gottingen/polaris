@@ -12,7 +12,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace faiss;
+using namespace polaris;
 
 TEST(MEM_LEAK, ivfflat) {
     size_t num_tfidf_faiss_cells = 20;

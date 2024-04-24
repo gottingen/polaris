@@ -11,7 +11,7 @@
 #include <polaris/invlists/InvertedLists.h>
 #include <string>
 
-namespace faiss {
+namespace polaris {
 
 /** Callbacks to handle other types of InvertedList objects.
  *
@@ -59,4 +59,4 @@ struct InvertedListsIOHook {
     static InvertedListsIOHook* lookup_classname(const std::string& classname);
 };
 
-} // namespace faiss
+} // namespace polaris

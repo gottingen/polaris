@@ -22,7 +22,7 @@
  * parallel compile times. Templates are instantiated explicitly.
  */
 
-namespace faiss {
+namespace polaris {
 
 struct NormTableScaler;
 struct SIMDResultHandler;
@@ -189,4 +189,4 @@ void pq4_accumulate_loop_qbs(
         SIMDResultHandler& res,
         const NormTableScaler* scaler = nullptr);
 
-} // namespace faiss
+} // namespace polaris

@@ -12,7 +12,7 @@
 #include <polaris/gpu/utils/Tensor.cuh>
 #include <initializer_list>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <int Dim, bool InnerContig = false, typename IndexT = idx_t>
@@ -118,4 +118,4 @@ class NoTypeTensor {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

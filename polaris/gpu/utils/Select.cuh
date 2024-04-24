@@ -16,7 +16,7 @@
 #include <polaris/gpu/utils/Reductions.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Specialization for block-wide monotonic merges producing a merge sort
@@ -644,4 +644,4 @@ struct WarpSelect<K, V, Dir, Comp, 1, NumThreadQ, ThreadsPerBlock> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

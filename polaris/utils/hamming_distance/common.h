@@ -15,7 +15,7 @@
 /* The Hamming distance type */
 using hamdis_t = int32_t;
 
-namespace faiss {
+namespace polaris {
 
 // trust the compiler to provide efficient popcount implementations
 inline int popcount32(uint32_t x) {
@@ -44,6 +44,6 @@ static constexpr uint8_t hamdis_tab_ham_bytes[256] = {
         4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
         4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8};
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

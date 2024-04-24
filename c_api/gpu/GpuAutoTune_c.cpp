@@ -18,14 +18,14 @@
 #include "GpuClonerOptions_c.h"
 #include "macros_impl.h"
 
-using faiss::Index;
-using faiss::gpu::GpuClonerOptions;
-using faiss::gpu::GpuMultipleClonerOptions;
-using faiss::gpu::GpuResourcesProvider;
+using polaris::Index;
+using polaris::gpu::GpuClonerOptions;
+using polaris::gpu::GpuMultipleClonerOptions;
+using polaris::gpu::GpuResourcesProvider;
 
 int faiss_index_gpu_to_cpu(const FaissIndex* gpu_index, FaissIndex** p_out) {
     try {
-        auto cpu_index = faiss::gpu::index_gpu_to_cpu(
+        auto cpu_index = polaris::gpu::index_gpu_to_cpu(
                 reinterpret_cast<const Index*>(gpu_index));
         *p_out = reinterpret_cast<FaissIndex*>(cpu_index);
     }
@@ -40,7 +40,7 @@ int faiss_index_cpu_to_gpu(
         FaissGpuIndex** p_out) {
     try {
         auto res = reinterpret_cast<GpuResourcesProvider*>(provider);
-        auto gpu_index = faiss::gpu::index_cpu_to_gpu(
+        auto gpu_index = polaris::gpu::index_cpu_to_gpu(
                 res, device, reinterpret_cast<const Index*>(index));
         *p_out = reinterpret_cast<FaissGpuIndex*>(gpu_index);
     }
@@ -55,7 +55,7 @@ int faiss_index_cpu_to_gpu_with_options(
         FaissGpuIndex** p_out) {
     try {
         auto res = reinterpret_cast<GpuResourcesProvider*>(provider);
-        auto gpu_index = faiss::gpu::index_cpu_to_gpu(
+        auto gpu_index = polaris::gpu::index_cpu_to_gpu(
                 res,
                 device,
                 reinterpret_cast<const Index*>(index),
@@ -79,7 +79,7 @@ int faiss_index_cpu_to_gpu_multiple(
 
         std::vector<int> dev(devices, devices + devices_size);
 
-        auto gpu_index = faiss::gpu::index_cpu_to_gpu_multiple(
+        auto gpu_index = polaris::gpu::index_cpu_to_gpu_multiple(
                 res, dev, reinterpret_cast<const Index*>(index));
         *p_out = reinterpret_cast<FaissGpuIndex*>(gpu_index);
     }
@@ -102,7 +102,7 @@ int faiss_index_cpu_to_gpu_multiple_with_options(
 
         std::vector<int> dev(devices, devices + devices_size);
 
-        auto gpu_index = faiss::gpu::index_cpu_to_gpu_multiple(
+        auto gpu_index = polaris::gpu::index_cpu_to_gpu_multiple(
                 res,
                 dev,
                 reinterpret_cast<const Index*>(index),

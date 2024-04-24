@@ -30,7 +30,7 @@
 #include <optional>
 
 #pragma GCC visibility push(default)
-namespace faiss {
+namespace polaris {
 namespace gpu {
 /// Implementing class for IVFPQ on the GPU
 class RaftIVFPQ : public IVFPQ {
@@ -39,7 +39,7 @@ class RaftIVFPQ : public IVFPQ {
             GpuResources* resources,
             int dim,
             idx_t nlist,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             int numSubQuantizers,
             int bitsPerSubQuantizer,
@@ -146,5 +146,5 @@ class RaftIVFPQ : public IVFPQ {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 #pragma GCC visibility pop

@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -253,5 +253,5 @@ struct IndexPQDecoder {
 };
 
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris
 #endif // PQ_INL_H

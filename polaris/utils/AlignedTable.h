@@ -16,7 +16,7 @@
 
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 template <int A = 32>
 inline bool is_aligned_pointer(const void* x) {
@@ -175,4 +175,4 @@ struct AlignedTable {
     // assign and copy constructor should work as expected
 };
 
-} // namespace faiss
+} // namespace polaris

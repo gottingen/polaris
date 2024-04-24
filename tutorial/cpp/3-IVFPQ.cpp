@@ -12,7 +12,7 @@
 #include <polaris/IndexFlat.h>
 #include <polaris/IndexIVFPQ.h>
 
-using idx_t = faiss::idx_t;
+using idx_t = polaris::idx_t;
 
 int main() {
     int d = 64;      // dimension
@@ -40,8 +40,8 @@ int main() {
     int nlist = 100;
     int k = 4;
     int m = 8;                       // bytes per vector
-    faiss::IndexFlatL2 quantizer(d); // the other index
-    faiss::IndexIVFPQ index(&quantizer, d, nlist, m, 8);
+    polaris::IndexFlatL2 quantizer(d); // the other index
+    polaris::IndexIVFPQ index(&quantizer, d, nlist, m, 8);
 
     index.train(nb, xb);
     index.add(nb, xb);

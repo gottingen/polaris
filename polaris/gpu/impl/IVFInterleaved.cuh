@@ -25,7 +25,7 @@
 #include <polaris/gpu/utils/Select.cuh>
 #include <polaris/gpu/utils/WarpPackedBits.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// First pass kernel to perform scanning of IVF lists to produce top-k
@@ -228,7 +228,7 @@ void runIVFInterleavedScan(
         IndicesOptions indicesOptions,
         DeviceVector<idx_t>& listLengths,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         bool useResidual,
         Tensor<float, 3, true>& residualBase,
         GpuScalarQuantizer* scalarQ,
@@ -253,4 +253,4 @@ void runIVFInterleavedScan2(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

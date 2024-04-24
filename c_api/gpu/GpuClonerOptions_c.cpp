@@ -12,9 +12,9 @@
 #include <polaris/gpu/GpuClonerOptions.h>
 #include "macros_impl.h"
 
-using faiss::gpu::GpuClonerOptions;
-using faiss::gpu::GpuMultipleClonerOptions;
-using faiss::gpu::IndicesOptions;
+using polaris::gpu::GpuClonerOptions;
+using polaris::gpu::GpuMultipleClonerOptions;
+using polaris::gpu::IndicesOptions;
 
 int faiss_GpuClonerOptions_new(FaissGpuClonerOptions** p) {
     try {

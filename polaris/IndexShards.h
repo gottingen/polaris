@@ -11,7 +11,7 @@
 #include <polaris/IndexBinary.h>
 #include <polaris/impl/ThreadedIndex.h>
 
-namespace faiss {
+namespace polaris {
 
 /**
  * Index that concatenates the results from several sub-indexes
@@ -108,4 +108,4 @@ struct IndexShardsTemplate : public ThreadedIndex<IndexT> {
 using IndexShards = IndexShardsTemplate<Index>;
 using IndexBinaryShards = IndexShardsTemplate<IndexBinary>;
 
-} // namespace faiss
+} // namespace polaris

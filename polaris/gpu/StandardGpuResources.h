@@ -36,7 +36,7 @@
 #include <vector>
 
 #pragma GCC visibility push(default)
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Standard implementation of the GpuResources object that provides for a
@@ -255,5 +255,5 @@ class StandardGpuResources : public GpuResourcesProvider {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 #pragma GCC visibility pop

@@ -15,7 +15,7 @@
 
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 
 /// Forward declarations see AuxIndexStructures.h
 struct IDSelector;
@@ -173,6 +173,6 @@ struct IndexBinary {
             const IndexBinary& otherIndex) const;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif // FAISS_INDEX_BINARY_H

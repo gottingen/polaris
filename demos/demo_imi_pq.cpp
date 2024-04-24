@@ -48,7 +48,7 @@ int main() {
     // quantizer to the inverted-file index (with attribute do_delete_quantizer)
     //
     // Note: a regular clustering algorithm would be defined as:
-    //       faiss::IndexFlatL2 coarse_quantizer (d);
+    //       polaris::IndexFlatL2 coarse_quantizer (d);
     //
     // Use nhash=2 subquantizers used to define the product coarse quantizer
     // Number of bits: we will have 2^nbits_coarse centroids per subquantizer
@@ -66,7 +66,7 @@ int main() {
     size_t ncentroids = 1 << (nhash * nbits_subq); // total # of centroids
     int bytes_per_code = 16;
 
-    faiss::MultiIndexQuantizer coarse_quantizer(d, nhash, nbits_subq);
+    polaris::MultiIndexQuantizer coarse_quantizer(d, nhash, nbits_subq);
 
     printf("IMI (%ld,%ld): %ld virtual centroids (target: %ld base vectors)",
            nhash,
@@ -77,8 +77,8 @@ int main() {
     // the coarse quantizer should not be dealloced before the index
     // 4 = nb of bytes per code (d must be a multiple of this)
     // 8 = nb of bits per sub-code (almost always 8)
-    faiss::MetricType metric = faiss::METRIC_L2; // can be METRIC_INNER_PRODUCT
-    faiss::IndexIVFPQ index(
+    polaris::MetricType metric = polaris::METRIC_L2; // can be METRIC_INNER_PRODUCT
+    polaris::IndexIVFPQ index(
             &coarse_quantizer, d, ncentroids, bytes_per_code, 8);
     index.quantizer_trains_alone = true;
 
@@ -114,8 +114,8 @@ int main() {
     }
 
     // the index can be re-loaded later with
-    // faiss::Index * idx = faiss::read_index("/tmp/trained_index.faissindex");
-    faiss::write_index(&index, "/tmp/trained_index.faissindex");
+    // polaris::Index * idx = polaris::read_index("/tmp/trained_index.faissindex");
+    polaris::write_index(&index, "/tmp/trained_index.faissindex");
 
     size_t nq;
     std::vector<float> queries;
@@ -126,7 +126,7 @@ int main() {
                nb);
 
         std::vector<float> database(nb * d);
-        std::vector<faiss::idx_t> ids(nb);
+        std::vector<polaris::idx_t> ids(nb);
         for (size_t i = 0; i < nb; i++) {
             for (size_t j = 0; j < d; j++) {
                 database[i * d + j] = distrib(rng);
@@ -169,12 +169,12 @@ int main() {
     // - given a vector float *x, finding which k centroids are
     //   closest to it (ie to find the nearest neighbors) can be done with
     //
-    //   faiss::idx_t *centroid_ids = new faiss::idx_t[k];
+    //   polaris::idx_t *centroid_ids = new polaris::idx_t[k];
     //   float *distances = new float[k];
     //   index.quantizer->search (1, x, k, dis, centroids_ids);
     //
 
-    faiss::write_index(&index, "/tmp/populated_index.faissindex");
+    polaris::write_index(&index, "/tmp/populated_index.faissindex");
 
     { // searching the database
         int k = 5;
@@ -184,7 +184,7 @@ int main() {
                k,
                nq);
 
-        std::vector<faiss::idx_t> nns(k * nq);
+        std::vector<polaris::idx_t> nns(k * nq);
         std::vector<float> dis(k * nq);
 
         index.search(nq, queries.data(), k, dis.data(), nns.data());

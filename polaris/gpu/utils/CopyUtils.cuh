@@ -10,7 +10,7 @@
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/HostTensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Ensure the memory at `p` is either on the given device, or copy it
@@ -134,4 +134,4 @@ void fromDevice(Tensor<T, Dim, true>& src, T* dst, cudaStream_t stream) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

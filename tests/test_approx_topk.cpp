@@ -22,7 +22,7 @@
 #include <polaris/utils/Heap.h>
 
 //
-using namespace faiss;
+using namespace polaris;
 
 //
 template <uint32_t NBUCKETS, uint32_t N>
@@ -99,7 +99,7 @@ void test_approx_topk(
                     k,
                     approxDistances.data(),
                     approxIndices.data());
-        } catch (const faiss::FaissException&) {
+        } catch (const polaris::FaissException&) {
             //
             if (verbose) {
                 printf("Skipping the case.\n");

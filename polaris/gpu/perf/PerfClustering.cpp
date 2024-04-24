@@ -35,7 +35,7 @@ DEFINE_int64(
 DEFINE_int64(pinned_mem, -1, "pinned memory allocation to use");
 DEFINE_int32(max_points, -1, "max points per centroid");
 
-using namespace faiss::gpu;
+using namespace polaris::gpu;
 
 int main(int argc, char** argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     printf("using seed %ld\n", seed);
 
     std::vector<float> vecs((size_t)FLAGS_num * FLAGS_dim);
-    faiss::float_rand(vecs.data(), vecs.size(), seed);
+    polaris::float_rand(vecs.data(), vecs.size(), seed);
 
     printf("K-means metric %s dim %d centroids %d num train %d niter %d\n",
            FLAGS_L2_metric ? "L2" : "IP",
@@ -59,10 +59,10 @@ int main(int argc, char** argv) {
            FLAGS_transposed ? "enabled" : "disabled");
     printf("verbose %s\n", FLAGS_verbose ? "enabled" : "disabled");
 
-    auto initFn = [](faiss::gpu::GpuResourcesProvider* res,
-                     int dev) -> std::unique_ptr<faiss::gpu::GpuIndexFlat> {
+    auto initFn = [](polaris::gpu::GpuResourcesProvider* res,
+                     int dev) -> std::unique_ptr<polaris::gpu::GpuIndexFlat> {
         if (FLAGS_pinned_mem >= 0) {
-            ((faiss::gpu::StandardGpuResources*)res)
+            ((polaris::gpu::StandardGpuResources*)res)
                     ->setPinnedMemory(FLAGS_pinned_mem);
         }
 
@@ -71,11 +71,11 @@ int main(int argc, char** argv) {
         config.useFloat16 = FLAGS_use_float16;
         config.storeTransposed = FLAGS_transposed;
 
-        auto p = std::unique_ptr<faiss::gpu::GpuIndexFlat>(
+        auto p = std::unique_ptr<polaris::gpu::GpuIndexFlat>(
                 FLAGS_L2_metric
-                        ? (faiss::gpu::GpuIndexFlat*)new faiss::gpu::
+                        ? (polaris::gpu::GpuIndexFlat*)new polaris::gpu::
                                   GpuIndexFlatL2(res, FLAGS_dim, config)
-                        : (faiss::gpu::GpuIndexFlat*)new faiss::gpu::
+                        : (polaris::gpu::GpuIndexFlat*)new polaris::gpu::
                                   GpuIndexFlatIP(res, FLAGS_dim, config));
 
         if (FLAGS_min_paging_size >= 0) {
@@ -84,14 +84,14 @@ int main(int argc, char** argv) {
         return p;
     };
 
-    IndexWrapper<faiss::gpu::GpuIndexFlat> gpuIndex(FLAGS_num_gpus, initFn);
+    IndexWrapper<polaris::gpu::GpuIndexFlat> gpuIndex(FLAGS_num_gpus, initFn);
 
     CUDA_VERIFY(cudaProfilerStart());
-    faiss::gpu::synchronizeAllDevices();
+    polaris::gpu::synchronizeAllDevices();
 
     float gpuTime = 0.0f;
 
-    faiss::ClusteringParameters cp;
+    polaris::ClusteringParameters cp;
     cp.niter = FLAGS_niter;
     cp.verbose = FLAGS_verbose;
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
         cp.max_points_per_centroid = FLAGS_max_points;
     }
 
-    faiss::Clustering kmeans(FLAGS_dim, FLAGS_k, cp);
+    polaris::Clustering kmeans(FLAGS_dim, FLAGS_k, cp);
 
     // Time k-means
     {

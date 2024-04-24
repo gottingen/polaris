@@ -19,13 +19,13 @@
 #include <polaris/AutoTune.h>
 #include <polaris/IVFlib.h>
 #include <polaris/IndexBinaryIVF.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/IndexPreTransform.h>
 #include <polaris/VectorTransform.h>
 #include <polaris/index_factory.h>
 #include <polaris/index_io.h>
 
-using namespace faiss;
+using namespace polaris;
 
 namespace {
 

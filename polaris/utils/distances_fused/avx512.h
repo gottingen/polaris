@@ -18,7 +18,7 @@
 
 #ifdef __AVX512F__
 
-namespace faiss {
+namespace polaris {
 
 // Returns true if the fused kernel is available and the data was processed.
 // Returns false if the fused kernel is not available.
@@ -31,6 +31,6 @@ bool exhaustive_L2sqr_fused_cmax_AVX512(
         Top1BlockResultHandler<CMax<float, int64_t>>& res,
         const float* y_norms);
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

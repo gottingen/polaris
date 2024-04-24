@@ -12,7 +12,7 @@
 
 // Utilities for bit packing and unpacking CPU non-interleaved and GPU
 // interleaved by 32 encodings
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Unpacks arbitrary bitwidth codes to a whole number of bytes per code
@@ -54,4 +54,4 @@ std::vector<uint8_t> packInterleaved(
         int bitsPerCode);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

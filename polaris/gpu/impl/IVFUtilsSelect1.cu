@@ -18,7 +18,7 @@
 // on compile time
 //
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -194,4 +194,4 @@ void runPass1SelectLists(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

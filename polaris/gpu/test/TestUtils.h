@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Generates and displays a new seed for the test
@@ -67,8 +67,8 @@ std::vector<float> roundToHalf(const std::vector<float>& v);
 /// query vectors
 void compareIndices(
         const std::vector<float>& queryVecs,
-        faiss::Index& refIndex,
-        faiss::Index& testIndex,
+        polaris::Index& refIndex,
+        polaris::Index& testIndex,
         int numQuery,
         int dim,
         int k,
@@ -80,8 +80,8 @@ void compareIndices(
 /// Compare two indices via query for similarity, generating random query
 /// vectors
 void compareIndices(
-        faiss::Index& refIndex,
-        faiss::Index& testIndex,
+        polaris::Index& refIndex,
+        polaris::Index& testIndex,
         int numQuery,
         int dim,
         int k,
@@ -93,9 +93,9 @@ void compareIndices(
 /// Display specific differences in the two (distance, index) lists
 void compareLists(
         const float* refDist,
-        const faiss::idx_t* refInd,
+        const polaris::idx_t* refInd,
         const float* testDist,
-        const faiss::idx_t* testInd,
+        const polaris::idx_t* testInd,
         int dim1,
         int dim2,
         const std::string& configMsg,
@@ -120,7 +120,7 @@ void testIVFEquality(A& cpuIndex, B& gpuIndex) {
         std::vector<uint8_t> cpuCodes(
                 cpuLists->list_size(i) * cpuLists->code_size);
 
-        auto sc = faiss::InvertedLists::ScopedCodes(cpuLists, i);
+        auto sc = polaris::InvertedLists::ScopedCodes(cpuLists, i);
         std::memcpy(
                 cpuCodes.data(),
                 sc.get(),
@@ -132,14 +132,14 @@ void testIVFEquality(A& cpuIndex, B& gpuIndex) {
         // Index equality
         std::vector<idx_t> cpuIndices(cpuLists->list_size(i));
 
-        auto si = faiss::InvertedLists::ScopedIds(cpuLists, i);
+        auto si = polaris::InvertedLists::ScopedIds(cpuLists, i);
         std::memcpy(
                 cpuIndices.data(),
                 si.get(),
-                cpuLists->list_size(i) * sizeof(faiss::idx_t));
+                cpuLists->list_size(i) * sizeof(polaris::idx_t));
         EXPECT_EQ(cpuIndices, gpuIndex.getListIndices(i));
     }
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

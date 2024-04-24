@@ -15,7 +15,7 @@
 
 #include <polaris/cppcontrib/detail/UintReader.h>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -2068,5 +2068,5 @@ struct Index2LevelDecoder {
 };
 
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris
 #endif // LEVEL2_AVX2_INL_H

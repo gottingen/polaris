@@ -14,7 +14,7 @@
 
 // A collection of utility functions for IVFPQ and IVFFlat, for
 // post-processing and k-selecting the results
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -91,4 +91,4 @@ void runPass2SelectLists(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

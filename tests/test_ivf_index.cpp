@@ -38,15 +38,15 @@ class TestContext {
     }
 
     // id to codes map
-    std::unordered_map<faiss::idx_t, std::vector<uint8_t>> codes;
+    std::unordered_map<polaris::idx_t, std::vector<uint8_t>> codes;
     // id to list_no map
-    std::unordered_map<faiss::idx_t, size_t> list_nos;
-    faiss::idx_t id = 0;
+    std::unordered_map<polaris::idx_t, size_t> list_nos;
+    polaris::idx_t id = 0;
     std::set<size_t> lists_probed;
 };
 
 // the iterator that iterates over the codes stored in context object
-class TestInvertedListIterator : public faiss::InvertedListsIterator {
+class TestInvertedListIterator : public polaris::InvertedListsIterator {
    public:
     TestInvertedListIterator(size_t list_no, TestContext* context)
             : list_no{list_no}, context{context} {
@@ -72,7 +72,7 @@ class TestInvertedListIterator : public faiss::InvertedListsIterator {
         seek_next();
     }
 
-    virtual std::pair<faiss::idx_t, const uint8_t*> get_id_and_codes()
+    virtual std::pair<polaris::idx_t, const uint8_t*> get_id_and_codes()
             override {
         if (it == context->codes.cend()) {
             FAISS_THROW_MSG("invalid state");
@@ -86,10 +86,10 @@ class TestInvertedListIterator : public faiss::InvertedListsIterator {
     decltype(context->codes.cbegin()) it;
 };
 
-class TestInvertedLists : public faiss::InvertedLists {
+class TestInvertedLists : public polaris::InvertedLists {
    public:
     TestInvertedLists(size_t nlist, size_t code_size)
-            : faiss::InvertedLists(nlist, code_size) {
+            : polaris::InvertedLists(nlist, code_size) {
         use_iterator = true;
     }
 
@@ -98,7 +98,7 @@ class TestInvertedLists : public faiss::InvertedLists {
         FAISS_THROW_MSG("unexpected call");
     }
 
-    faiss::InvertedListsIterator* get_iterator(size_t list_no, void* context)
+    polaris::InvertedListsIterator* get_iterator(size_t list_no, void* context)
             const override {
         auto testContext = (TestContext*)context;
         testContext->lists_probed.insert(list_no);
@@ -109,14 +109,14 @@ class TestInvertedLists : public faiss::InvertedLists {
         FAISS_THROW_MSG("unexpected call");
     }
 
-    const faiss::idx_t* get_ids(size_t /* list_no */) const override {
+    const polaris::idx_t* get_ids(size_t /* list_no */) const override {
         FAISS_THROW_MSG("unexpected call");
     }
 
     // store the codes in context object
     size_t add_entry(
             size_t list_no,
-            faiss::idx_t /*theid*/,
+            polaris::idx_t /*theid*/,
             const uint8_t* code,
             void* context) override {
         auto testContext = (TestContext*)context;
@@ -127,7 +127,7 @@ class TestInvertedLists : public faiss::InvertedLists {
     size_t add_entries(
             size_t /*list_no*/,
             size_t /*n_entry*/,
-            const faiss::idx_t* /*ids*/,
+            const polaris::idx_t* /*ids*/,
             const uint8_t* /*code*/) override {
         FAISS_THROW_MSG("unexpected call");
     }
@@ -136,7 +136,7 @@ class TestInvertedLists : public faiss::InvertedLists {
             size_t /*list_no*/,
             size_t /*offset*/,
             size_t /*n_entry*/,
-            const faiss::idx_t* /*ids*/,
+            const polaris::idx_t* /*ids*/,
             const uint8_t* /*code*/) override {
         FAISS_THROW_MSG("unexpected call");
     }
@@ -165,8 +165,8 @@ TEST(IVF, list_context) {
     // thread-safe
     omp_set_num_threads(1);
 
-    faiss::IndexFlatL2 quantizer(d); // the other index
-    faiss::IndexIVFFlat index(&quantizer, d, nlist);
+    polaris::IndexFlatL2 quantizer(d); // the other index
+    polaris::IndexIVFFlat index(&quantizer, d, nlist);
     TestInvertedLists inverted_lists(nlist, index.code_size);
     index.replace_invlists(&inverted_lists);
     {
@@ -181,7 +181,7 @@ TEST(IVF, list_context) {
     }
     TestContext context;
     std::vector<float> query_vector;
-    constexpr faiss::idx_t query_vector_id = 100;
+    constexpr polaris::idx_t query_vector_id = 100;
     {
         // populating the database
         std::vector<float> database(nb * d);
@@ -192,10 +192,10 @@ TEST(IVF, list_context) {
                 query_vector.push_back(database[i]);
             }
         }
-        std::vector<faiss::idx_t> coarse_idx(nb);
+        std::vector<polaris::idx_t> coarse_idx(nb);
         index.quantizer->assign(nb, database.data(), coarse_idx.data());
         // pass dummy ids, the acutal ids are assigned in TextContext object
-        std::vector<faiss::idx_t> xids(nb, 42);
+        std::vector<polaris::idx_t> xids(nb, 42);
         index.add_core(
                 nb, database.data(), xids.data(), coarse_idx.data(), &context);
 
@@ -207,11 +207,11 @@ TEST(IVF, list_context) {
                 << "should have correct number of list numbers";
     }
     {
-        constexpr faiss::idx_t k = 100;
+        constexpr polaris::idx_t k = 100;
         constexpr size_t nprobe = 10;
         std::vector<float> distances(k);
-        std::vector<faiss::idx_t> labels(k);
-        faiss::SearchParametersIVF params;
+        std::vector<polaris::idx_t> labels(k);
+        polaris::SearchParametersIVF params;
         params.inverted_list_context = &context;
         params.nprobe = nprobe;
         index.search(

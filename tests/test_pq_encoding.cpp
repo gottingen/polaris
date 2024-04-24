@@ -53,13 +53,13 @@ TEST(PQEncoderGeneric, encode) {
         // NOTE(hoss): Necessary scope to ensure trailing bits are flushed to
         // mem.
         {
-            faiss::PQEncoderGeneric encoder(codes.get(), nbits);
+            polaris::PQEncoderGeneric encoder(codes.get(), nbits);
             for (const auto& v : values) {
                 encoder.encode(v & mask);
             }
         }
 
-        faiss::PQDecoderGeneric decoder(codes.get(), nbits);
+        polaris::PQDecoderGeneric decoder(codes.get(), nbits);
         for (int i = 0; i < nsubcodes; ++i) {
             uint64_t v = decoder.decode();
             EXPECT_EQ(values[i] & mask, v);
@@ -73,12 +73,12 @@ TEST(PQEncoder8, encode) {
     const uint64_t mask = 0xFF;
     std::unique_ptr<uint8_t[]> codes(new uint8_t[nsubcodes]);
 
-    faiss::PQEncoder8 encoder(codes.get(), 8);
+    polaris::PQEncoder8 encoder(codes.get(), 8);
     for (const auto& v : values) {
         encoder.encode(v & mask);
     }
 
-    faiss::PQDecoder8 decoder(codes.get(), 8);
+    polaris::PQDecoder8 decoder(codes.get(), 8);
     for (int i = 0; i < nsubcodes; ++i) {
         uint64_t v = decoder.decode();
         EXPECT_EQ(values[i] & mask, v);
@@ -91,12 +91,12 @@ TEST(PQEncoder16, encode) {
     const uint64_t mask = 0xFFFF;
     std::unique_ptr<uint8_t[]> codes(new uint8_t[2 * nsubcodes]);
 
-    faiss::PQEncoder16 encoder(codes.get(), 16);
+    polaris::PQEncoder16 encoder(codes.get(), 16);
     for (const auto& v : values) {
         encoder.encode(v & mask);
     }
 
-    faiss::PQDecoder16 decoder(codes.get(), 16);
+    polaris::PQDecoder16 decoder(codes.get(), 16);
     for (int i = 0; i < nsubcodes; ++i) {
         uint64_t v = decoder.decode();
         EXPECT_EQ(values[i] & mask, v);
@@ -106,7 +106,7 @@ TEST(PQEncoder16, encode) {
 TEST(PQFastScan, set_packed_element) {
     int d = 20, ntotal = 1000, M = 5, nbits = 4;
     const std::vector<float> ds = random_vector_float(ntotal * d);
-    faiss::IndexPQFastScan index(d, M, nbits);
+    polaris::IndexPQFastScan index(d, M, nbits);
     index.train(ntotal, ds.data());
     index.add(ntotal, ds.data());
 
@@ -116,12 +116,12 @@ TEST(PQFastScan, set_packed_element) {
         std::vector<uint8_t> code(M);
         for (int i = 0; i < ntotal; i++) {
             for (int sq = 0; sq < M; sq++) {
-                old[i * M + sq] = faiss::pq4_get_packed_element(
+                old[i * M + sq] = polaris::pq4_get_packed_element(
                         index.codes.data(), index.bbs, M, i, sq);
             }
         }
         for (int sq = 0; sq < M; sq++) {
-            faiss::pq4_set_packed_element(
+            polaris::pq4_set_packed_element(
                     index.codes.data(),
                     ((old[vector_id * M + sq] + 3) % 16),
                     index.bbs,
@@ -131,7 +131,7 @@ TEST(PQFastScan, set_packed_element) {
         }
         for (int i = 0; i < ntotal; i++) {
             for (int sq = 0; sq < M; sq++) {
-                uint8_t newcode = faiss::pq4_get_packed_element(
+                uint8_t newcode = polaris::pq4_get_packed_element(
                         index.codes.data(), index.bbs, M, i, sq);
                 uint8_t oldcode = old[i * M + sq];
                 if (i == vector_id) {

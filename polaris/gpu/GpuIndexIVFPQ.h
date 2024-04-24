@@ -12,11 +12,11 @@
 #include <memory>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 struct IndexIVFPQ;
 }
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuIndexFlat;
@@ -51,11 +51,11 @@ struct GpuIndexIVFPQConfig : public GpuIndexIVFConfig {
 /// IVFPQ index for the GPU
 class GpuIndexIVFPQ : public GpuIndexIVF {
    public:
-    /// Construct from a pre-existing faiss::IndexIVFPQ instance, copying
+    /// Construct from a pre-existing polaris::IndexIVFPQ instance, copying
     /// data over to the given GPU, if the input index is trained.
     GpuIndexIVFPQ(
             GpuResourcesProvider* provider,
-            const faiss::IndexIVFPQ* index,
+            const polaris::IndexIVFPQ* index,
             GpuIndexIVFPQConfig config = GpuIndexIVFPQConfig());
 
     /// Constructs a new instance with an empty flat quantizer; the user
@@ -66,7 +66,7 @@ class GpuIndexIVFPQ : public GpuIndexIVF {
             idx_t nlist,
             idx_t subQuantizers,
             idx_t bitsPerCode,
-            faiss::MetricType metric = faiss::METRIC_L2,
+            polaris::MetricType metric = polaris::METRIC_L2,
             GpuIndexIVFPQConfig config = GpuIndexIVFPQConfig());
 
     /// Constructs a new instance with a provided CPU or GPU coarse quantizer;
@@ -78,7 +78,7 @@ class GpuIndexIVFPQ : public GpuIndexIVF {
             idx_t nlist,
             idx_t subQuantizers,
             idx_t bitsPerCode,
-            faiss::MetricType metric = faiss::METRIC_L2,
+            polaris::MetricType metric = polaris::METRIC_L2,
             GpuIndexIVFPQConfig config = GpuIndexIVFPQConfig());
 
     ~GpuIndexIVFPQ() override;
@@ -88,11 +88,11 @@ class GpuIndexIVFPQ : public GpuIndexIVF {
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(const faiss::IndexIVFPQ* index);
+    void copyFrom(const polaris::IndexIVFPQ* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexIVFPQ* index) const;
+    void copyTo(polaris::IndexIVFPQ* index) const;
 
     /// Reserve GPU memory in our inverted lists for this number of vectors
     void reserveMemory(size_t numVecs);
@@ -139,7 +139,7 @@ class GpuIndexIVFPQ : public GpuIndexIVF {
             GpuResources* resources,
             int dim,
             idx_t nlist,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             int numSubQuantizers,
             int bitsPerSubQuantizer,
@@ -178,4 +178,4 @@ class GpuIndexIVFPQ : public GpuIndexIVF {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

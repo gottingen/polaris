@@ -11,7 +11,7 @@
 #include <polaris/gpu/utils/MathOperators.cuh>
 #include <polaris/gpu/utils/WarpShuffles.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// A simple pair type for CUDA device usage
@@ -63,4 +63,4 @@ inline __device__ Pair<T, U> shfl_xor(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

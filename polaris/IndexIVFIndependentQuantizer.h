@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/VectorTransform.h>
 
-namespace faiss {
+namespace polaris {
 
 /** An IVF index with a quantizer that has a different input dimension from the
  * payload size. The vectors to encode are obtained from the input vectors by a
@@ -53,4 +53,4 @@ struct IndexIVFIndependentQuantizer : Index {
     ~IndexIVFIndependentQuantizer() override;
 };
 
-} // namespace faiss
+} // namespace polaris

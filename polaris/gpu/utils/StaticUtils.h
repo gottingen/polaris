@@ -15,7 +15,7 @@
 #define __device__
 #endif
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 namespace utils {
 
@@ -91,4 +91,4 @@ static_assert(
 
 } // namespace utils
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -13,7 +13,7 @@
 #include <polaris/gpu/utils/NoTypeTensor.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -42,4 +42,4 @@ void runPQScanMultiPassPrecomputed(
         GpuResources* res);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

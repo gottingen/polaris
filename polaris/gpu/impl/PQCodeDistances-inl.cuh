@@ -17,7 +17,7 @@
 #include <polaris/gpu/utils/PtxUtils.cuh>
 #include <polaris/gpu/utils/Transpose.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Kernel responsible for calculating distance from residual vector to
@@ -731,4 +731,4 @@ void runPQCodeDistances(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

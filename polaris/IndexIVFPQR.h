@@ -13,7 +13,7 @@
 
 #include <polaris/IndexIVFPQ.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Index with an additional level of PQ refinement */
 struct IndexIVFPQR : IndexIVFPQ {
@@ -71,4 +71,4 @@ struct IndexIVFPQR : IndexIVFPQ {
     IndexIVFPQR();
 };
 
-} // namespace faiss
+} // namespace polaris

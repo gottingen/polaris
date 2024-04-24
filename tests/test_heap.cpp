@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <numeric>
 
-using namespace faiss;
+using namespace polaris;
 
 TEST(Heap, addn_with_ids) {
     size_t n = 1000;

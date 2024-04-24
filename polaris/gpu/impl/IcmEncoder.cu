@@ -19,7 +19,7 @@
 
 #include <curand_kernel.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 extern __shared__ char smem[];
@@ -376,4 +376,4 @@ void IcmEncoderImpl::encode(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

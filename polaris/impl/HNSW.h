@@ -19,7 +19,7 @@
 #include <polaris/utils/Heap.h>
 #include <polaris/utils/random.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Implementation of the Hierarchical Navigable Small World
  * datastructure.
@@ -68,7 +68,7 @@ struct HNSW {
 
         std::vector<storage_idx_t> ids;
         std::vector<float> dis;
-        typedef faiss::CMax<float, storage_idx_t> HC;
+        typedef polaris::CMax<float, storage_idx_t> HC;
 
         explicit MinimaxHeap(int n) : n(n), k(0), nvalid(0), ids(n), dis(n) {}
 
@@ -126,7 +126,7 @@ struct HNSW {
     /// level
     storage_idx_t entry_point = -1;
 
-    faiss::RandomGenerator rng;
+    polaris::RandomGenerator rng;
 
     /// maximum level
     int max_level = -1;
@@ -260,4 +260,4 @@ struct HNSWStats {
 // global var that collects them all
 FAISS_API extern HNSWStats hnsw_stats;
 
-} // namespace faiss
+} // namespace polaris

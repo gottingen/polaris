@@ -9,7 +9,7 @@
 
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Indirect sort of a floating-point array
  *
@@ -95,4 +95,4 @@ void hashtable_int64_to_int64_lookup(
         const int64_t* keys,
         int64_t* vals);
 
-} // namespace faiss
+} // namespace polaris

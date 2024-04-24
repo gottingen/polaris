@@ -16,7 +16,7 @@
 #include <polaris/utils/random.h>
 #include <polaris/utils/utils.h>
 
-using namespace faiss;
+using namespace polaris;
 
 // These implementations are currently slower than HammingComputerDefault so
 // they are not in the main faiss anymore.
@@ -102,7 +102,7 @@ void hamming_func_test(
         uint64_t& xorv) {
     constexpr size_t CODE_SIZE_IN_BYTES = CODE_SIZE_IN_BITS / 8;
 
-    double t0 = faiss::getmillisecs();
+    double t0 = polaris::getmillisecs();
 
     uint64_t sumx = 0;
     uint64_t xorx = 0;
@@ -123,7 +123,7 @@ void hamming_func_test(
                     const uint64_t* data2_ptr =
                             (const uint64_t*)(x2 + j * CODE_SIZE_IN_BYTES);
 
-                    uint64_t code = faiss::hamming<CODE_SIZE_IN_BITS>(
+                    uint64_t code = polaris::hamming<CODE_SIZE_IN_BITS>(
                             data1_ptr, data2_ptr);
                     local_sum += code;
                     local_xor ^= code;
@@ -138,7 +138,7 @@ void hamming_func_test(
     sumv = sumx;
     xorv = xorx;
 
-    double t1 = faiss::getmillisecs();
+    double t1 = polaris::getmillisecs();
     printf("hamming<%d>: %.3f msec, %" PRIX64 ", %" PRIX64 "\n",
            CODE_SIZE_IN_BITS,
            (t1 - t0) / nruns,
@@ -156,7 +156,7 @@ void hamming_computer_test(
         uint64_t& xorv) {
     constexpr size_t CODE_SIZE_IN_BYTES = CODE_SIZE_IN_BITS / 8;
 
-    double t0 = faiss::getmillisecs();
+    double t0 = polaris::getmillisecs();
 
     uint64_t sumx = 0;
     uint64_t xorx = 0;
@@ -192,7 +192,7 @@ void hamming_computer_test(
     sumv = sumx;
     xorv = xorx;
 
-    double t1 = faiss::getmillisecs();
+    double t1 = polaris::getmillisecs();
     printf("HammingComputer<%zd>: %.3f msec, %" PRIX64 ", %" PRIX64 "\n",
            CODE_SIZE_IN_BYTES,
            (t1 - t0) / nruns,
@@ -281,34 +281,34 @@ int main() {
     hamming_func_test<512>(x1.data(), x2.data(), n1, n2, sumx, xorx);
 
     // evaluate various HammingComputerXX
-    hamming_computer_test<faiss::HammingComputer4, 32>(
+    hamming_computer_test<polaris::HammingComputer4, 32>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::HammingComputer8, 64>(
+    hamming_computer_test<polaris::HammingComputer8, 64>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::HammingComputer16, 128>(
+    hamming_computer_test<polaris::HammingComputer16, 128>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::HammingComputer20, 160>(
+    hamming_computer_test<polaris::HammingComputer20, 160>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::HammingComputer32, 256>(
+    hamming_computer_test<polaris::HammingComputer32, 256>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::HammingComputer64, 512>(
+    hamming_computer_test<polaris::HammingComputer64, 512>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
 
     // evaluate various GenHammingDistanceComputerXX
-    hamming_computer_test<faiss::GenHammingComputer8, 64>(
+    hamming_computer_test<polaris::GenHammingComputer8, 64>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::GenHammingComputer16, 128>(
+    hamming_computer_test<polaris::GenHammingComputer16, 128>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::GenHammingComputer32, 256>(
+    hamming_computer_test<polaris::GenHammingComputer32, 256>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
 
-    hamming_computer_test<faiss::GenHammingComputerM8, 64>(
+    hamming_computer_test<polaris::GenHammingComputerM8, 64>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::GenHammingComputerM8, 128>(
+    hamming_computer_test<polaris::GenHammingComputerM8, 128>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::GenHammingComputerM8, 256>(
+    hamming_computer_test<polaris::GenHammingComputerM8, 256>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
-    hamming_computer_test<faiss::GenHammingComputerM8, 512>(
+    hamming_computer_test<polaris::GenHammingComputerM8, 512>(
             x1.data(), x2.data(), n1, n2, sumx, xorx);
 
     return 0;

@@ -12,7 +12,7 @@
 #include <polaris/gpu/GpuResources.h>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class BinaryFlatIndex;
@@ -23,11 +23,11 @@ struct GpuIndexBinaryFlatConfig : public GpuIndexConfig {};
 /// via Hamming distance
 class GpuIndexBinaryFlat : public IndexBinary {
    public:
-    /// Construct from a pre-existing faiss::IndexBinaryFlat instance, copying
+    /// Construct from a pre-existing polaris::IndexBinaryFlat instance, copying
     /// data over to the given GPU
     GpuIndexBinaryFlat(
             GpuResourcesProvider* resources,
-            const faiss::IndexBinaryFlat* index,
+            const polaris::IndexBinaryFlat* index,
             GpuIndexBinaryFlatConfig config = GpuIndexBinaryFlatConfig());
 
     /// Construct an empty instance that can be added to
@@ -47,26 +47,26 @@ class GpuIndexBinaryFlat : public IndexBinary {
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(const faiss::IndexBinaryFlat* index);
+    void copyFrom(const polaris::IndexBinaryFlat* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexBinaryFlat* index) const;
+    void copyTo(polaris::IndexBinaryFlat* index) const;
 
-    void add(faiss::idx_t n, const uint8_t* x) override;
+    void add(polaris::idx_t n, const uint8_t* x) override;
 
     void reset() override;
 
     void search(
             idx_t n,
             const uint8_t* x,
-            // faiss::IndexBinary has idx_t for k
+            // polaris::IndexBinary has idx_t for k
             idx_t k,
             int32_t* distances,
-            faiss::idx_t* labels,
-            const faiss::SearchParameters* params = nullptr) const override;
+            polaris::idx_t* labels,
+            const polaris::SearchParameters* params = nullptr) const override;
 
-    void reconstruct(faiss::idx_t key, uint8_t* recons) const override;
+    void reconstruct(polaris::idx_t key, uint8_t* recons) const override;
 
    protected:
     /// Called from search when the input data is on the CPU;
@@ -97,4 +97,4 @@ class GpuIndexBinaryFlat : public IndexBinary {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

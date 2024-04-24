@@ -13,7 +13,7 @@
 #include <polaris/IndexFlat.h>
 #include <polaris/IndexIVFFlat.h>
 
-using idx_t = faiss::idx_t;
+using idx_t = polaris::idx_t;
 
 int main() {
     int d = 64;      // dimension
@@ -41,8 +41,8 @@ int main() {
     int nlist = 100;
     int k = 4;
 
-    faiss::IndexFlatL2 quantizer(d); // the other index
-    faiss::IndexIVFFlat index(&quantizer, d, nlist);
+    polaris::IndexFlatL2 quantizer(d); // the other index
+    polaris::IndexIVFFlat index(&quantizer, d, nlist);
     assert(!index.is_trained);
     index.train(nb, xb);
     assert(index.is_trained);

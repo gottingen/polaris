@@ -10,7 +10,7 @@
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/Select.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Number of warps that the kernel is instantiated with
@@ -313,4 +313,4 @@ void runBinaryDistance(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

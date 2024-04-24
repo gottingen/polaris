@@ -9,7 +9,7 @@
 
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 void runL2SelectMin(
@@ -21,4 +21,4 @@ void runL2SelectMin(
         cudaStream_t stream);
 
 }
-} // namespace faiss
+} // namespace polaris

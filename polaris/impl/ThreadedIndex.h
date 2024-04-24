@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /// A holder of indices in a collection of threads
 /// The interface to this class itself is not thread safe
@@ -42,7 +42,7 @@ class ThreadedIndex : public IndexT {
     void runOnIndex(std::function<void(int, IndexT*)> f);
     void runOnIndex(std::function<void(int, const IndexT*)> f) const;
 
-    /// faiss::Index API
+    /// polaris::Index API
     /// All indices receive the same call
     void reset() override;
 
@@ -81,6 +81,6 @@ class ThreadedIndex : public IndexT {
     bool isThreaded_;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/impl/ThreadedIndex-inl.h>

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // For growing GPU allocations:
@@ -272,4 +272,4 @@ class DeviceVector {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

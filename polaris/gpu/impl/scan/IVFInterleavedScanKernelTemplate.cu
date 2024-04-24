@@ -1,6 +1,6 @@
 #include <polaris/gpu/impl/scan/IVFInterleavedImpl.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <>
@@ -75,4 +75,4 @@ void IVFINT_RUN<
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

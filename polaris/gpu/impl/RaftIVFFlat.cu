@@ -37,17 +37,17 @@
 #include <limits>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 RaftIVFFlat::RaftIVFFlat(
         GpuResources* res,
         int dim,
         int nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         bool useResidual,
-        faiss::ScalarQuantizer* scalarQ,
+        polaris::ScalarQuantizer* scalarQ,
         bool interleavedLayout,
         IndicesOptions indicesOptions,
         MemorySpace space)
@@ -418,7 +418,7 @@ void RaftIVFFlat::copyInvertedListsFrom(const InvertedLists* ivf) {
             raft_handle.get_stream());
 
     // Precompute the centers vector norms for L2Expanded distance
-    if (this->metric_ == faiss::METRIC_L2) {
+    if (this->metric_ == polaris::METRIC_L2) {
         raft_knn_index.value().allocate_center_norms(raft_handle);
         raft::linalg::rowNorm(
                 raft_knn_index.value().center_norms().value().data_handle(),
@@ -545,4 +545,4 @@ void RaftIVFFlatCodePackerInterleaved::unpack_1(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

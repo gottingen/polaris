@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-namespace faiss {
+namespace polaris {
 
 /** General interface for quantizer objects */
 struct Quantizer {
@@ -43,4 +43,4 @@ struct Quantizer {
     virtual ~Quantizer() {}
 };
 
-} // namespace faiss
+} // namespace polaris

@@ -22,7 +22,7 @@
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <polaris/impl/FaissAssert.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 using namespace ::faiss;
@@ -111,4 +111,4 @@ void GpuParameterSpace::set_index_parameter(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -10,7 +10,7 @@
 #include <polaris/Index.h>
 #include <functional>
 
-namespace faiss {
+namespace polaris {
 
 /** SMAWK algorithm. Find the row minima of a monotone matrix.
  *
@@ -45,4 +45,4 @@ void smawk(
  */
 double kmeans1d(const float* x, size_t n, size_t nclusters, float* centroids);
 
-} // namespace faiss
+} // namespace polaris

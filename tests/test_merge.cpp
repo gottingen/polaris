@@ -48,7 +48,7 @@ struct Tempfilename {
 
 pthread_mutex_t Tempfilename::mutex = PTHREAD_MUTEX_INITIALIZER;
 
-typedef faiss::idx_t idx_t;
+typedef polaris::idx_t idx_t;
 
 // parameters to use for the test
 int d = 64;
@@ -62,7 +62,7 @@ struct CommonData {
     std::vector<float> database;
     std::vector<float> queries;
     std::vector<idx_t> ids;
-    faiss::IndexFlatL2 quantizer;
+    polaris::IndexFlatL2 quantizer;
 
     CommonData() : database(nb * d), queries(nq * d), ids(nb), quantizer(d) {
         std::mt19937 rng;
@@ -77,7 +77,7 @@ struct CommonData {
             ids[i] = 123 + 456 * i;
         }
         { // just to train the quantizer
-            faiss::IndexIVFFlat iflat(&quantizer, d, nlist);
+            polaris::IndexIVFFlat iflat(&quantizer, d, nlist);
             iflat.train(nb, database.data());
         }
     }
@@ -88,7 +88,7 @@ CommonData cd;
 /// perform a search on shards, then merge and search again and
 /// compare results.
 int compare_merged(
-        faiss::IndexShards* index_shards,
+        polaris::IndexShards* index_shards,
         bool shift_ids,
         bool standard_merge = true) {
     std::vector<idx_t> refI(k * nq);
@@ -102,18 +102,18 @@ int compare_merged(
 
     if (standard_merge) {
         for (int i = 1; i < nindex; i++) {
-            faiss::ivflib::merge_into(
+            polaris::ivflib::merge_into(
                     index_shards->at(0), index_shards->at(i), shift_ids);
         }
 
         index_shards->syncWithSubIndexes();
     } else {
-        std::vector<const faiss::InvertedLists*> lists;
-        faiss::IndexIVF* index0 = nullptr;
+        std::vector<const polaris::InvertedLists*> lists;
+        polaris::IndexIVF* index0 = nullptr;
         size_t ntotal = 0;
         for (int i = 0; i < nindex; i++) {
             auto index_ivf =
-                    dynamic_cast<faiss::IndexIVF*>(index_shards->at(i));
+                    dynamic_cast<polaris::IndexIVF*>(index_shards->at(i));
             assert(index_ivf);
             if (i == 0) {
                 index0 = index_ivf;
@@ -122,7 +122,7 @@ int compare_merged(
             ntotal += index_ivf->ntotal;
         }
 
-        auto il = new faiss::OnDiskInvertedLists(
+        auto il = new polaris::OnDiskInvertedLists(
                 index0->nlist, index0->code_size, filename.c_str());
 
         il->merge_from(lists.data(), lists.size());
@@ -147,11 +147,11 @@ int compare_merged(
 
 // test on IVFFlat with implicit numbering
 TEST(MERGE, merge_flat_no_ids) {
-    faiss::IndexShards index_shards(d);
+    polaris::IndexShards index_shards(d);
     index_shards.own_indices = true;
     for (int i = 0; i < nindex; i++) {
         index_shards.add_shard(
-                new faiss::IndexIVFFlat(&cd.quantizer, d, nlist));
+                new polaris::IndexIVFFlat(&cd.quantizer, d, nlist));
     }
     EXPECT_TRUE(index_shards.is_trained);
     index_shards.add(nb, cd.database.data());
@@ -163,12 +163,12 @@ TEST(MERGE, merge_flat_no_ids) {
 
 // test on IVFFlat, explicit ids
 TEST(MERGE, merge_flat) {
-    faiss::IndexShards index_shards(d, false, false);
+    polaris::IndexShards index_shards(d, false, false);
     index_shards.own_indices = true;
 
     for (int i = 0; i < nindex; i++) {
         index_shards.add_shard(
-                new faiss::IndexIVFFlat(&cd.quantizer, d, nlist));
+                new polaris::IndexIVFFlat(&cd.quantizer, d, nlist));
     }
 
     EXPECT_TRUE(index_shards.is_trained);
@@ -179,24 +179,24 @@ TEST(MERGE, merge_flat) {
 
 // test on IVFFlat and a VectorTransform
 TEST(MERGE, merge_flat_vt) {
-    faiss::IndexShards index_shards(d, false, false);
+    polaris::IndexShards index_shards(d, false, false);
     index_shards.own_indices = true;
 
     // here we have to retrain because of the vectorTransform
-    faiss::RandomRotationMatrix rot(d, d);
+    polaris::RandomRotationMatrix rot(d, d);
     rot.init(1234);
-    faiss::IndexFlatL2 quantizer(d);
+    polaris::IndexFlatL2 quantizer(d);
 
     { // just to train the quantizer
-        faiss::IndexIVFFlat iflat(&quantizer, d, nlist);
-        faiss::IndexPreTransform ipt(&rot, &iflat);
+        polaris::IndexIVFFlat iflat(&quantizer, d, nlist);
+        polaris::IndexPreTransform ipt(&rot, &iflat);
         ipt.train(nb, cd.database.data());
     }
 
     for (int i = 0; i < nindex; i++) {
-        faiss::IndexPreTransform* ipt = new faiss::IndexPreTransform(
-                new faiss::RandomRotationMatrix(rot),
-                new faiss::IndexIVFFlat(&quantizer, d, nlist));
+        polaris::IndexPreTransform* ipt = new polaris::IndexPreTransform(
+                new polaris::RandomRotationMatrix(rot),
+                new polaris::IndexIVFFlat(&quantizer, d, nlist));
         ipt->own_fields = true;
         index_shards.add_shard(ipt);
     }
@@ -210,14 +210,14 @@ TEST(MERGE, merge_flat_vt) {
 
 // put the merged invfile on disk
 TEST(MERGE, merge_flat_ondisk) {
-    faiss::IndexShards index_shards(d, false, false);
+    polaris::IndexShards index_shards(d, false, false);
     index_shards.own_indices = true;
     Tempfilename filename;
 
     for (int i = 0; i < nindex; i++) {
-        auto ivf = new faiss::IndexIVFFlat(&cd.quantizer, d, nlist);
+        auto ivf = new polaris::IndexIVFFlat(&cd.quantizer, d, nlist);
         if (i == 0) {
-            auto il = new faiss::OnDiskInvertedLists(
+            auto il = new polaris::OnDiskInvertedLists(
                     ivf->nlist, ivf->code_size, filename.c_str());
             ivf->replace_invlists(il, true);
         }
@@ -233,12 +233,12 @@ TEST(MERGE, merge_flat_ondisk) {
 
 // now use ondisk specific merge
 TEST(MERGE, merge_flat_ondisk_2) {
-    faiss::IndexShards index_shards(d, false, false);
+    polaris::IndexShards index_shards(d, false, false);
     index_shards.own_indices = true;
 
     for (int i = 0; i < nindex; i++) {
         index_shards.add_shard(
-                new faiss::IndexIVFFlat(&cd.quantizer, d, nlist));
+                new polaris::IndexIVFFlat(&cd.quantizer, d, nlist));
     }
     EXPECT_TRUE(index_shards.is_trained);
     index_shards.add_with_ids(nb, cd.database.data(), cd.ids.data());

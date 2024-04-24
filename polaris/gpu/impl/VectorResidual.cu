@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename CentroidT, bool LargeDim>
@@ -211,4 +211,4 @@ void runReconstruct(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

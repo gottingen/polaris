@@ -17,7 +17,7 @@
 #include <polaris/gpu/utils/Select.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // L2 + select kernel for k == 1, implements re-use of ||c||^2
@@ -287,4 +287,4 @@ void runL2SelectMin(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -71,7 +71,7 @@ typedef uint64_t size_t;
 #include <polaris/IndexLSH.h>
 #include <polaris/IndexPQ.h>
 #include <polaris/IndexAdditiveQuantizer.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/IndexIVFPQ.h>
 #include <polaris/Index2Layer.h>
 #include <polaris/IndexIVFPQR.h>
@@ -172,7 +172,7 @@ typedef uint64_t size_t;
  ********************************************************/
 
 #ifdef SWIGPYTHON
-// %catches(faiss::FaissException);
+// %catches(polaris::FaissException);
 
 
 // Python-specific: release GIL by default for all functions
@@ -180,7 +180,7 @@ typedef uint64_t size_t;
     Py_BEGIN_ALLOW_THREADS
     try {
         $action
-    } catch(faiss::FaissException & e) {
+    } catch(polaris::FaissException & e) {
         PyEval_RestoreThread(_save);
 
         if (PyErr_Occurred()) {
@@ -250,24 +250,24 @@ namespace std {
 %template(UInt8VectorVector) std::vector<std::vector<uint8_t> >;
 %template(Int32VectorVector) std::vector<std::vector<int32_t> >;
 %template(Int64VectorVector) std::vector<std::vector<int64_t> >;
-%template(VectorTransformVector) std::vector<faiss::VectorTransform*>;
-%template(OperatingPointVector) std::vector<faiss::OperatingPoint>;
-%template(InvertedListsPtrVector) std::vector<faiss::InvertedLists*>;
-%template(RepeatVector) std::vector<faiss::Repeat>;
-%template(ClusteringIterationStatsVector) std::vector<faiss::ClusteringIterationStats>;
-%template(ParameterRangeVector) std::vector<faiss::ParameterRange>;
+%template(VectorTransformVector) std::vector<polaris::VectorTransform*>;
+%template(OperatingPointVector) std::vector<polaris::OperatingPoint>;
+%template(InvertedListsPtrVector) std::vector<polaris::InvertedLists*>;
+%template(RepeatVector) std::vector<polaris::Repeat>;
+%template(ClusteringIterationStatsVector) std::vector<polaris::ClusteringIterationStats>;
+%template(ParameterRangeVector) std::vector<polaris::ParameterRange>;
 
 
 #ifndef SWIGWIN
-%template(OnDiskOneListVector) std::vector<faiss::OnDiskOneList>;
+%template(OnDiskOneListVector) std::vector<polaris::OnDiskOneList>;
 #endif // !SWIGWIN
 
 #ifdef GPU_WRAPPER
-%template(GpuResourcesVector) std::vector<faiss::gpu::GpuResourcesProvider*>;
+%template(GpuResourcesVector) std::vector<polaris::gpu::GpuResourcesProvider*>;
 #endif
 
 // produces an error on the Mac
-%ignore faiss::hamming;
+%ignore polaris::hamming;
 
 /*******************************************************************
  * Parse headers
@@ -281,7 +281,7 @@ namespace std {
 %include <faiss/utils/Heap.h>
 
 // this ignore seems to be ignored, so disable W362 above
-%ignore faiss::AlignedTable::operator=;
+%ignore polaris::AlignedTable::operator=;
 
 %include <faiss/utils/AlignedTable.h>
 %include <faiss/utils/partitioning.h>
@@ -295,8 +295,8 @@ void gpu_sync_all_devices();
 
 #ifdef GPU_WRAPPER
 
-%shared_ptr(faiss::gpu::GpuResources);
-%shared_ptr(faiss::gpu::StandardGpuResourcesImpl);
+%shared_ptr(polaris::gpu::GpuResources);
+%shared_ptr(polaris::gpu::StandardGpuResourcesImpl);
 
 %{
 
@@ -317,22 +317,22 @@ void gpu_sync_all_devices();
 
 int get_num_gpus()
 {
-    return faiss::gpu::getNumDevices();
+    return polaris::gpu::getNumDevices();
 }
 
 void gpu_profiler_start()
 {
-    return faiss::gpu::profilerStart();
+    return polaris::gpu::profilerStart();
 }
 
 void gpu_profiler_stop()
 {
-    return faiss::gpu::profilerStop();
+    return polaris::gpu::profilerStop();
 }
 
 void gpu_sync_all_devices()
 {
-    return faiss::gpu::synchronizeAllDevices();
+    return polaris::gpu::synchronizeAllDevices();
 }
 
 %}
@@ -343,9 +343,9 @@ void gpu_sync_all_devices()
 
 // causes weird wrapper bug
 %ignore *::allocMemoryHandle;
-%ignore faiss::gpu::GpuMemoryReservation;
-%ignore faiss::gpu::GpuMemoryReservation::operator=(GpuMemoryReservation&&);
-%ignore faiss::gpu::AllocType;
+%ignore polaris::gpu::GpuMemoryReservation;
+%ignore polaris::gpu::GpuMemoryReservation::operator=(GpuMemoryReservation&&);
+%ignore polaris::gpu::AllocType;
 
 %include  <faiss/gpu/GpuResources.h>
 %include  <faiss/gpu/StandardGpuResources.h>
@@ -392,8 +392,8 @@ void gpu_sync_all_devices()
 // order matters because includes are not recursive
 
 %include  <faiss/utils/utils.h>
-%template(CombinerRangeKNNfloat) faiss::CombinerRangeKNN<float>;
-%template(CombinerRangeKNNint16) faiss::CombinerRangeKNN<int16_t>;
+%template(CombinerRangeKNNfloat) polaris::CombinerRangeKNN<float>;
+%template(CombinerRangeKNNint16) polaris::CombinerRangeKNN<int16_t>;
 
 %include  <faiss/utils/distances.h>
 %include  <faiss/utils/random.h>
@@ -415,7 +415,7 @@ void gpu_sync_all_devices()
 
 %include  <faiss/utils/extra_distances.h>
 
-%ignore faiss::ProductQuantizer::get_centroids(size_t,size_t) const;
+%ignore polaris::ProductQuantizer::get_centroids(size_t,size_t) const;
 
 %include  <faiss/impl/Quantizer.h>
 %include  <faiss/impl/ProductQuantizer.h>
@@ -455,21 +455,21 @@ void gpu_sync_all_devices()
 
 %include <faiss/impl/kmeans1d.h>
 
-%ignore faiss::nndescent::Nhood::lock;
+%ignore polaris::nndescent::Nhood::lock;
 %include  <faiss/impl/NNDescent.h>
 %include  <faiss/IndexNNDescent.h>
 
 %include  <faiss/IndexIVFFlat.h>
 
-%warnfilter(509) faiss::nsg::Graph< int >::at(int,int);
+%warnfilter(509) polaris::nsg::Graph< int >::at(int,int);
 
 %include  <faiss/impl/NSG.h>
 
-%template(NSG_Graph_int) faiss::nsg::Graph<int>;
+%template(NSG_Graph_int) polaris::nsg::Graph<int>;
 
 // not using %shared_ptr to avoid mem leaks
-%extend faiss::NSG {
-    faiss::nsg::Graph<int>* get_final_graph() {
+%extend polaris::NSG {
+    polaris::nsg::Graph<int>* get_final_graph() {
         return $self->final_graph.get();
     }
 }
@@ -477,7 +477,7 @@ void gpu_sync_all_devices()
 %include  <faiss/IndexNSG.h>
 
 #ifndef SWIGWIN
-%warnfilter(401) faiss::OnDiskInvertedListsIOHook;
+%warnfilter(401) polaris::OnDiskInvertedListsIOHook;
 %ignore OnDiskInvertedListsIOHook;
 %include  <faiss/invlists/OnDiskInvertedLists.h>
 #endif // !SWIGWIN
@@ -485,7 +485,7 @@ void gpu_sync_all_devices()
 %include  <faiss/impl/lattice_Zn.h>
 %include  <faiss/IndexLattice.h>
 
-%ignore faiss::IndexIVFPQ::alloc_type;
+%ignore polaris::IndexIVFPQ::alloc_type;
 %include  <faiss/IndexIVFPQ.h>
 %include  <faiss/IndexIVFPQR.h>
 %include  <faiss/Index2Layer.h>
@@ -495,7 +495,7 @@ void gpu_sync_all_devices()
 %include  <faiss/IndexPQFastScan.h>
 
 // NOTE(matthijs) let's not go into wrapping simdlib
-struct faiss::simd16uint16 {};
+struct polaris::simd16uint16 {};
 
 %include  <faiss/impl/simd_result_handlers.h>
 %include  <faiss/IndexIVFFastScan.h>
@@ -513,38 +513,38 @@ struct faiss::simd16uint16 {};
 %include  <faiss/IndexBinaryHash.h>
 
 %include  <faiss/impl/ThreadedIndex.h>
-%template(ThreadedIndexBase) faiss::ThreadedIndex<faiss::Index>;
-%template(ThreadedIndexBaseBinary) faiss::ThreadedIndex<faiss::IndexBinary>;
+%template(ThreadedIndexBase) polaris::ThreadedIndex<polaris::Index>;
+%template(ThreadedIndexBaseBinary) polaris::ThreadedIndex<polaris::IndexBinary>;
 
 %include  <faiss/IndexShards.h>
-%template(IndexShards) faiss::IndexShardsTemplate<faiss::Index>;
-%template(IndexBinaryShards) faiss::IndexShardsTemplate<faiss::IndexBinary>;
+%template(IndexShards) polaris::IndexShardsTemplate<polaris::Index>;
+%template(IndexBinaryShards) polaris::IndexShardsTemplate<polaris::IndexBinary>;
 %include  <faiss/IndexShardsIVF.h>
 
 %include  <faiss/IndexReplicas.h>
-%template(IndexReplicas) faiss::IndexReplicasTemplate<faiss::Index>;
-%template(IndexBinaryReplicas) faiss::IndexReplicasTemplate<faiss::IndexBinary>;
+%template(IndexReplicas) polaris::IndexReplicasTemplate<polaris::Index>;
+%template(IndexBinaryReplicas) polaris::IndexReplicasTemplate<polaris::IndexBinary>;
 
 %include  <faiss/MetaIndexes.h>
 
 %include  <faiss/IndexRowwiseMinMax.h>
 
 
-%ignore faiss::BufferList::Buffer;
-%ignore faiss::RangeSearchPartialResult::QueryResult;
-%ignore faiss::IDSelectorBatch::set;
-%ignore faiss::IDSelectorBatch::bloom;
-%ignore faiss::InterruptCallback::instance;
-%ignore faiss::InterruptCallback::lock;
+%ignore polaris::BufferList::Buffer;
+%ignore polaris::RangeSearchPartialResult::QueryResult;
+%ignore polaris::IDSelectorBatch::set;
+%ignore polaris::IDSelectorBatch::bloom;
+%ignore polaris::InterruptCallback::instance;
+%ignore polaris::InterruptCallback::lock;
 
 %include <faiss/impl/AuxIndexStructures.h>
 %include <faiss/impl/IDSelector.h>
 
 %include  <faiss/IndexIDMap.h>
-%template(IndexIDMap) faiss::IndexIDMapTemplate<faiss::Index>;
-%template(IndexBinaryIDMap) faiss::IndexIDMapTemplate<faiss::IndexBinary>;
-%template(IndexIDMap2) faiss::IndexIDMap2Template<faiss::Index>;
-%template(IndexBinaryIDMap2) faiss::IndexIDMap2Template<faiss::IndexBinary>;
+%template(IndexIDMap) polaris::IndexIDMapTemplate<polaris::Index>;
+%template(IndexBinaryIDMap) polaris::IndexIDMapTemplate<polaris::IndexBinary>;
+%template(IndexIDMap2) polaris::IndexIDMap2Template<polaris::Index>;
+%template(IndexBinaryIDMap2) polaris::IndexIDMap2Template<polaris::IndexBinary>;
 
 
 %include <faiss/utils/approx_topk/mode.h>
@@ -552,7 +552,7 @@ struct faiss::simd16uint16 {};
 #ifdef GPU_WRAPPER
 
 // quiet SWIG warnings
-%ignore faiss::gpu::GpuIndexIVF::GpuIndexIVF;
+%ignore polaris::gpu::GpuIndexIVF::GpuIndexIVF;
 
 %include  <faiss/gpu/GpuIndicesOptions.h>
 %include  <faiss/gpu/GpuClonerOptions.h>
@@ -585,19 +585,19 @@ struct faiss::simd16uint16 {};
 #ifdef SWIGPYTHON
 
 %define DOWNCAST(subclass)
-    if (dynamic_cast<faiss::subclass *> ($1)) {
+    if (dynamic_cast<polaris::subclass *> ($1)) {
       $result = SWIG_NewPointerObj($1,SWIGTYPE_p_faiss__ ## subclass,$owner);
     } else
 %enddef
 
 %define DOWNCAST2(subclass, longname)
-    if (dynamic_cast<faiss::subclass *> ($1)) {
+    if (dynamic_cast<polaris::subclass *> ($1)) {
       $result = SWIG_NewPointerObj($1,SWIGTYPE_p_faiss__ ## longname,$owner);
     } else
 %enddef
 
 %define DOWNCAST_GPU(subclass)
-    if (dynamic_cast<faiss::gpu::subclass *> ($1)) {
+    if (dynamic_cast<polaris::gpu::subclass *> ($1)) {
       $result = SWIG_NewPointerObj($1,SWIGTYPE_p_faiss__gpu__ ## subclass,$owner);
     } else
 %enddef
@@ -614,7 +614,7 @@ struct faiss::simd16uint16 {};
 %newobject clone_VectorTransform;
 
 // Subclasses should appear before their parent
-%typemap(out) faiss::Index * {
+%typemap(out) polaris::Index * {
     DOWNCAST2 ( IndexIDMap2, IndexIDMap2TemplateT_faiss__Index_t )
     DOWNCAST2 ( IndexIDMap, IndexIDMapTemplateT_faiss__Index_t )
     DOWNCAST ( IndexShardsIVF )
@@ -691,7 +691,7 @@ struct faiss::simd16uint16 {};
 }
 
 
-%typemap(out) faiss::IndexBinary * {
+%typemap(out) polaris::IndexBinary * {
     DOWNCAST2 ( IndexBinaryReplicas, IndexReplicasTemplateT_faiss__IndexBinary_t )
     DOWNCAST2 ( IndexBinaryIDMap2, IndexIDMap2TemplateT_faiss__IndexBinary_t )
     DOWNCAST2 ( IndexBinaryIDMap, IndexIDMapTemplateT_faiss__IndexBinary_t )
@@ -716,7 +716,7 @@ struct faiss::simd16uint16 {};
     }
 }
 
-%typemap(out) faiss::VectorTransform * {
+%typemap(out) polaris::VectorTransform * {
     DOWNCAST (RemapDimensionsTransform)
     DOWNCAST (OPQMatrix)
     DOWNCAST (PCAMatrix)
@@ -732,7 +732,7 @@ struct faiss::simd16uint16 {};
     }
 }
 
-%typemap(out) faiss::InvertedLists * {
+%typemap(out) polaris::InvertedLists * {
     DOWNCAST (ArrayInvertedLists)
     DOWNCAST (BlockInvertedLists)
 #ifndef SWIGWIN
@@ -747,7 +747,7 @@ struct faiss::simd16uint16 {};
     }
 }
 
-%typemap(out) faiss::Quantizer * {
+%typemap(out) polaris::Quantizer * {
     DOWNCAST (ScalarQuantizer)
     DOWNCAST (ProductQuantizer)
     DOWNCAST (LocalSearchQuantizer)
@@ -762,28 +762,28 @@ struct faiss::simd16uint16 {};
 // just to downcast pointers that come from elsewhere (eg. direct
 // access to object fields)
 %inline %{
-faiss::Index * downcast_index (faiss::Index *index)
+polaris::Index * downcast_index (polaris::Index *index)
 {
     return index;
 }
-faiss::VectorTransform * downcast_VectorTransform (faiss::VectorTransform *vt)
+polaris::VectorTransform * downcast_VectorTransform (polaris::VectorTransform *vt)
 {
     return vt;
 }
-faiss::IndexBinary * downcast_IndexBinary (faiss::IndexBinary *index)
+polaris::IndexBinary * downcast_IndexBinary (polaris::IndexBinary *index)
 {
     return index;
 }
-faiss::InvertedLists * downcast_InvertedLists (faiss::InvertedLists *il)
+polaris::InvertedLists * downcast_InvertedLists (polaris::InvertedLists *il)
 {
     return il;
 }
 // backwards compatibility
-faiss::Quantizer * downcast_AdditiveQuantizer (faiss::AdditiveQuantizer *aq)
+polaris::Quantizer * downcast_AdditiveQuantizer (polaris::AdditiveQuantizer *aq)
 {
     return aq;
 }
-faiss::Quantizer * downcast_Quantizer (faiss::Quantizer *aq)
+polaris::Quantizer * downcast_Quantizer (polaris::Quantizer *aq)
 {
     return aq;
 }
@@ -835,24 +835,24 @@ faiss::Quantizer * downcast_Quantizer (faiss::Quantizer *aq)
 
 // answer: the same as the C++ typedefs, but we still have to redefine them
 
-%template() faiss::CMin<float, int64_t>;
-%template() faiss::CMin<int, int64_t>;
-%template() faiss::CMax<float, int64_t>;
-%template() faiss::CMax<int, int64_t>;
+%template() polaris::CMin<float, int64_t>;
+%template() polaris::CMin<int, int64_t>;
+%template() polaris::CMax<float, int64_t>;
+%template() polaris::CMax<int, int64_t>;
 
-%template(float_minheap_array_t) faiss::HeapArray<faiss::CMin<float, int64_t> >;
-%template(int_minheap_array_t) faiss::HeapArray<faiss::CMin<int, int64_t> >;
-%template(float_maxheap_array_t) faiss::HeapArray<faiss::CMax<float, int64_t> >;
-%template(int_maxheap_array_t) faiss::HeapArray<faiss::CMax<int, int64_t> >;
+%template(float_minheap_array_t) polaris::HeapArray<polaris::CMin<float, int64_t> >;
+%template(int_minheap_array_t) polaris::HeapArray<polaris::CMin<int, int64_t> >;
+%template(float_maxheap_array_t) polaris::HeapArray<polaris::CMax<float, int64_t> >;
+%template(int_maxheap_array_t) polaris::HeapArray<polaris::CMax<int, int64_t> >;
 
 %template(CMin_float_partition_fuzzy)
-    faiss::partition_fuzzy<faiss::CMin<float, int64_t> >;
+    polaris::partition_fuzzy<polaris::CMin<float, int64_t> >;
 %template(CMax_float_partition_fuzzy)
-    faiss::partition_fuzzy<faiss::CMax<float, int64_t> >;
+    polaris::partition_fuzzy<polaris::CMax<float, int64_t> >;
 
-%template(AlignedTableUint8) faiss::AlignedTable<uint8_t>;
-%template(AlignedTableUint16) faiss::AlignedTable<uint16_t>;
-%template(AlignedTableFloat32) faiss::AlignedTable<float>;
+%template(AlignedTableUint8) polaris::AlignedTable<uint8_t>;
+%template(AlignedTableUint16) polaris::AlignedTable<uint16_t>;
+%template(AlignedTableFloat32) polaris::AlignedTable<float>;
 
 
 // SWIG seems to have some trouble resolving function template types here, so
@@ -866,7 +866,7 @@ uint16_t C ## _uint16_partition_fuzzy(
         uint16_t *vals, id_t *ids, size_t n,
         size_t q_min, size_t q_max, size_t * q_out)
 {
-    return faiss::partition_fuzzy<faiss::C<unsigned short, id_t> >(
+    return polaris::partition_fuzzy<polaris::C<unsigned short, id_t> >(
         vals, ids, n, q_min, q_max, q_out);
 }
 
@@ -887,10 +887,10 @@ INSTANTIATE_uint16_partition_fuzzy(CMax, int)
 %inline %{
 void merge_knn_results_ ## C(
     size_t n, size_t k, int nshard,
-    const distance_t *all_distances, const faiss::idx_t *all_labels,
-    distance_t *distances, faiss::idx_t *labels)
+    const distance_t *all_distances, const polaris::idx_t *all_labels,
+    distance_t *distances, polaris::idx_t *labels)
 {
-    faiss::merge_knn_results<faiss::idx_t, faiss::C<distance_t, int>>(
+    polaris::merge_knn_results<polaris::idx_t, polaris::C<distance_t, int>>(
         n, k, nshard, all_distances, all_labels, distances, labels);
 }
 %}
@@ -1040,7 +1040,7 @@ PyObject *swig_ptr (PyObject *a)
 }
 
 
-struct PythonInterruptCallback: faiss::InterruptCallback {
+struct PythonInterruptCallback: polaris::InterruptCallback {
 
     bool want_interrupt () override {
         int err;
@@ -1063,7 +1063,7 @@ struct PythonInterruptCallback: faiss::InterruptCallback {
     /* needed, else crash at runtime */
     import_array();
 
-    faiss::InterruptCallback::instance.reset(new PythonInterruptCallback());
+    polaris::InterruptCallback::instance.reset(new PythonInterruptCallback());
 
 %}
 
@@ -1110,8 +1110,8 @@ float * cast_integer_to_float_ptr (int64_t x) {
     return (float*)x;
 }
 
-faiss::idx_t* cast_integer_to_idx_t_ptr (int64_t x) {
-    return (faiss::idx_t*)x;
+polaris::idx_t* cast_integer_to_idx_t_ptr (int64_t x) {
+    return (polaris::idx_t*)x;
 }
 
 int * cast_integer_to_int_ptr (int64_t x) {

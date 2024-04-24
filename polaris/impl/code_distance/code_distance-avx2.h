@@ -229,7 +229,7 @@ inline void distance_four_codes_avx2_pqdecoder8_m8(
 
 } // namespace
 
-namespace faiss {
+namespace polaris {
 
 template <typename PQDecoderT>
 typename std::enable_if<!std::is_same<PQDecoderT, PQDecoder8>::value, float>::
@@ -524,6 +524,6 @@ distance_four_codes_avx2(
     }
 }
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

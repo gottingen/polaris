@@ -15,7 +15,7 @@
 #include <polaris/IndexFlatCodes.h>
 #include <polaris/VectorTransform.h>
 
-namespace faiss {
+namespace polaris {
 
 /** The sign of each vector component is put in a binary signature */
 struct IndexLSH : IndexFlatCodes {
@@ -68,6 +68,6 @@ struct IndexLSH : IndexFlatCodes {
     void sa_decode(idx_t n, const uint8_t* bytes, float* x) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

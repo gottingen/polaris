@@ -8,7 +8,7 @@
 #include <polaris/gpu/impl/IVFInterleaved.cuh>
 #include <polaris/gpu/impl/scan/IVFInterleavedImpl.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 constexpr uint32_t kMaxUInt32 = std::numeric_limits<uint32_t>::max();
@@ -180,7 +180,7 @@ void runIVFInterleavedScan(
         IndicesOptions indicesOptions,
         DeviceVector<idx_t>& listLengths,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         bool useResidual,
         Tensor<float, 3, true>& residualBase,
         GpuScalarQuantizer* scalarQ,
@@ -232,4 +232,4 @@ void runIVFInterleavedScan(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

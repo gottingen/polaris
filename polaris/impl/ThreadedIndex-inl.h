@@ -9,7 +9,7 @@
 #include <exception>
 #include <iostream>
 
-namespace faiss {
+namespace polaris {
 
 template <typename IndexT>
 ThreadedIndex<IndexT>::ThreadedIndex(bool threaded)
@@ -187,4 +187,4 @@ void ThreadedIndex<IndexT>::waitAndHandleFutures(
     handleExceptions(exceptions);
 }
 
-} // namespace faiss
+} // namespace polaris

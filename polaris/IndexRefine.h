@@ -9,7 +9,7 @@
 
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 
 struct IndexRefineSearchParameters : SearchParameters {
     float k_factor = 1;
@@ -88,4 +88,4 @@ struct IndexRefineFlat : IndexRefine {
             const SearchParameters* params = nullptr) const override;
 };
 
-} // namespace faiss
+} // namespace polaris

@@ -13,7 +13,7 @@
 #include <polaris/gpu/utils/MathOperators.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T, int kRowsPerBlock, int kRowUnroll, int kColLoad>
@@ -374,4 +374,4 @@ void runSumAlongRows(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

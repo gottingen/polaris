@@ -13,7 +13,7 @@
 #include <polaris/gpu/utils/DeviceVector.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -37,7 +37,7 @@ void runPQScanMultiPassNoPrecomputed(
         DeviceVector<idx_t>& listLengths,
         idx_t maxListLength,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         // output
         Tensor<float, 2, true>& outDistances,
         // output
@@ -45,6 +45,6 @@ void runPQScanMultiPassNoPrecomputed(
         GpuResources* res);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/gpu/impl/PQScanMultiPassNoPrecomputed-inl.cuh>

@@ -16,7 +16,7 @@
 
 #include <polaris/utils/approx_topk/mode.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Index that stores the full vectors and performs exhaustive search. */
 struct IndexBinaryFlat : IndexBinary {
@@ -63,6 +63,6 @@ struct IndexBinaryFlat : IndexBinary {
     IndexBinaryFlat() {}
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif // INDEX_BINARY_FLAT_H

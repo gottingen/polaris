@@ -11,7 +11,7 @@
 
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResourcesProvider;
@@ -57,4 +57,4 @@ struct GpuIcmEncoderFactory : public lsq::IcmEncoderFactory {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

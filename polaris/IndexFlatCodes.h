@@ -13,7 +13,7 @@
 #include <polaris/impl/DistanceComputer.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 struct CodePacker;
 
@@ -63,4 +63,4 @@ struct IndexFlatCodes : Index {
     void permute_entries(const idx_t* perm);
 };
 
-} // namespace faiss
+} // namespace polaris

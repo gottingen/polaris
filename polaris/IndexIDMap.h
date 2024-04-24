@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /** Index that translates search results to ids */
 template <typename IndexT>
@@ -124,4 +124,4 @@ struct IDSelectorTranslated : IDSelector {
     }
 };
 
-} // namespace faiss
+} // namespace polaris

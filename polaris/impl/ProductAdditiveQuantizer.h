@@ -15,7 +15,7 @@
 #include <polaris/impl/LocalSearchQuantizer.h>
 #include <polaris/impl/ResidualQuantizer.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Product Additive Quantizers
  *
@@ -151,4 +151,4 @@ struct ProductResidualQuantizer : ProductAdditiveQuantizer {
     ProductResidualQuantizer();
 };
 
-} // namespace faiss
+} // namespace polaris

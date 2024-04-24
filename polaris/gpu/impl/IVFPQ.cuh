@@ -12,7 +12,7 @@
 #include <polaris/gpu/impl/IVFBase.cuh>
 #include <polaris/gpu/utils/Float16.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Implementing class for IVFPQ on the GPU
@@ -21,7 +21,7 @@ class IVFPQ : public IVFBase {
     IVFPQ(GpuResources* resources,
           int dim,
           idx_t nlist,
-          faiss::MetricType metric,
+          polaris::MetricType metric,
           float metricArg,
           int numSubQuantizers,
           int bitsPerSubQuantizer,
@@ -178,4 +178,4 @@ class IVFPQ : public IVFBase {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

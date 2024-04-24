@@ -13,13 +13,13 @@
 #include <cstdint>
 #include <vector>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/impl/LocalSearchQuantizer.h>
 #include <polaris/impl/ProductAdditiveQuantizer.h>
 #include <polaris/impl/ResidualQuantizer.h>
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /// Abstract class for IVF additive quantizers.
 /// The search functions are in common.
@@ -179,6 +179,6 @@ struct IndexIVFProductLocalSearchQuantizer : IndexIVFAdditiveQuantizer {
     virtual ~IndexIVFProductLocalSearchQuantizer();
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

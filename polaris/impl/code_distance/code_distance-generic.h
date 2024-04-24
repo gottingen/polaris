@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 
 /// Returns the distance to a single code.
 template <typename PQDecoderT>
@@ -78,4 +78,4 @@ inline void distance_four_codes_generic(
     }
 }
 
-} // namespace faiss
+} // namespace polaris

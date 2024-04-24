@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 size_t getIVFKSelectionPass2Chunks(size_t nprobe) {
@@ -186,4 +186,4 @@ void runCalcListOffsets(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

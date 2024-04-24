@@ -31,20 +31,20 @@ DEFINE_int32(num_train, -1, "number of database vecs to train on");
 
 template <typename T>
 void fillAndSave(T& index, int numTrain, int num, int dim) {
-    auto trainVecs = faiss::gpu::randVecs(numTrain, dim);
+    auto trainVecs = polaris::gpu::randVecs(numTrain, dim);
     index.train(numTrain, trainVecs.data());
 
     constexpr int kAddChunk = 1000000;
 
     for (int i = 0; i < num; i += kAddChunk) {
         int numRemaining = (num - i) < kAddChunk ? (num - i) : kAddChunk;
-        auto vecs = faiss::gpu::randVecs(numRemaining, dim);
+        auto vecs = polaris::gpu::randVecs(numRemaining, dim);
 
         printf("adding at %d: %d\n", i, numRemaining);
         index.add(numRemaining, vecs.data());
     }
 
-    faiss::write_index(&index, FLAGS_out.c_str());
+    polaris::write_index(&index, FLAGS_out.c_str());
 }
 
 int main(int argc, char** argv) {
@@ -64,8 +64,8 @@ int main(int argc, char** argv) {
     numTrain = std::min(num, numTrain);
 
     if (FLAGS_ivfpq) {
-        faiss::IndexFlatL2 quantizer(dim);
-        faiss::IndexIVFPQ index(
+        polaris::IndexFlatL2 quantizer(dim);
+        polaris::IndexIVFPQ index(
                 &quantizer,
                 dim,
                 numCentroids,
@@ -85,18 +85,18 @@ int main(int argc, char** argv) {
 
         fillAndSave(index, numTrain, num, dim);
     } else if (FLAGS_ivfflat) {
-        faiss::IndexFlatL2 quantizerL2(dim);
-        faiss::IndexFlatIP quantizerIP(dim);
+        polaris::IndexFlatL2 quantizerL2(dim);
+        polaris::IndexFlatIP quantizerIP(dim);
 
-        faiss::IndexFlat* quantizer = FLAGS_l2
-                ? (faiss::IndexFlat*)&quantizerL2
-                : (faiss::IndexFlat*)&quantizerIP;
+        polaris::IndexFlat* quantizer = FLAGS_l2
+                ? (polaris::IndexFlat*)&quantizerL2
+                : (polaris::IndexFlat*)&quantizerIP;
 
-        faiss::IndexIVFFlat index(
+        polaris::IndexIVFFlat index(
                 quantizer,
                 dim,
                 numCentroids,
-                FLAGS_l2 ? faiss::METRIC_L2 : faiss::METRIC_INNER_PRODUCT);
+                FLAGS_l2 ? polaris::METRIC_L2 : polaris::METRIC_INNER_PRODUCT);
 
         printf("IVFFlat: metric %s\n", FLAGS_l2 ? "L2" : "IP");
         printf("Lists: %d\n", numCentroids);

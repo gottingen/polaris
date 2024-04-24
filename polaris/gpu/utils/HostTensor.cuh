@@ -10,7 +10,7 @@
 #include <polaris/Index.h> // idx_t
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -89,6 +89,6 @@ class HostTensor : public Tensor<T, Dim, InnerContig, IndexT, PtrTraits> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/gpu/utils/HostTensor-inl.cuh>

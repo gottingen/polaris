@@ -8,7 +8,7 @@
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <polaris/gpu/utils/warpselect/WarpSelectImpl.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 #if GPU_MAX_SELECTION_K >= 2048
@@ -16,4 +16,4 @@ WARP_SELECT_IMPL(float, false, 2048, 8);
 #endif
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

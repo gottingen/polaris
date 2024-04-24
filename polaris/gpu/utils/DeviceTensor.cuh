@@ -11,7 +11,7 @@
 #include <polaris/gpu/GpuResources.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -91,6 +91,6 @@ class DeviceTensor : public Tensor<T, Dim, InnerContig, IndexT, PtrTraits> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/gpu/utils/DeviceTensor-inl.cuh>

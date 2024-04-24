@@ -16,16 +16,16 @@
 TEST(RCQCropping, test_cropping) {
     size_t nq = 10, nt = 2000, nb = 1000, d = 32;
 
-    using idx_t = faiss::idx_t;
+    using idx_t = polaris::idx_t;
 
     std::vector<float> buf((nq + nb + nt) * d);
-    faiss::rand_smooth_vectors(nq + nb + nt, d, buf.data(), 1234);
+    polaris::rand_smooth_vectors(nq + nb + nt, d, buf.data(), 1234);
     const float* xt = buf.data();
     const float* xb = xt + nt * d;
     const float* xq = xb + nb * d;
 
     std::vector<size_t> nbits = {5, 4, 4};
-    faiss::ResidualCoarseQuantizer rcq(d, nbits);
+    polaris::ResidualCoarseQuantizer rcq(d, nbits);
 
     rcq.train(nt, xt);
     // fprintf(stderr, "nb centroids: %zd\n", rcq.ntotal);
@@ -35,21 +35,21 @@ TEST(RCQCropping, test_cropping) {
 
     // perform search
     int nprobe = 15;
-    std::vector<faiss::idx_t> Iref(nq * nprobe);
+    std::vector<polaris::idx_t> Iref(nq * nprobe);
     std::vector<float> Dref(nq * nprobe);
     rcq.search(nq, xq, nprobe, Dref.data(), Iref.data());
 
     // crop to the first 2 quantization levels
     int last_nbits = nbits.back();
     nbits.pop_back();
-    faiss::ResidualCoarseQuantizer rcq_cropped(d, nbits);
+    polaris::ResidualCoarseQuantizer rcq_cropped(d, nbits);
     rcq_cropped.initialize_from(rcq);
     // fprintf(stderr, "cropped nb centroids: %zd\n", rcq_cropped.ntotal);
 
     EXPECT_EQ(rcq_cropped.ntotal, rcq.ntotal >> last_nbits);
 
     // perform search
-    std::vector<faiss::idx_t> Inew(nq * nprobe);
+    std::vector<polaris::idx_t> Inew(nq * nprobe);
     std::vector<float> Dnew(nq * nprobe);
     rcq_cropped.search(nq, xq, nprobe, Dnew.data(), Inew.data());
 
@@ -77,19 +77,19 @@ TEST(RCQCropping, test_cropping) {
 TEST(RCQCropping, search_params) {
     size_t nq = 10, nt = 2000, nb = 1000, d = 32;
 
-    using idx_t = faiss::idx_t;
+    using idx_t = polaris::idx_t;
 
     std::vector<float> buf((nq + nb + nt) * d);
-    faiss::rand_smooth_vectors(nq + nb + nt, d, buf.data(), 1234);
+    polaris::rand_smooth_vectors(nq + nb + nt, d, buf.data(), 1234);
     const float* xt = buf.data();
     const float* xb = xt + nt * d;
     const float* xq = xb + nb * d;
 
     std::vector<size_t> nbits = {3, 6, 3};
-    faiss::ResidualCoarseQuantizer quantizer(d, nbits);
+    polaris::ResidualCoarseQuantizer quantizer(d, nbits);
     size_t ntotal = (size_t)1 << quantizer.rq.tot_bits;
-    faiss::IndexIVFScalarQuantizer index(
-            &quantizer, d, ntotal, faiss::ScalarQuantizer::QT_8bit);
+    polaris::IndexIVFScalarQuantizer index(
+            &quantizer, d, ntotal, polaris::ScalarQuantizer::QT_8bit);
     index.quantizer_trains_alone = true;
 
     index.train(nt, xt);
@@ -115,9 +115,9 @@ TEST(RCQCropping, search_params) {
     EXPECT_NE(D1, D2);
 
     // override the class level beam factor
-    faiss::SearchParametersResidualCoarseQuantizer params1;
+    polaris::SearchParametersResidualCoarseQuantizer params1;
     params1.beam_factor = beam_factor_1;
-    faiss::SearchParametersIVF params;
+    polaris::SearchParametersIVF params;
     params.nprobe = index.nprobe;
     params.quantizer_params = &params1;
 

@@ -11,7 +11,7 @@
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/Float16.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -130,7 +130,7 @@ void allPairwiseDistanceOnDevice(
         Tensor<float, 1, true>* vectorNorms,
         Tensor<T, 2, true>& queries,
         bool queriesRowMajor,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         Tensor<float, 2, true>& outDistances) {
     DeviceScope ds(device);
@@ -139,8 +139,8 @@ void allPairwiseDistanceOnDevice(
 
     // L2 and IP are specialized to use GEMM and an optimized L2 + selection or
     // pure k-selection kernel.
-    if ((metric == faiss::MetricType::METRIC_L2) ||
-        (metric == faiss::MetricType::METRIC_Lp && metricArg == 2)) {
+    if ((metric == polaris::MetricType::METRIC_L2) ||
+        (metric == polaris::MetricType::METRIC_Lp && metricArg == 2)) {
         runAllPairwiseL2Distance(
                 resources,
                 stream,
@@ -150,7 +150,7 @@ void allPairwiseDistanceOnDevice(
                 queries,
                 queriesRowMajor,
                 outDistances);
-    } else if (metric == faiss::MetricType::METRIC_INNER_PRODUCT) {
+    } else if (metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
         runAllPairwiseIPDistance(
                 resources,
                 stream,
@@ -177,15 +177,15 @@ void allPairwiseDistanceOnDevice(
                 ? queries.transposeInnermost(1)
                 : queries.transposeInnermost(0);
 
-        if ((metric == faiss::MetricType::METRIC_L1) ||
-            (metric == faiss::MetricType::METRIC_Lp && metricArg == 1)) {
+        if ((metric == polaris::MetricType::METRIC_L1) ||
+            (metric == polaris::MetricType::METRIC_Lp && metricArg == 1)) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
                     outDistances,
                     L1Distance(),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_Lp && metricArg == -1) {
+        } else if (metric == polaris::MetricType::METRIC_Lp && metricArg == -1) {
             // A way to test L2 distance
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
@@ -193,42 +193,42 @@ void allPairwiseDistanceOnDevice(
                     outDistances,
                     L2Distance(),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_Lp) {
+        } else if (metric == polaris::MetricType::METRIC_Lp) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
                     outDistances,
                     LpDistance(metricArg),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_Linf) {
+        } else if (metric == polaris::MetricType::METRIC_Linf) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
                     outDistances,
                     LinfDistance(),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_Canberra) {
+        } else if (metric == polaris::MetricType::METRIC_Canberra) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
                     outDistances,
                     CanberraDistance(),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_BrayCurtis) {
+        } else if (metric == polaris::MetricType::METRIC_BrayCurtis) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
                     outDistances,
                     BrayCurtisDistance(),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_JensenShannon) {
+        } else if (metric == polaris::MetricType::METRIC_JensenShannon) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
                     outDistances,
                     JensenShannonDistance(),
                     stream);
-        } else if (metric == faiss::MetricType::METRIC_Jaccard) {
+        } else if (metric == polaris::MetricType::METRIC_Jaccard) {
             runGeneralDistanceKernel(
                     tVectorsDimInnermost,
                     tQueriesDimInnermost,
@@ -257,7 +257,7 @@ void bfKnnOnDevice(
         Tensor<T, 2, true>& queries,
         bool queriesRowMajor,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         Tensor<float, 2, true>& outDistances,
         Tensor<idx_t, 2, true>& outIndices,
@@ -268,8 +268,8 @@ void bfKnnOnDevice(
 
     // L2 and IP are specialized to use GEMM and an optimized L2 + selection or
     // pure k-selection kernel.
-    if ((metric == faiss::MetricType::METRIC_L2) ||
-        (metric == faiss::MetricType::METRIC_Lp && metricArg == 2)) {
+    if ((metric == polaris::MetricType::METRIC_L2) ||
+        (metric == polaris::MetricType::METRIC_Lp && metricArg == 2)) {
         runL2Distance(
                 resources,
                 stream,
@@ -281,7 +281,7 @@ void bfKnnOnDevice(
                 k,
                 outDistances,
                 outIndices);
-    } else if (metric == faiss::MetricType::METRIC_INNER_PRODUCT) {
+    } else if (metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
         runIPDistance(
                 resources,
                 stream,
@@ -310,8 +310,8 @@ void bfKnnOnDevice(
                 ? queries.transposeInnermost(1)
                 : queries.transposeInnermost(0);
 
-        if ((metric == faiss::MetricType::METRIC_L1) ||
-            (metric == faiss::MetricType::METRIC_Lp && metricArg == 1)) {
+        if ((metric == polaris::MetricType::METRIC_L1) ||
+            (metric == polaris::MetricType::METRIC_Lp && metricArg == 1)) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -321,7 +321,7 @@ void bfKnnOnDevice(
                     L1Distance(),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_Lp && metricArg == -1) {
+        } else if (metric == polaris::MetricType::METRIC_Lp && metricArg == -1) {
             // A way to test L2 distance
             runGeneralDistance(
                     resources,
@@ -332,7 +332,7 @@ void bfKnnOnDevice(
                     L2Distance(),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_Lp) {
+        } else if (metric == polaris::MetricType::METRIC_Lp) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -342,7 +342,7 @@ void bfKnnOnDevice(
                     LpDistance(metricArg),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_Linf) {
+        } else if (metric == polaris::MetricType::METRIC_Linf) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -352,7 +352,7 @@ void bfKnnOnDevice(
                     LinfDistance(),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_Canberra) {
+        } else if (metric == polaris::MetricType::METRIC_Canberra) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -362,7 +362,7 @@ void bfKnnOnDevice(
                     CanberraDistance(),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_BrayCurtis) {
+        } else if (metric == polaris::MetricType::METRIC_BrayCurtis) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -372,7 +372,7 @@ void bfKnnOnDevice(
                     BrayCurtisDistance(),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_JensenShannon) {
+        } else if (metric == polaris::MetricType::METRIC_JensenShannon) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -382,7 +382,7 @@ void bfKnnOnDevice(
                     JensenShannonDistance(),
                     outDistances,
                     outIndices);
-        } else if (metric == faiss::MetricType::METRIC_Jaccard) {
+        } else if (metric == polaris::MetricType::METRIC_Jaccard) {
             runGeneralDistance(
                     resources,
                     stream,
@@ -399,4 +399,4 @@ void bfKnnOnDevice(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

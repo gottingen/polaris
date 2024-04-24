@@ -10,7 +10,7 @@
 #include <polaris/Index.h>
 
 #pragma GCC visibility push(default)
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResourcesProvider;
@@ -34,7 +34,7 @@ struct GpuDistanceParams {
     //
 
     /// Search parameter: distance metric
-    faiss::MetricType metric = METRIC_L2;
+    polaris::MetricType metric = METRIC_L2;
 
     /// Search parameter: distance metric argument (if applicable)
     /// For metric == METRIC_Lp, this is the p-value
@@ -150,7 +150,7 @@ void bfKnn_tiling(
 /// Deprecated legacy implementation
 void bruteForceKnn(
         GpuResourcesProvider* resources,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         // If vectorsRowMajor is true, this is
         // numVectors x dims, with dims innermost; otherwise,
         // dims x numVectors, with numVectors innermost
@@ -173,5 +173,5 @@ void bruteForceKnn(
         idx_t* outIndices);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 #pragma GCC visibility pop

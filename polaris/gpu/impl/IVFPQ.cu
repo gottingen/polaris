@@ -31,14 +31,14 @@
 #include <type_traits>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 IVFPQ::IVFPQ(
         GpuResources* resources,
         int dim,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         int numSubQuantizers,
         int bitsPerSubQuantizer,
@@ -734,4 +734,4 @@ void IVFPQ::runPQNoPrecomputedCodes_(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

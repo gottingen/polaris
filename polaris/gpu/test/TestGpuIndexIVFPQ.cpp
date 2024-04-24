@@ -24,8 +24,8 @@ void pickEncoding(int& codes, int& dim) {
     std::vector<int> dimSizes{4, 8, 10, 12, 16, 20, 24, 28, 32};
 
     while (true) {
-        codes = codeSizes[faiss::gpu::randVal(0, codeSizes.size() - 1)];
-        dim = codes * dimSizes[faiss::gpu::randVal(0, dimSizes.size() - 1)];
+        codes = codeSizes[polaris::gpu::randVal(0, codeSizes.size() - 1)];
+        dim = codes * dimSizes[polaris::gpu::randVal(0, dimSizes.size() - 1)];
 
         // for such a small test, super-low or high dim is more likely to
         // generate comparison errors
@@ -40,8 +40,8 @@ void pickRaftEncoding(int& codes, int& dim, int bitsPerCode) {
     std::vector<int> dimSizes{4, 8, 10, 12, 16, 20, 24, 28, 32};
 
     while (true) {
-        codes = faiss::gpu::randVal(0, 96);
-        dim = codes * dimSizes[faiss::gpu::randVal(0, dimSizes.size() - 1)];
+        codes = polaris::gpu::randVal(0, 96);
+        dim = codes * dimSizes[polaris::gpu::randVal(0, dimSizes.size() - 1)];
 
         // for such a small test, super-low or high dim is more likely to
         // generate comparison errors
@@ -53,36 +53,36 @@ void pickRaftEncoding(int& codes, int& dim, int bitsPerCode) {
 
 struct Options {
     Options() {
-        numAdd = faiss::gpu::randVal(2000, 5000);
+        numAdd = polaris::gpu::randVal(2000, 5000);
         numCentroids = std::sqrt((float)numAdd);
         numTrain = numCentroids * 40;
 
         pickEncoding(codes, dim);
 
-        // TODO: Change back to `faiss::gpu::randVal(3, 7)` when we
+        // TODO: Change back to `polaris::gpu::randVal(3, 7)` when we
         // officially support non-multiple of 8 subcodes for IVFPQ.
         bitsPerCode = 8;
 
-        nprobe = std::min(faiss::gpu::randVal(40, 1000), numCentroids);
-        numQuery = faiss::gpu::randVal(4, 8);
+        nprobe = std::min(polaris::gpu::randVal(40, 1000), numCentroids);
+        numQuery = polaris::gpu::randVal(4, 8);
 
         // Due to the approximate nature of the query and of floating point
         // differences between GPU and CPU, to stay within our error bounds,
         // only use a small k
-        k = std::min(faiss::gpu::randVal(5, 20), numAdd / 40);
-        usePrecomputed = faiss::gpu::randBool();
-        indicesOpt = faiss::gpu::randSelect(
-                {faiss::gpu::INDICES_CPU,
-                 faiss::gpu::INDICES_32_BIT,
-                 faiss::gpu::INDICES_64_BIT});
+        k = std::min(polaris::gpu::randVal(5, 20), numAdd / 40);
+        usePrecomputed = polaris::gpu::randBool();
+        indicesOpt = polaris::gpu::randSelect(
+                {polaris::gpu::INDICES_CPU,
+                 polaris::gpu::INDICES_32_BIT,
+                 polaris::gpu::INDICES_64_BIT});
         if (codes > 48) {
             // large codes can only fit using float16
             useFloat16 = true;
         } else {
-            useFloat16 = faiss::gpu::randBool();
+            useFloat16 = polaris::gpu::randBool();
         }
 
-        device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+        device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
 
         interleavedLayout = false;
         useRaft = false;
@@ -122,24 +122,24 @@ struct Options {
     int numQuery;
     int k;
     bool usePrecomputed;
-    faiss::gpu::IndicesOptions indicesOpt;
+    polaris::gpu::IndicesOptions indicesOpt;
     bool useFloat16;
     int device;
     bool interleavedLayout;
     bool useRaft;
 };
 
-void queryTest(Options opt, faiss::MetricType metricType) {
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+void queryTest(Options opt, polaris::MetricType metricType) {
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::IndexFlatL2 coarseQuantizerL2(opt.dim);
-    faiss::IndexFlatIP coarseQuantizerIP(opt.dim);
-    faiss::Index* quantizer = metricType == faiss::METRIC_L2
-            ? (faiss::Index*)&coarseQuantizerL2
-            : (faiss::Index*)&coarseQuantizerIP;
+    polaris::IndexFlatL2 coarseQuantizerL2(opt.dim);
+    polaris::IndexFlatIP coarseQuantizerIP(opt.dim);
+    polaris::Index* quantizer = metricType == polaris::METRIC_L2
+            ? (polaris::Index*)&coarseQuantizerL2
+            : (polaris::Index*)&coarseQuantizerIP;
 
-    faiss::IndexIVFPQ cpuIndex(
+    polaris::IndexIVFPQ cpuIndex(
             quantizer, opt.dim, opt.numCentroids, opt.codes, opt.bitsPerCode);
     cpuIndex.metric_type = metricType;
     cpuIndex.nprobe = opt.nprobe;
@@ -148,9 +148,9 @@ void queryTest(Options opt, faiss::MetricType metricType) {
 
     // Use the default temporary memory management to test the memory
     // manager
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = opt.device;
     config.usePrecomputedTables = opt.usePrecomputed;
     config.indicesOptions = opt.indicesOpt;
@@ -158,10 +158,10 @@ void queryTest(Options opt, faiss::MetricType metricType) {
     config.interleavedLayout = opt.interleavedLayout;
     config.use_raft = opt.useRaft;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
     gpuIndex.nprobe = opt.nprobe;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             opt.numQuery,
@@ -177,14 +177,14 @@ TEST(TestGpuIndexIVFPQ, Query_L2) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
         opt.usePrecomputed = (tries % 2 == 0);
-        queryTest(opt, faiss::MetricType::METRIC_L2);
+        queryTest(opt, polaris::MetricType::METRIC_L2);
     }
 }
 
 TEST(TestGpuIndexIVFPQ, Query_IP) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
-        queryTest(opt, faiss::MetricType::METRIC_INNER_PRODUCT);
+        queryTest(opt, polaris::MetricType::METRIC_INNER_PRODUCT);
     }
 }
 
@@ -200,11 +200,11 @@ TEST(TestGpuIndexIVFPQ, LargeBatch) {
         opt.usePrecomputed = usePrecomputed;
         opt.useFloat16 = false;
 
-        queryTest(opt, faiss::MetricType::METRIC_L2);
+        queryTest(opt, polaris::MetricType::METRIC_L2);
     }
 }
 
-void testMMCodeDistance(faiss::MetricType mt) {
+void testMMCodeDistance(polaris::MetricType mt) {
     // Explicitly test the code distance via batch matrix multiplication route
     // (even for dimension sizes that would otherwise be handled by the
     // specialized route (via enabling `useMMCodeDistance`)
@@ -212,11 +212,11 @@ void testMMCodeDistance(faiss::MetricType mt) {
         Options opt;
 
         std::vector<float> trainVecs =
-                faiss::gpu::randVecs(opt.numTrain, opt.dim);
-        std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+                polaris::gpu::randVecs(opt.numTrain, opt.dim);
+        std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-        faiss::IndexFlat coarseQuantizer(opt.dim, mt);
-        faiss::IndexIVFPQ cpuIndex(
+        polaris::IndexFlat coarseQuantizer(opt.dim, mt);
+        polaris::IndexIVFPQ cpuIndex(
                 &coarseQuantizer,
                 opt.dim,
                 opt.numCentroids,
@@ -228,9 +228,9 @@ void testMMCodeDistance(faiss::MetricType mt) {
 
         // Use the default temporary memory management to test the memory
         // manager
-        faiss::gpu::StandardGpuResources res;
+        polaris::gpu::StandardGpuResources res;
 
-        faiss::gpu::GpuIndexIVFPQConfig config;
+        polaris::gpu::GpuIndexIVFPQConfig config;
         config.device = opt.device;
         config.usePrecomputedTables = false;
         config.useMMCodeDistance = true;
@@ -241,10 +241,10 @@ void testMMCodeDistance(faiss::MetricType mt) {
         config.useFloat16LookupTables = (tries % 2 == 0);
         config.flatConfig.useFloat16 = (tries % 2 == 1);
 
-        faiss::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
+        polaris::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
         gpuIndex.nprobe = opt.nprobe;
 
-        faiss::gpu::compareIndices(
+        polaris::gpu::compareIndices(
                 cpuIndex,
                 gpuIndex,
                 opt.numQuery,
@@ -264,11 +264,11 @@ void testMMCodeDistance(faiss::MetricType mt) {
         opt.dim = dimPerSubQ * opt.codes;
 
         std::vector<float> trainVecs =
-                faiss::gpu::randVecs(opt.numTrain, opt.dim);
-        std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+                polaris::gpu::randVecs(opt.numTrain, opt.dim);
+        std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-        faiss::IndexFlat coarseQuantizer(opt.dim, mt);
-        faiss::IndexIVFPQ cpuIndex(
+        polaris::IndexFlat coarseQuantizer(opt.dim, mt);
+        polaris::IndexIVFPQ cpuIndex(
                 &coarseQuantizer,
                 opt.dim,
                 opt.numCentroids,
@@ -280,9 +280,9 @@ void testMMCodeDistance(faiss::MetricType mt) {
 
         // Use the default temporary memory management to test the memory
         // manager
-        faiss::gpu::StandardGpuResources res;
+        polaris::gpu::StandardGpuResources res;
 
-        faiss::gpu::GpuIndexIVFPQConfig config;
+        polaris::gpu::GpuIndexIVFPQConfig config;
         config.device = opt.device;
         config.usePrecomputedTables = false;
         config.indicesOptions = opt.indicesOpt;
@@ -291,10 +291,10 @@ void testMMCodeDistance(faiss::MetricType mt) {
         // Make sure that the float16 version works as well
         config.useFloat16LookupTables = (dimPerSubQ == 7);
 
-        faiss::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
+        polaris::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
         gpuIndex.nprobe = opt.nprobe;
 
-        faiss::gpu::compareIndices(
+        polaris::gpu::compareIndices(
                 cpuIndex,
                 gpuIndex,
                 opt.numQuery,
@@ -308,21 +308,21 @@ void testMMCodeDistance(faiss::MetricType mt) {
 }
 
 TEST(TestGpuIndexIVFPQ, Query_L2_MMCodeDistance) {
-    testMMCodeDistance(faiss::MetricType::METRIC_L2);
+    testMMCodeDistance(polaris::MetricType::METRIC_L2);
 }
 
 TEST(TestGpuIndexIVFPQ, Query_IP_MMCodeDistance) {
-    testMMCodeDistance(faiss::MetricType::METRIC_INNER_PRODUCT);
+    testMMCodeDistance(polaris::MetricType::METRIC_INNER_PRODUCT);
 }
 
 TEST(TestGpuIndexIVFPQ, Float16Coarse) {
     Options opt;
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::IndexFlatL2 coarseQuantizer(opt.dim);
-    faiss::IndexIVFPQ cpuIndex(
+    polaris::IndexFlatL2 coarseQuantizer(opt.dim);
+    polaris::IndexIVFPQ cpuIndex(
             &coarseQuantizer,
             opt.dim,
             opt.numCentroids,
@@ -332,9 +332,9 @@ TEST(TestGpuIndexIVFPQ, Float16Coarse) {
     cpuIndex.train(opt.numTrain, trainVecs.data());
 
     // Use the default temporary memory management to test the memory manager
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = opt.device;
     config.flatConfig.useFloat16 = true;
     config.usePrecomputedTables = opt.usePrecomputed;
@@ -342,13 +342,13 @@ TEST(TestGpuIndexIVFPQ, Float16Coarse) {
     config.useFloat16LookupTables = opt.useFloat16;
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
     gpuIndex.nprobe = opt.nprobe;
 
     gpuIndex.add(opt.numAdd, addVecs.data());
     cpuIndex.add(opt.numAdd, addVecs.data());
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             opt.numQuery,
@@ -360,17 +360,17 @@ TEST(TestGpuIndexIVFPQ, Float16Coarse) {
             opt.getPctMaxDiffN());
 }
 
-void addTest(Options opt, faiss::MetricType metricType) {
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+void addTest(Options opt, polaris::MetricType metricType) {
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::IndexFlatL2 coarseQuantizerL2(opt.dim);
-    faiss::IndexFlatIP coarseQuantizerIP(opt.dim);
-    faiss::Index* quantizer = metricType == faiss::METRIC_L2
-            ? (faiss::Index*)&coarseQuantizerL2
-            : (faiss::Index*)&coarseQuantizerIP;
+    polaris::IndexFlatL2 coarseQuantizerL2(opt.dim);
+    polaris::IndexFlatIP coarseQuantizerIP(opt.dim);
+    polaris::Index* quantizer = metricType == polaris::METRIC_L2
+            ? (polaris::Index*)&coarseQuantizerL2
+            : (polaris::Index*)&coarseQuantizerIP;
 
-    faiss::IndexIVFPQ cpuIndex(
+    polaris::IndexIVFPQ cpuIndex(
             quantizer, opt.dim, opt.numCentroids, opt.codes, opt.bitsPerCode);
     cpuIndex.nprobe = opt.nprobe;
     cpuIndex.metric_type = metricType;
@@ -378,9 +378,9 @@ void addTest(Options opt, faiss::MetricType metricType) {
 
     // Use the default temporary memory management to test the memory
     // manager
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = opt.device;
     config.usePrecomputedTables = opt.usePrecomputed;
     config.indicesOptions = opt.indicesOpt;
@@ -388,13 +388,13 @@ void addTest(Options opt, faiss::MetricType metricType) {
     config.interleavedLayout = opt.interleavedLayout;
     config.use_raft = opt.useRaft;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(&res, &cpuIndex, config);
     gpuIndex.nprobe = opt.nprobe;
 
     gpuIndex.add(opt.numAdd, addVecs.data());
     cpuIndex.add(opt.numAdd, addVecs.data());
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             opt.numQuery,
@@ -409,28 +409,28 @@ void addTest(Options opt, faiss::MetricType metricType) {
 TEST(TestGpuIndexIVFPQ, Add_L2) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
-        addTest(opt, faiss::METRIC_L2);
+        addTest(opt, polaris::METRIC_L2);
     }
 }
 
 TEST(TestGpuIndexIVFPQ, Add_IP) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
-        addTest(opt, faiss::METRIC_INNER_PRODUCT);
+        addTest(opt, polaris::METRIC_INNER_PRODUCT);
     }
 }
 
 void copyToTest(Options opt) {
     for (int tries = 0; tries < 2; ++tries) {
         std::vector<float> trainVecs =
-                faiss::gpu::randVecs(opt.numTrain, opt.dim);
-        std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+                polaris::gpu::randVecs(opt.numTrain, opt.dim);
+        std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
         // Use the default temporary memory management to test the memory
         // manager
-        faiss::gpu::StandardGpuResources res;
+        polaris::gpu::StandardGpuResources res;
 
-        faiss::gpu::GpuIndexIVFPQConfig config;
+        polaris::gpu::GpuIndexIVFPQConfig config;
         config.device = opt.device;
         config.usePrecomputedTables = false;
         config.indicesOptions = opt.indicesOpt;
@@ -438,21 +438,21 @@ void copyToTest(Options opt) {
         config.interleavedLayout = opt.interleavedLayout;
         config.use_raft = opt.useRaft;
 
-        faiss::gpu::GpuIndexIVFPQ gpuIndex(
+        polaris::gpu::GpuIndexIVFPQ gpuIndex(
                 &res,
                 opt.dim,
                 opt.numCentroids,
                 opt.codes,
                 opt.bitsPerCode,
-                faiss::METRIC_L2,
+                polaris::METRIC_L2,
                 config);
         gpuIndex.nprobe = opt.nprobe;
         gpuIndex.train(opt.numTrain, trainVecs.data());
         gpuIndex.add(opt.numAdd, addVecs.data());
 
         // Use garbage values to see if we overwrite them
-        faiss::IndexFlatL2 cpuQuantizer(1);
-        faiss::IndexIVFPQ cpuIndex(&cpuQuantizer, 1, 1, 1, 1);
+        polaris::IndexFlatL2 cpuQuantizer(1);
+        polaris::IndexIVFPQ cpuIndex(&cpuQuantizer, 1, 1, 1, 1);
 
         gpuIndex.copyTo(&cpuIndex);
 
@@ -471,7 +471,7 @@ void copyToTest(Options opt) {
         testIVFEquality(cpuIndex, gpuIndex);
 
         // Query both objects; results should be equivalent
-        faiss::gpu::compareIndices(
+        polaris::gpu::compareIndices(
                 cpuIndex,
                 gpuIndex,
                 opt.numQuery,
@@ -490,11 +490,11 @@ TEST(TestGpuIndexIVFPQ, CopyTo) {
 }
 
 void copyFromTest(Options opt) {
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::IndexFlatL2 coarseQuantizer(opt.dim);
-    faiss::IndexIVFPQ cpuIndex(
+    polaris::IndexFlatL2 coarseQuantizer(opt.dim);
+    polaris::IndexIVFPQ cpuIndex(
             &coarseQuantizer,
             opt.dim,
             opt.numCentroids,
@@ -505,9 +505,9 @@ void copyFromTest(Options opt) {
     cpuIndex.add(opt.numAdd, addVecs.data());
 
     // Use the default temporary memory management to test the memory manager
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = opt.device;
     config.usePrecomputedTables = opt.usePrecomputed;
     config.indicesOptions = opt.indicesOpt;
@@ -516,8 +516,8 @@ void copyFromTest(Options opt) {
     config.use_raft = opt.useRaft;
 
     // Use garbage values to see if we overwrite them
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(
-            &res, 1, 1, 1, 8, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(
+            &res, 1, 1, 1, 8, polaris::METRIC_L2, config);
     gpuIndex.nprobe = 1;
 
     gpuIndex.copyFrom(&cpuIndex);
@@ -538,7 +538,7 @@ void copyFromTest(Options opt) {
     testIVFEquality(cpuIndex, gpuIndex);
 
     // Query both objects; results should be equivalent
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             opt.numQuery,
@@ -556,13 +556,13 @@ TEST(TestGpuIndexIVFPQ, CopyFrom) {
 }
 
 void queryNaNTest(Options opt) {
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
     // Use the default temporary memory management to test the memory manager
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = opt.device;
     config.usePrecomputedTables = opt.usePrecomputed;
     config.indicesOptions = opt.indicesOpt;
@@ -570,13 +570,13 @@ void queryNaNTest(Options opt) {
     config.use_raft = opt.useRaft;
     config.interleavedLayout = opt.useRaft ? true : opt.interleavedLayout;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(
             &res,
             opt.dim,
             opt.numCentroids,
             opt.codes,
             opt.bitsPerCode,
-            faiss::METRIC_L2,
+            polaris::METRIC_L2,
             config);
 
     gpuIndex.nprobe = opt.nprobe;
@@ -589,7 +589,7 @@ void queryNaNTest(Options opt) {
             numQuery * opt.dim, std::numeric_limits<float>::quiet_NaN());
 
     std::vector<float> distances(numQuery * opt.k, 0);
-    std::vector<faiss::idx_t> indices(numQuery * opt.k, 0);
+    std::vector<polaris::idx_t> indices(numQuery * opt.k, 0);
 
     gpuIndex.search(
             numQuery, nans.data(), opt.k, distances.data(), indices.data());
@@ -612,9 +612,9 @@ TEST(TestGpuIndexIVFPQ, QueryNaN) {
 
 void addNaNTest(Options opt) {
     // Use the default temporary memory management to test the memory manager
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = opt.device;
     config.usePrecomputedTables = opt.usePrecomputed;
     config.indicesOptions = opt.indicesOpt;
@@ -622,13 +622,13 @@ void addNaNTest(Options opt) {
     config.interleavedLayout = opt.interleavedLayout;
     config.use_raft = opt.useRaft;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(
             &res,
             opt.dim,
             opt.numCentroids,
             opt.codes,
             opt.bitsPerCode,
-            faiss::METRIC_L2,
+            polaris::METRIC_L2,
             config);
 
     gpuIndex.nprobe = opt.nprobe;
@@ -642,16 +642,16 @@ void addNaNTest(Options opt) {
         nans[i] = 0.0f;
     }
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
     gpuIndex.train(opt.numTrain, trainVecs.data());
 
     // should not crash
     EXPECT_EQ(gpuIndex.ntotal, 0);
     gpuIndex.add(numNans, nans.data());
 
-    std::vector<float> queryVecs = faiss::gpu::randVecs(opt.numQuery, opt.dim);
+    std::vector<float> queryVecs = polaris::gpu::randVecs(opt.numQuery, opt.dim);
     std::vector<float> distance(opt.numQuery * opt.k, 0);
-    std::vector<faiss::idx_t> indices(opt.numQuery * opt.k, 0);
+    std::vector<polaris::idx_t> indices(opt.numQuery * opt.k, 0);
 
     // should not crash
     gpuIndex.search(
@@ -672,26 +672,26 @@ TEST(TestGpuIndexIVFPQ, AddNaN) {
 TEST(TestGpuIndexIVFPQ, Query_L2_Raft) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
-        opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+        opt.bitsPerCode = polaris::gpu::randVal(4, 8);
         opt.useRaft = true;
         opt.interleavedLayout = true;
         opt.usePrecomputed = false;
-        opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+        opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
         pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
-        queryTest(opt, faiss::MetricType::METRIC_L2);
+        queryTest(opt, polaris::MetricType::METRIC_L2);
     }
 }
 
 TEST(TestGpuIndexIVFPQ, Query_IP_Raft) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
-        opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+        opt.bitsPerCode = polaris::gpu::randVal(4, 8);
         opt.useRaft = true;
         opt.interleavedLayout = true;
         opt.usePrecomputed = false;
-        opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+        opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
         pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
-        queryTest(opt, faiss::MetricType::METRIC_INNER_PRODUCT);
+        queryTest(opt, polaris::MetricType::METRIC_INNER_PRODUCT);
     }
 }
 
@@ -707,19 +707,19 @@ TEST(TestGpuIndexIVFPQ, LargeBatch_Raft) {
     opt.interleavedLayout = true;
     opt.usePrecomputed = false;
     opt.useFloat16 = false;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
     opt.bitsPerCode = 8;
 
-    queryTest(opt, faiss::MetricType::METRIC_L2);
+    queryTest(opt, polaris::MetricType::METRIC_L2);
 }
 
 TEST(TestGpuIndexIVFPQ, CopyFrom_Raft) {
     Options opt;
     opt.useRaft = true;
     opt.interleavedLayout = true;
-    opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+    opt.bitsPerCode = polaris::gpu::randVal(4, 8);
     opt.usePrecomputed = false;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
     pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
     copyFromTest(opt);
 }
@@ -729,11 +729,11 @@ TEST(TestGpuIndexIVFPQ, Add_L2_Raft) {
         Options opt;
         opt.useRaft = true;
         opt.interleavedLayout = true;
-        opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+        opt.bitsPerCode = polaris::gpu::randVal(4, 8);
         opt.usePrecomputed = false;
-        opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+        opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
         pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
-        addTest(opt, faiss::METRIC_L2);
+        addTest(opt, polaris::METRIC_L2);
     }
 }
 
@@ -742,11 +742,11 @@ TEST(TestGpuIndexIVFPQ, Add_IP_Raft) {
         Options opt;
         opt.useRaft = true;
         opt.interleavedLayout = true;
-        opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+        opt.bitsPerCode = polaris::gpu::randVal(4, 8);
         opt.usePrecomputed = false;
-        opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+        opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
         pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
-        addTest(opt, faiss::METRIC_INNER_PRODUCT);
+        addTest(opt, polaris::METRIC_INNER_PRODUCT);
     }
 }
 
@@ -754,9 +754,9 @@ TEST(TestGpuIndexIVFPQ, QueryNaN_Raft) {
     Options opt;
     opt.useRaft = true;
     opt.interleavedLayout = true;
-    opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+    opt.bitsPerCode = polaris::gpu::randVal(4, 8);
     opt.usePrecomputed = false;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
     pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
     queryNaNTest(opt);
 }
@@ -765,9 +765,9 @@ TEST(TestGpuIndexIVFPQ, AddNaN_Raft) {
     Options opt;
     opt.useRaft = true;
     opt.interleavedLayout = true;
-    opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+    opt.bitsPerCode = polaris::gpu::randVal(4, 8);
     opt.usePrecomputed = false;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
     pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
     addNaNTest(opt);
 }
@@ -776,9 +776,9 @@ TEST(TestGpuIndexIVFPQ, CopyTo_Raft) {
     Options opt;
     opt.useRaft = true;
     opt.interleavedLayout = true;
-    opt.bitsPerCode = faiss::gpu::randVal(4, 8);
+    opt.bitsPerCode = polaris::gpu::randVal(4, 8);
     opt.usePrecomputed = false;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
     pickRaftEncoding(opt.codes, opt.dim, opt.bitsPerCode);
     copyToTest(opt);
 }
@@ -787,9 +787,9 @@ TEST(TestGpuIndexIVFPQ, CopyTo_Raft) {
 TEST(TestGpuIndexIVFPQ, UnifiedMemory) {
     // Construct on a random device to test multi-device, if we have
     // multiple devices
-    int device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+    int device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
 
-    if (!faiss::gpu::getFullUnifiedMemSupport(device)) {
+    if (!polaris::gpu::getFullUnifiedMemSupport(device)) {
         return;
     }
 
@@ -807,37 +807,37 @@ TEST(TestGpuIndexIVFPQ, UnifiedMemory) {
     int codes = 8;
     int bitsPerCode = 8;
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(numTrain, dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(numAdd, dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(numTrain, dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(numAdd, dim);
 
-    faiss::IndexFlatL2 quantizer(dim);
-    faiss::IndexIVFPQ cpuIndex(
+    polaris::IndexFlatL2 quantizer(dim);
+    polaris::IndexIVFPQ cpuIndex(
             &quantizer, dim, numCentroids, codes, bitsPerCode);
 
     cpuIndex.train(numTrain, trainVecs.data());
     cpuIndex.add(numAdd, addVecs.data());
     cpuIndex.nprobe = nprobe;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = device;
-    config.memorySpace = faiss::gpu::MemorySpace::Unified;
+    config.memorySpace = polaris::gpu::MemorySpace::Unified;
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(
             &res,
             dim,
             numCentroids,
             codes,
             bitsPerCode,
-            faiss::METRIC_L2,
+            polaris::METRIC_L2,
             config);
     gpuIndex.copyFrom(&cpuIndex);
     gpuIndex.nprobe = nprobe;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             numQuery,
@@ -851,20 +851,20 @@ TEST(TestGpuIndexIVFPQ, UnifiedMemory) {
 #if defined USE_NVIDIA_RAFT
     config.interleavedLayout = true;
     config.use_raft = true;
-    config.indicesOptions = faiss::gpu::INDICES_64_BIT;
+    config.indicesOptions = polaris::gpu::INDICES_64_BIT;
 
-    faiss::gpu::GpuIndexIVFPQ raftGpuIndex(
+    polaris::gpu::GpuIndexIVFPQ raftGpuIndex(
             &res,
             dim,
             numCentroids,
             codes,
             bitsPerCode,
-            faiss::METRIC_L2,
+            polaris::METRIC_L2,
             config);
     raftGpuIndex.copyFrom(&cpuIndex);
     raftGpuIndex.nprobe = nprobe;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             raftGpuIndex,
             numQuery,
@@ -881,7 +881,7 @@ int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
 
     // just run with a fixed test seed
-    faiss::gpu::setTestSeed(100);
+    polaris::gpu::setTestSeed(100);
 
     return RUN_ALL_TESTS();
 }

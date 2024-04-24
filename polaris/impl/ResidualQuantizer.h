@@ -15,7 +15,7 @@
 
 #include <polaris/utils/approx_topk/mode.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Residual quantizer with variable number of bits per sub-quantizer
  *
@@ -155,4 +155,4 @@ struct ResidualQuantizer : AdditiveQuantizer {
     std::vector<float> cent_norms;
 };
 
-} // namespace faiss
+} // namespace polaris

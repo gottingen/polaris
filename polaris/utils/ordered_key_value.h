@@ -12,7 +12,7 @@
 
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 
 /*******************************************************************
  * C object: uniform handling of min and max heap
@@ -103,4 +103,4 @@ inline uint16_t cmax_nextafter<uint16_t>(uint16_t x) {
     return x + 1;
 }
 
-} // namespace faiss
+} // namespace polaris

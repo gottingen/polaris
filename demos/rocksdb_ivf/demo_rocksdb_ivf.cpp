@@ -12,7 +12,7 @@
 #include <polaris/impl/FaissException.h>
 #include <polaris/utils/random.h>
 
-using namespace faiss;
+using namespace polaris;
 
 int main(int argc, char* argv[]) {
     try {

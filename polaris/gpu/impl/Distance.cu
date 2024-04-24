@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -641,4 +641,4 @@ void runIPDistance(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

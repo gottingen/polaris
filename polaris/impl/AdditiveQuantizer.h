@@ -15,7 +15,7 @@
 #include <polaris/IndexFlat.h>
 #include <polaris/impl/Quantizer.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Abstract structure for additive quantizers
  *
@@ -203,4 +203,4 @@ struct AdditiveQuantizer : Quantizer {
     virtual ~AdditiveQuantizer();
 };
 
-} // namespace faiss
+} // namespace polaris

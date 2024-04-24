@@ -12,7 +12,7 @@
 
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /** partitions the table into 0:q and q:n where all elements above q are >= all
  * elements below q (for C = CMax, for CMin comparisons are reversed)
@@ -71,4 +71,4 @@ struct PartitionStats {
 // global var that collects them all
 FAISS_API extern PartitionStats partition_stats;
 
-} // namespace faiss
+} // namespace polaris

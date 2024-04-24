@@ -29,7 +29,7 @@ DEFINE_int32(iter, 5, "iterations to run");
 DEFINE_bool(k_powers, false, "test k powers of 2 from 1 -> max k");
 
 int main(int argc, char** argv) {
-    using namespace faiss::gpu;
+    using namespace polaris::gpu;
 
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
                 resUse.get(),
                 makeDevAlloc(AllocType::Other, 0),
                 {FLAGS_rows, k});
-        DeviceTensor<faiss::idx_t, 2, true> gpuOutInd(
+        DeviceTensor<polaris::idx_t, 2, true> gpuOutInd(
                 resUse.get(),
                 makeDevAlloc(AllocType::Other, 0),
                 {FLAGS_rows, k});

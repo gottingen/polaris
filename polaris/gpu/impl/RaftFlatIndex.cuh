@@ -29,7 +29,7 @@
 #include <polaris/gpu/utils/DeviceVector.cuh>
 
 #pragma GCC visibility push(default)
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -50,7 +50,7 @@ class RaftFlatIndex : public FlatIndex {
     void query(
             Tensor<float, 2, true>& vecs,
             int k,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             Tensor<float, 2, true>& outDistances,
             Tensor<idx_t, 2, true>& outIndices,
@@ -59,7 +59,7 @@ class RaftFlatIndex : public FlatIndex {
     void query(
             Tensor<half, 2, true>& vecs,
             int k,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             Tensor<float, 2, true>& outDistances,
             Tensor<idx_t, 2, true>& outIndices,
@@ -67,5 +67,5 @@ class RaftFlatIndex : public FlatIndex {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 #pragma GCC visibility pop

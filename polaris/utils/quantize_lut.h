@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace faiss {
+namespace polaris {
 
 /** Functions to quantize PQ floating-point Look Up Tables (LUT) to uint8, and
  * biases to uint16. The accumulation is supposed to take place in uint16.
@@ -99,4 +99,4 @@ float aq_estimate_norm_scale(
 
 } // namespace quantize_lut
 
-} // namespace faiss
+} // namespace polaris

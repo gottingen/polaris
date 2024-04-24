@@ -10,7 +10,7 @@
 #include <polaris/gpu/utils/Pair.cuh>
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -92,4 +92,4 @@ struct Limits<Pair<K, V>> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

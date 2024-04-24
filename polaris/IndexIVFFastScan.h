@@ -9,10 +9,10 @@
 
 #include <memory>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/utils/AlignedTable.h>
 
-namespace faiss {
+namespace polaris {
 
 struct NormTableScaler;
 struct SIMDResultHandlerToFloat;
@@ -245,4 +245,4 @@ struct IVFFastScanStats {
 
 FAISS_API extern IVFFastScanStats IVFFastScan_stats;
 
-} // namespace faiss
+} // namespace polaris

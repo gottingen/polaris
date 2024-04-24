@@ -25,7 +25,7 @@
  * object.
  */
 
-namespace faiss {
+namespace polaris {
 
 struct Index;
 struct IndexBinary;
@@ -79,6 +79,6 @@ void write_ProductQuantizer(const ProductQuantizer* pq, IOWriter* f);
 void write_InvertedLists(const InvertedLists* ils, IOWriter* f);
 InvertedLists* read_InvertedLists(IOReader* reader, int io_flags = 0);
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

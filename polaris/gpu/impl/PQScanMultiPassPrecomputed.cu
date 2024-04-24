@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // A basic implementation that works for the interleaved by vector layout for
@@ -720,4 +720,4 @@ void runPQScanMultiPassPrecomputed(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

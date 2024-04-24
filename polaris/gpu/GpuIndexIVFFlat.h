@@ -12,11 +12,11 @@
 
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 struct IndexIVFFlat;
 }
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class IVFFlat;
@@ -29,14 +29,14 @@ struct GpuIndexIVFFlatConfig : public GpuIndexIVFConfig {
 };
 
 /// Wrapper around the GPU implementation that looks like
-/// faiss::IndexIVFFlat
+/// polaris::IndexIVFFlat
 class GpuIndexIVFFlat : public GpuIndexIVF {
    public:
-    /// Construct from a pre-existing faiss::IndexIVFFlat instance, copying
+    /// Construct from a pre-existing polaris::IndexIVFFlat instance, copying
     /// data over to the given GPU, if the input index is trained.
     GpuIndexIVFFlat(
             GpuResourcesProvider* provider,
-            const faiss::IndexIVFFlat* index,
+            const polaris::IndexIVFFlat* index,
             GpuIndexIVFFlatConfig config = GpuIndexIVFFlatConfig());
 
     /// Constructs a new instance with an empty flat quantizer; the user
@@ -45,7 +45,7 @@ class GpuIndexIVFFlat : public GpuIndexIVF {
             GpuResourcesProvider* provider,
             int dims,
             idx_t nlist,
-            faiss::MetricType metric = faiss::METRIC_L2,
+            polaris::MetricType metric = polaris::METRIC_L2,
             GpuIndexIVFFlatConfig config = GpuIndexIVFFlatConfig());
 
     /// Constructs a new instance with a provided CPU or GPU coarse quantizer;
@@ -55,7 +55,7 @@ class GpuIndexIVFFlat : public GpuIndexIVF {
             Index* coarseQuantizer,
             int dims,
             idx_t nlist,
-            faiss::MetricType metric = faiss::METRIC_L2,
+            polaris::MetricType metric = polaris::METRIC_L2,
             GpuIndexIVFFlatConfig config = GpuIndexIVFFlatConfig());
 
     ~GpuIndexIVFFlat() override;
@@ -65,11 +65,11 @@ class GpuIndexIVFFlat : public GpuIndexIVF {
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(const faiss::IndexIVFFlat* index);
+    void copyFrom(const polaris::IndexIVFFlat* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexIVFFlat* index) const;
+    void copyTo(polaris::IndexIVFFlat* index) const;
 
     /// After adding vectors, one can call this to reclaim device memory
     /// to exactly the amount needed. Returns space reclaimed in bytes
@@ -93,11 +93,11 @@ class GpuIndexIVFFlat : public GpuIndexIVF {
             GpuResources* resources,
             int dim,
             int nlist,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             bool useResidual,
             /// Optional ScalarQuantizer
-            faiss::ScalarQuantizer* scalarQ,
+            polaris::ScalarQuantizer* scalarQ,
             bool interleavedLayout,
             IndicesOptions indicesOptions,
             MemorySpace space);
@@ -114,4 +114,4 @@ class GpuIndexIVFFlat : public GpuIndexIVF {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

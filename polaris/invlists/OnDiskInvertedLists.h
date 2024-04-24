@@ -14,11 +14,11 @@
 #include <typeinfo>
 #include <vector>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/index_io.h>
 #include <polaris/invlists/InvertedListsIOHook.h>
 
-namespace faiss {
+namespace polaris {
 
 struct LockLevels;
 
@@ -150,6 +150,6 @@ struct OnDiskInvertedListsIOHook : InvertedListsIOHook {
             const std::vector<size_t>& sizes) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

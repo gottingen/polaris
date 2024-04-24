@@ -18,7 +18,7 @@
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/utils.h>
 
-namespace faiss {
+namespace polaris {
 
 namespace lsq {
 
@@ -245,4 +245,4 @@ struct LSQTimerScope {
 
 } // namespace lsq
 
-} // namespace faiss
+} // namespace polaris

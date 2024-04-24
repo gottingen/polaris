@@ -12,7 +12,7 @@
 #include <polaris/utils/distances.h>
 #include <type_traits>
 
-namespace faiss {
+namespace polaris {
 
 template <MetricType mt>
 struct VectorDistance {
@@ -130,4 +130,4 @@ inline float VectorDistance<METRIC_Jaccard>::operator()(
     return accu_num / accu_den;
 }
 
-} // namespace faiss
+} // namespace polaris

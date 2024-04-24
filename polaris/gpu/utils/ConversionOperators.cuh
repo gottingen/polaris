@@ -15,7 +15,7 @@
 #include <thrust/execution_policy.h>
 #include <thrust/transform.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 //
@@ -154,4 +154,4 @@ DeviceTensor<To, Dim, true> convertTensorNonTemporary(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

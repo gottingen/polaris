@@ -60,7 +60,7 @@ TEST(ONDISK, make_invlists) {
 
     Tempfilename filename;
 
-    faiss::OnDiskInvertedLists ivf(nlist, code_size, filename.c_str());
+    polaris::OnDiskInvertedLists ivf(nlist, code_size, filename.c_str());
 
     {
         std::vector<uint8_t> code(32);
@@ -80,10 +80,10 @@ TEST(ONDISK, make_invlists) {
     int ntot = 0;
     for (int i = 0; i < nlist; i++) {
         int size = ivf.list_size(i);
-        const faiss::idx_t* ids = ivf.get_ids(i);
+        const polaris::idx_t* ids = ivf.get_ids(i);
         const uint8_t* codes = ivf.get_codes(i);
         for (int j = 0; j < size; j++) {
-            faiss::idx_t id = ids[j];
+            polaris::idx_t id = ids[j];
             const int* ar = (const int*)&codes[code_size * j];
             EXPECT_EQ(ar[0], id);
             EXPECT_EQ(ar[1], i);
@@ -97,23 +97,23 @@ TEST(ONDISK, make_invlists) {
 TEST(ONDISK, test_add) {
     int d = 8;
     int nlist = 30, nq = 200, nb = 1500, k = 10;
-    faiss::IndexFlatL2 quantizer(d);
+    polaris::IndexFlatL2 quantizer(d);
     {
         std::vector<float> x(d * nlist);
-        faiss::float_rand(x.data(), d * nlist, 12345);
+        polaris::float_rand(x.data(), d * nlist, 12345);
         quantizer.add(nlist, x.data());
     }
     std::vector<float> xb(d * nb);
-    faiss::float_rand(xb.data(), d * nb, 23456);
+    polaris::float_rand(xb.data(), d * nb, 23456);
 
-    faiss::IndexIVFFlat index(&quantizer, d, nlist);
+    polaris::IndexIVFFlat index(&quantizer, d, nlist);
     index.add(nb, xb.data());
 
     std::vector<float> xq(d * nb);
-    faiss::float_rand(xq.data(), d * nq, 34567);
+    polaris::float_rand(xq.data(), d * nq, 34567);
 
     std::vector<float> ref_D(nq * k);
-    std::vector<faiss::idx_t> ref_I(nq * k);
+    std::vector<polaris::idx_t> ref_I(nq * k);
 
     index.search(nq, xq.data(), k, ref_D.data(), ref_I.data());
 
@@ -121,9 +121,9 @@ TEST(ONDISK, test_add) {
 
     // test add + search
     {
-        faiss::IndexIVFFlat index2(&quantizer, d, nlist);
+        polaris::IndexIVFFlat index2(&quantizer, d, nlist);
 
-        faiss::OnDiskInvertedLists ivf(
+        polaris::OnDiskInvertedLists ivf(
                 index.nlist, index.code_size, filename.c_str());
 
         index2.replace_invlists(&ivf);
@@ -131,7 +131,7 @@ TEST(ONDISK, test_add) {
         index2.add(nb, xb.data());
 
         std::vector<float> new_D(nq * k);
-        std::vector<faiss::idx_t> new_I(nq * k);
+        std::vector<polaris::idx_t> new_I(nq * k);
 
         index2.search(nq, xq.data(), k, new_D.data(), new_I.data());
 
@@ -143,10 +143,10 @@ TEST(ONDISK, test_add) {
 
     // test io
     {
-        faiss::Index* index3 = faiss::read_index(filename2.c_str());
+        polaris::Index* index3 = polaris::read_index(filename2.c_str());
 
         std::vector<float> new_D(nq * k);
-        std::vector<faiss::idx_t> new_I(nq * k);
+        std::vector<polaris::idx_t> new_I(nq * k);
 
         index3->search(nq, xq.data(), k, new_D.data(), new_I.data());
 
@@ -165,7 +165,7 @@ TEST(ONDISK, make_invlists_threaded) {
 
     Tempfilename filename;
 
-    faiss::OnDiskInvertedLists ivf(nlist, code_size, filename.c_str());
+    polaris::OnDiskInvertedLists ivf(nlist, code_size, filename.c_str());
 
     std::vector<int> list_nos(nadd);
 
@@ -192,10 +192,10 @@ TEST(ONDISK, make_invlists_threaded) {
     int ntot = 0;
     for (int i = 0; i < nlist; i++) {
         int size = ivf.list_size(i);
-        const faiss::idx_t* ids = ivf.get_ids(i);
+        const polaris::idx_t* ids = ivf.get_ids(i);
         const uint8_t* codes = ivf.get_codes(i);
         for (int j = 0; j < size; j++) {
-            faiss::idx_t id = ids[j];
+            polaris::idx_t id = ids[j];
             const int* ar = (const int*)&codes[code_size * j];
             EXPECT_EQ(ar[0], id);
             EXPECT_EQ(ar[1], i);

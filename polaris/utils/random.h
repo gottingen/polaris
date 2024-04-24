@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <random>
 
-namespace faiss {
+namespace polaris {
 
 /**************************************************
  * Random data generation functions
@@ -59,4 +59,4 @@ void rand_perm(int* perm, size_t n, int64_t seed);
  * */
 void rand_smooth_vectors(size_t n, size_t d, float* x, int64_t seed);
 
-} // namespace faiss
+} // namespace polaris

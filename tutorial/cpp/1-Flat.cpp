@@ -12,7 +12,7 @@
 #include <polaris/IndexFlat.h>
 
 // 64-bit int
-using idx_t = faiss::idx_t;
+using idx_t = polaris::idx_t;
 
 int main() {
     int d = 64;      // dimension
@@ -37,7 +37,7 @@ int main() {
         xq[d * i] += i / 1000.;
     }
 
-    faiss::IndexFlatL2 index(d); // call constructor
+    polaris::IndexFlatL2 index(d); // call constructor
     printf("is_trained = %s\n", index.is_trained ? "true" : "false");
     index.add(nb, xb); // add vectors to the index
     printf("ntotal = %zd\n", index.ntotal);

@@ -13,7 +13,7 @@
 
 #include <algorithm>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 ///< A helper structure to support multi-GPU
@@ -117,4 +117,4 @@ lsq::IcmEncoder* GpuIcmEncoderFactory::get(const LocalSearchQuantizer* lsq) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

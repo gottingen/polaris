@@ -8,7 +8,7 @@
 #include <polaris/gpu/impl/RemapIndices.h>
 #include <polaris/impl/FaissAssert.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Utility function to translate (list id, offset) to a user index on
@@ -44,4 +44,4 @@ void ivfOffsetToUserIndex(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -12,7 +12,7 @@
 
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /// The metric space for vector comparison for Faiss indices and algorithms.
 ///
@@ -24,7 +24,7 @@ enum MetricType {
     METRIC_L2 = 1,            ///< squared L2 search
     METRIC_L1,                ///< L1 (aka cityblock)
     METRIC_Linf,              ///< infinity distance
-    METRIC_Lp,                ///< L_p distance, p is given by a faiss::Index
+    METRIC_Lp,                ///< L_p distance, p is given by a polaris::Index
                               /// metric_arg
 
     /// some additional metrics defined in scipy.spatial.distance
@@ -45,6 +45,6 @@ constexpr bool is_similarity_metric(MetricType metric_type) {
             (metric_type == METRIC_Jaccard));
 }
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

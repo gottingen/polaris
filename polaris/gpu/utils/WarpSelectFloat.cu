@@ -8,7 +8,7 @@
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <polaris/gpu/utils/warpselect/WarpSelectImpl.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // warp Q to thread Q:
@@ -96,4 +96,4 @@ void runWarpSelect(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

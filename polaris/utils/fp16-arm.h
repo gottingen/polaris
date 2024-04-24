@@ -10,7 +10,7 @@
 #include <arm_neon.h>
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 
 inline uint16_t encode_fp16(float x) {
     float32x4_t fx4 = vdupq_n_f32(x);
@@ -26,4 +26,4 @@ inline float decode_fp16(uint16_t x) {
     return vdups_laneq_f32(fx4, 3);
 }
 
-} // namespace faiss
+} // namespace polaris

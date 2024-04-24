@@ -38,11 +38,11 @@ int main() {
         xq[d * i] += i / 1000.;
     }
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
     // Using a flat index
 
-    faiss::gpu::GpuIndexFlatL2 index_flat(&res, d);
+    polaris::gpu::GpuIndexFlatL2 index_flat(&res, d);
 
     printf("is_trained = %s\n", index_flat.is_trained ? "true" : "false");
     index_flat.add(nb, xb); // add vectors to the index
@@ -78,7 +78,7 @@ int main() {
     // Using an IVF index
 
     int nlist = 100;
-    faiss::gpu::GpuIndexIVFFlat index_ivf(&res, d, nlist, faiss::METRIC_L2);
+    polaris::gpu::GpuIndexIVFFlat index_ivf(&res, d, nlist, polaris::METRIC_L2);
 
     assert(!index_ivf.is_trained);
     index_ivf.train(nb, xb);

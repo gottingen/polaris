@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Input: (batch x dim)
@@ -276,4 +276,4 @@ void runL2Norm(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

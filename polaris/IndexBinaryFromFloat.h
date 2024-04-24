@@ -12,7 +12,7 @@
 
 #include <polaris/IndexBinary.h>
 
-namespace faiss {
+namespace polaris {
 
 struct Index;
 
@@ -49,6 +49,6 @@ struct IndexBinaryFromFloat : IndexBinary {
     void train(idx_t n, const uint8_t* x) override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif // FAISS_INDEX_BINARY_FROM_FLOAT_H

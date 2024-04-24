@@ -19,7 +19,7 @@
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Product Quantizer. Implemented only for METRIC_L2 */
 struct ProductQuantizer : Quantizer {
@@ -238,7 +238,7 @@ struct PQDecoder16 {
     uint64_t decode();
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/impl/ProductQuantizer-inl.h>
 

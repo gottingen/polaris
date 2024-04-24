@@ -15,7 +15,7 @@
 #include <polaris/impl/ProductAdditiveQuantizer.h>
 #include <polaris/utils/AlignedTable.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Fast scan version of IVFAQ. Works for 4-bit AQ for now.
  *
@@ -169,4 +169,4 @@ struct IndexIVFProductResidualQuantizerFastScan
     IndexIVFProductResidualQuantizerFastScan();
 };
 
-} // namespace faiss
+} // namespace polaris

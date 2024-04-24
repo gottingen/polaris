@@ -352,7 +352,7 @@ Certain tests / benchmarks might be outdated.
 * bench_index_pq.py - benchmarks PQ on SIFT1M dataset
 * bench_ivf_fastscan_single_query.py - benchmarks a single query for different nprobe levels for IVF{nlist},PQ{M}x4fs on BIGANN dataset
 * bench_ivf_fastscan.py - compares IVF{nlist},PQ{M}x4fs against other indices on SIFT1M dataset
-* bench_ivf_selector.cpp - checks the possible overhead when using faiss::IDSelectorAll interface
+* bench_ivf_selector.cpp - checks the possible overhead when using polaris::IDSelectorAll interface
 * bench_pairwise_distances.py - benchmarks pairwise distance computation between two synthetic datasets
 * bench_partition.py - benchmarks partitioning functions
 * bench_pq_tables.py - benchmarks ProductQuantizer.compute_inner_prod_tables() and ProductQuantizer.compute_distance_tables() calls

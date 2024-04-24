@@ -12,7 +12,7 @@
 #include <cstring>
 #include <string>
 
-namespace faiss {
+namespace polaris {
 
 struct simd256bit {
     union {
@@ -1042,4 +1042,4 @@ inline void cmplt_min_max_fast(
 
 } // namespace
 
-} // namespace faiss
+} // namespace polaris

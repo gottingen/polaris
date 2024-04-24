@@ -13,7 +13,7 @@
 #include <polaris/gpu/utils/PtxUtils.cuh>
 #include <polaris/gpu/utils/WarpShuffles.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 //
@@ -547,4 +547,4 @@ inline __device__ void warpSortAnyRegisters(K k[N], V v[N]) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

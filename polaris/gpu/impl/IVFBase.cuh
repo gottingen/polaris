@@ -15,11 +15,11 @@
 #include <memory>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 struct InvertedLists;
 }
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -31,7 +31,7 @@ class IVFBase {
     IVFBase(GpuResources* resources,
             int dim,
             idx_t nlist,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             bool interleavedLayout,
             bool useResidual,
@@ -194,7 +194,7 @@ class IVFBase {
     GpuResources* resources_;
 
     /// Metric type of the index
-    faiss::MetricType metric_;
+    polaris::MetricType metric_;
 
     /// Metric arg
     float metricArg_;
@@ -268,4 +268,4 @@ class IVFBase {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -33,7 +33,7 @@
 
 #define RAFT_NAME "raft"
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 using namespace raft::distance;
@@ -49,7 +49,7 @@ RaftFlatIndex::RaftFlatIndex(
 void RaftFlatIndex::query(
         Tensor<float, 2, true>& input,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         Tensor<float, 2, true>& outDistances,
         Tensor<idx_t, 2, true>& outIndices,
@@ -123,7 +123,7 @@ void RaftFlatIndex::query(
 void RaftFlatIndex::query(
         Tensor<half, 2, true>& vecs,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         Tensor<float, 2, true>& outDistances,
         Tensor<idx_t, 2, true>& outIndices,
@@ -142,4 +142,4 @@ void RaftFlatIndex::query(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

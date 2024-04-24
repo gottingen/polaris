@@ -10,20 +10,20 @@
 #include <polaris/AutoTune.h>
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// parameter space and setters for GPU indexes
-struct GpuParameterSpace : faiss::ParameterSpace {
+struct GpuParameterSpace : polaris::ParameterSpace {
     /// initialize with reasonable parameters for the index
-    void initialize(const faiss::Index* index) override;
+    void initialize(const polaris::Index* index) override;
 
     /// set a combination of parameters on an index
     void set_index_parameter(
-            faiss::Index* index,
+            polaris::Index* index,
             const std::string& name,
             double val) const override;
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

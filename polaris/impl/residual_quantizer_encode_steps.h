@@ -13,7 +13,7 @@
 #include <polaris/Index.h>
 #include <polaris/utils/approx_topk/mode.h>
 
-namespace faiss {
+namespace polaris {
 
 /********************************************************************
  * Single step of encoding
@@ -173,4 +173,4 @@ void compute_codes_add_centroids_mp_lut1(
 
 } // namespace rq_encode_steps
 
-} // namespace faiss
+} // namespace polaris

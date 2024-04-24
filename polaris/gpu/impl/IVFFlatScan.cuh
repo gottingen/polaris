@@ -14,7 +14,7 @@
 #include <polaris/gpu/utils/DeviceVector.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -28,7 +28,7 @@ void runIVFFlatScan(
         DeviceVector<idx_t>& listLengths,
         idx_t maxListLength,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         bool useResidual,
         Tensor<float, 3, true>& residualBase,
         GpuScalarQuantizer* scalarQ,
@@ -39,4 +39,4 @@ void runIVFFlatScan(
         GpuResources* res);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

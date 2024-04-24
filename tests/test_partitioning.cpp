@@ -10,7 +10,7 @@
 #include <polaris/utils/AlignedTable.h>
 #include <polaris/utils/partitioning.h>
 
-using namespace faiss;
+using namespace polaris;
 
 typedef AlignedTable<uint16_t> AlignedTableUint16;
 

@@ -14,7 +14,7 @@
 #include <polaris/gpu/utils/Tensor.cuh>
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -381,4 +381,4 @@ void runBatchMatrixMult(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

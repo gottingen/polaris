@@ -14,10 +14,10 @@
  * IndexIVFs embedded within an IndexPreTransform.
  */
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 struct IndexIVFResidualQuantizer;
 struct IndexResidualQuantizer;
@@ -168,6 +168,6 @@ void ivf_residual_add_from_flat_codes(
         int64_t code_size = -1);
 
 } // namespace ivflib
-} // namespace faiss
+} // namespace polaris
 
 #endif

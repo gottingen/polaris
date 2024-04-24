@@ -81,7 +81,7 @@ void test(
 #pragma omp parallel for schedule(guided)
         for (size_t i = 0; i < n; i++) {
             resultsRef[i] =
-                    faiss::distance_single_code_generic<faiss::PQDecoder8>(
+                    polaris::distance_single_code_generic<polaris::PQDecoder8>(
                             subq, 8, lookup.data(), codes.data() + subq * i);
         }
     }
@@ -95,7 +95,7 @@ void test(
 #pragma omp parallel for schedule(guided)
             for (size_t i = 0; i < n; i++) {
                 resultsNewGeneric1x[i] =
-                        faiss::distance_single_code_generic<faiss::PQDecoder8>(
+                        polaris::distance_single_code_generic<polaris::PQDecoder8>(
                                 subq,
                                 8,
                                 lookup.data(),
@@ -117,7 +117,7 @@ void test(
         for (size_t k = 0; k < 1000; k++) {
 #pragma omp parallel for schedule(guided)
             for (size_t i = 0; i < n; i += 4) {
-                faiss::distance_four_codes_generic<faiss::PQDecoder8>(
+                polaris::distance_four_codes_generic<polaris::PQDecoder8>(
                         subq,
                         8,
                         lookup.data(),
@@ -148,7 +148,7 @@ void test(
 #pragma omp parallel for schedule(guided)
             for (size_t i = 0; i < n; i++) {
                 resultsNewCustom1x[i] =
-                        faiss::distance_single_code<faiss::PQDecoder8>(
+                        polaris::distance_single_code<polaris::PQDecoder8>(
                                 subq,
                                 8,
                                 lookup.data(),
@@ -170,7 +170,7 @@ void test(
         for (size_t k = 0; k < 1000; k++) {
 #pragma omp parallel for schedule(guided)
             for (size_t i = 0; i < n; i += 4) {
-                faiss::distance_four_codes<faiss::PQDecoder8>(
+                polaris::distance_four_codes<polaris::PQDecoder8>(
                         subq,
                         8,
                         lookup.data(),

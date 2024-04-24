@@ -19,7 +19,7 @@
 #include <polaris/impl/ResidualQuantizer.h>
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /// Abstract class for additive quantizers. The search functions are in common.
 struct IndexAdditiveQuantizer : IndexFlatCodes {
@@ -257,6 +257,6 @@ struct LocalSearchCoarseQuantizer : AdditiveCoarseQuantizer {
     LocalSearchCoarseQuantizer();
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

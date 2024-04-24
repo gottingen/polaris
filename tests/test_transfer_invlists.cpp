@@ -31,9 +31,9 @@ size_t nt = 500;
 int k = 10;
 int nlist = 40;
 
-using namespace faiss;
+using namespace polaris;
 
-typedef faiss::idx_t idx_t;
+typedef polaris::idx_t idx_t;
 
 std::vector<float> get_data(size_t nb, int seed) {
     std::vector<float> x(nb * d);

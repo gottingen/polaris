@@ -16,7 +16,7 @@
 #include <polaris/Index.h>
 #include <polaris/IndexBinary.h>
 
-namespace faiss {
+namespace polaris {
 
 /**
  * Evaluation criterion. Returns a performance measure in [0,1],
@@ -207,6 +207,6 @@ struct ParameterSpace {
     virtual ~ParameterSpace() {}
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

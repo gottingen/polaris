@@ -7,10 +7,10 @@
 
 #include <polaris/gpu/utils/blockselect/BlockSelectImpl.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 BLOCK_SELECT_IMPL(float, false, 1024, 8);
 
 }
-} // namespace faiss
+} // namespace polaris

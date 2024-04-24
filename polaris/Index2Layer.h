@@ -12,11 +12,11 @@
 #include <vector>
 
 #include <polaris/IndexFlatCodes.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/IndexPQ.h>
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 struct IndexIVFPQ;
 
@@ -73,4 +73,4 @@ struct Index2Layer : IndexFlatCodes {
 // block size used in Index2Layer::sa_encode
 FAISS_API extern int index2layer_sa_encode_bs;
 
-} // namespace faiss
+} // namespace polaris

@@ -12,6 +12,6 @@
 #include <polaris/gpu/GpuIndex.h>
 #include "macros_impl.h"
 
-using faiss::gpu::GpuIndexConfig;
+using polaris::gpu::GpuIndexConfig;
 
 DEFINE_GETTER(GpuIndexConfig, int, device)

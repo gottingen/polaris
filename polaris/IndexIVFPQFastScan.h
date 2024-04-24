@@ -14,7 +14,7 @@
 #include <polaris/impl/ProductQuantizer.h>
 #include <polaris/utils/AlignedTable.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Fast scan version of IVFPQ. Works for 4-bit PQ for now.
  *
@@ -84,4 +84,4 @@ struct IndexIVFPQFastScan : IndexIVFFastScan {
     void sa_decode(idx_t n, const uint8_t* bytes, float* x) const override;
 };
 
-} // namespace faiss
+} // namespace polaris

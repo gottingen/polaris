@@ -13,7 +13,7 @@
 
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /** Class for the clustering parameters. Can be passed to the
  * constructor of the Clustering object.
@@ -95,7 +95,7 @@ struct Clustering : ClusteringParameters {
     virtual void train(
             idx_t n,
             const float* x,
-            faiss::Index& index,
+            polaris::Index& index,
             const float* x_weights = nullptr);
 
     /** run with encoded vectors
@@ -199,6 +199,6 @@ float kmeans_clustering(
         const float* x,
         float* centroids);
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

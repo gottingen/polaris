@@ -12,7 +12,7 @@
 #include <polaris/Index.h>
 #include <polaris/VectorTransform.h>
 
-namespace faiss {
+namespace polaris {
 
 struct SearchParametersPreTransform : SearchParameters {
     // nothing to add here.
@@ -99,4 +99,4 @@ struct IndexPreTransform : Index {
     ~IndexPreTransform() override;
 };
 
-} // namespace faiss
+} // namespace polaris

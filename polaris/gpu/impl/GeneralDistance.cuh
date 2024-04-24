@@ -27,7 +27,7 @@
 // Kernels for non-L2 / inner product distances
 //
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Reduction tree operator
@@ -451,4 +451,4 @@ void runGeneralDistance(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

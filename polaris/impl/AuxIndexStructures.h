@@ -21,7 +21,7 @@
 #include <polaris/MetricType.h>
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /** The objective is to have a simple result structure while
  *  minimizing the number of mem copies in the result. The method
@@ -189,6 +189,6 @@ struct VisitedTable {
     }
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

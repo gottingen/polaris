@@ -22,7 +22,7 @@ cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
 
 set(FAISS_LANGUAGES CXX)
 
-if(FAISS_ENABLE_GPU)
+if(POLARIS_ENABLE_GPU)
   list(APPEND FAISS_LANGUAGES CUDA)
 endif()
 
@@ -52,12 +52,12 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # Valid values are "generic", "avx2", "avx512".
 option(FAISS_OPT_LEVEL "" "generic")
-option(FAISS_ENABLE_GPU "Enable support for GPU indexes." OFF)
+option(POLARIS_ENABLE_GPU "Enable support for GPU indexes." OFF)
 option(FAISS_ENABLE_RAFT "Enable RAFT for GPU indexes." OFF)
 option(FAISS_ENABLE_PYTHON "Build Python extension." OFF)
-option(FAISS_ENABLE_C_API "Build C API." OFF)
+option(POLARIS_ENABLE_C_API "Build C API." ON)
 
-if(FAISS_ENABLE_GPU)
+if(POLARIS_ENABLE_GPU)
   set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
   enable_language(CUDA)
 endif()
@@ -68,7 +68,7 @@ if(FAISS_ENABLE_RAFT AND NOT TARGET raft::raft)
 
 add_subdirectory(polaris)
 
-if(FAISS_ENABLE_GPU)
+if(POLARIS_ENABLE_GPU)
   add_subdirectory(polaris/gpu)
 endif()
 
@@ -76,7 +76,7 @@ if(FAISS_ENABLE_PYTHON)
   add_subdirectory(polaris/python)
 endif()
 
-if(FAISS_ENABLE_C_API)
+if(POLARIS_ENABLE_C_API)
   add_subdirectory(c_api)
 endif()
 
@@ -89,7 +89,7 @@ include(CTest)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 
-  if(FAISS_ENABLE_GPU)
+  if(POLARIS_ENABLE_GPU)
     add_subdirectory(polaris/gpu/test)
   endif()
 endif()

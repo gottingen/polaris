@@ -9,7 +9,7 @@
 
 #include <cuda.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // We require at least CUDA 8.0 for compilation
@@ -40,4 +40,4 @@ __forceinline__ __device__ void warpFence() {
 #endif
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

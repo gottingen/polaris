@@ -14,7 +14,7 @@
 #include <polaris/gpu/utils/ReductionOperators.cuh>
 #include <polaris/gpu/utils/WarpShuffles.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T, typename Op, int ReduceWidth = kWarpSize>
@@ -144,4 +144,4 @@ __device__ inline void blockReduceAllSum(T vals[Num], T* smem) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

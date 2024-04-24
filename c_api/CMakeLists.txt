@@ -5,55 +5,55 @@
 
 cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
 
-project(faiss_c_library LANGUAGES C CXX)
+project(polaris_c_library LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 
-set(FAISS_C_SRC
-  AutoTune_c.cpp
-  Clustering_c.cpp
-  IndexFlat_c.cpp
-  IndexIVFFlat_c.cpp
-  IndexIVF_c.cpp
-  IndexLSH_c.cpp
-  IndexPreTransform_c.cpp
-  VectorTransform_c.cpp
-  IndexShards_c.cpp
-  IndexReplicas_c.cpp
-  Index_c.cpp
-  IndexBinary_c.cpp
-  IndexScalarQuantizer_c.cpp
-  MetaIndexes_c.cpp
-  clone_index_c.cpp
-  error_impl.cpp
-  index_factory_c.cpp
-  index_io_c.cpp
-  impl/AuxIndexStructures_c.cpp
-  utils/distances_c.cpp
+set(POLARIS_C_SRC
+  AutoTune_c.cc
+  Clustering_c.cc
+  IndexFlat_c.cc
+  IndexIVFFlat_c.cc
+  IndexIVF_c.cc
+  IndexLSH_c.cc
+  IndexPreTransform_c.cc
+  VectorTransform_c.cc
+  IndexShards_c.cc
+  IndexReplicas_c.cc
+  Index_c.cc
+  IndexBinary_c.cc
+  IndexScalarQuantizer_c.cc
+  MetaIndexes_c.cc
+  clone_index_c.cc
+  error_impl.cc
+  index_factory_c.cc
+  index_io_c.cc
+  impl/AuxIndexStructures_c.cc
+  utils/distances_c.cc
 )
-add_library(faiss_c ${FAISS_C_SRC})
-target_link_libraries(faiss_c PRIVATE faiss)
+add_library(polaris_c ${POLARIS_C_SRC})
+target_link_libraries(polaris_c PRIVATE polaris)
 
-function(faiss_install_headers headers p)
+function(polaris_install_headers headers p)
   foreach(h ${headers})
     get_filename_component(f ${h} DIRECTORY)
     install(FILES ${h}
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/faiss/${p}/${f}
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/polaris/${p}/${f}
     )
   endforeach()
 endfunction()
 
-file(GLOB FAISS_C_API_HEADERS
+file(GLOB POLARIS_C_API_HEADERS
      RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
      "*.h"
      "impl/*.h"
      "utils/*.h")
 
-faiss_install_headers("${FAISS_C_API_HEADERS}" c_api)
+polaris_install_headers("${POLARIS_C_API_HEADERS}" c_api)
 
 add_executable(example_c EXCLUDE_FROM_ALL example_c.c)
-target_link_libraries(example_c PRIVATE faiss_c)
+target_link_libraries(example_c PRIVATE polaris_c)
 
-if(FAISS_ENABLE_GPU)
+if(POLARIS_ENABLE_GPU)
   add_subdirectory(gpu)
 endif()

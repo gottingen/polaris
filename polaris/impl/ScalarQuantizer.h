@@ -13,7 +13,7 @@
 #include <polaris/impl/DistanceComputer.h>
 #include <polaris/impl/Quantizer.h>
 
-namespace faiss {
+namespace polaris {
 
 struct InvertedListScanner;
 
@@ -117,4 +117,4 @@ struct ScalarQuantizer : Quantizer {
             bool by_residual = false) const;
 };
 
-} // namespace faiss
+} // namespace polaris

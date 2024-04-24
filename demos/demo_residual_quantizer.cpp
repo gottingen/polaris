@@ -29,15 +29,15 @@ int main() {
     /******************************************
      * Generate a test dataset
      ******************************************/
-    using idx_t = faiss::idx_t;
+    using idx_t = polaris::idx_t;
     size_t d = 128;
     size_t nt = 10000;
     size_t nb = 10000;
     size_t nq = 100;
-    double t0 = faiss::getmillisecs();
+    double t0 = polaris::getmillisecs();
 
     auto tic = [t0]() {
-        printf("[%.3f s] ", (faiss::getmillisecs() - t0) / 1000);
+        printf("[%.3f s] ", (polaris::getmillisecs() - t0) / 1000);
     };
 
     tic();
@@ -48,7 +48,7 @@ int main() {
            nt);
 
     std::vector<float> buf(d * (nq + nt + nb));
-    faiss::rand_smooth_vectors(nq + nt + nb, d, buf.data(), 1234);
+    polaris::rand_smooth_vectors(nq + nt + nb, d, buf.data(), 1234);
     const float* xt = buf.data();
     const float* xb = buf.data() + nt * d;
     const float* xq = buf.data() + (nt + nb) * d;
@@ -58,13 +58,13 @@ int main() {
     std::vector<float> unused(k * nq);
     tic();
     printf("compute ground truth, k=%zd\n", k);
-    faiss::knn_L2sqr(xq, xb, d, nq, nb, k, unused.data(), gt.data());
+    polaris::knn_L2sqr(xq, xb, d, nq, nb, k, unused.data(), gt.data());
 
     // a function to compute the accuracy
     auto accuracy = [&](const idx_t* I) {
         idx_t accu = 0;
         for (idx_t q = 0; q < nq; q++) {
-            accu += faiss::ranklist_intersection_size(
+            accu += polaris::ranklist_intersection_size(
                     k, gt.data() + q * k, k, I + q * k);
         }
         return double(accu) / (k * nq);
@@ -74,8 +74,8 @@ int main() {
      * Prepare the residual quantizer
      ******************************************/
 
-    faiss::ResidualQuantizer rq(
-            d, 7, 6, faiss::AdditiveQuantizer::ST_norm_qint8);
+    polaris::ResidualQuantizer rq(
+            d, 7, 6, polaris::AdditiveQuantizer::ST_norm_qint8);
     // do cheap an inaccurate training
     rq.cp.niter = 5;
     rq.max_beam_size = 5;
@@ -95,8 +95,8 @@ int main() {
      * Verify that a distance computer gives the same distances
      ****************************************************************/
     {
-        faiss::IndexResidualQuantizer index(
-                rq.d, rq.nbits, faiss::METRIC_L2, rq.search_type);
+        polaris::IndexResidualQuantizer index(
+                rq.d, rq.nbits, polaris::METRIC_L2, rq.search_type);
 
         // override trained index
         index.rq = rq;
@@ -115,7 +115,7 @@ int main() {
 
         tic();
         printf("Accuracy (intersection @ %zd): %.3f\n", k, accuracy(I.data()));
-        std::unique_ptr<faiss::FlatCodesDistanceComputer> dc(
+        std::unique_ptr<polaris::FlatCodesDistanceComputer> dc(
                 index.get_FlatCodesDistanceComputer());
 
         float max_diff12 = 0, max_diff13 = 0;
@@ -158,7 +158,7 @@ int main() {
         // build a coarse quantizer from the 2 first levels of the RQ
         std::vector<size_t> nbits(2);
         std::copy(rq.nbits.begin(), rq.nbits.begin() + 2, nbits.begin());
-        faiss::ResidualCoarseQuantizer rcq(rq.d, nbits);
+        polaris::ResidualCoarseQuantizer rcq(rq.d, nbits);
 
         // set the coarse quantizer from the 2 first quantizers
         rcq.rq.initialize_from(rq);
@@ -174,8 +174,8 @@ int main() {
         printf("RCQ nlist = %zd tot_bits=%zd\n", nlist, rcq.rq.tot_bits);
 
         // build a IVFResidualQuantizer from that
-        faiss::IndexIVFResidualQuantizer index(
-                &rcq, rcq.d, nlist, rq.nbits, faiss::METRIC_L2, rq.search_type);
+        polaris::IndexIVFResidualQuantizer index(
+                &rcq, rcq.d, nlist, rq.nbits, polaris::METRIC_L2, rq.search_type);
         index.by_residual = false;
         index.rq = rq;
         index.is_trained = true;
@@ -195,7 +195,7 @@ int main() {
             } else if (filled_with == "manual") {
                 // compute inverted lists and add elements manually
                 // fill in the inverted index manually
-                faiss::InvertedLists& invlists = *index.invlists;
+                polaris::InvertedLists& invlists = *index.invlists;
 
                 // assign vectors to inverted lists
                 std::vector<idx_t> listnos(nb);
@@ -212,12 +212,12 @@ int main() {
             } else if (filled_with == "derived") {
                 // Since we have the raw codes precomputed, their prefix is the
                 // inverted list index, so let's use that.
-                faiss::InvertedLists& invlists = *index.invlists;
+                polaris::InvertedLists& invlists = *index.invlists;
 
                 // populate inverted lists
                 for (idx_t i = 0; i < nb; i++) {
                     const uint8_t* code = &raw_codes[i * code_size];
-                    faiss::BitstringReader rd(code, code_size);
+                    polaris::BitstringReader rd(code, code_size);
                     idx_t list_no =
                             rd.read(rcq.rq.tot_bits); // read the list number
                     invlists.add_entry(list_no, i, code);
@@ -254,8 +254,8 @@ int main() {
         // build a coarse quantizer from the 2 first levels of the RQ
         int nlevel = 2;
 
-        std::unique_ptr<faiss::IndexIVFResidualQuantizer> index(
-                faiss::ivflib::ivf_residual_from_quantizer(rq, nlevel));
+        std::unique_ptr<polaris::IndexIVFResidualQuantizer> index(
+                polaris::ivflib::ivf_residual_from_quantizer(rq, nlevel));
 
         // there are 2 ways of filling up the index...
         for (std::string filled_with : {"add", "derived"}) {
@@ -270,7 +270,7 @@ int main() {
                 // standard add method
                 index->add(nb, xb);
             } else if (filled_with == "derived") {
-                faiss::ivflib::ivf_residual_add_from_flat_codes(
+                polaris::ivflib::ivf_residual_add_from_flat_codes(
                         index.get(), nb, raw_codes.data(), rq.code_size);
             }
 

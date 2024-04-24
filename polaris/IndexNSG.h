@@ -18,7 +18,7 @@
 #include <polaris/impl/NSG.h>
 #include <polaris/utils/utils.h>
 
-namespace faiss {
+namespace polaris {
 
 /** The NSG index is a normal random-access index with a NSG
  * link structure built on top */
@@ -106,4 +106,4 @@ struct IndexNSGSQ : IndexNSG {
             MetricType metric = METRIC_L2);
 };
 
-} // namespace faiss
+} // namespace polaris

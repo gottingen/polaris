@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 
 template <typename SubIndexT>
@@ -464,4 +464,4 @@ struct IndexMinMaxDecoder {
 };
 
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris

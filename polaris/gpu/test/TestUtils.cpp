@@ -15,7 +15,7 @@
 #include <sstream>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 inline float relativeError(float a, float b) {
@@ -56,7 +56,7 @@ bool randBool() {
 std::vector<float> randVecs(size_t num, size_t dim) {
     std::vector<float> v(num * dim);
 
-    faiss::float_rand(v.data(), v.size(), s_seed);
+    polaris::float_rand(v.data(), v.size(), s_seed);
     // unfortunately we generate separate sets of vectors, and don't
     // want the same values
     ++s_seed;
@@ -67,7 +67,7 @@ std::vector<float> randVecs(size_t num, size_t dim) {
 std::vector<unsigned char> randBinaryVecs(size_t num, size_t dim) {
     std::vector<unsigned char> v(num * (dim / 8));
 
-    faiss::byte_rand(v.data(), v.size(), s_seed);
+    polaris::byte_rand(v.data(), v.size(), s_seed);
     // unfortunately we generate separate sets of vectors, and don't
     // want the same values
     ++s_seed;
@@ -86,8 +86,8 @@ std::vector<float> roundToHalf(const std::vector<float>& v) {
 
 void compareIndices(
         const std::vector<float>& queryVecs,
-        faiss::Index& refIndex,
-        faiss::Index& testIndex,
+        polaris::Index& refIndex,
+        polaris::Index& testIndex,
         int numQuery,
         int /*dim*/,
         int k,
@@ -97,7 +97,7 @@ void compareIndices(
         float pctMaxDiffN) {
     // Compare
     std::vector<float> refDistance(numQuery * k, 0);
-    std::vector<faiss::idx_t> refIndices(numQuery * k, -1);
+    std::vector<polaris::idx_t> refIndices(numQuery * k, -1);
     refIndex.search(
             numQuery,
             queryVecs.data(),
@@ -106,7 +106,7 @@ void compareIndices(
             refIndices.data());
 
     std::vector<float> testDistance(numQuery * k, 0);
-    std::vector<faiss::idx_t> testIndices(numQuery * k, -1);
+    std::vector<polaris::idx_t> testIndices(numQuery * k, -1);
     testIndex.search(
             numQuery,
             queryVecs.data(),
@@ -114,7 +114,7 @@ void compareIndices(
             testDistance.data(),
             testIndices.data());
 
-    faiss::gpu::compareLists(
+    polaris::gpu::compareLists(
             refDistance.data(),
             refIndices.data(),
             testDistance.data(),
@@ -131,8 +131,8 @@ void compareIndices(
 }
 
 void compareIndices(
-        faiss::Index& refIndex,
-        faiss::Index& testIndex,
+        polaris::Index& refIndex,
+        polaris::Index& testIndex,
         int numQuery,
         int dim,
         int k,
@@ -140,7 +140,7 @@ void compareIndices(
         float maxRelativeError,
         float pctMaxDiff1,
         float pctMaxDiffN) {
-    auto queryVecs = faiss::gpu::randVecs(numQuery, dim);
+    auto queryVecs = polaris::gpu::randVecs(numQuery, dim);
 
     compareIndices(
             queryVecs,
@@ -162,9 +162,9 @@ inline T lookup(const T* p, int i, int j, int /*dim1*/, int dim2) {
 
 void compareLists(
         const float* refDist,
-        const faiss::idx_t* refInd,
+        const polaris::idx_t* refInd,
         const float* testDist,
-        const faiss::idx_t* testInd,
+        const polaris::idx_t* testInd,
         int dim1,
         int dim2,
         const std::string& configMsg,
@@ -181,10 +181,10 @@ void compareLists(
     int numResults = dim1 * dim2;
 
     // query -> {index -> result position}
-    std::vector<std::unordered_map<faiss::idx_t, int>> refIndexMap;
+    std::vector<std::unordered_map<polaris::idx_t, int>> refIndexMap;
 
     for (int query = 0; query < dim1; ++query) {
-        std::unordered_map<faiss::idx_t, int> indices;
+        std::unordered_map<polaris::idx_t, int> indices;
 
         for (int result = 0; result < dim2; ++result) {
             indices[lookup(refInd, query, result, dim1, dim2)] = result;
@@ -208,7 +208,7 @@ void compareLists(
 
     for (int query = 0; query < dim1; ++query) {
         std::vector<int> diffs;
-        std::set<faiss::idx_t> uniqueIndices;
+        std::set<polaris::idx_t> uniqueIndices;
 
         auto& indices = refIndexMap[query];
 
@@ -360,4 +360,4 @@ void compareLists(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

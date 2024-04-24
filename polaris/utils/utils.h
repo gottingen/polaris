@@ -24,7 +24,7 @@
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 /****************************************************************************
  * Get compile specific variables
@@ -200,6 +200,6 @@ struct CodeSet {
     void insert(size_t n, const uint8_t* codes, bool* inserted);
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif /* FAISS_utils_h */

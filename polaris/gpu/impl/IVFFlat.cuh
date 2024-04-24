@@ -10,7 +10,7 @@
 #include <polaris/gpu/impl/GpuScalarQuantizer.cuh>
 #include <polaris/gpu/impl/IVFBase.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class IVFFlat : public IVFBase {
@@ -18,11 +18,11 @@ class IVFFlat : public IVFBase {
     IVFFlat(GpuResources* resources,
             int dim,
             idx_t nlist,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             bool useResidual,
             /// Optional ScalarQuantizer
-            faiss::ScalarQuantizer* scalarQ,
+            polaris::ScalarQuantizer* scalarQ,
             bool interleavedLayout,
             IndicesOptions indicesOptions,
             MemorySpace space);
@@ -100,4 +100,4 @@ class IVFFlat : public IVFBase {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

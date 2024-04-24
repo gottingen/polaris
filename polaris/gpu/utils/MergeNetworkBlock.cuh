@@ -15,7 +15,7 @@
 #include <polaris/gpu/utils/PtxUtils.cuh>
 #include <polaris/gpu/utils/WarpShuffles.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Merge pairs of lists smaller than blockDim.x (NumThreads)
@@ -318,4 +318,4 @@ inline __device__ void blockMerge(K* listK, V* listV) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -10,7 +10,7 @@
 #include <polaris/gpu/impl/BinaryDistance.cuh>
 #include <polaris/gpu/impl/BinaryFlatIndex.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 constexpr int kBitsPerByte = 8;
@@ -88,4 +88,4 @@ void BinaryFlatIndex::reset() {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

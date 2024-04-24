@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 
 // non-intrinsic FP16 <-> FP32 code adapted from
 // https://github.com/ispc/ispc/blob/master/stdlib.ispc
@@ -105,4 +105,4 @@ inline float decode_fp16(uint16_t h) {
     return floatbits(((exp == shifted_exp) ? infnan_val : reg_val) | sign_bit);
 }
 
-} // namespace faiss
+} // namespace polaris

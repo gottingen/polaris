@@ -19,7 +19,7 @@
 /// Originally from Facebook's fbcunn, since added to the Torch GPU
 /// library cutorch as well.
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Our tensor type
@@ -694,6 +694,6 @@ Tensor<T, Dim, InnerContig, IndexT, PtrTraits>::operator[](IndexT index) const {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/gpu/utils/Tensor-inl.cuh>

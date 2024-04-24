@@ -32,18 +32,18 @@
 #include <vector>
 
 void evaluate_bfknn(
-        faiss::gpu::GpuDistanceParams& args,
-        faiss::gpu::GpuResourcesProvider* res,
+        polaris::gpu::GpuDistanceParams& args,
+        polaris::gpu::GpuResourcesProvider* res,
         std::vector<float>& cpuDistance,
-        std::vector<faiss::idx_t>& cpuIndices,
+        std::vector<polaris::idx_t>& cpuIndices,
         std::vector<float>& gpuDistance,
-        std::vector<faiss::idx_t>& gpuIndices,
+        std::vector<polaris::idx_t>& gpuIndices,
         int numQuery,
         int k,
         bool colMajorVecs,
         bool colMajorQueries,
-        faiss::MetricType metric) {
-    using namespace faiss::gpu;
+        polaris::MetricType metric) {
+    using namespace polaris::gpu;
 
     bfKnn(res, args);
 
@@ -71,10 +71,10 @@ void evaluate_bfknn(
 void testTransposition(
         bool colMajorVecs,
         bool colMajorQueries,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         bool use_raft = false,
         float metricArg = 0) {
-    using namespace faiss::gpu;
+    using namespace polaris::gpu;
 
     int device = randVal(0, getNumDevices() - 1);
 
@@ -90,8 +90,8 @@ void testTransposition(
     std::vector<float> vecs = randVecs(numVecs, dim);
     std::vector<float> queries = randVecs(numQuery, dim);
 
-    if ((metric == faiss::MetricType::METRIC_JensenShannon) ||
-        (metric == faiss::MetricType::METRIC_Jaccard)) {
+    if ((metric == polaris::MetricType::METRIC_JensenShannon) ||
+        (metric == polaris::MetricType::METRIC_Jaccard)) {
         // make values positive
         for (auto& v : vecs) {
             v = std::abs(v);
@@ -109,12 +109,12 @@ void testTransposition(
     }
 
     // The CPU index is our reference for the results
-    faiss::IndexFlat cpuIndex(dim, metric);
+    polaris::IndexFlat cpuIndex(dim, metric);
     cpuIndex.metric_arg = metricArg;
     cpuIndex.add(numVecs, vecs.data());
 
     std::vector<float> cpuDistance(numQuery * k, 0);
-    std::vector<faiss::idx_t> cpuIndices(numQuery * k, -1);
+    std::vector<polaris::idx_t> cpuIndices(numQuery * k, -1);
 
     cpuIndex.search(
             numQuery, queries.data(), k, cpuDistance.data(), cpuIndices.data());
@@ -151,7 +151,7 @@ void testTransposition(
     runTransposeAny(gpuQueries, 0, 1, queriesT, stream);
 
     std::vector<float> gpuDistance(numQuery * k, 0);
-    std::vector<faiss::idx_t> gpuIndices(numQuery * k, -1);
+    std::vector<polaris::idx_t> gpuIndices(numQuery * k, -1);
 
     GpuDistanceParams args;
     args.metric = metric;
@@ -192,146 +192,146 @@ void testTransposition(
 
 // Test different memory layouts for brute-force k-NN
 TEST(TestGpuDistance, Transposition_RR) {
-    testTransposition(false, false, faiss::MetricType::METRIC_L2);
-    testTransposition(false, false, faiss::MetricType::METRIC_INNER_PRODUCT);
+    testTransposition(false, false, polaris::MetricType::METRIC_L2);
+    testTransposition(false, false, polaris::MetricType::METRIC_INNER_PRODUCT);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, Transposition_RR) {
-    testTransposition(false, false, faiss::MetricType::METRIC_L2, true);
+    testTransposition(false, false, polaris::MetricType::METRIC_L2, true);
     testTransposition(
-            false, false, faiss::MetricType::METRIC_INNER_PRODUCT, true);
+            false, false, polaris::MetricType::METRIC_INNER_PRODUCT, true);
 }
 #endif
 
 TEST(TestGpuDistance, Transposition_RC) {
-    testTransposition(false, true, faiss::MetricType::METRIC_L2);
+    testTransposition(false, true, polaris::MetricType::METRIC_L2);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, Transposition_RC) {
-    testTransposition(false, true, faiss::MetricType::METRIC_L2, true);
+    testTransposition(false, true, polaris::MetricType::METRIC_L2, true);
 }
 #endif
 
 TEST(TestGpuDistance, Transposition_CR) {
-    testTransposition(true, false, faiss::MetricType::METRIC_L2);
+    testTransposition(true, false, polaris::MetricType::METRIC_L2);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, Transposition_CR) {
-    testTransposition(true, false, faiss::MetricType::METRIC_L2, true);
+    testTransposition(true, false, polaris::MetricType::METRIC_L2, true);
 }
 #endif
 
 TEST(TestGpuDistance, Transposition_CC) {
-    testTransposition(true, true, faiss::MetricType::METRIC_L2);
+    testTransposition(true, true, polaris::MetricType::METRIC_L2);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, Transposition_CC) {
-    testTransposition(true, true, faiss::MetricType::METRIC_L2, true);
+    testTransposition(true, true, polaris::MetricType::METRIC_L2, true);
 }
 #endif
 
 TEST(TestGpuDistance, L1) {
-    testTransposition(false, false, faiss::MetricType::METRIC_L1);
+    testTransposition(false, false, polaris::MetricType::METRIC_L1);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, L1) {
-    testTransposition(false, false, faiss::MetricType::METRIC_L1, true);
+    testTransposition(false, false, polaris::MetricType::METRIC_L1, true);
 }
 #endif
 
 // Test other transpositions with the general distance kernel
 TEST(TestGpuDistance, L1_RC) {
-    testTransposition(false, true, faiss::MetricType::METRIC_L1);
+    testTransposition(false, true, polaris::MetricType::METRIC_L1);
 }
 
 #if defined USE_NVIDIA_RAFT
 // Test other transpositions with the general distance kernel
 TEST(TestRaftGpuDistance, L1_RC) {
-    testTransposition(false, true, faiss::MetricType::METRIC_L1, true);
+    testTransposition(false, true, polaris::MetricType::METRIC_L1, true);
 }
 #endif
 
 TEST(TestGpuDistance, L1_CR) {
-    testTransposition(true, false, faiss::MetricType::METRIC_L1);
+    testTransposition(true, false, polaris::MetricType::METRIC_L1);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, L1_CR) {
-    testTransposition(true, false, faiss::MetricType::METRIC_L1, true);
+    testTransposition(true, false, polaris::MetricType::METRIC_L1, true);
 }
 #endif
 
 TEST(TestGpuDistance, L1_CC) {
-    testTransposition(true, true, faiss::MetricType::METRIC_L1);
+    testTransposition(true, true, polaris::MetricType::METRIC_L1);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, L1_CC) {
-    testTransposition(true, true, faiss::MetricType::METRIC_L1, true);
+    testTransposition(true, true, polaris::MetricType::METRIC_L1, true);
 }
 #endif
 
 // Test remainder of metric types
 TEST(TestGpuDistance, Linf) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Linf);
+    testTransposition(false, false, polaris::MetricType::METRIC_Linf);
 }
 
 #if defined USE_NVIDIA_RAFT
 // Test remainder of metric types
 TEST(TestRaftGpuDistance, Linf) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Linf, true);
+    testTransposition(false, false, polaris::MetricType::METRIC_Linf, true);
 }
 #endif
 
 TEST(TestGpuDistance, Lp) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Lp, false, 3);
+    testTransposition(false, false, polaris::MetricType::METRIC_Lp, false, 3);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, Lp) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Lp, true, 3);
+    testTransposition(false, false, polaris::MetricType::METRIC_Lp, true, 3);
 }
 #endif
 
 TEST(TestGpuDistance, Canberra) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Canberra);
+    testTransposition(false, false, polaris::MetricType::METRIC_Canberra);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, Canberra) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Canberra, true);
+    testTransposition(false, false, polaris::MetricType::METRIC_Canberra, true);
 }
 #endif
 
 TEST(TestGpuDistance, BrayCurtis) {
-    testTransposition(false, false, faiss::MetricType::METRIC_BrayCurtis);
+    testTransposition(false, false, polaris::MetricType::METRIC_BrayCurtis);
 }
 
 TEST(TestGpuDistance, JensenShannon) {
-    testTransposition(false, false, faiss::MetricType::METRIC_JensenShannon);
+    testTransposition(false, false, polaris::MetricType::METRIC_JensenShannon);
 }
 
 #if defined USE_NVIDIA_RAFT
 TEST(TestRaftGpuDistance, JensenShannon) {
     testTransposition(
-            false, false, faiss::MetricType::METRIC_JensenShannon, true);
+            false, false, polaris::MetricType::METRIC_JensenShannon, true);
 }
 #endif
 
 TEST(TestGpuDistance, Jaccard) {
-    testTransposition(false, false, faiss::MetricType::METRIC_Jaccard);
+    testTransposition(false, false, polaris::MetricType::METRIC_Jaccard);
 }
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
 
     // just run with a fixed test seed
-    faiss::gpu::setTestSeed(100);
+    polaris::gpu::setTestSeed(100);
 
     return RUN_ALL_TESTS();
 }

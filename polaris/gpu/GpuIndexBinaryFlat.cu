@@ -14,7 +14,7 @@
 #include <polaris/gpu/utils/ConversionOperators.cuh>
 #include <polaris/gpu/utils/CopyUtils.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Default CPU search size for which we use paged copies
@@ -22,7 +22,7 @@ constexpr size_t kMinPageSize = (size_t)256 * 1024 * 1024;
 
 GpuIndexBinaryFlat::GpuIndexBinaryFlat(
         GpuResourcesProvider* provider,
-        const faiss::IndexBinaryFlat* index,
+        const polaris::IndexBinaryFlat* index,
         GpuIndexBinaryFlatConfig config)
         : IndexBinary(index->d),
           resources_(provider->getResources()),
@@ -71,7 +71,7 @@ std::shared_ptr<GpuResources> GpuIndexBinaryFlat::getResources() {
     return resources_;
 }
 
-void GpuIndexBinaryFlat::copyFrom(const faiss::IndexBinaryFlat* index) {
+void GpuIndexBinaryFlat::copyFrom(const polaris::IndexBinaryFlat* index) {
     DeviceScope scope(binaryFlatConfig_.device);
 
     this->d = index->d;
@@ -92,7 +92,7 @@ void GpuIndexBinaryFlat::copyFrom(const faiss::IndexBinaryFlat* index) {
     }
 }
 
-void GpuIndexBinaryFlat::copyTo(faiss::IndexBinaryFlat* index) const {
+void GpuIndexBinaryFlat::copyTo(polaris::IndexBinaryFlat* index) const {
     DeviceScope scope(binaryFlatConfig_.device);
 
     index->d = this->d;
@@ -137,7 +137,7 @@ void GpuIndexBinaryFlat::search(
         const uint8_t* x,
         idx_t k,
         int32_t* distances,
-        faiss::idx_t* labels,
+        polaris::idx_t* labels,
         const SearchParameters* params) const {
     DeviceScope scope(binaryFlatConfig_.device);
     auto stream = resources_->getDefaultStream(binaryFlatConfig_.device);
@@ -246,7 +246,7 @@ void GpuIndexBinaryFlat::searchFromCpuPaged_(
     }
 }
 
-void GpuIndexBinaryFlat::reconstruct(faiss::idx_t key, uint8_t* out) const {
+void GpuIndexBinaryFlat::reconstruct(polaris::idx_t key, uint8_t* out) const {
     DeviceScope scope(binaryFlatConfig_.device);
 
     FAISS_THROW_IF_NOT_MSG(key < this->ntotal, "index out of bounds");
@@ -259,4 +259,4 @@ void GpuIndexBinaryFlat::reconstruct(faiss::idx_t key, uint8_t* out) const {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

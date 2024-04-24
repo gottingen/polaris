@@ -21,7 +21,7 @@
 #define FAISS_VERSION_PATCH 0
 
 /**
- * @namespace faiss
+ * @namespace polaris
  *
  * Throughout the library, vectors are provided as float * pointers.
  * Most algorithms can be optimized when several vectors are processed
@@ -36,7 +36,7 @@
  * an n*d matrix, which implies a row-major storage.
  */
 
-namespace faiss {
+namespace polaris {
 
 /// Forward declarations see impl/AuxIndexStructures.h, impl/IDSelector.h and
 /// impl/DistanceComputer.h
@@ -294,6 +294,6 @@ struct Index {
     virtual void check_compatible_for_merge(const Index& otherIndex) const;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

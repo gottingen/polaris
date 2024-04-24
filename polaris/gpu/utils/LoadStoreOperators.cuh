@@ -20,7 +20,7 @@
 // over half and float, and on vector types transparently
 //
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -98,4 +98,4 @@ struct LoadStore<Half8> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

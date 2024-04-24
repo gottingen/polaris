@@ -7,11 +7,11 @@
 
 #include <polaris/gpu/utils/warpselect/WarpSelectImpl.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 WARP_SELECT_IMPL(float, true, 32, 2);
 WARP_SELECT_IMPL(float, false, 32, 2);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

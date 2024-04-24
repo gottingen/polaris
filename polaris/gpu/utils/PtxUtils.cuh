@@ -9,7 +9,7 @@
 
 #include <cuda.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // defines to simplify the SASS assembly structure file/line in the profiler
@@ -89,4 +89,4 @@ __device__ __forceinline__ void namedBarrierArrived(int name, int numThreads) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

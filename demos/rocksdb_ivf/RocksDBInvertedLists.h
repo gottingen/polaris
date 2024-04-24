@@ -8,14 +8,14 @@
 
 namespace faiss_rocksdb {
 
-struct RocksDBInvertedListsIterator : faiss::InvertedListsIterator {
+struct RocksDBInvertedListsIterator : polaris::InvertedListsIterator {
     RocksDBInvertedListsIterator(
             rocksdb::DB* db,
             size_t list_no,
             size_t code_size);
     virtual bool is_available() const override;
     virtual void next() override;
-    virtual std::pair<faiss::idx_t, const uint8_t*> get_id_and_codes() override;
+    virtual std::pair<polaris::idx_t, const uint8_t*> get_id_and_codes() override;
 
    private:
     std::unique_ptr<rocksdb::Iterator> it;
@@ -24,7 +24,7 @@ struct RocksDBInvertedListsIterator : faiss::InvertedListsIterator {
     std::vector<uint8_t> codes; // buffer for returning codes in next()
 };
 
-struct RocksDBInvertedLists : faiss::InvertedLists {
+struct RocksDBInvertedLists : polaris::InvertedLists {
     RocksDBInvertedLists(
             const char* db_directory,
             size_t nlist,
@@ -32,24 +32,24 @@ struct RocksDBInvertedLists : faiss::InvertedLists {
 
     size_t list_size(size_t list_no) const override;
     const uint8_t* get_codes(size_t list_no) const override;
-    const faiss::idx_t* get_ids(size_t list_no) const override;
+    const polaris::idx_t* get_ids(size_t list_no) const override;
 
     size_t add_entries(
             size_t list_no,
             size_t n_entry,
-            const faiss::idx_t* ids,
+            const polaris::idx_t* ids,
             const uint8_t* code) override;
 
     void update_entries(
             size_t list_no,
             size_t offset,
             size_t n_entry,
-            const faiss::idx_t* ids,
+            const polaris::idx_t* ids,
             const uint8_t* code) override;
 
     void resize(size_t list_no, size_t new_size) override;
 
-    faiss::InvertedListsIterator* get_iterator(size_t list_no) const override;
+    polaris::InvertedListsIterator* get_iterator(size_t list_no) const override;
 
    private:
     std::unique_ptr<rocksdb::DB> db_;

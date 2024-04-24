@@ -18,7 +18,7 @@
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 struct RangeSearchResult;
 
@@ -123,6 +123,6 @@ struct IndexBinaryMultiHash : IndexBinary {
     size_t hashtable_size() const;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

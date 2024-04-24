@@ -19,7 +19,7 @@
 
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Any transformation applied on a set of vectors */
 struct VectorTransform {
@@ -308,6 +308,6 @@ struct CenteringTransform : VectorTransform {
     void check_identical(const VectorTransform& other) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

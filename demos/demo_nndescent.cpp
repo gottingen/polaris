@@ -26,7 +26,7 @@ int main(void) {
     std::mt19937 rng(12345);
 
     // make the index object and train it
-    faiss::IndexNNDescentFlat index(d, K, faiss::METRIC_L2);
+    polaris::IndexNNDescentFlat index(d, K, polaris::METRIC_L2);
     index.nndescent.S = 10;
     index.nndescent.R = 32;
     index.nndescent.L = K;
@@ -34,7 +34,7 @@ int main(void) {
     index.verbose = true;
 
     // generate labels by IndexFlat
-    faiss::IndexFlat bruteforce(d, faiss::METRIC_L2);
+    polaris::IndexFlat bruteforce(d, polaris::METRIC_L2);
 
     std::vector<float> database(nb * d);
     for (size_t i = 0; i < nb * d; i++) {
@@ -58,8 +58,8 @@ int main(void) {
         }
 
         int k = 5;
-        std::vector<faiss::idx_t> nns(k * nq);
-        std::vector<faiss::idx_t> gt_nns(k * nq);
+        std::vector<polaris::idx_t> nns(k * nq);
+        std::vector<polaris::idx_t> gt_nns(k * nq);
         std::vector<float> dis(k * nq);
 
         auto start = high_resolution_clock::now();

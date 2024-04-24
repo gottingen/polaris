@@ -15,7 +15,7 @@
 /// Returns the number of available GPU devices
 int faiss_get_num_gpus(int* p_output) {
     try {
-        int output = faiss::gpu::getNumDevices();
+        int output = polaris::gpu::getNumDevices();
         *p_output = output;
     }
     CATCH_AND_HANDLE
@@ -24,7 +24,7 @@ int faiss_get_num_gpus(int* p_output) {
 /// Starts the CUDA profiler (exposed via SWIG)
 int faiss_gpu_profiler_start() {
     try {
-        faiss::gpu::profilerStart();
+        polaris::gpu::profilerStart();
     }
     CATCH_AND_HANDLE
 }
@@ -32,7 +32,7 @@ int faiss_gpu_profiler_start() {
 /// Stops the CUDA profiler (exposed via SWIG)
 int faiss_gpu_profiler_stop() {
     try {
-        faiss::gpu::profilerStop();
+        polaris::gpu::profilerStop();
     }
     CATCH_AND_HANDLE
 }
@@ -41,7 +41,7 @@ int faiss_gpu_profiler_stop() {
 /// cudaDeviceSynchronize for each device)
 int faiss_gpu_sync_all_devices() {
     try {
-        faiss::gpu::synchronizeAllDevices();
+        polaris::gpu::synchronizeAllDevices();
     }
     CATCH_AND_HANDLE
 }

@@ -12,12 +12,12 @@
 
 #include <vector>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/IndexPQ.h>
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/AlignedTable.h>
 
-namespace faiss {
+namespace polaris {
 
 struct IVFPQSearchParameters : IVFSearchParameters {
     size_t scan_table_threshold; ///< use table computation or on-the-fly?
@@ -185,6 +185,6 @@ struct IndexIVFPQStats {
 // global var that collects them all
 FAISS_API extern IndexIVFPQStats indexIVFPQ_stats;
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

@@ -21,7 +21,7 @@
 
 #ifdef NDEBUG
 #define CATCH_AND_HANDLE                                                      \
-    catch (faiss::FaissException & e) {                                       \
+    catch (polaris::FaissException & e) {                                       \
         faiss_last_exception = std::make_exception_ptr(e);                    \
         return -2;                                                            \
     }                                                                         \
@@ -37,7 +37,7 @@
     return 0;
 #else
 #define CATCH_AND_HANDLE                                                      \
-    catch (faiss::FaissException & e) {                                       \
+    catch (polaris::FaissException & e) {                                       \
         std::cerr << e.what() << '\n';                                        \
         faiss_last_exception = std::make_exception_ptr(e);                    \
         return -2;                                                            \
@@ -59,50 +59,50 @@
 #define DEFINE_GETTER(clazz, ty, name)                             \
     ty faiss_##clazz##_##name(const Faiss##clazz* obj) {           \
         return static_cast<ty>(                                    \
-                reinterpret_cast<const faiss::clazz*>(obj)->name); \
+                reinterpret_cast<const polaris::clazz*>(obj)->name); \
     }
 
 #define DEFINE_GETTER_SUBCLASS(clazz, parent, ty, name)                    \
     ty faiss_##clazz##_##name(const Faiss##clazz* obj) {                   \
         return static_cast<ty>(                                            \
-                reinterpret_cast<const faiss::parent::clazz*>(obj)->name); \
+                reinterpret_cast<const polaris::parent::clazz*>(obj)->name); \
     }
 
 #define DEFINE_GETTER_PERMISSIVE(clazz, ty, name)                      \
     ty faiss_##clazz##_##name(const Faiss##clazz* obj) {               \
-        return (ty)(reinterpret_cast<const faiss::clazz*>(obj)->name); \
+        return (ty)(reinterpret_cast<const polaris::clazz*>(obj)->name); \
     }
 
 #define DEFINE_GETTER_SUBCLASS_PERMISSIVE(clazz, parent, ty, name)             \
     ty faiss_##clazz##_##name(const Faiss##clazz* obj) {                       \
-        return (ty)(reinterpret_cast<const faiss::parent::clazz*>(obj)->name); \
+        return (ty)(reinterpret_cast<const polaris::parent::clazz*>(obj)->name); \
     }
 
 #define DEFINE_SETTER(clazz, ty, name)                           \
     void faiss_##clazz##_set_##name(Faiss##clazz* obj, ty val) { \
-        reinterpret_cast<faiss::clazz*>(obj)->name = val;        \
+        reinterpret_cast<polaris::clazz*>(obj)->name = val;        \
     }
 
 #define DEFINE_SETTER_STATIC(clazz, ty_to, ty_from, name)                     \
     void faiss_##clazz##_set_##name(Faiss##clazz* obj, ty_from val) {         \
-        reinterpret_cast<faiss::clazz*>(obj)->name = static_cast<ty_to>(val); \
+        reinterpret_cast<polaris::clazz*>(obj)->name = static_cast<ty_to>(val); \
     }
 
 #define DEFINE_DESTRUCTOR(clazz)                     \
     void faiss_##clazz##_free(Faiss##clazz* obj) {   \
-        delete reinterpret_cast<faiss::clazz*>(obj); \
+        delete reinterpret_cast<polaris::clazz*>(obj); \
     }
 
 #define DEFINE_INDEX_DOWNCAST(clazz)                                        \
     Faiss##clazz* faiss_##clazz##_cast(FaissIndex* index) {                 \
-        return reinterpret_cast<Faiss##clazz*>(dynamic_cast<faiss::clazz*>( \
-                reinterpret_cast<faiss::Index*>(index)));                   \
+        return reinterpret_cast<Faiss##clazz*>(dynamic_cast<polaris::clazz*>( \
+                reinterpret_cast<polaris::Index*>(index)));                   \
     }
 
 #define DEFINE_SEARCH_PARAMETERS_DOWNCAST(clazz)                            \
     Faiss##clazz* faiss_##clazz##_cast(FaissSearchParameters* sp) {         \
-        return reinterpret_cast<Faiss##clazz*>(dynamic_cast<faiss::clazz*>( \
-                reinterpret_cast<faiss::SearchParameters*>(sp)));           \
+        return reinterpret_cast<Faiss##clazz*>(dynamic_cast<polaris::clazz*>( \
+                reinterpret_cast<polaris::SearchParameters*>(sp)));           \
     }
 
 #endif

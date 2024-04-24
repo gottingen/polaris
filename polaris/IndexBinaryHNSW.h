@@ -13,7 +13,7 @@
 #include <polaris/impl/HNSW.h>
 #include <polaris/utils/utils.h>
 
-namespace faiss {
+namespace polaris {
 
 /** The HNSW index is a normal random-access index with a HNSW
  * link structure built on top */
@@ -55,4 +55,4 @@ struct IndexBinaryHNSW : IndexBinary {
     void reset() override;
 };
 
-} // namespace faiss
+} // namespace polaris

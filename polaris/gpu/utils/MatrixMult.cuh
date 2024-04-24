@@ -13,7 +13,7 @@
 #include <polaris/gpu/utils/HostTensor.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -50,6 +50,6 @@ void runIteratedMatrixMult(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/gpu/utils/MatrixMult-inl.cuh>

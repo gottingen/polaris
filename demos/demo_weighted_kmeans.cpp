@@ -32,7 +32,7 @@ float weighted_kmeans_clustering(
         const float* weights,
         float* centroids,
         WeightedKMeansType index_num) {
-    using namespace faiss;
+    using namespace polaris;
     Clustering clus(d, k);
     clus.verbose = true;
 
@@ -87,12 +87,12 @@ void generate_trainset(
     // same sampling as test_build_blocks.py test_weighted
 
     ccent.resize(d * 2 * nc);
-    faiss::float_randn(ccent.data(), d * 2 * nc, 123);
-    faiss::fvec_renorm_L2(d, 2 * nc, ccent.data());
+    polaris::float_randn(ccent.data(), d * 2 * nc, 123);
+    polaris::fvec_renorm_L2(d, 2 * nc, ccent.data());
     n = nc * n_big + nc * n_small;
     x.resize(d * n);
     weights.resize(n);
-    faiss::float_randn(x.data(), x.size(), 1234);
+    polaris::float_randn(x.data(), x.size(), 1234);
 
     float* xi = x.data();
     float* w = weights.data();
@@ -153,10 +153,10 @@ int main(int argc, char** argv) {
                     (WeightedKMeansType)index_num);
 
             { // compute distance of points to centroids
-                faiss::IndexFlatL2 cent_index(d);
+                polaris::IndexFlatL2 cent_index(d);
                 cent_index.add(nc, centroids.data());
                 std::vector<float> dis(n);
-                std::vector<faiss::idx_t> idx(n);
+                std::vector<polaris::idx_t> idx(n);
 
                 cent_index.search(
                         nc * 2, ccent.data(), 1, dis.data(), idx.data());

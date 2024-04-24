@@ -13,7 +13,7 @@
 #include <polaris/gpu/utils/DeviceVector.cuh>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Append user indices to IVF lists
@@ -81,4 +81,4 @@ void runIVFFlatInterleavedAppend(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

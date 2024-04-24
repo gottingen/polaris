@@ -90,7 +90,7 @@ int main() {
     // const char *index_key = "IMI2x8,PQ8+16";
     // const char *index_key = "OPQ16_64,IMI2x8,PQ8+16";
 
-    faiss::Index* index;
+    polaris::Index* index;
 
     size_t d;
 
@@ -104,7 +104,7 @@ int main() {
                elapsed() - t0,
                index_key,
                d);
-        index = faiss::index_factory(d, index_key);
+        index = polaris::index_factory(d, index_key);
 
         printf("[%.3f s] Training on %ld vectors\n", elapsed() - t0, nt);
 
@@ -141,7 +141,7 @@ int main() {
     }
 
     size_t k;         // nb of results per query in the GT
-    faiss::idx_t* gt; // nq * k matrix of ground-truth nearest-neighbors
+    polaris::idx_t* gt; // nq * k matrix of ground-truth nearest-neighbors
 
     {
         printf("[%.3f s] Loading ground truth for %ld queries\n",
@@ -153,7 +153,7 @@ int main() {
         int* gt_int = ivecs_read("sift1M/sift_groundtruth.ivecs", &k, &nq2);
         assert(nq2 == nq || !"incorrect nb of ground truth entries");
 
-        gt = new faiss::idx_t[k * nq];
+        gt = new polaris::idx_t[k * nq];
         for (int i = 0; i < k * nq; i++) {
             gt[i] = gt_int[i];
         }
@@ -171,13 +171,13 @@ int main() {
                k,
                nq);
 
-        faiss::OneRecallAtRCriterion crit(nq, 1);
+        polaris::OneRecallAtRCriterion crit(nq, 1);
         crit.set_groundtruth(k, nullptr, gt);
         crit.nnn = k; // by default, the criterion will request only 1 NN
 
         printf("[%.3f s] Preparing auto-tune parameters\n", elapsed() - t0);
 
-        faiss::ParameterSpace params;
+        polaris::ParameterSpace params;
         params.initialize(index);
 
         printf("[%.3f s] Auto-tuning over %ld parameters (%ld combinations)\n",
@@ -185,7 +185,7 @@ int main() {
                params.parameter_ranges.size(),
                params.n_combinations());
 
-        faiss::OperatingPoints ops;
+        polaris::OperatingPoints ops;
         params.explore(index, nq, xq, crit, &ops);
 
         printf("[%.3f s] Found the following operating points: \n",
@@ -206,7 +206,7 @@ int main() {
 
     { // Use the found configuration to perform a search
 
-        faiss::ParameterSpace params;
+        polaris::ParameterSpace params;
 
         printf("[%.3f s] Setting parameter configuration \"%s\" on index\n",
                elapsed() - t0,
@@ -219,7 +219,7 @@ int main() {
                nq);
 
         // output buffers
-        faiss::idx_t* I = new faiss::idx_t[nq * k];
+        polaris::idx_t* I = new polaris::idx_t[nq * k];
         float* D = new float[nq * k];
 
         index->search(nq, xq, k, D, I);

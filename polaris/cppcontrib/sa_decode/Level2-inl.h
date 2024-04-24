@@ -13,7 +13,7 @@
 
 #include <polaris/cppcontrib/detail/CoarseBitType.h>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -410,5 +410,5 @@ struct Index2LevelDecoder {
 };
 
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris
 #endif // LEVEL2_INL_H

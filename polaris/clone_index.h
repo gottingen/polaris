@@ -11,7 +11,7 @@
 
 #pragma once
 
-namespace faiss {
+namespace polaris {
 
 struct Index;
 struct IndexIVF;
@@ -36,4 +36,4 @@ Quantizer* clone_Quantizer(const Quantizer* quant);
 
 IndexBinary* clone_binary_index(const IndexBinary* index);
 
-} // namespace faiss
+} // namespace polaris

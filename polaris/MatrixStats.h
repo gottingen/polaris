@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /** Reports some statistics on a dataset and comments on them.
  *
@@ -68,4 +68,4 @@ struct MatrixStats {
     void do_comment(const char* fmt, ...);
 };
 
-} // namespace faiss
+} // namespace polaris

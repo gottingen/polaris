@@ -7,7 +7,7 @@
 
 #include <polaris/impl/FaissAssert.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename GpuIndex>
@@ -15,9 +15,9 @@ IndexWrapper<GpuIndex>::IndexWrapper(
         int numGpus,
         std::function<std::unique_ptr<GpuIndex>(GpuResourcesProvider*, int)>
                 init) {
-    FAISS_ASSERT(numGpus <= faiss::gpu::getNumDevices());
+    FAISS_ASSERT(numGpus <= polaris::gpu::getNumDevices());
     for (int i = 0; i < numGpus; ++i) {
-        auto res = std::unique_ptr<faiss::gpu::StandardGpuResources>(
+        auto res = std::unique_ptr<polaris::gpu::StandardGpuResources>(
                 new StandardGpuResources);
 
         subIndex.emplace_back(init(res.get(), i));
@@ -27,7 +27,7 @@ IndexWrapper<GpuIndex>::IndexWrapper(
     if (numGpus > 1) {
         // create proxy
         replicaIndex =
-                std::unique_ptr<faiss::IndexReplicas>(new faiss::IndexReplicas);
+                std::unique_ptr<polaris::IndexReplicas>(new polaris::IndexReplicas);
 
         for (auto& index : subIndex) {
             replicaIndex->addIndex(index.get());
@@ -36,7 +36,7 @@ IndexWrapper<GpuIndex>::IndexWrapper(
 }
 
 template <typename GpuIndex>
-faiss::Index* IndexWrapper<GpuIndex>::getIndex() {
+polaris::Index* IndexWrapper<GpuIndex>::getIndex() {
     if ((bool)replicaIndex) {
         return replicaIndex.get();
     } else {
@@ -48,7 +48,7 @@ faiss::Index* IndexWrapper<GpuIndex>::getIndex() {
 template <typename GpuIndex>
 void IndexWrapper<GpuIndex>::runOnIndices(std::function<void(GpuIndex*)> f) {
     if ((bool)replicaIndex) {
-        replicaIndex->runOnIndex([f](int, faiss::Index* index) {
+        replicaIndex->runOnIndex([f](int, polaris::Index* index) {
             f(dynamic_cast<GpuIndex*>(index));
         });
     } else {
@@ -63,4 +63,4 @@ void IndexWrapper<GpuIndex>::setNumProbes(size_t nprobe) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

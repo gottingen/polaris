@@ -10,7 +10,7 @@
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// A collection of various utility functions for index implementation
@@ -39,4 +39,4 @@ void validateNProbe(size_t nprobe) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

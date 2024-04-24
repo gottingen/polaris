@@ -16,7 +16,7 @@
 #include <polaris/IndexShards.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /** splits input vectors in segments and assigns each segment to a sub-index
  * used to distribute a MultiIndexQuantizer
@@ -78,6 +78,6 @@ struct IndexRandom : Index {
     ~IndexRandom() override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

@@ -10,7 +10,7 @@
 #include <polaris/Index.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Calculates residual v_i - c_j for all v_i in vecs where j = vecToCentroid[i]
@@ -56,4 +56,4 @@ void runReconstruct(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

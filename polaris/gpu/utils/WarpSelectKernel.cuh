@@ -9,7 +9,7 @@
 
 #include <polaris/gpu/utils/Select.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -82,4 +82,4 @@ void runWarpSelect(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

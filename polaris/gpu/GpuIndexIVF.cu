@@ -6,7 +6,7 @@
  */
 
 #include <polaris/IndexFlat.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/gpu/GpuCloner.h>
 #include <polaris/gpu/GpuIndexFlat.h>
 #include <polaris/gpu/GpuIndexIVF.h>
@@ -16,13 +16,13 @@
 #include <polaris/gpu/impl/IVFBase.cuh>
 #include <polaris/gpu/utils/CopyUtils.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 GpuIndexIVF::GpuIndexIVF(
         GpuResourcesProvider* provider,
         int dims,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         idx_t nlistIn,
         GpuIndexIVFConfig config)
@@ -30,8 +30,8 @@ GpuIndexIVF::GpuIndexIVF(
           IndexIVFInterface(nullptr, nlistIn),
           ivfConfig_(config) {
     // Only IP and L2 are supported for now
-    if (!(metric_type == faiss::METRIC_L2 ||
-          metric_type == faiss::METRIC_INNER_PRODUCT)) {
+    if (!(metric_type == polaris::METRIC_L2 ||
+          metric_type == polaris::METRIC_INNER_PRODUCT)) {
         FAISS_THROW_FMT("unsupported metric type %d", (int)metric_type);
     }
 
@@ -42,7 +42,7 @@ GpuIndexIVF::GpuIndexIVF(
         GpuResourcesProvider* provider,
         Index* coarseQuantizer,
         int dims,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         idx_t nlistIn,
         GpuIndexIVFConfig config)
@@ -56,8 +56,8 @@ GpuIndexIVF::GpuIndexIVF(
     own_fields = false;
 
     // Only IP and L2 are supported for now
-    if (!(metric_type == faiss::METRIC_L2 ||
-          metric_type == faiss::METRIC_INNER_PRODUCT)) {
+    if (!(metric_type == polaris::METRIC_L2 ||
+          metric_type == polaris::METRIC_INNER_PRODUCT)) {
         FAISS_THROW_FMT("unsupported metric type %d", (int)metric_type);
     }
 
@@ -69,7 +69,7 @@ void GpuIndexIVF::init_() {
 
     // Spherical by default if the metric is inner_product
     // (copying IndexIVF.cpp)
-    if (metric_type == faiss::METRIC_INNER_PRODUCT) {
+    if (metric_type == polaris::METRIC_INNER_PRODUCT) {
         cp.spherical = true;
     }
 
@@ -93,9 +93,9 @@ void GpuIndexIVF::init_() {
         config.device = config_.device;
         config.use_raft = config_.use_raft;
 
-        if (metric_type == faiss::METRIC_L2) {
+        if (metric_type == polaris::METRIC_L2) {
             quantizer = new GpuIndexFlatL2(resources_, d, config);
-        } else if (metric_type == faiss::METRIC_INNER_PRODUCT) {
+        } else if (metric_type == polaris::METRIC_INNER_PRODUCT) {
             quantizer = new GpuIndexFlatIP(resources_, d, config);
         } else {
             // unknown metric type
@@ -145,7 +145,7 @@ void GpuIndexIVF::verifyIVFSettings_() const {
     }
 }
 
-void GpuIndexIVF::copyFrom(const faiss::IndexIVF* index) {
+void GpuIndexIVF::copyFrom(const polaris::IndexIVF* index) {
     DeviceScope scope(config_.device);
 
     GpuIndex::copyFrom(index);
@@ -198,7 +198,7 @@ void GpuIndexIVF::copyFrom(const faiss::IndexIVF* index) {
     verifyIVFSettings_();
 }
 
-void GpuIndexIVF::copyTo(faiss::IndexIVF* index) const {
+void GpuIndexIVF::copyTo(polaris::IndexIVF* index) const {
     DeviceScope scope(config_.device);
 
     //
@@ -458,4 +458,4 @@ void GpuIndexIVF::trainQuantizer_(idx_t n, const float* x) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

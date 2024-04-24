@@ -13,7 +13,7 @@
 #include <polaris/utils/random.h>
 #include <polaris/utils/utils.h>
 
-using namespace faiss;
+using namespace polaris;
 
 void addn_default(
         size_t n,

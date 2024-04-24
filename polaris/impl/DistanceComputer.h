@@ -9,7 +9,7 @@
 
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 
 /***********************************************************
  * The distance computer maintains a current query and computes
@@ -82,4 +82,4 @@ struct FlatCodesDistanceComputer : DistanceComputer {
     virtual ~FlatCodesDistanceComputer() {}
 };
 
-} // namespace faiss
+} // namespace polaris

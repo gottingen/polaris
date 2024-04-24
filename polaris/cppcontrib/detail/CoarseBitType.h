@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 namespace detail {
 
@@ -28,4 +28,4 @@ struct CoarseBitType<16> {
 
 } // namespace detail
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris

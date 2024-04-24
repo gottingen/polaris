@@ -10,7 +10,7 @@
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/DeviceVector.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -62,4 +62,4 @@ class BinaryFlatIndex {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

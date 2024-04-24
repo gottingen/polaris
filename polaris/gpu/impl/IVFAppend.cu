@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 //
@@ -642,4 +642,4 @@ void runIVFPQInterleavedAppend(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

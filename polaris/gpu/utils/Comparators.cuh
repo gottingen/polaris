@@ -10,7 +10,7 @@
 #include <cuda.h>
 #include <polaris/gpu/utils/Float16.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -44,4 +44,4 @@ struct Comparator<half> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

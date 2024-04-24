@@ -16,7 +16,7 @@
 
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 struct FlatCodesDistanceComputer;
 
@@ -53,6 +53,6 @@ FlatCodesDistanceComputer* get_extra_distance_computer(
         size_t nb,
         const float* xb);
 
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/utils/extra_distances-inl.h>

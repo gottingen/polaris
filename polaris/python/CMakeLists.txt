@@ -34,7 +34,7 @@ macro(configure_swigfaiss source)
       SWIG_FLAGS -DSWIGWIN
     )
   endif()
-  if(FAISS_ENABLE_GPU)
+  if(POLARIS_ENABLE_GPU)
     set_source_files_properties(${source} PROPERTIES
       COMPILE_DEFINITIONS GPU_WRAPPER
     )
@@ -110,7 +110,7 @@ else()
   target_compile_options(swigfaiss_avx512 PRIVATE /bigobj)
 endif()
 
-if(FAISS_ENABLE_GPU)
+if(POLARIS_ENABLE_GPU)
   find_package(CUDAToolkit REQUIRED)
   if(FAISS_ENABLE_RAFT)
     find_package(raft COMPONENTS compiled distributed)

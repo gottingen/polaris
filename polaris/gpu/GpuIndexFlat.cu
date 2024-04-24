@@ -22,12 +22,12 @@
 #include <polaris/gpu/impl/RaftFlatIndex.cuh>
 #endif
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 GpuIndexFlat::GpuIndexFlat(
         GpuResourcesProvider* provider,
-        const faiss::IndexFlat* index,
+        const polaris::IndexFlat* index,
         GpuIndexFlatConfig config)
         : GpuIndex(
                   provider->getResources(),
@@ -44,7 +44,7 @@ GpuIndexFlat::GpuIndexFlat(
 
 GpuIndexFlat::GpuIndexFlat(
         std::shared_ptr<GpuResources> resources,
-        const faiss::IndexFlat* index,
+        const polaris::IndexFlat* index,
         GpuIndexFlatConfig config)
         : GpuIndex(
                   resources,
@@ -62,7 +62,7 @@ GpuIndexFlat::GpuIndexFlat(
 GpuIndexFlat::GpuIndexFlat(
         GpuResourcesProvider* provider,
         int dims,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         GpuIndexFlatConfig config)
         : GpuIndex(provider->getResources(), dims, metric, 0, config),
           flatConfig_(config) {
@@ -78,7 +78,7 @@ GpuIndexFlat::GpuIndexFlat(
 GpuIndexFlat::GpuIndexFlat(
         std::shared_ptr<GpuResources> resources,
         int dims,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         GpuIndexFlatConfig config)
         : GpuIndex(resources, dims, metric, 0, config), flatConfig_(config) {
     DeviceScope scope(config_.device);
@@ -117,7 +117,7 @@ void GpuIndexFlat::resetIndex_(int dims) {
     }
 }
 
-void GpuIndexFlat::copyFrom(const faiss::IndexFlat* index) {
+void GpuIndexFlat::copyFrom(const polaris::IndexFlat* index) {
     DeviceScope scope(config_.device);
 
     GpuIndex::copyFrom(index);
@@ -134,7 +134,7 @@ void GpuIndexFlat::copyFrom(const faiss::IndexFlat* index) {
     }
 }
 
-void GpuIndexFlat::copyTo(faiss::IndexFlat* index) const {
+void GpuIndexFlat::copyTo(polaris::IndexFlat* index) const {
     DeviceScope scope(config_.device);
 
     GpuIndex::copyTo(index);
@@ -290,7 +290,7 @@ void GpuIndexFlat::reconstruct_batch(idx_t n, const idx_t* keys, float* out)
         return;
     }
 
-    auto keysDevice = toDeviceTemporary<faiss::idx_t, 1>(
+    auto keysDevice = toDeviceTemporary<polaris::idx_t, 1>(
             resources_.get(),
             config_.device,
             const_cast<idx_t*>(keys),
@@ -353,13 +353,13 @@ void GpuIndexFlat::compute_residual_n(
 
 GpuIndexFlatL2::GpuIndexFlatL2(
         GpuResourcesProvider* provider,
-        faiss::IndexFlatL2* index,
+        polaris::IndexFlatL2* index,
         GpuIndexFlatConfig config)
         : GpuIndexFlat(provider, index, config) {}
 
 GpuIndexFlatL2::GpuIndexFlatL2(
         std::shared_ptr<GpuResources> resources,
-        faiss::IndexFlatL2* index,
+        polaris::IndexFlatL2* index,
         GpuIndexFlatConfig config)
         : GpuIndexFlat(resources, index, config) {}
 
@@ -367,15 +367,15 @@ GpuIndexFlatL2::GpuIndexFlatL2(
         GpuResourcesProvider* provider,
         int dims,
         GpuIndexFlatConfig config)
-        : GpuIndexFlat(provider, dims, faiss::METRIC_L2, config) {}
+        : GpuIndexFlat(provider, dims, polaris::METRIC_L2, config) {}
 
 GpuIndexFlatL2::GpuIndexFlatL2(
         std::shared_ptr<GpuResources> resources,
         int dims,
         GpuIndexFlatConfig config)
-        : GpuIndexFlat(resources, dims, faiss::METRIC_L2, config) {}
+        : GpuIndexFlat(resources, dims, polaris::METRIC_L2, config) {}
 
-void GpuIndexFlatL2::copyFrom(faiss::IndexFlat* index) {
+void GpuIndexFlatL2::copyFrom(polaris::IndexFlat* index) {
     FAISS_THROW_IF_NOT_MSG(
             index->metric_type == metric_type,
             "Cannot copy a GpuIndexFlatL2 from an index of "
@@ -384,7 +384,7 @@ void GpuIndexFlatL2::copyFrom(faiss::IndexFlat* index) {
     GpuIndexFlat::copyFrom(index);
 }
 
-void GpuIndexFlatL2::copyTo(faiss::IndexFlat* index) {
+void GpuIndexFlatL2::copyTo(polaris::IndexFlat* index) {
     FAISS_THROW_IF_NOT_MSG(
             index->metric_type == metric_type,
             "Cannot copy a GpuIndexFlatL2 to an index of "
@@ -399,13 +399,13 @@ void GpuIndexFlatL2::copyTo(faiss::IndexFlat* index) {
 
 GpuIndexFlatIP::GpuIndexFlatIP(
         GpuResourcesProvider* provider,
-        faiss::IndexFlatIP* index,
+        polaris::IndexFlatIP* index,
         GpuIndexFlatConfig config)
         : GpuIndexFlat(provider, index, config) {}
 
 GpuIndexFlatIP::GpuIndexFlatIP(
         std::shared_ptr<GpuResources> resources,
-        faiss::IndexFlatIP* index,
+        polaris::IndexFlatIP* index,
         GpuIndexFlatConfig config)
         : GpuIndexFlat(resources, index, config) {}
 
@@ -413,15 +413,15 @@ GpuIndexFlatIP::GpuIndexFlatIP(
         GpuResourcesProvider* provider,
         int dims,
         GpuIndexFlatConfig config)
-        : GpuIndexFlat(provider, dims, faiss::METRIC_INNER_PRODUCT, config) {}
+        : GpuIndexFlat(provider, dims, polaris::METRIC_INNER_PRODUCT, config) {}
 
 GpuIndexFlatIP::GpuIndexFlatIP(
         std::shared_ptr<GpuResources> resources,
         int dims,
         GpuIndexFlatConfig config)
-        : GpuIndexFlat(resources, dims, faiss::METRIC_INNER_PRODUCT, config) {}
+        : GpuIndexFlat(resources, dims, polaris::METRIC_INNER_PRODUCT, config) {}
 
-void GpuIndexFlatIP::copyFrom(faiss::IndexFlat* index) {
+void GpuIndexFlatIP::copyFrom(polaris::IndexFlat* index) {
     FAISS_THROW_IF_NOT_MSG(
             index->metric_type == metric_type,
             "Cannot copy a GpuIndexFlatIP from an index of "
@@ -430,7 +430,7 @@ void GpuIndexFlatIP::copyFrom(faiss::IndexFlat* index) {
     GpuIndexFlat::copyFrom(index);
 }
 
-void GpuIndexFlatIP::copyTo(faiss::IndexFlat* index) {
+void GpuIndexFlatIP::copyTo(polaris::IndexFlat* index) {
     // The passed in index must be IP
     FAISS_THROW_IF_NOT_MSG(
             index->metric_type == metric_type,
@@ -441,4 +441,4 @@ void GpuIndexFlatIP::copyTo(faiss::IndexFlat* index) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -16,7 +16,7 @@
 #include <polaris/impl/platform_macros.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 struct IDSelector;
 
@@ -483,4 +483,4 @@ int fvec_madd_and_argmin(
         const float* b,
         float* c);
 
-} // namespace faiss
+} // namespace polaris

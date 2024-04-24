@@ -43,7 +43,7 @@
 #define RAFT_NAME "raft"
 #endif
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 #if defined USE_NVIDIA_RAFT
@@ -527,7 +527,7 @@ void bfKnn_tiling(
 // legacy version
 void bruteForceKnn(
         GpuResourcesProvider* res,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         // A region of memory size numVectors x dims, with dims
         // innermost
         const float* vectors,
@@ -565,4 +565,4 @@ void bruteForceKnn(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

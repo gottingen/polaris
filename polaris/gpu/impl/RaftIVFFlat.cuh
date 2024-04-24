@@ -31,7 +31,7 @@
 #include <optional>
 
 #pragma GCC visibility push(default)
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class RaftIVFFlat : public IVFFlat {
@@ -40,11 +40,11 @@ class RaftIVFFlat : public IVFFlat {
             GpuResources* resources,
             int dim,
             int nlist,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             bool useResidual,
             /// Optional ScalarQuantizer
-            faiss::ScalarQuantizer* scalarQ,
+            polaris::ScalarQuantizer* scalarQ,
             bool interleavedLayout,
             IndicesOptions indicesOptions,
             MemorySpace space);
@@ -146,5 +146,5 @@ struct RaftIVFFlatCodePackerInterleaved : CodePacker {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 #pragma GCC visibility pop

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-namespace faiss {
+namespace polaris {
 
 inline PQEncoderGeneric::PQEncoderGeneric(
         uint8_t* code,
@@ -113,4 +113,4 @@ inline uint64_t PQDecoder16::decode() {
     return (uint64_t)(*code++);
 }
 
-} // namespace faiss
+} // namespace polaris

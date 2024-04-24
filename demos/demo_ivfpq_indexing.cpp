@@ -36,7 +36,7 @@ int main() {
     size_t nt = 100 * 1000;
 
     // make the index object and train it
-    faiss::IndexFlatL2 coarse_quantizer(d);
+    polaris::IndexFlatL2 coarse_quantizer(d);
 
     // a reasonable number of centroids to index nb vectors
     int ncentroids = int(4 * sqrt(nb));
@@ -44,7 +44,7 @@ int main() {
     // the coarse quantizer should not be dealloced before the index
     // 4 = nb of bytes per code (d must be a multiple of this)
     // 8 = nb of bits per sub-code (almost always 8)
-    faiss::IndexIVFPQ index(&coarse_quantizer, d, ncentroids, 4, 8);
+    polaris::IndexIVFPQ index(&coarse_quantizer, d, ncentroids, 4, 8);
 
     std::mt19937 rng;
 
@@ -118,7 +118,7 @@ int main() {
                k,
                nq);
 
-        std::vector<faiss::idx_t> nns(k * nq);
+        std::vector<polaris::idx_t> nns(k * nq);
         std::vector<float> dis(k * nq);
 
         index.search(nq, queries.data(), k, dis.data(), nns.data());

@@ -33,7 +33,7 @@
 
 #include <polaris/utils/ordered_key_value.h>
 
-namespace faiss {
+namespace polaris {
 
 /*******************************************************************
  * Basic heap ops: push and pop
@@ -526,6 +526,6 @@ void merge_knn_results(
         typename C::T* distances,
         idx_t* labels);
 
-} // namespace faiss
+} // namespace polaris
 
 #endif /* FAISS_Heap_h */

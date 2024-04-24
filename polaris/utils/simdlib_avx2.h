@@ -14,7 +14,7 @@
 
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Simple wrapper around the AVX 256-bit registers
  *
@@ -800,4 +800,4 @@ inline simd8float32 gethigh128(simd8float32 a, simd8float32 b) {
 
 } // namespace
 
-} // namespace faiss
+} // namespace polaris

@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// How user vector index data is stored on the GPU
@@ -28,4 +28,4 @@ enum IndicesOptions {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

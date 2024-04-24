@@ -14,7 +14,7 @@
 
 #include <immintrin.h>
 
-namespace faiss {
+namespace polaris {
 
 // 8x2 -> 2x8
 inline void transpose_8x2(
@@ -160,6 +160,6 @@ inline void transpose_8x8(
     o7 = _mm256_permute2f128_ps(rr3, rr7, 0x31);
 }
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

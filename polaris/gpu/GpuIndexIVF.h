@@ -8,13 +8,13 @@
 #pragma once
 
 #include <polaris/Clustering.h>
-#include <polaris/IndexIVF.h> // for SearchParametersIVF
+#include <polaris/index_ivf.h> // for SearchParametersIVF
 #include <polaris/gpu/GpuIndex.h>
 #include <polaris/gpu/GpuIndexFlat.h>
 #include <polaris/gpu/GpuIndicesOptions.h>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuIndexFlat;
@@ -38,7 +38,7 @@ class GpuIndexIVF : public GpuIndex, public IndexIVFInterface {
     GpuIndexIVF(
             GpuResourcesProvider* provider,
             int dims,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             idx_t nlist,
             GpuIndexIVFConfig config = GpuIndexIVFConfig());
@@ -49,7 +49,7 @@ class GpuIndexIVF : public GpuIndex, public IndexIVFInterface {
             GpuResourcesProvider* provider,
             Index* coarseQuantizer,
             int dims,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             idx_t nlist,
             GpuIndexIVFConfig config = GpuIndexIVFConfig());
@@ -62,10 +62,10 @@ class GpuIndexIVF : public GpuIndex, public IndexIVFInterface {
 
    public:
     /// Copy what we need from the CPU equivalent
-    void copyFrom(const faiss::IndexIVF* index);
+    void copyFrom(const polaris::IndexIVF* index);
 
     /// Copy what we have to the CPU equivalent
-    void copyTo(faiss::IndexIVF* index) const;
+    void copyTo(polaris::IndexIVF* index) const;
 
     /// Should be called if the user ever changes the state of the IVF coarse
     /// quantizer manually (e.g., substitutes a new instance or changes vectors
@@ -145,4 +145,4 @@ class GpuIndexIVF : public GpuIndex, public IndexIVFInterface {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

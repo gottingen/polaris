@@ -27,14 +27,14 @@ using namespace ::testing;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
-std::tuple<std::shared_ptr<faiss::Index>, std::vector<uint8_t>> trainDataset(
+std::tuple<std::shared_ptr<polaris::Index>, std::vector<uint8_t>> trainDataset(
         const std::vector<float>& input,
         const uint64_t n,
         const uint64_t d,
         const std::string& description) {
     // train an index
-    auto index = std::shared_ptr<faiss::Index>(
-            faiss::index_factory((int)d, description.c_str()));
+    auto index = std::shared_ptr<polaris::Index>(
+            polaris::index_factory((int)d, description.c_str()));
     index->train((int)n, input.data());
 
     // encode
@@ -47,21 +47,21 @@ std::tuple<std::shared_ptr<faiss::Index>, std::vector<uint8_t>> trainDataset(
 }
 
 bool testIfIVFPQ(
-        const faiss::Index* const index,
+        const polaris::Index* const index,
         const float** pqCoarseCentroidsQ,
         const float** pqFineCentroidsQ) {
     if (pqFineCentroidsQ == nullptr || pqCoarseCentroidsQ == nullptr) {
         return false;
     }
 
-    const faiss::IndexIVFPQ* const indexQ =
-            dynamic_cast<const faiss::IndexIVFPQ*>(index);
+    const polaris::IndexIVFPQ* const indexQ =
+            dynamic_cast<const polaris::IndexIVFPQ*>(index);
     if (indexQ == nullptr) {
         return false;
     }
 
     const auto coarseIndexQ =
-            dynamic_cast<const faiss::IndexFlatCodes*>(indexQ->quantizer);
+            dynamic_cast<const polaris::IndexFlatCodes*>(indexQ->quantizer);
     if (coarseIndexQ == nullptr) {
         return false;
     }
@@ -73,20 +73,20 @@ bool testIfIVFPQ(
 }
 
 bool testIfResidualPQ(
-        const faiss::Index* const index,
+        const polaris::Index* const index,
         const float** pqCoarseCentroidsQ,
         const float** pqFineCentroidsQ) {
     if (pqFineCentroidsQ == nullptr || pqCoarseCentroidsQ == nullptr) {
         return false;
     }
 
-    const faiss::Index2Layer* const indexQ =
-            dynamic_cast<const faiss::Index2Layer*>(index);
+    const polaris::Index2Layer* const indexQ =
+            dynamic_cast<const polaris::Index2Layer*>(index);
     if (indexQ == nullptr) {
         return false;
     }
 
-    const auto coarseIndexQ = dynamic_cast<const faiss::MultiIndexQuantizer*>(
+    const auto coarseIndexQ = dynamic_cast<const polaris::MultiIndexQuantizer*>(
             indexQ->q1.quantizer);
     if (coarseIndexQ == nullptr) {
         return false;
@@ -101,7 +101,7 @@ template <typename T>
 void verifyIndex2LevelDecoder(
         const uint64_t n,
         const uint64_t d,
-        const std::shared_ptr<faiss::Index>& index,
+        const std::shared_ptr<polaris::Index>& index,
         const std::vector<uint8_t>& encodedData) {
     //
     const float* pqFineCentroidsQ = nullptr;
@@ -300,15 +300,15 @@ template <typename T>
 void verifyMinMaxIndex2LevelDecoder(
         const uint64_t n,
         const uint64_t d,
-        const std::shared_ptr<faiss::Index>& index,
+        const std::shared_ptr<polaris::Index>& index,
         const std::vector<uint8_t>& encodedData) {
     //
     const float* pqFineCentroidsQ = nullptr;
     const float* pqCoarseCentroidsQ = nullptr;
 
     // extract an index that is wrapped with IndexRowwiseMinMaxBase
-    const std::shared_ptr<faiss::IndexRowwiseMinMaxBase> indexMinMax =
-            std::dynamic_pointer_cast<faiss::IndexRowwiseMinMaxBase>(index);
+    const std::shared_ptr<polaris::IndexRowwiseMinMaxBase> indexMinMax =
+            std::dynamic_pointer_cast<polaris::IndexRowwiseMinMaxBase>(index);
     ASSERT_NE(indexMinMax.get(), nullptr);
 
     auto subIndex = indexMinMax->index;
@@ -551,11 +551,11 @@ template <typename T>
 void verifyIndexPQDecoder(
         const uint64_t n,
         const uint64_t d,
-        const std::shared_ptr<faiss::Index>& index,
+        const std::shared_ptr<polaris::Index>& index,
         const std::vector<uint8_t>& encodedData) {
     //
-    const faiss::IndexPQ* const indexQ =
-            dynamic_cast<const faiss::IndexPQ*>(index.get());
+    const polaris::IndexPQ* const indexQ =
+            dynamic_cast<const polaris::IndexPQ*>(index.get());
     const float* const pqFineCentroidsQ = indexQ->pq.centroids.data();
 
     //
@@ -733,18 +733,18 @@ template <typename T>
 void verifyMinMaxIndexPQDecoder(
         const uint64_t n,
         const uint64_t d,
-        const std::shared_ptr<faiss::Index>& index,
+        const std::shared_ptr<polaris::Index>& index,
         const std::vector<uint8_t>& encodedData) {
     // extract an index that is wrapped with IndexRowwiseMinMaxBase
-    const std::shared_ptr<faiss::IndexRowwiseMinMaxBase> indexMinMax =
-            std::dynamic_pointer_cast<faiss::IndexRowwiseMinMaxBase>(index);
+    const std::shared_ptr<polaris::IndexRowwiseMinMaxBase> indexMinMax =
+            std::dynamic_pointer_cast<polaris::IndexRowwiseMinMaxBase>(index);
     ASSERT_NE(indexMinMax.get(), nullptr);
 
     auto subIndex = indexMinMax->index;
 
     //
-    const faiss::IndexPQ* const indexQ =
-            dynamic_cast<const faiss::IndexPQ*>(subIndex);
+    const polaris::IndexPQ* const indexQ =
+            dynamic_cast<const polaris::IndexPQ*>(subIndex);
     const float* const pqFineCentroidsQ = indexQ->pq.centroids.data();
 
     //
@@ -985,7 +985,7 @@ void testIndex2LevelDecoder(
         const uint64_t d,
         const std::string& description) {
     auto data = generate(n, d);
-    std::shared_ptr<faiss::Index> index;
+    std::shared_ptr<polaris::Index> index;
     std::vector<uint8_t> encodedData;
     std::tie(index, encodedData) = trainDataset(data, n, d, description);
 
@@ -998,7 +998,7 @@ void testMinMaxIndex2LevelDecoder(
         const uint64_t d,
         const std::string& description) {
     auto data = generate(n, d);
-    std::shared_ptr<faiss::Index> index;
+    std::shared_ptr<polaris::Index> index;
     std::vector<uint8_t> encodedData;
     std::tie(index, encodedData) = trainDataset(data, n, d, description);
 
@@ -1011,7 +1011,7 @@ void testIndexPQDecoder(
         const uint64_t d,
         const std::string& description) {
     auto data = generate(n, d);
-    std::shared_ptr<faiss::Index> index;
+    std::shared_ptr<polaris::Index> index;
     std::vector<uint8_t> encodedData;
     std::tie(index, encodedData) = trainDataset(data, n, d, description);
 
@@ -1024,7 +1024,7 @@ void testMinMaxIndexPQDecoder(
         const uint64_t d,
         const std::string& description) {
     auto data = generate(n, d);
-    std::shared_ptr<faiss::Index> index;
+    std::shared_ptr<polaris::Index> index;
     std::vector<uint8_t> encodedData;
     std::tie(index, encodedData) = trainDataset(data, n, d, description);
 
@@ -1035,134 +1035,134 @@ constexpr size_t NSAMPLES = 256;
 
 //
 TEST(testCppcontribSaDecode, D256_IVF256_PQ16) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 256, "IVF256,PQ16np");
 }
 
 TEST(testCppcontribSaDecode, D256_IVF256_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 256, 32>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 256, 32>;
     testIndex2LevelDecoder<T>(NSAMPLES, 256, "IVF256,PQ8np");
 }
 
 //
 TEST(testCppcontribSaDecode, D192_IVF256_PQ24) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<192, 192, 8>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<192, 192, 8>;
     testIndex2LevelDecoder<T>(NSAMPLES, 192, "IVF256,PQ24np");
 }
 
 //
 TEST(testCppcontribSaDecode, D192_IVF256_PQ16) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<192, 192, 12>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<192, 192, 12>;
     testIndex2LevelDecoder<T>(NSAMPLES, 192, "IVF256,PQ16np");
 }
 
 //
 TEST(testCppcontribSaDecode, D192_IVF256_PQ12) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<192, 192, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<192, 192, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 192, "IVF256,PQ12np");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_IVF256_PQ40) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 160, 4>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 160, 4>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "IVF256,PQ40np");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_IVF256_PQ20) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 160, 8>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 160, 8>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "IVF256,PQ20np");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_IVF256_PQ10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 160, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 160, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "IVF256,PQ10np");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_IVF256_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 160, 20>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 160, 20>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "IVF256,PQ8np");
 }
 
 //
 TEST(testCppcontribSaDecode, D128_IVF256_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<128, 128, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<128, 128, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 128, "IVF256,PQ8np");
 }
 
 TEST(testCppcontribSaDecode, D128_IVF256_PQ4) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<128, 128, 32>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<128, 128, 32>;
     testIndex2LevelDecoder<T>(NSAMPLES, 128, "IVF256,PQ4np");
 }
 
 //
 TEST(testCppcontribSaDecode, D64_IVF256_PQ16) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<64, 64, 8>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<64, 64, 8>;
     testIndex2LevelDecoder<T>(NSAMPLES, 64, "IVF256,PQ8np");
 }
 
 TEST(testCppcontribSaDecode, D64_IVF256_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<64, 64, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<64, 64, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 64, "IVF256,PQ4np");
 }
 
 #if defined(__AVX2__)
 TEST(testCppcontribSaDecode, D40_IVF256_PQ20) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<40, 40, 2>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<40, 40, 2>;
     testIndex2LevelDecoder<T>(NSAMPLES, 40, "IVF256,PQ20np");
 }
 #endif
 
 //
 TEST(testCppcontribSaDecode, D256_Residual4x8_PQ16) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 64, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 64, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 256, "Residual4x8,PQ16");
 }
 
 TEST(testCppcontribSaDecode, D256_Residual4x8_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 64, 32>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 64, 32>;
     testIndex2LevelDecoder<T>(NSAMPLES, 256, "Residual4x8,PQ8");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_Residual4x8_PQ10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 40, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 40, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "Residual4x8,PQ10");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_Residual2x8_PQ10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 80, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 80, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "Residual2x8,PQ10");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_Residual1x8_PQ10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 160, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 160, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 160, "Residual1x8,PQ10");
 }
 
 //
 TEST(testCppcontribSaDecode, D128_Residual4x8_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<128, 32, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<128, 32, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 128, "Residual4x8,PQ8");
 }
 
 TEST(testCppcontribSaDecode, D128_Residual4x8_PQ4) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<128, 32, 32>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<128, 32, 32>;
     testIndex2LevelDecoder<T>(NSAMPLES, 128, "Residual4x8,PQ4");
 }
 
 //
 TEST(testCppcontribSaDecode, D64_Residual4x8_PQ8) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<64, 16, 8>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<64, 16, 8>;
     testIndex2LevelDecoder<T>(NSAMPLES, 64, "Residual4x8,PQ8");
 }
 
 TEST(testCppcontribSaDecode, D64_Residual4x8_PQ4) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<64, 16, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<64, 16, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES, 64, "Residual4x8,PQ4");
 }
 
@@ -1170,7 +1170,7 @@ TEST(testCppcontribSaDecode, D64_Residual4x8_PQ4) {
 TEST(testCppcontribSaDecode, D256_IVF1024_PQ16) {
     // It is acceptable to use COARSE_BITS=16 in this case,
     // because there's only one coarse quantizer element.
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES * 4, 256, "IVF1024,PQ16np");
 }
 
@@ -1178,110 +1178,110 @@ TEST(testCppcontribSaDecode, D64_Residual1x9_PQ8) {
     // It is acceptable to use COARSE_BITS=16 in this case,
     // because there's only one coarse quantizer element.
     // It won't work for "Residual2x9,PQ8".
-    using T = faiss::cppcontrib::Index2LevelDecoder<64, 64, 8, 16>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<64, 64, 8, 16>;
     testIndex2LevelDecoder<T>(NSAMPLES * 2, 64, "Residual1x9,PQ8");
 }
 
 //
 TEST(testCppcontribSaDecode, D256_PQ16) {
-    using T = faiss::cppcontrib::IndexPQDecoder<256, 16>;
+    using T = polaris::cppcontrib::IndexPQDecoder<256, 16>;
     testIndexPQDecoder<T>(NSAMPLES, 256, "PQ16np");
 }
 
 //
 TEST(testCppcontribSaDecode, D160_PQ20) {
-    using T = faiss::cppcontrib::IndexPQDecoder<160, 8>;
+    using T = polaris::cppcontrib::IndexPQDecoder<160, 8>;
     testIndexPQDecoder<T>(NSAMPLES, 160, "PQ20np");
 }
 
 #if defined(__AVX2__)
 TEST(testCppcontribSaDecode, D40_PQ20) {
-    using T = faiss::cppcontrib::IndexPQDecoder<40, 2>;
+    using T = polaris::cppcontrib::IndexPQDecoder<40, 2>;
     testIndexPQDecoder<T>(NSAMPLES, 40, "PQ20np");
 }
 #endif
 
 // test IndexRowwiseMinMaxFP16
 TEST(testCppcontribSaDecode, D256_MINMAXFP16_IVF256_PQ16) {
-    using SubT = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16>;
-    using T = faiss::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
+    using SubT = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16>;
+    using T = polaris::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
     testMinMaxIndex2LevelDecoder<T>(NSAMPLES, 256, "MinMaxFP16,IVF256,PQ16np");
 }
 
 TEST(testCppcontribSaDecode, D256_MINMAXFP16_PQ16) {
-    using SubT = faiss::cppcontrib::IndexPQDecoder<256, 16>;
-    using T = faiss::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
+    using SubT = polaris::cppcontrib::IndexPQDecoder<256, 16>;
+    using T = polaris::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
     testMinMaxIndexPQDecoder<T>(NSAMPLES, 256, "MinMaxFP16,PQ16np");
 }
 
 // test IndexRowwiseMinMax
 TEST(testCppcontribSaDecode, D256_MINMAX_IVF256_PQ16) {
-    using SubT = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16>;
-    using T = faiss::cppcontrib::IndexMinMaxDecoder<SubT>;
+    using SubT = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16>;
+    using T = polaris::cppcontrib::IndexMinMaxDecoder<SubT>;
     testMinMaxIndex2LevelDecoder<T>(NSAMPLES, 256, "MinMax,IVF256,PQ16np");
 }
 
 TEST(testCppcontribSaDecode, D256_MINMAX_PQ16) {
-    using SubT = faiss::cppcontrib::IndexPQDecoder<256, 16>;
-    using T = faiss::cppcontrib::IndexMinMaxDecoder<SubT>;
+    using SubT = polaris::cppcontrib::IndexPQDecoder<256, 16>;
+    using T = polaris::cppcontrib::IndexMinMaxDecoder<SubT>;
     testMinMaxIndexPQDecoder<T>(NSAMPLES, 256, "MinMax,PQ16np");
 }
 
 // implemented for AVX2 and ARM so far
 #if defined(__AVX2__) || defined(__ARM_NEON)
 TEST(testCppcontribSaDecode, D256_PQ16x10) {
-    using T = faiss::cppcontrib::IndexPQDecoder<256, 16, 10>;
+    using T = polaris::cppcontrib::IndexPQDecoder<256, 16, 10>;
     testIndexPQDecoder<T>(NSAMPLES * 4, 256, "PQ16x10np");
 }
 
 TEST(testCppcontribSaDecode, D256_PQ16x12) {
-    using T = faiss::cppcontrib::IndexPQDecoder<256, 16, 12>;
+    using T = polaris::cppcontrib::IndexPQDecoder<256, 16, 12>;
     testIndexPQDecoder<T>(NSAMPLES * 16, 256, "PQ16x12np");
 }
 
 TEST(testCppcontribSaDecode, D160_PQ20x10) {
-    using T = faiss::cppcontrib::IndexPQDecoder<160, 8, 10>;
+    using T = polaris::cppcontrib::IndexPQDecoder<160, 8, 10>;
     testIndexPQDecoder<T>(NSAMPLES * 4, 160, "PQ20x10np");
 }
 
 TEST(testCppcontribSaDecode, D160_PQ20x12) {
-    using T = faiss::cppcontrib::IndexPQDecoder<160, 8, 12>;
+    using T = polaris::cppcontrib::IndexPQDecoder<160, 8, 12>;
     testIndexPQDecoder<T>(NSAMPLES * 16, 160, "PQ20x12np");
 }
 
 TEST(testCppcontribSaDecode, D256_IVF256_PQ16x10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 8, 10>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 8, 10>;
     testIndex2LevelDecoder<T>(NSAMPLES * 4, 256, "IVF256,PQ16x10np");
 }
 
 TEST(testCppcontribSaDecode, D256_IVF256_PQ16x12) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 8, 12>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 8, 12>;
     testIndex2LevelDecoder<T>(NSAMPLES * 16, 256, "IVF256,PQ16x12np");
 }
 
 TEST(testCppcontribSaDecode, D256_MINMAXFP16_IVF256_PQ16x10) {
-    using SubT = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 8, 10>;
-    using T = faiss::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
+    using SubT = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 8, 10>;
+    using T = polaris::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
     testMinMaxIndex2LevelDecoder<T>(
             NSAMPLES * 4, 256, "MinMaxFP16,IVF256,PQ16x10np");
 }
 
 TEST(testCppcontribSaDecode, D256_MINMAXFP16_IVF1024_PQ16x10) {
-    using SubT = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 10, 10>;
-    using T = faiss::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
+    using SubT = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 10, 10>;
+    using T = polaris::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
     testMinMaxIndex2LevelDecoder<T>(
             NSAMPLES * 4, 256, "MinMaxFP16,IVF1024,PQ16x10np");
 }
 
 TEST(testCppcontribSaDecode, D256_MINMAXFP16_IVF1024_PQ16x10_ALTERNATIVE) {
-    using SubT = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 16, 10>;
-    using T = faiss::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
+    using SubT = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 16, 10>;
+    using T = polaris::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
     testMinMaxIndex2LevelDecoder<T>(
             NSAMPLES * 4, 256, "MinMaxFP16,IVF1024,PQ16x10np");
 }
 
 TEST(testCppcontribSaDecode, D160_Residual4x8_PQ8x10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<160, 40, 20, 8, 10>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<160, 40, 20, 8, 10>;
     testIndex2LevelDecoder<T>(NSAMPLES * 4, 160, "Residual4x8,PQ8x10");
 }
 
@@ -1289,17 +1289,17 @@ TEST(testCppcontribSaDecode, D256_Residual1x9_PQ16x10) {
     // It is acceptable to use COARSE_BITS=16 in this case,
     // because there's only one coarse quantizer element.
     // It won't work for "Residual2x9,PQ16x10".
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 256, 16, 16, 10>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 256, 16, 16, 10>;
     testIndex2LevelDecoder<T>(NSAMPLES * 4, 256, "Residual1x9,PQ16x10");
 }
 
 TEST(testCppcontribSaDecode, D256_Residual4x10_PQ16x10) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 64, 16, 10, 10>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 64, 16, 10, 10>;
     testIndex2LevelDecoder<T>(NSAMPLES * 4, 256, "Residual4x10,PQ16x10");
 }
 
 TEST(testCppcontribSaDecode, D256_Residual4x12_PQ16x12) {
-    using T = faiss::cppcontrib::Index2LevelDecoder<256, 64, 16, 12, 12>;
+    using T = polaris::cppcontrib::Index2LevelDecoder<256, 64, 16, 12, 12>;
     testIndex2LevelDecoder<T>(NSAMPLES * 16, 256, "Residual4x12,PQ16x12");
 }
 

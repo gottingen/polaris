@@ -9,7 +9,7 @@
 
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// A collection of various utility functions for index implementation
@@ -26,4 +26,4 @@ void validateKSelect(int k);
 void validateNProbe(size_t nprobe);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -20,24 +20,24 @@ constexpr float kF32MaxRelErr = 0.03f;
 
 struct Options {
     Options() {
-        numAdd = 2 * faiss::gpu::randVal(2000, 5000);
-        dim = faiss::gpu::randVal(64, 200);
+        numAdd = 2 * polaris::gpu::randVal(2000, 5000);
+        dim = polaris::gpu::randVal(64, 200);
 
         numCentroids = std::sqrt((float)numAdd / 2);
         numTrain = numCentroids * 40;
-        nprobe = faiss::gpu::randVal(std::min(10, numCentroids), numCentroids);
-        numQuery = faiss::gpu::randVal(32, 100);
+        nprobe = polaris::gpu::randVal(std::min(10, numCentroids), numCentroids);
+        numQuery = polaris::gpu::randVal(32, 100);
 
         // Due to the approximate nature of the query and of floating point
         // differences between GPU and CPU, to stay within our error bounds,
         // only use a small k
-        k = std::min(faiss::gpu::randVal(10, 30), numAdd / 40);
-        indicesOpt = faiss::gpu::randSelect(
-                {faiss::gpu::INDICES_CPU,
-                 faiss::gpu::INDICES_32_BIT,
-                 faiss::gpu::INDICES_64_BIT});
+        k = std::min(polaris::gpu::randVal(10, 30), numAdd / 40);
+        indicesOpt = polaris::gpu::randSelect(
+                {polaris::gpu::INDICES_CPU,
+                 polaris::gpu::INDICES_32_BIT,
+                 polaris::gpu::INDICES_64_BIT});
 
-        device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+        device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
     }
 
     std::string toString() const {
@@ -58,12 +58,12 @@ struct Options {
     int numQuery;
     int k;
     int device;
-    faiss::gpu::IndicesOptions indicesOpt;
+    polaris::gpu::IndicesOptions indicesOpt;
 };
 
-void runCopyToTest(faiss::ScalarQuantizer::QuantizerType qtype) {
-    using namespace faiss;
-    using namespace faiss::gpu;
+void runCopyToTest(polaris::ScalarQuantizer::QuantizerType qtype) {
+    using namespace polaris;
+    using namespace polaris::gpu;
 
     Options opt;
     std::vector<float> trainVecs = randVecs(opt.numTrain, opt.dim);
@@ -118,32 +118,32 @@ void runCopyToTest(faiss::ScalarQuantizer::QuantizerType qtype) {
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyTo_fp16) {
-    runCopyToTest(faiss::ScalarQuantizer::QuantizerType::QT_fp16);
+    runCopyToTest(polaris::ScalarQuantizer::QuantizerType::QT_fp16);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyTo_8bit) {
-    runCopyToTest(faiss::ScalarQuantizer::QuantizerType::QT_8bit);
+    runCopyToTest(polaris::ScalarQuantizer::QuantizerType::QT_8bit);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyTo_8bit_uniform) {
-    runCopyToTest(faiss::ScalarQuantizer::QuantizerType::QT_8bit_uniform);
+    runCopyToTest(polaris::ScalarQuantizer::QuantizerType::QT_8bit_uniform);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyTo_6bit) {
-    runCopyToTest(faiss::ScalarQuantizer::QuantizerType::QT_6bit);
+    runCopyToTest(polaris::ScalarQuantizer::QuantizerType::QT_6bit);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyTo_4bit) {
-    runCopyToTest(faiss::ScalarQuantizer::QuantizerType::QT_4bit);
+    runCopyToTest(polaris::ScalarQuantizer::QuantizerType::QT_4bit);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyTo_4bit_uniform) {
-    runCopyToTest(faiss::ScalarQuantizer::QuantizerType::QT_4bit_uniform);
+    runCopyToTest(polaris::ScalarQuantizer::QuantizerType::QT_4bit_uniform);
 }
 
-void runCopyFromTest(faiss::ScalarQuantizer::QuantizerType qtype) {
-    using namespace faiss;
-    using namespace faiss::gpu;
+void runCopyFromTest(polaris::ScalarQuantizer::QuantizerType qtype) {
+    using namespace polaris;
+    using namespace polaris::gpu;
 
     Options opt;
     std::vector<float> trainVecs = randVecs(opt.numTrain, opt.dim);
@@ -200,34 +200,34 @@ void runCopyFromTest(faiss::ScalarQuantizer::QuantizerType qtype) {
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyFrom_fp16) {
-    runCopyFromTest(faiss::ScalarQuantizer::QuantizerType::QT_fp16);
+    runCopyFromTest(polaris::ScalarQuantizer::QuantizerType::QT_fp16);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyFrom_8bit) {
-    runCopyFromTest(faiss::ScalarQuantizer::QuantizerType::QT_8bit);
+    runCopyFromTest(polaris::ScalarQuantizer::QuantizerType::QT_8bit);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyFrom_8bit_uniform) {
-    runCopyFromTest(faiss::ScalarQuantizer::QuantizerType::QT_8bit_uniform);
+    runCopyFromTest(polaris::ScalarQuantizer::QuantizerType::QT_8bit_uniform);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyFrom_6bit) {
-    runCopyFromTest(faiss::ScalarQuantizer::QuantizerType::QT_6bit);
+    runCopyFromTest(polaris::ScalarQuantizer::QuantizerType::QT_6bit);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyFrom_4bit) {
-    runCopyFromTest(faiss::ScalarQuantizer::QuantizerType::QT_4bit);
+    runCopyFromTest(polaris::ScalarQuantizer::QuantizerType::QT_4bit);
 }
 
 TEST(TestGpuIndexIVFScalarQuantizer, CopyFrom_4bit_uniform) {
-    runCopyFromTest(faiss::ScalarQuantizer::QuantizerType::QT_4bit_uniform);
+    runCopyFromTest(polaris::ScalarQuantizer::QuantizerType::QT_4bit_uniform);
 }
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
 
     // just run with a fixed test seed
-    faiss::gpu::setTestSeed(100);
+    polaris::gpu::setTestSeed(100);
 
     return RUN_ALL_TESTS();
 }

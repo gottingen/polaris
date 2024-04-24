@@ -10,7 +10,7 @@
 #include <cstring>
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -1049,4 +1049,4 @@ __host__ __device__ Tensor<T, NewDim, InnerContig, IndexT, PtrTraits> Tensor<
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -12,10 +12,10 @@
 
 #include <vector>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/impl/lattice_Zn.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Index that encodes a vector with a series of Zn lattice quantizers
  */
@@ -60,6 +60,6 @@ struct IndexLattice : Index {
     void reset() override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

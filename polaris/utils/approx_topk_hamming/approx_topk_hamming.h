@@ -14,7 +14,7 @@
 #include <polaris/utils/Heap.h>
 #include <polaris/utils/simdlib.h>
 
-namespace faiss {
+namespace polaris {
 
 // HeapWithBucketsForHamming32 uses simd8uint32 under the hood.
 
@@ -113,7 +113,7 @@ struct HeapWithBucketsForHamming32<
                         simd8uint32 max_distances_new;
                         simd8uint32 max_indices_new;
 
-                        faiss::cmplt_min_max_fast(
+                        polaris::cmplt_min_max_fast(
                                 distance_candidate,
                                 indices_candidate,
                                 min_distances_i[j][p],
@@ -297,7 +297,7 @@ struct HeapWithBucketsForHamming16<
                         simd16uint16 max_distances_new;
                         simd16uint16 max_indices_new;
 
-                        faiss::cmplt_min_max_fast(
+                        polaris::cmplt_min_max_fast(
                                 distance_candidate,
                                 indices_candidate,
                                 min_distances_i[j][p],
@@ -364,4 +364,4 @@ struct HeapWithBucketsForHamming16<
     }
 };
 
-} // namespace faiss
+} // namespace polaris

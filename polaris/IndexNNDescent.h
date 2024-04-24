@@ -15,7 +15,7 @@
 #include <polaris/impl/NNDescent.h>
 #include <polaris/utils/utils.h>
 
-namespace faiss {
+namespace polaris {
 
 /** The NNDescent index is a normal random-access index with an NNDescent
  * link structure built on top */
@@ -69,4 +69,4 @@ struct IndexNNDescentFlat : IndexNNDescent {
     IndexNNDescentFlat(int d, int K, MetricType metric = METRIC_L2);
 };
 
-} // namespace faiss
+} // namespace polaris

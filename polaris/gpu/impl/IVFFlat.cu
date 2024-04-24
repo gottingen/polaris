@@ -25,17 +25,17 @@
 #include <limits>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 IVFFlat::IVFFlat(
         GpuResources* res,
         int dim,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         bool useResidual,
-        faiss::ScalarQuantizer* scalarQ,
+        polaris::ScalarQuantizer* scalarQ,
         bool interleavedLayout,
         IndicesOptions indicesOptions,
         MemorySpace space)
@@ -352,4 +352,4 @@ void IVFFlat::searchImpl_(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

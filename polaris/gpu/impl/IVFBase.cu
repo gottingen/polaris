@@ -22,7 +22,7 @@
 #include <limits>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 IVFBase::DeviceIVFList::DeviceIVFList(GpuResources* res, const AllocInfo& info)
@@ -32,7 +32,7 @@ IVFBase::IVFBase(
         GpuResources* resources,
         int dim,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         bool useResidual,
         bool interleavedLayout,
@@ -830,4 +830,4 @@ idx_t IVFBase::addVectors(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

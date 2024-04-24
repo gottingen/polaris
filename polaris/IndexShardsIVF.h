@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/IndexShards.h>
 
-namespace faiss {
+namespace polaris {
 
 /**
  * IndexShards with a common coarse quantizer. All the indexes added should be
@@ -39,4 +39,4 @@ struct IndexShardsIVF : public IndexShards, Level1Quantizer {
             const SearchParameters* params = nullptr) const override;
 };
 
-} // namespace faiss
+} // namespace polaris

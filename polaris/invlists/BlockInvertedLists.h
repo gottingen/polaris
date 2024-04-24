@@ -12,7 +12,7 @@
 #include <polaris/invlists/InvertedListsIOHook.h>
 #include <polaris/utils/AlignedTable.h>
 
-namespace faiss {
+namespace polaris {
 
 struct CodePacker;
 
@@ -77,4 +77,4 @@ struct BlockInvertedListsIOHook : InvertedListsIOHook {
     InvertedLists* read(IOReader* f, int io_flags) const override;
 };
 
-} // namespace faiss
+} // namespace polaris

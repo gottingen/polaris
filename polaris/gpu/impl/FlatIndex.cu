@@ -29,7 +29,7 @@
 #include <polaris/gpu/utils/CopyUtils.cuh>
 #include <polaris/gpu/utils/Transpose.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 FlatIndex::FlatIndex(
@@ -111,7 +111,7 @@ Tensor<half, 2, true>& FlatIndex::getVectorsFloat16Ref() {
 void FlatIndex::query(
         Tensor<float, 2, true>& input,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         Tensor<float, 2, true>& outDistances,
         Tensor<idx_t, 2, true>& outIndices,
@@ -152,7 +152,7 @@ void FlatIndex::query(
 void FlatIndex::query(
         Tensor<half, 2, true>& input,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         Tensor<float, 2, true>& outDistances,
         Tensor<idx_t, 2, true>& outIndices,
@@ -301,4 +301,4 @@ void FlatIndex::reset() {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -14,10 +14,10 @@
 
 #include <polaris/Clustering.h>
 #include <polaris/IndexBinary.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 struct BinaryInvertedListScanner;
 
@@ -255,6 +255,6 @@ struct BinaryInvertedListScanner {
     virtual ~BinaryInvertedListScanner() {}
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif // FAISS_INDEX_BINARY_IVF_H

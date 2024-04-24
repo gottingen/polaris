@@ -24,12 +24,12 @@
 
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 GpuIndexIVFPQ::GpuIndexIVFPQ(
         GpuResourcesProvider* provider,
-        const faiss::IndexIVFPQ* index,
+        const polaris::IndexIVFPQ* index,
         GpuIndexIVFPQConfig config)
         : GpuIndexIVF(
                   provider,
@@ -53,7 +53,7 @@ GpuIndexIVFPQ::GpuIndexIVFPQ(
         idx_t nlist,
         idx_t subQuantizers,
         idx_t bitsPerCode,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         GpuIndexIVFPQConfig config)
         : GpuIndexIVF(provider, dims, metric, 0, nlist, config),
           pq(dims, subQuantizers, bitsPerCode),
@@ -72,7 +72,7 @@ GpuIndexIVFPQ::GpuIndexIVFPQ(
         idx_t nlist,
         idx_t subQuantizers,
         idx_t bitsPerCode,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         GpuIndexIVFPQConfig config)
         : GpuIndexIVF(
                   provider,
@@ -103,7 +103,7 @@ GpuIndexIVFPQ::GpuIndexIVFPQ(
 
 GpuIndexIVFPQ::~GpuIndexIVFPQ() {}
 
-void GpuIndexIVFPQ::copyFrom(const faiss::IndexIVFPQ* index) {
+void GpuIndexIVFPQ::copyFrom(const polaris::IndexIVFPQ* index) {
     DeviceScope scope(config_.device);
 
     // This will copy GpuIndexIVF data such as the coarse quantizer
@@ -168,7 +168,7 @@ void GpuIndexIVFPQ::copyFrom(const faiss::IndexIVFPQ* index) {
     index_->copyInvertedListsFrom(index->invlists);
 }
 
-void GpuIndexIVFPQ::copyTo(faiss::IndexIVFPQ* index) const {
+void GpuIndexIVFPQ::copyTo(polaris::IndexIVFPQ* index) const {
     DeviceScope scope(config_.device);
 
     // We must have the indices in order to copy to ourselves
@@ -185,7 +185,7 @@ void GpuIndexIVFPQ::copyTo(faiss::IndexIVFPQ* index) const {
     index->by_residual = true;
     index->use_precomputed_table = 0;
     index->code_size = utils::divUp(subQuantizers_ * bitsPerCode_, 8);
-    index->pq = faiss::ProductQuantizer(this->d, subQuantizers_, bitsPerCode_);
+    index->pq = polaris::ProductQuantizer(this->d, subQuantizers_, bitsPerCode_);
 
     index->do_polysemous_training = false;
     index->polysemous_training = nullptr;
@@ -286,7 +286,7 @@ void GpuIndexIVFPQ::updateQuantizer() {
 }
 
 void GpuIndexIVFPQ::trainResidualQuantizer_(idx_t n, const float* x) {
-    // Code largely copied from faiss::IndexIVFPQ
+    // Code largely copied from polaris::IndexIVFPQ
     auto x_in = x;
 
     x = fvecs_maybe_subsample(
@@ -474,7 +474,7 @@ void GpuIndexIVFPQ::setIndex_(
         GpuResources* resources,
         int dim,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         int numSubQuantizers,
         int bitsPerSubQuantizer,
@@ -604,4 +604,4 @@ void GpuIndexIVFPQ::verifyPQSettings_() const {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

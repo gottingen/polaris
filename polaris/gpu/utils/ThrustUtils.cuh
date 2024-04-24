@@ -12,7 +12,7 @@
 #include <thrust/device_vector.h>
 #include <unordered_set>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Allocator for Thrust that comes out of a specified memory space
@@ -79,4 +79,4 @@ class ThrustAllocator {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

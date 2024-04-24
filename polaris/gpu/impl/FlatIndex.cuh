@@ -27,7 +27,7 @@
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/DeviceVector.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -62,7 +62,7 @@ class FlatIndex {
     virtual void query(
             Tensor<float, 2, true>& vecs,
             int k,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             Tensor<float, 2, true>& outDistances,
             Tensor<idx_t, 2, true>& outIndices,
@@ -71,7 +71,7 @@ class FlatIndex {
     virtual void query(
             Tensor<half, 2, true>& vecs,
             int k,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             float metricArg,
             Tensor<float, 2, true>& outDistances,
             Tensor<idx_t, 2, true>& outIndices,
@@ -129,4 +129,4 @@ class FlatIndex {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -27,16 +27,16 @@ TEST(TestGpuMemoryException, AddException) {
     size_t brokenAddDims = ((devTotal / sizeof(float)) / numBrokenAdd) + 1;
     size_t realAddDims = 128;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexFlatConfig config;
-    config.device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+    polaris::gpu::GpuIndexFlatConfig config;
+    config.device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexFlatL2 gpuIndexL2Broken(
+    polaris::gpu::GpuIndexFlatL2 gpuIndexL2Broken(
             &res, (int)brokenAddDims, config);
-    faiss::gpu::GpuIndexFlatL2 gpuIndexL2(&res, (int)realAddDims, config);
-    faiss::IndexFlatL2 cpuIndex((int)realAddDims);
+    polaris::gpu::GpuIndexFlatL2 gpuIndexL2(&res, (int)realAddDims, config);
+    polaris::IndexFlatL2 cpuIndex((int)realAddDims);
 
     // Should throw on attempting to allocate too much data
     {
@@ -45,12 +45,12 @@ TEST(TestGpuMemoryException, AddException) {
                 new float[numBrokenAdd * brokenAddDims]);
         EXPECT_THROW(
                 gpuIndexL2Broken.add(numBrokenAdd, vecs.get()),
-                faiss::FaissException);
+                polaris::FaissException);
     }
 
     // Should be able to add a smaller set of data now
     {
-        auto vecs = faiss::gpu::randVecs(numRealAdd, realAddDims);
+        auto vecs = polaris::gpu::randVecs(numRealAdd, realAddDims);
         EXPECT_NO_THROW(gpuIndexL2.add(numRealAdd, vecs.data()));
         cpuIndex.add(numRealAdd, vecs.data());
     }
@@ -62,13 +62,13 @@ TEST(TestGpuMemoryException, AddException) {
                 new float[numBrokenAdd * brokenAddDims]);
         EXPECT_THROW(
                 gpuIndexL2Broken.add(numBrokenAdd, vecs.get()),
-                faiss::FaissException);
+                polaris::FaissException);
     }
 
     // Should be able to query results from what we had before
     {
         size_t numQuery = 10;
-        auto vecs = faiss::gpu::randVecs(numQuery, realAddDims);
+        auto vecs = polaris::gpu::randVecs(numQuery, realAddDims);
         EXPECT_NO_THROW(compareIndices(
                 vecs,
                 cpuIndex,
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
 
     // just run with a fixed test seed
-    faiss::gpu::setTestSeed(100);
+    polaris::gpu::setTestSeed(100);
 
     return RUN_ALL_TESTS();
 }

@@ -15,7 +15,7 @@
 #include <polaris/utils/Heap.h>
 #include <polaris/utils/partitioning.h>
 
-namespace faiss {
+namespace polaris {
 
 /*****************************************************************
  * The classes below are intended to be used as template arguments
@@ -565,4 +565,4 @@ struct RangeSearchBlockResultHandler : BlockResultHandler<C> {
     }
 };
 
-} // namespace faiss
+} // namespace polaris

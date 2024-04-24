@@ -14,7 +14,7 @@
 #include <polaris/gpu/utils/PtxUtils.cuh>
 #include <polaris/gpu/utils/WarpShuffles.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 inline bool isSQSupported(ScalarQuantizer::QuantizerType qtype) {
@@ -849,4 +849,4 @@ struct Codec<ScalarQuantizer::QuantizerType::QT_4bit, 1> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

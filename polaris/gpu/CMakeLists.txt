@@ -170,19 +170,19 @@ set(FAISS_GPU_HEADERS
 
 function(generate_ivf_interleaved_code)
   set(SUB_CODEC_TYPE
-    "faiss::gpu::Codec<0, 1>"
-    "faiss::gpu::Codec<1, 1>"
-    "faiss::gpu::Codec<2, 1>"
-    "faiss::gpu::Codec<3, 1>"
-    "faiss::gpu::Codec<4, 1>"
-    "faiss::gpu::Codec<5, 1>"
-    "faiss::gpu::Codec<6, 1>"
-    "faiss::gpu::CodecFloat"
+    "polaris::gpu::Codec<0, 1>"
+    "polaris::gpu::Codec<1, 1>"
+    "polaris::gpu::Codec<2, 1>"
+    "polaris::gpu::Codec<3, 1>"
+    "polaris::gpu::Codec<4, 1>"
+    "polaris::gpu::Codec<5, 1>"
+    "polaris::gpu::Codec<6, 1>"
+    "polaris::gpu::CodecFloat"
   )
 
   set(SUB_METRIC_TYPE
-    "faiss::gpu::IPDistance"
-    "faiss::gpu::L2Distance"
+    "polaris::gpu::IPDistance"
+    "polaris::gpu::L2Distance"
   )
 
   # Used for SUB_THREADS, SUB_NUM_WARP_Q, SUB_NUM_THREAD_Q

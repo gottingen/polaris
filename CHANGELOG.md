@@ -97,7 +97,7 @@ the Facebook Faiss team.  Feel free to add entries here if you submit a PR.
 
 ## [1.7.1] - 2021-05-27
 ### Added
-- Support for building C bindings through the `FAISS_ENABLE_C_API` CMake option.
+- Support for building C bindings through the `POLARIS_ENABLE_C_API` CMake option.
 - Serializing the indexes with the python pickle module
 - Support for the NNDescent k-NN graph building method (by @KinglittleQ)
 - Support for the NSG graph indexing method (by @KinglittleQ)

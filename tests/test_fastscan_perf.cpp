@@ -40,21 +40,21 @@ TEST(TestFastScan, knnVSrange) {
     }
 
     // build index
-    faiss::IndexFlatL2 coarse_quantizer(d);
-    faiss::IndexIVFPQFastScan index(
-            &coarse_quantizer, d, nlist, d / 2, 4, faiss::METRIC_L2, 32);
+    polaris::IndexFlatL2 coarse_quantizer(d);
+    polaris::IndexIVFPQFastScan index(
+            &coarse_quantizer, d, nlist, d / 2, 4, polaris::METRIC_L2, 32);
     index.pq.cp.niter = 10; // speed up train
     index.nprobe = nlist;
     index.train(nb, database.data());
     index.add(nb, database.data());
 
     std::vector<float> distances(nb);
-    std::vector<faiss::idx_t> labels(nb);
+    std::vector<polaris::idx_t> labels(nb);
     auto t = std::chrono::high_resolution_clock::now();
     index.search(nb, database.data(), 1, distances.data(), labels.data());
     auto knn_time = std::chrono::high_resolution_clock::now() - t;
 
-    faiss::RangeSearchResult rsr(nb);
+    polaris::RangeSearchResult rsr(nb);
     t = std::chrono::high_resolution_clock::now();
     index.range_search(nb, database.data(), 1.0, &rsr);
     auto range_time = std::chrono::high_resolution_clock::now() - t;

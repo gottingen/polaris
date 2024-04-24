@@ -22,7 +22,7 @@
 
 #include <polaris/Index.h>
 
-namespace faiss {
+namespace polaris {
 
 struct IOReader {
     // name that can be used in error messages
@@ -142,4 +142,4 @@ void fourcc_inv(uint32_t x, char str[5]);
 std::string fourcc_inv(uint32_t x);
 std::string fourcc_inv_printable(uint32_t x);
 
-} // namespace faiss
+} // namespace polaris

@@ -16,7 +16,7 @@
 
 #include <polaris/impl/HNSW.h>
 
-int reference_pop_min(faiss::HNSW::MinimaxHeap& heap, float* vmin_out) {
+int reference_pop_min(polaris::HNSW::MinimaxHeap& heap, float* vmin_out) {
     assert(heap.k > 0);
     // returns min. This is an O(n) operation
     int i = heap.k - 1;
@@ -48,9 +48,9 @@ int reference_pop_min(faiss::HNSW::MinimaxHeap& heap, float* vmin_out) {
 
 void test_popmin(int heap_size, int amount_to_put) {
     // create a heap
-    faiss::HNSW::MinimaxHeap mm_heap(heap_size);
+    polaris::HNSW::MinimaxHeap mm_heap(heap_size);
 
-    using storage_idx_t = faiss::HNSW::storage_idx_t;
+    using storage_idx_t = polaris::HNSW::storage_idx_t;
 
     std::default_random_engine rng(123 + heap_size * amount_to_put);
     std::uniform_int_distribution<storage_idx_t> u(0, 65536);
@@ -74,7 +74,7 @@ void test_popmin(int heap_size, int amount_to_put) {
     }
 
     // clone the heap
-    faiss::HNSW::MinimaxHeap cloned_mm_heap = mm_heap;
+    polaris::HNSW::MinimaxHeap cloned_mm_heap = mm_heap;
 
     // takes ones out one by one
     while (mm_heap.size() > 0) {
@@ -111,9 +111,9 @@ void test_popmin_identical_distances(
         int amount_to_put,
         const float distance) {
     // create a heap
-    faiss::HNSW::MinimaxHeap mm_heap(heap_size);
+    polaris::HNSW::MinimaxHeap mm_heap(heap_size);
 
-    using storage_idx_t = faiss::HNSW::storage_idx_t;
+    using storage_idx_t = polaris::HNSW::storage_idx_t;
 
     std::default_random_engine rng(123 + heap_size * amount_to_put);
     std::uniform_int_distribution<storage_idx_t> u(0, 65536);
@@ -131,7 +131,7 @@ void test_popmin_identical_distances(
     }
 
     // clone the heap
-    faiss::HNSW::MinimaxHeap cloned_mm_heap = mm_heap;
+    polaris::HNSW::MinimaxHeap cloned_mm_heap = mm_heap;
 
     // takes ones out one by one
     while (mm_heap.size() > 0) {

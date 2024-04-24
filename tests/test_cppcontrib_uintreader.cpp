@@ -23,9 +23,9 @@ template <intptr_t N_ELEMENTS, intptr_t CODE_BITS, intptr_t CPOS>
 struct TestLoop {
     static void test(
             const uint8_t* const container,
-            faiss::BitstringReader& br) {
+            polaris::BitstringReader& br) {
         // validate
-        const intptr_t uintreader_data = faiss::cppcontrib::detail::
+        const intptr_t uintreader_data = polaris::cppcontrib::detail::
                 UintReaderRaw<N_ELEMENTS, CODE_BITS, CPOS>::get(container);
         const intptr_t bitstringreader_data = br.read(CODE_BITS);
 
@@ -44,7 +44,7 @@ template <intptr_t N_ELEMENTS, intptr_t CODE_BITS>
 struct TestLoop<N_ELEMENTS, CODE_BITS, N_ELEMENTS> {
     static void test(
             const uint8_t* const container,
-            faiss::BitstringReader& br) {}
+            polaris::BitstringReader& br) {}
 };
 
 template <intptr_t N_ELEMENTS, intptr_t CODE_BITS>
@@ -64,13 +64,13 @@ void TestUintReader() {
         }
 
         // populate it
-        faiss::BitstringWriter bw(container.get(), CODE_BYTES);
+        polaris::BitstringWriter bw(container.get(), CODE_BYTES);
         for (size_t i = 0; i < N_ELEMENTS; i++) {
             bw.write(u(rng), CODE_BITS);
         }
 
         // read it back and verify against bitreader
-        faiss::BitstringReader br(container.get(), CODE_BYTES);
+        polaris::BitstringReader br(container.get(), CODE_BYTES);
 
         TestLoop<N_ELEMENTS, CODE_BITS, 0>::test(container.get(), br);
     }

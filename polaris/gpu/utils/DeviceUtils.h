@@ -12,7 +12,7 @@
 #include <polaris/impl/FaissAssert.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Returns the current thread-local GPU device
@@ -202,4 +202,4 @@ inline void streamWait(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

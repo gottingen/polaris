@@ -30,7 +30,7 @@ DEFINE_int64(pinned_mem, 0, "pinned memory allocation to use");
 DEFINE_bool(cpu, true, "run the CPU code for timing and comparison");
 DEFINE_bool(use_unified_mem, false, "use Pascal unified memory for the index");
 
-using namespace faiss::gpu;
+using namespace polaris::gpu;
 
 int main(int argc, char** argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -42,11 +42,11 @@ int main(int argc, char** argv) {
 
     auto numQueries = FLAGS_num_queries;
 
-    auto index = std::unique_ptr<faiss::IndexBinaryFlat>(
-            new faiss::IndexBinaryFlat(FLAGS_dim));
+    auto index = std::unique_ptr<polaris::IndexBinaryFlat>(
+            new polaris::IndexBinaryFlat(FLAGS_dim));
 
     HostTensor<unsigned char, 2, true> vecs({FLAGS_num, FLAGS_dim / 8});
-    faiss::byte_rand(vecs.data(), vecs.numElements(), seed);
+    polaris::byte_rand(vecs.data(), vecs.numElements(), seed);
 
     index->add(FLAGS_num, vecs.data());
 
@@ -60,18 +60,18 @@ int main(int argc, char** argv) {
     config.memorySpace =
             FLAGS_use_unified_mem ? MemorySpace::Unified : MemorySpace::Device;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
-    faiss::gpu::GpuIndexBinaryFlat gpuIndex(&res, index.get(), config);
+    polaris::gpu::GpuIndexBinaryFlat gpuIndex(&res, index.get(), config);
     printf("copy done\n");
 
     // Build query vectors
     HostTensor<unsigned char, 2, true> cpuQuery({numQueries, FLAGS_dim / 8});
-    faiss::byte_rand(cpuQuery.data(), cpuQuery.numElements(), seed);
+    polaris::byte_rand(cpuQuery.data(), cpuQuery.numElements(), seed);
 
     // Time faiss CPU
     HostTensor<int, 2, true> cpuDistances({numQueries, FLAGS_k});
-    HostTensor<faiss::idx_t, 2, true> cpuIndices({numQueries, FLAGS_k});
+    HostTensor<polaris::idx_t, 2, true> cpuIndices({numQueries, FLAGS_k});
 
     if (FLAGS_cpu) {
         float cpuTime = 0.0f;
@@ -89,10 +89,10 @@ int main(int argc, char** argv) {
     }
 
     HostTensor<int, 2, true> gpuDistances({numQueries, FLAGS_k});
-    HostTensor<faiss::idx_t, 2, true> gpuIndices({numQueries, FLAGS_k});
+    HostTensor<polaris::idx_t, 2, true> gpuIndices({numQueries, FLAGS_k});
 
     CUDA_VERIFY(cudaProfilerStart());
-    faiss::gpu::synchronizeAllDevices();
+    polaris::gpu::synchronizeAllDevices();
 
     float gpuTime = 0.0f;
 

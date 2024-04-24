@@ -18,7 +18,7 @@
 #include <polaris/MetricType.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 struct InvertedListsIterator {
     virtual ~InvertedListsIterator();
@@ -410,6 +410,6 @@ struct StopWordsInvertedLists : ReadOnlyInvertedLists {
     void prefetch_lists(const idx_t* list_nos, int nlist) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

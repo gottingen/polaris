@@ -9,7 +9,7 @@
 
 #include <polaris/gpu/GpuIndicesOptions.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// set some options on how to copy to GPU
@@ -60,4 +60,4 @@ struct GpuMultipleClonerOptions : public GpuClonerOptions {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

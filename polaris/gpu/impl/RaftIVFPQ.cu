@@ -32,14 +32,14 @@
 #include <limits>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 RaftIVFPQ::RaftIVFPQ(
         GpuResources* resources,
         int dim,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         int numSubQuantizers,
         int bitsPerSubQuantizer,
@@ -543,4 +543,4 @@ void RaftIVFPQ::setBasePQCentroids_() {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

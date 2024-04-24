@@ -24,7 +24,7 @@
 #include <polaris/gpu/utils/DeviceUtils.h>
 #include <sstream>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 std::string allocTypeToString(AllocType t) {
@@ -220,4 +220,4 @@ std::shared_ptr<GpuResources> GpuResourcesProviderFromInstance::getResources() {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

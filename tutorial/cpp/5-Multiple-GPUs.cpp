@@ -39,21 +39,21 @@ int main() {
         xq[d * i] += i / 1000.;
     }
 
-    int ngpus = faiss::gpu::getNumDevices();
+    int ngpus = polaris::gpu::getNumDevices();
 
     printf("Number of GPUs: %d\n", ngpus);
 
-    std::vector<faiss::gpu::GpuResourcesProvider*> res;
+    std::vector<polaris::gpu::GpuResourcesProvider*> res;
     std::vector<int> devs;
     for (int i = 0; i < ngpus; i++) {
-        res.push_back(new faiss::gpu::StandardGpuResources);
+        res.push_back(new polaris::gpu::StandardGpuResources);
         devs.push_back(i);
     }
 
-    faiss::IndexFlatL2 cpu_index(d);
+    polaris::IndexFlatL2 cpu_index(d);
 
-    faiss::Index* gpu_index =
-            faiss::gpu::index_cpu_to_gpu_multiple(res, devs, &cpu_index);
+    polaris::Index* gpu_index =
+            polaris::gpu::index_cpu_to_gpu_multiple(res, devs, &cpu_index);
 
     printf("is_trained = %s\n", gpu_index->is_trained ? "true" : "false");
     gpu_index->add(nb, xb); // add vectors to the index

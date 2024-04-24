@@ -22,7 +22,7 @@
 
 #include <algorithm>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 namespace {
@@ -197,7 +197,7 @@ void runIVFFlatScanTile(
         Tensor<idx_t, 3, true>& heapIndices,
         int k,
         bool use64BitSelection,
-        faiss::MetricType metricType,
+        polaris::MetricType metricType,
         bool useResidual,
         Tensor<float, 3, true>& residualBase,
         GpuScalarQuantizer* scalarQ,
@@ -334,7 +334,7 @@ void runIVFFlatScan(
         DeviceVector<idx_t>& listLengths,
         idx_t maxListLength,
         int k,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         bool useResidual,
         Tensor<float, 3, true>& residualBase,
         GpuScalarQuantizer* scalarQ,
@@ -490,4 +490,4 @@ void runIVFFlatScan(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

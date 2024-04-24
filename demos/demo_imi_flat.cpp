@@ -47,7 +47,7 @@ int main() {
     // quantizer to the inverted-file index (with attribute do_delete_quantizer)
     //
     // Note: a regular clustering algorithm would be defined as:
-    //       faiss::IndexFlatL2 coarse_quantizer (d);
+    //       polaris::IndexFlatL2 coarse_quantizer (d);
     //
     // Use nhash=2 subquantizers used to define the product coarse quantizer
     // Number of bits: we will have 2^nbits_coarse centroids per subquantizer
@@ -56,7 +56,7 @@ int main() {
     size_t nbits_subq = int(log2(nb + 1) / 2);     // good choice in general
     size_t ncentroids = 1 << (nhash * nbits_subq); // total # of centroids
 
-    faiss::MultiIndexQuantizer coarse_quantizer(d, nhash, nbits_subq);
+    polaris::MultiIndexQuantizer coarse_quantizer(d, nhash, nbits_subq);
 
     printf("IMI (%ld,%ld): %ld virtual centroids (target: %ld base vectors)",
            nhash,
@@ -67,8 +67,8 @@ int main() {
     // the coarse quantizer should not be dealloced before the index
     // 4 = nb of bytes per code (d must be a multiple of this)
     // 8 = nb of bits per sub-code (almost always 8)
-    faiss::MetricType metric = faiss::METRIC_L2; // can be METRIC_INNER_PRODUCT
-    faiss::IndexIVFFlat index(&coarse_quantizer, d, ncentroids, metric);
+    polaris::MetricType metric = polaris::METRIC_L2; // can be METRIC_INNER_PRODUCT
+    polaris::IndexIVFFlat index(&coarse_quantizer, d, ncentroids, metric);
     index.quantizer_trains_alone = true;
 
     // define the number of probes. 2048 is for high-dim, overkilled in practice
@@ -132,7 +132,7 @@ int main() {
                k,
                nq);
 
-        std::vector<faiss::idx_t> nns(k * nq);
+        std::vector<polaris::idx_t> nns(k * nq);
         std::vector<float> dis(k * nq);
 
         index.search(nq, queries.data(), k, dis.data(), nns.data());

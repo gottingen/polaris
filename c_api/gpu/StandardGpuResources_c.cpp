@@ -12,7 +12,7 @@
 #include <polaris/gpu/StandardGpuResources.h>
 #include "macros_impl.h"
 
-using faiss::gpu::StandardGpuResources;
+using polaris::gpu::StandardGpuResources;
 
 DEFINE_DESTRUCTOR(StandardGpuResources)
 

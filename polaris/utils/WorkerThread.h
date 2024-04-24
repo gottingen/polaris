@@ -13,7 +13,7 @@
 #include <future>
 #include <thread>
 
-namespace faiss {
+namespace polaris {
 
 class WorkerThread {
    public:
@@ -58,4 +58,4 @@ class WorkerThread {
     std::deque<std::pair<std::function<void()>, std::promise<bool>>> queue_;
 };
 
-} // namespace faiss
+} // namespace polaris

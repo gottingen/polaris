@@ -9,7 +9,7 @@
 
 #include <polaris/utils/simdlib.h>
 
-using namespace faiss;
+using namespace polaris;
 
 TEST(TestSIMDLib, TestCmpltAndBlendInplace) {
     simd8float32 lowestValues(0, 1, 2, 3, 4, 5, 6, 7);

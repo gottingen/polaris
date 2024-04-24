@@ -35,7 +35,7 @@
 #include <rmm/mr/device/device_memory_resource.hpp>
 #endif
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResources;
@@ -302,4 +302,4 @@ class GpuResourcesProviderFromInstance : public GpuResourcesProvider {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

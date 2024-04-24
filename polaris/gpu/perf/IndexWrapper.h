@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // If we want to run multi-GPU, create a proxy to wrap the indices.
@@ -21,21 +21,21 @@ namespace gpu {
 // affect the timings.
 template <typename GpuIndex>
 struct IndexWrapper {
-    std::vector<std::unique_ptr<faiss::gpu::StandardGpuResources>> resources;
+    std::vector<std::unique_ptr<polaris::gpu::StandardGpuResources>> resources;
     std::vector<std::unique_ptr<GpuIndex>> subIndex;
-    std::unique_ptr<faiss::IndexReplicas> replicaIndex;
+    std::unique_ptr<polaris::IndexReplicas> replicaIndex;
 
     IndexWrapper(
             int numGpus,
             std::function<std::unique_ptr<GpuIndex>(GpuResourcesProvider*, int)>
                     init);
-    faiss::Index* getIndex();
+    polaris::Index* getIndex();
 
     void runOnIndices(std::function<void(GpuIndex*)> f);
     void setNumProbes(size_t nprobe);
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris
 
 #include <polaris/gpu/perf/IndexWrapper-inl.h>

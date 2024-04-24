@@ -15,13 +15,13 @@
 #include <gtest/gtest.h>
 
 #include <polaris/IVFlib.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/VectorTransform.h>
 #include <polaris/index_factory.h>
 
 namespace {
 
-typedef faiss::idx_t idx_t;
+typedef polaris::idx_t idx_t;
 
 /*************************************************************
  * Test utils
@@ -47,11 +47,11 @@ std::vector<float> make_data(size_t n) {
     return database;
 }
 
-std::unique_ptr<faiss::Index> make_index(
+std::unique_ptr<polaris::Index> make_index(
         const char* index_type,
         const std::vector<float>& x) {
     auto index =
-            std::unique_ptr<faiss::Index>(faiss::index_factory(d, index_type));
+            std::unique_ptr<polaris::Index>(polaris::index_factory(d, index_type));
     index->train(nb, x.data());
     index->add(nb, x.data());
     return index;
@@ -70,10 +70,10 @@ bool test_search_centroid(const char* index_key) {
        the inverted list corresponding to its centroid */
 
     std::vector<idx_t> centroid_ids(nb);
-    faiss::ivflib::search_centroid(
+    polaris::ivflib::search_centroid(
             index.get(), xb.data(), nb, centroid_ids.data());
 
-    const faiss::IndexIVF* ivf = faiss::ivflib::extract_index_ivf(index.get());
+    const polaris::IndexIVF* ivf = polaris::ivflib::extract_index_ivf(index.get());
 
     for (int i = 0; i < nb; i++) {
         bool found = false;
@@ -98,10 +98,10 @@ int test_search_and_return_centroids(const char* index_key) {
     auto index = make_index(index_key, xb);
 
     std::vector<idx_t> centroid_ids(nb);
-    faiss::ivflib::search_centroid(
+    polaris::ivflib::search_centroid(
             index.get(), xb.data(), nb, centroid_ids.data());
 
-    faiss::IndexIVF* ivf = faiss::ivflib::extract_index_ivf(index.get());
+    polaris::IndexIVF* ivf = polaris::ivflib::extract_index_ivf(index.get());
     ivf->nprobe = 4;
 
     std::vector<float> xq = make_data(nq); // database vectors
@@ -122,7 +122,7 @@ int test_search_and_return_centroids(const char* index_key) {
     std::vector<idx_t> query_centroid_ids(nq);
     std::vector<idx_t> result_centroid_ids(nq * k);
 
-    faiss::ivflib::search_and_return_centroids(
+    polaris::ivflib::search_and_return_centroids(
             index.get(),
             nq,
             xq.data(),

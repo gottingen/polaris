@@ -18,7 +18,7 @@
 // on compile time
 //
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // This is warp divergence central, but this is really a final step
@@ -252,4 +252,4 @@ void runPass2SelectLists(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

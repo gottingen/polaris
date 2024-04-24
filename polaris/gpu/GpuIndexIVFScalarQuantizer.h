@@ -11,7 +11,7 @@
 #include <polaris/gpu/GpuIndexIVF.h>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class IVFFlat;
@@ -24,14 +24,14 @@ struct GpuIndexIVFScalarQuantizerConfig : public GpuIndexIVFConfig {
 };
 
 /// Wrapper around the GPU implementation that looks like
-/// faiss::IndexIVFScalarQuantizer
+/// polaris::IndexIVFScalarQuantizer
 class GpuIndexIVFScalarQuantizer : public GpuIndexIVF {
    public:
-    /// Construct from a pre-existing faiss::IndexIVFScalarQuantizer instance,
+    /// Construct from a pre-existing polaris::IndexIVFScalarQuantizer instance,
     /// copying data over to the given GPU, if the input index is trained.
     GpuIndexIVFScalarQuantizer(
             GpuResourcesProvider* provider,
-            const faiss::IndexIVFScalarQuantizer* index,
+            const polaris::IndexIVFScalarQuantizer* index,
             GpuIndexIVFScalarQuantizerConfig config =
                     GpuIndexIVFScalarQuantizerConfig());
 
@@ -41,8 +41,8 @@ class GpuIndexIVFScalarQuantizer : public GpuIndexIVF {
             GpuResourcesProvider* provider,
             int dims,
             idx_t nlist,
-            faiss::ScalarQuantizer::QuantizerType qtype,
-            faiss::MetricType metric = MetricType::METRIC_L2,
+            polaris::ScalarQuantizer::QuantizerType qtype,
+            polaris::MetricType metric = MetricType::METRIC_L2,
             bool encodeResidual = true,
             GpuIndexIVFScalarQuantizerConfig config =
                     GpuIndexIVFScalarQuantizerConfig());
@@ -54,8 +54,8 @@ class GpuIndexIVFScalarQuantizer : public GpuIndexIVF {
             Index* coarseQuantizer,
             int dims,
             idx_t nlist,
-            faiss::ScalarQuantizer::QuantizerType qtype,
-            faiss::MetricType metric = MetricType::METRIC_L2,
+            polaris::ScalarQuantizer::QuantizerType qtype,
+            polaris::MetricType metric = MetricType::METRIC_L2,
             bool encodeResidual = true,
             GpuIndexIVFScalarQuantizerConfig config =
                     GpuIndexIVFScalarQuantizerConfig());
@@ -67,11 +67,11 @@ class GpuIndexIVFScalarQuantizer : public GpuIndexIVF {
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(const faiss::IndexIVFScalarQuantizer* index);
+    void copyFrom(const polaris::IndexIVFScalarQuantizer* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexIVFScalarQuantizer* index) const;
+    void copyTo(polaris::IndexIVFScalarQuantizer* index) const;
 
     /// After adding vectors, one can call this to reclaim device memory
     /// to exactly the amount needed. Returns space reclaimed in bytes
@@ -98,7 +98,7 @@ class GpuIndexIVFScalarQuantizer : public GpuIndexIVF {
 
    public:
     /// Exposed like the CPU version
-    faiss::ScalarQuantizer sq;
+    polaris::ScalarQuantizer sq;
 
     /// Exposed like the CPU version
     bool by_residual;
@@ -115,4 +115,4 @@ class GpuIndexIVFScalarQuantizer : public GpuIndexIVF {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -28,7 +28,7 @@
 
 #include <polaris/impl/code_distance/code_distance-avx2.h>
 
-namespace faiss {
+namespace polaris {
 
 template <typename PQDecoderT>
 inline float distance_single_code(
@@ -75,13 +75,13 @@ inline void distance_four_codes(
             result3);
 }
 
-} // namespace faiss
+} // namespace polaris
 
 #else
 
 #include <polaris/impl/code_distance/code_distance-generic.h>
 
-namespace faiss {
+namespace polaris {
 
 template <typename PQDecoderT>
 inline float distance_single_code(
@@ -128,6 +128,6 @@ inline void distance_four_codes(
             result3);
 }
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

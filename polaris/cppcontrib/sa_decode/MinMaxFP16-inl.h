@@ -12,7 +12,7 @@
 
 #include <polaris/utils/fp16.h>
 
-namespace faiss {
+namespace polaris {
 namespace cppcontrib {
 
 template <typename SubIndexT>
@@ -28,8 +28,8 @@ struct IndexMinMaxFP16Decoder {
             float* const __restrict outputStore) {
         const uint16_t* const __restrict codeFP16 =
                 reinterpret_cast<const uint16_t*>(code);
-        const float scaler = faiss::decode_fp16(codeFP16[0]);
-        const float minv = faiss::decode_fp16(codeFP16[1]);
+        const float scaler = polaris::decode_fp16(codeFP16[0]);
+        const float minv = polaris::decode_fp16(codeFP16[1]);
 
         SubIndexT::store(
                 pqCoarseCentroids,
@@ -49,8 +49,8 @@ struct IndexMinMaxFP16Decoder {
             float* const __restrict outputStore) {
         const uint16_t* const __restrict codeFP16 =
                 reinterpret_cast<const uint16_t*>(code);
-        const float scaler = faiss::decode_fp16(codeFP16[0]);
-        const float minv = faiss::decode_fp16(codeFP16[1]);
+        const float scaler = polaris::decode_fp16(codeFP16[0]);
+        const float minv = polaris::decode_fp16(codeFP16[1]);
 
         SubIndexT::store(
                 pqFineCentroids, code + 2 * sizeof(uint16_t), outputStore);
@@ -72,8 +72,8 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict codeFP16 =
                 reinterpret_cast<const uint16_t*>(code);
-        const float scaler = faiss::decode_fp16(codeFP16[0]) * weight;
-        const float minv = faiss::decode_fp16(codeFP16[1]) * weight;
+        const float scaler = polaris::decode_fp16(codeFP16[0]) * weight;
+        const float minv = polaris::decode_fp16(codeFP16[1]) * weight;
 
         SubIndexT::accum(
                 pqCoarseCentroids,
@@ -97,8 +97,8 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict codeFP16 =
                 reinterpret_cast<const uint16_t*>(code);
-        const float scaler = faiss::decode_fp16(codeFP16[0]) * weight;
-        const float minv = faiss::decode_fp16(codeFP16[1]) * weight;
+        const float scaler = polaris::decode_fp16(codeFP16[0]) * weight;
+        const float minv = polaris::decode_fp16(codeFP16[1]) * weight;
 
         SubIndexT::accum(
                 pqFineCentroids,
@@ -130,13 +130,13 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         SubIndexT::accum(
                 pqCoarseCentroids0,
@@ -171,13 +171,13 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         SubIndexT::accum(
                 pqCoarseCentroids,
@@ -209,13 +209,13 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         SubIndexT::accum(
                 pqFineCentroids0,
@@ -246,13 +246,13 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         SubIndexT::accum(
                 pqFineCentroids,
@@ -291,18 +291,18 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         const uint16_t* const __restrict code2FP16 =
                 reinterpret_cast<const uint16_t*>(code2);
-        const float scaler2 = faiss::decode_fp16(code2FP16[0]) * weight2;
-        const float minv2 = faiss::decode_fp16(code2FP16[1]) * weight2;
+        const float scaler2 = polaris::decode_fp16(code2FP16[0]) * weight2;
+        const float minv2 = polaris::decode_fp16(code2FP16[1]) * weight2;
 
         SubIndexT::accum(
                 pqCoarseCentroids0,
@@ -344,18 +344,18 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         const uint16_t* const __restrict code2FP16 =
                 reinterpret_cast<const uint16_t*>(code2);
-        const float scaler2 = faiss::decode_fp16(code2FP16[0]) * weight2;
-        const float minv2 = faiss::decode_fp16(code2FP16[1]) * weight2;
+        const float scaler2 = polaris::decode_fp16(code2FP16[0]) * weight2;
+        const float minv2 = polaris::decode_fp16(code2FP16[1]) * weight2;
 
         SubIndexT::accum(
                 pqCoarseCentroids,
@@ -393,18 +393,18 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         const uint16_t* const __restrict code2FP16 =
                 reinterpret_cast<const uint16_t*>(code2);
-        const float scaler2 = faiss::decode_fp16(code2FP16[0]) * weight2;
-        const float minv2 = faiss::decode_fp16(code2FP16[1]) * weight2;
+        const float scaler2 = polaris::decode_fp16(code2FP16[0]) * weight2;
+        const float minv2 = polaris::decode_fp16(code2FP16[1]) * weight2;
 
         SubIndexT::accum(
                 pqFineCentroids0,
@@ -441,18 +441,18 @@ struct IndexMinMaxFP16Decoder {
             float& minvAccum) {
         const uint16_t* const __restrict code0FP16 =
                 reinterpret_cast<const uint16_t*>(code0);
-        const float scaler0 = faiss::decode_fp16(code0FP16[0]) * weight0;
-        const float minv0 = faiss::decode_fp16(code0FP16[1]) * weight0;
+        const float scaler0 = polaris::decode_fp16(code0FP16[0]) * weight0;
+        const float minv0 = polaris::decode_fp16(code0FP16[1]) * weight0;
 
         const uint16_t* const __restrict code1FP16 =
                 reinterpret_cast<const uint16_t*>(code1);
-        const float scaler1 = faiss::decode_fp16(code1FP16[0]) * weight1;
-        const float minv1 = faiss::decode_fp16(code1FP16[1]) * weight1;
+        const float scaler1 = polaris::decode_fp16(code1FP16[0]) * weight1;
+        const float minv1 = polaris::decode_fp16(code1FP16[1]) * weight1;
 
         const uint16_t* const __restrict code2FP16 =
                 reinterpret_cast<const uint16_t*>(code2);
-        const float scaler2 = faiss::decode_fp16(code2FP16[0]) * weight2;
-        const float minv2 = faiss::decode_fp16(code2FP16[1]) * weight2;
+        const float scaler2 = polaris::decode_fp16(code2FP16[0]) * weight2;
+        const float minv2 = polaris::decode_fp16(code2FP16[1]) * weight2;
 
         SubIndexT::accum(
                 pqFineCentroids,
@@ -469,4 +469,4 @@ struct IndexMinMaxFP16Decoder {
 };
 
 } // namespace cppcontrib
-} // namespace faiss
+} // namespace polaris

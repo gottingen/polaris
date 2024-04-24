@@ -14,10 +14,10 @@
 #include <vector>
 
 #include <polaris/IndexFlatCodes.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/impl/ScalarQuantizer.h>
 
-namespace faiss {
+namespace polaris {
 
 /**
  * Flat index built on a scalar quantizer.
@@ -105,6 +105,6 @@ struct IndexIVFScalarQuantizer : IndexIVF {
     void sa_decode(idx_t n, const uint8_t* bytes, float* x) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

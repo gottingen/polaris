@@ -17,7 +17,7 @@
  * norm components in Additive quantizer fast-scan.
  ********************************************/
 
-namespace faiss {
+namespace polaris {
 
 /// no-op handler
 struct DummyScaler {
@@ -74,4 +74,4 @@ struct NormTableScaler {
     }
 };
 
-} // namespace faiss
+} // namespace polaris

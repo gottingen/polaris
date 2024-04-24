@@ -32,7 +32,7 @@
 #include <thrust/gather.h>
 #include <thrust/reduce.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 void validRowIndices(
@@ -114,4 +114,4 @@ idx_t inplaceGatherFilteredRows(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

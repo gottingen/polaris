@@ -7,7 +7,7 @@
 
 #include <utility> // std::move
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -189,4 +189,4 @@ __host__ DeviceTensor<T, Dim, InnerContig, IndexT, PtrTraits>& DeviceTensor<
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -18,7 +18,7 @@
  * Callbacks for IO reader and writer
  ***********************************************************/
 
-struct PyCallbackIOWriter : faiss::IOWriter {
+struct PyCallbackIOWriter : polaris::IOWriter {
     PyObject* callback;
     size_t bs; // maximum write size
 
@@ -32,7 +32,7 @@ struct PyCallbackIOWriter : faiss::IOWriter {
     ~PyCallbackIOWriter() override;
 };
 
-struct PyCallbackIOReader : faiss::IOReader {
+struct PyCallbackIOReader : polaris::IOReader {
     PyObject* callback;
     size_t bs; // maximum buffer size
 
@@ -49,12 +49,12 @@ struct PyCallbackIOReader : faiss::IOReader {
  * Callbacks for IDSelector
  ***********************************************************/
 
-struct PyCallbackIDSelector : faiss::IDSelector {
+struct PyCallbackIDSelector : polaris::IDSelector {
     PyObject* callback;
 
     explicit PyCallbackIDSelector(PyObject* callback);
 
-    bool is_member(faiss::idx_t id) const override;
+    bool is_member(polaris::idx_t id) const override;
 
     ~PyCallbackIDSelector() override;
 };

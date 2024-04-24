@@ -24,7 +24,7 @@
 #include <polaris/utils/Heap.h>
 #include <polaris/utils/random.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Implementation of NNDescent which is one of the most popular
  *  KNN graph building algorithms
@@ -151,4 +151,4 @@ struct NNDescent {
     std::vector<int> final_graph;
 };
 
-} // namespace faiss
+} // namespace polaris

@@ -39,30 +39,30 @@ int main(int argc, char** argv) {
     int bytesPerVec = FLAGS_bytes_per_vec;
     int bitsPerCode = FLAGS_bits_per_code;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
 
     // IndexIVFPQ will complain, but just give us enough to get through this
     int numTrain = 4 * numCentroids;
-    std::vector<float> trainVecs = faiss::gpu::randVecs(numTrain, dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(numTrain, dim);
 
-    faiss::IndexFlatL2 coarseQuantizer(dim);
-    faiss::IndexIVFPQ cpuIndex(
+    polaris::IndexFlatL2 coarseQuantizer(dim);
+    polaris::IndexIVFPQ cpuIndex(
             &coarseQuantizer, dim, numCentroids, bytesPerVec, bitsPerCode);
     if (FLAGS_time_cpu) {
         cpuIndex.train(numTrain, trainVecs.data());
     }
 
-    faiss::gpu::GpuIndexIVFPQConfig config;
+    polaris::gpu::GpuIndexIVFPQConfig config;
     config.device = 0;
-    config.indicesOptions = (faiss::gpu::IndicesOptions)FLAGS_index;
+    config.indicesOptions = (polaris::gpu::IndicesOptions)FLAGS_index;
 
-    faiss::gpu::GpuIndexIVFPQ gpuIndex(
+    polaris::gpu::GpuIndexIVFPQ gpuIndex(
             &res,
             dim,
             numCentroids,
             bytesPerVec,
             bitsPerCode,
-            faiss::METRIC_L2,
+            polaris::METRIC_L2,
             config);
 
     if (FLAGS_time_gpu) {
@@ -86,10 +86,10 @@ int main(int argc, char** argv) {
             }
         }
 
-        auto addVecs = faiss::gpu::randVecs(FLAGS_batch_size, dim);
+        auto addVecs = polaris::gpu::randVecs(FLAGS_batch_size, dim);
 
         if (FLAGS_time_gpu) {
-            faiss::gpu::CpuTimer timer;
+            polaris::gpu::CpuTimer timer;
             gpuIndex.add(FLAGS_batch_size, addVecs.data());
             CUDA_VERIFY(cudaDeviceSynchronize());
             auto time = timer.elapsedMilliseconds();
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
         }
 
         if (FLAGS_time_cpu) {
-            faiss::gpu::CpuTimer timer;
+            polaris::gpu::CpuTimer timer;
             cpuIndex.add(FLAGS_batch_size, addVecs.data());
             auto time = timer.elapsedMilliseconds();
 

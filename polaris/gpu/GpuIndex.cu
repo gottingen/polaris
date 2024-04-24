@@ -21,7 +21,7 @@
 #include <limits>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Default CPU search size for which we use paged copies
@@ -55,7 +55,7 @@ bool should_use_raft(GpuIndexConfig config_) {
 GpuIndex::GpuIndex(
         std::shared_ptr<GpuResources> resources,
         int dims,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         GpuIndexConfig config)
         : Index(dims, metric),
@@ -86,7 +86,7 @@ int GpuIndex::getDevice() const {
     return config_.device;
 }
 
-void GpuIndex::copyFrom(const faiss::Index* index) {
+void GpuIndex::copyFrom(const polaris::Index* index) {
     d = index->d;
     metric_type = index->metric_type;
     metric_arg = index->metric_arg;
@@ -94,7 +94,7 @@ void GpuIndex::copyFrom(const faiss::Index* index) {
     is_trained = index->is_trained;
 }
 
-void GpuIndex::copyTo(faiss::Index* index) const {
+void GpuIndex::copyTo(polaris::Index* index) const {
     index->d = d;
     index->metric_type = metric_type;
     index->metric_arg = metric_arg;
@@ -499,15 +499,15 @@ std::shared_ptr<GpuResources> GpuIndex::getResources() {
     return resources_;
 }
 
-GpuIndex* tryCastGpuIndex(faiss::Index* index) {
+GpuIndex* tryCastGpuIndex(polaris::Index* index) {
     return dynamic_cast<GpuIndex*>(index);
 }
 
-bool isGpuIndex(faiss::Index* index) {
+bool isGpuIndex(polaris::Index* index) {
     return tryCastGpuIndex(index) != nullptr;
 }
 
-bool isGpuIndexImplemented(faiss::Index* index) {
+bool isGpuIndexImplemented(polaris::Index* index) {
 #define CHECK_INDEX(TYPE)                 \
     do {                                  \
         if (dynamic_cast<TYPE*>(index)) { \
@@ -515,11 +515,11 @@ bool isGpuIndexImplemented(faiss::Index* index) {
         }                                 \
     } while (false)
 
-    CHECK_INDEX(faiss::IndexFlat);
+    CHECK_INDEX(polaris::IndexFlat);
     // FIXME: do we want recursive checking of the IVF quantizer?
-    CHECK_INDEX(faiss::IndexIVFFlat);
-    CHECK_INDEX(faiss::IndexIVFPQ);
-    CHECK_INDEX(faiss::IndexIVFScalarQuantizer);
+    CHECK_INDEX(polaris::IndexIVFFlat);
+    CHECK_INDEX(polaris::IndexIVFPQ);
+    CHECK_INDEX(polaris::IndexIVFScalarQuantizer);
 
     return false;
 }
@@ -542,4 +542,4 @@ struct InitGpuCompileOptions {
 
 InitGpuCompileOptions InitGpuCompileOptions_instance;
 
-} // namespace faiss
+} // namespace polaris

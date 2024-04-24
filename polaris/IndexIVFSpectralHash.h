@@ -12,9 +12,9 @@
 
 #include <vector>
 
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 
-namespace faiss {
+namespace polaris {
 
 struct VectorTransform;
 struct IndexPreTransform;
@@ -84,6 +84,6 @@ struct IndexIVFSpectralHash : IndexIVF {
     ~IndexIVFSpectralHash() override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

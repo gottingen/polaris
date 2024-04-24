@@ -18,7 +18,7 @@
 
 #include <immintrin.h>
 
-namespace faiss {
+namespace polaris {
 
 /* Elementary Hamming distance computation: unoptimized  */
 template <size_t nbits, typename T>
@@ -457,6 +457,6 @@ struct GenHammingComputerM8 {
     }
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

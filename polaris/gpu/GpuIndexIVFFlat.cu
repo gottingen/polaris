@@ -23,12 +23,12 @@
 
 #include <limits>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 GpuIndexIVFFlat::GpuIndexIVFFlat(
         GpuResourcesProvider* provider,
-        const faiss::IndexIVFFlat* index,
+        const polaris::IndexIVFFlat* index,
         GpuIndexIVFFlatConfig config)
         : GpuIndexIVF(
                   provider,
@@ -46,7 +46,7 @@ GpuIndexIVFFlat::GpuIndexIVFFlat(
         GpuResourcesProvider* provider,
         int dims,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         GpuIndexIVFFlatConfig config)
         : GpuIndexIVF(provider, dims, metric, 0, nlist, config),
           ivfFlatConfig_(config),
@@ -60,7 +60,7 @@ GpuIndexIVFFlat::GpuIndexIVFFlat(
         Index* coarseQuantizer,
         int dims,
         idx_t nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         GpuIndexIVFFlatConfig config)
         : GpuIndexIVF(
                   provider,
@@ -111,7 +111,7 @@ void GpuIndexIVFFlat::reserveMemory(size_t numVecs) {
     }
 }
 
-void GpuIndexIVFFlat::copyFrom(const faiss::IndexIVFFlat* index) {
+void GpuIndexIVFFlat::copyFrom(const polaris::IndexIVFFlat* index) {
     DeviceScope scope(config_.device);
 
     // This will copy GpuIndexIVF data such as the coarse quantizer
@@ -153,7 +153,7 @@ void GpuIndexIVFFlat::copyFrom(const faiss::IndexIVFFlat* index) {
     index_->copyInvertedListsFrom(index->invlists);
 }
 
-void GpuIndexIVFFlat::copyTo(faiss::IndexIVFFlat* index) const {
+void GpuIndexIVFFlat::copyTo(polaris::IndexIVFFlat* index) const {
     DeviceScope scope(config_.device);
 
     // We must have the indices in order to copy to ourselves
@@ -309,11 +309,11 @@ void GpuIndexIVFFlat::setIndex_(
         GpuResources* resources,
         int dim,
         int nlist,
-        faiss::MetricType metric,
+        polaris::MetricType metric,
         float metricArg,
         bool useResidual,
         /// Optional ScalarQuantizer
-        faiss::ScalarQuantizer* scalarQ,
+        polaris::ScalarQuantizer* scalarQ,
         bool interleavedLayout,
         IndicesOptions indicesOptions,
         MemorySpace space) {
@@ -357,4 +357,4 @@ void GpuIndexIVFFlat::setIndex_(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -38,24 +38,24 @@ constexpr float kF32MaxRelErr = 0.03f;
 
 struct Options {
     Options() {
-        numAdd = 2 * faiss::gpu::randVal(2000, 5000);
-        dim = faiss::gpu::randVal(64, 200);
+        numAdd = 2 * polaris::gpu::randVal(2000, 5000);
+        dim = polaris::gpu::randVal(64, 200);
 
         numCentroids = std::sqrt((float)numAdd / 2);
         numTrain = numCentroids * 40;
-        nprobe = faiss::gpu::randVal(std::min(10, numCentroids), numCentroids);
-        numQuery = faiss::gpu::randVal(32, 100);
+        nprobe = polaris::gpu::randVal(std::min(10, numCentroids), numCentroids);
+        numQuery = polaris::gpu::randVal(32, 100);
 
         // Due to the approximate nature of the query and of floating point
         // differences between GPU and CPU, to stay within our error bounds,
         // only use a small k
-        k = std::min(faiss::gpu::randVal(10, 30), numAdd / 40);
-        indicesOpt = faiss::gpu::randSelect(
-                {faiss::gpu::INDICES_CPU,
-                 faiss::gpu::INDICES_32_BIT,
-                 faiss::gpu::INDICES_64_BIT});
+        k = std::min(polaris::gpu::randVal(10, 30), numAdd / 40);
+        indicesOpt = polaris::gpu::randSelect(
+                {polaris::gpu::INDICES_CPU,
+                 polaris::gpu::INDICES_32_BIT,
+                 polaris::gpu::INDICES_64_BIT});
 
-        device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+        device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
 
         useRaft = false;
     }
@@ -78,47 +78,47 @@ struct Options {
     int numQuery;
     int k;
     int device;
-    faiss::gpu::IndicesOptions indicesOpt;
+    polaris::gpu::IndicesOptions indicesOpt;
     bool useRaft;
 };
 
 void queryTest(
         Options opt,
-        faiss::MetricType metricType,
+        polaris::MetricType metricType,
         bool useFloat16CoarseQuantizer) {
     for (int tries = 0; tries < 2; ++tries) {
         std::vector<float> trainVecs =
-                faiss::gpu::randVecs(opt.numTrain, opt.dim);
-        std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+                polaris::gpu::randVecs(opt.numTrain, opt.dim);
+        std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-        faiss::IndexFlatL2 quantizerL2(opt.dim);
-        faiss::IndexFlatIP quantizerIP(opt.dim);
-        faiss::Index* quantizer = metricType == faiss::METRIC_L2
-                ? (faiss::Index*)&quantizerL2
-                : (faiss::Index*)&quantizerIP;
+        polaris::IndexFlatL2 quantizerL2(opt.dim);
+        polaris::IndexFlatIP quantizerIP(opt.dim);
+        polaris::Index* quantizer = metricType == polaris::METRIC_L2
+                ? (polaris::Index*)&quantizerL2
+                : (polaris::Index*)&quantizerIP;
 
-        faiss::IndexIVFFlat cpuIndex(
+        polaris::IndexIVFFlat cpuIndex(
                 quantizer, opt.dim, opt.numCentroids, metricType);
         cpuIndex.train(opt.numTrain, trainVecs.data());
         cpuIndex.add(opt.numAdd, addVecs.data());
         cpuIndex.nprobe = opt.nprobe;
 
-        faiss::gpu::StandardGpuResources res;
+        polaris::gpu::StandardGpuResources res;
         res.noTempMemory();
 
-        faiss::gpu::GpuIndexIVFFlatConfig config;
+        polaris::gpu::GpuIndexIVFFlatConfig config;
         config.device = opt.device;
         config.indicesOptions = opt.indicesOpt;
         config.flatConfig.useFloat16 = useFloat16CoarseQuantizer;
         config.use_raft = opt.useRaft;
 
-        faiss::gpu::GpuIndexIVFFlat gpuIndex(
+        polaris::gpu::GpuIndexIVFFlat gpuIndex(
                 &res, cpuIndex.d, cpuIndex.nlist, cpuIndex.metric_type, config);
         gpuIndex.copyFrom(&cpuIndex);
         gpuIndex.nprobe = opt.nprobe;
 
         bool compFloat16 = useFloat16CoarseQuantizer;
-        faiss::gpu::compareIndices(
+        polaris::gpu::compareIndices(
                 cpuIndex,
                 gpuIndex,
                 opt.numQuery,
@@ -135,38 +135,38 @@ void queryTest(
 }
 
 void addTest(
-        faiss::MetricType metricType,
+        polaris::MetricType metricType,
         bool useFloat16CoarseQuantizer,
         bool useRaft) {
     for (int tries = 0; tries < 2; ++tries) {
         Options opt;
 
         std::vector<float> trainVecs =
-                faiss::gpu::randVecs(opt.numTrain, opt.dim);
-        std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+                polaris::gpu::randVecs(opt.numTrain, opt.dim);
+        std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-        faiss::IndexFlatL2 quantizerL2(opt.dim);
-        faiss::IndexFlatIP quantizerIP(opt.dim);
-        faiss::Index* quantizer = metricType == faiss::METRIC_L2
-                ? (faiss::Index*)&quantizerL2
-                : (faiss::Index*)&quantizerIP;
+        polaris::IndexFlatL2 quantizerL2(opt.dim);
+        polaris::IndexFlatIP quantizerIP(opt.dim);
+        polaris::Index* quantizer = metricType == polaris::METRIC_L2
+                ? (polaris::Index*)&quantizerL2
+                : (polaris::Index*)&quantizerIP;
 
-        faiss::IndexIVFFlat cpuIndex(
+        polaris::IndexIVFFlat cpuIndex(
                 quantizer, opt.dim, opt.numCentroids, metricType);
         cpuIndex.train(opt.numTrain, trainVecs.data());
         cpuIndex.nprobe = opt.nprobe;
 
-        faiss::gpu::StandardGpuResources res;
+        polaris::gpu::StandardGpuResources res;
         res.noTempMemory();
 
-        faiss::gpu::GpuIndexIVFFlatConfig config;
+        polaris::gpu::GpuIndexIVFFlatConfig config;
         config.device = opt.device;
         config.indicesOptions =
-                useRaft ? faiss::gpu::INDICES_64_BIT : opt.indicesOpt;
+                useRaft ? polaris::gpu::INDICES_64_BIT : opt.indicesOpt;
         config.flatConfig.useFloat16 = useFloat16CoarseQuantizer;
         config.use_raft = useRaft;
 
-        faiss::gpu::GpuIndexIVFFlat gpuIndex(
+        polaris::gpu::GpuIndexIVFFlat gpuIndex(
                 &res, cpuIndex.d, cpuIndex.nlist, cpuIndex.metric_type, config);
         gpuIndex.copyFrom(&cpuIndex);
         gpuIndex.nprobe = opt.nprobe;
@@ -175,7 +175,7 @@ void addTest(
         gpuIndex.add(opt.numAdd, addVecs.data());
 
         bool compFloat16 = useFloat16CoarseQuantizer;
-        faiss::gpu::compareIndices(
+        polaris::gpu::compareIndices(
                 cpuIndex,
                 gpuIndex,
                 opt.numQuery,
@@ -190,28 +190,28 @@ void addTest(
 
 void copyToTest(bool useFloat16CoarseQuantizer, bool useRaft) {
     Options opt;
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = opt.device;
     config.indicesOptions =
-            useRaft ? faiss::gpu::INDICES_64_BIT : opt.indicesOpt;
+            useRaft ? polaris::gpu::INDICES_64_BIT : opt.indicesOpt;
     config.flatConfig.useFloat16 = useFloat16CoarseQuantizer;
     config.use_raft = useRaft;
 
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(
-            &res, opt.dim, opt.numCentroids, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(
+            &res, opt.dim, opt.numCentroids, polaris::METRIC_L2, config);
     gpuIndex.train(opt.numTrain, trainVecs.data());
     gpuIndex.add(opt.numAdd, addVecs.data());
     gpuIndex.nprobe = opt.nprobe;
 
     // use garbage values to see if we overwrite then
-    faiss::IndexFlatL2 cpuQuantizer(1);
-    faiss::IndexIVFFlat cpuIndex(&cpuQuantizer, 1, 1, faiss::METRIC_L2);
+    polaris::IndexFlatL2 cpuQuantizer(1);
+    polaris::IndexIVFFlat cpuIndex(&cpuQuantizer, 1, 1, polaris::METRIC_L2);
     cpuIndex.nprobe = 1;
 
     gpuIndex.copyTo(&cpuIndex);
@@ -229,7 +229,7 @@ void copyToTest(bool useFloat16CoarseQuantizer, bool useRaft) {
 
     // Query both objects; results should be equivalent
     bool compFloat16 = useFloat16CoarseQuantizer;
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             opt.numQuery,
@@ -243,28 +243,28 @@ void copyToTest(bool useFloat16CoarseQuantizer, bool useRaft) {
 
 void copyFromTest(bool useFloat16CoarseQuantizer, bool useRaft) {
     Options opt;
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::IndexFlatL2 cpuQuantizer(opt.dim);
-    faiss::IndexIVFFlat cpuIndex(
-            &cpuQuantizer, opt.dim, opt.numCentroids, faiss::METRIC_L2);
+    polaris::IndexFlatL2 cpuQuantizer(opt.dim);
+    polaris::IndexIVFFlat cpuIndex(
+            &cpuQuantizer, opt.dim, opt.numCentroids, polaris::METRIC_L2);
     cpuIndex.nprobe = opt.nprobe;
     cpuIndex.train(opt.numTrain, trainVecs.data());
     cpuIndex.add(opt.numAdd, addVecs.data());
 
     // use garbage values to see if we overwrite then
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = opt.device;
     config.indicesOptions =
-            useRaft ? faiss::gpu::INDICES_64_BIT : opt.indicesOpt;
+            useRaft ? polaris::gpu::INDICES_64_BIT : opt.indicesOpt;
     config.flatConfig.useFloat16 = useFloat16CoarseQuantizer;
     config.use_raft = useRaft;
 
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(&res, 1, 1, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(&res, 1, 1, polaris::METRIC_L2, config);
     gpuIndex.nprobe = 1;
 
     gpuIndex.copyFrom(&cpuIndex);
@@ -281,7 +281,7 @@ void copyFromTest(bool useFloat16CoarseQuantizer, bool useRaft) {
 
     // Query both objects; results should be equivalent
     bool compFloat16 = useFloat16CoarseQuantizer;
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             opt.numQuery,
@@ -294,34 +294,34 @@ void copyFromTest(bool useFloat16CoarseQuantizer, bool useRaft) {
 }
 
 TEST(TestGpuIndexIVFFlat, Float32_32_Add_L2) {
-    addTest(faiss::METRIC_L2, false, false);
+    addTest(polaris::METRIC_L2, false, false);
 
 #if defined USE_NVIDIA_RAFT
-    addTest(faiss::METRIC_L2, false, true);
+    addTest(polaris::METRIC_L2, false, true);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float32_32_Add_IP) {
-    addTest(faiss::METRIC_INNER_PRODUCT, false, false);
+    addTest(polaris::METRIC_INNER_PRODUCT, false, false);
 
 #if defined USE_NVIDIA_RAFT
-    addTest(faiss::METRIC_INNER_PRODUCT, false, true);
+    addTest(polaris::METRIC_INNER_PRODUCT, false, true);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float16_32_Add_L2) {
-    addTest(faiss::METRIC_L2, true, false);
+    addTest(polaris::METRIC_L2, true, false);
 
 #if defined USE_NVIDIA_RAFT
-    addTest(faiss::METRIC_L2, true, true);
+    addTest(polaris::METRIC_L2, true, true);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float16_32_Add_IP) {
-    addTest(faiss::METRIC_INNER_PRODUCT, true, false);
+    addTest(polaris::METRIC_INNER_PRODUCT, true, false);
 
 #if defined USE_NVIDIA_RAFT
-    addTest(faiss::METRIC_INNER_PRODUCT, true, true);
+    addTest(polaris::METRIC_INNER_PRODUCT, true, true);
 #endif
 }
 
@@ -331,23 +331,23 @@ TEST(TestGpuIndexIVFFlat, Float16_32_Add_IP) {
 
 TEST(TestGpuIndexIVFFlat, Float32_Query_L2) {
     Options opt;
-    queryTest(opt, faiss::METRIC_L2, false);
+    queryTest(opt, polaris::METRIC_L2, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_L2, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_L2, false);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float32_Query_IP) {
     Options opt;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, false);
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, false);
 #endif
 }
 
@@ -355,12 +355,12 @@ TEST(TestGpuIndexIVFFlat, LargeBatch) {
     Options opt;
     opt.dim = 3;
     opt.numQuery = 100000;
-    queryTest(opt, faiss::METRIC_L2, false);
+    queryTest(opt, polaris::METRIC_L2, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_L2, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_L2, false);
 #endif
 }
 
@@ -368,23 +368,23 @@ TEST(TestGpuIndexIVFFlat, LargeBatch) {
 
 TEST(TestGpuIndexIVFFlat, Float16_32_Query_L2) {
     Options opt;
-    queryTest(opt, faiss::METRIC_L2, true);
+    queryTest(opt, polaris::METRIC_L2, true);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_L2, true);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_L2, true);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float16_32_Query_IP) {
     Options opt;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, true);
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, true);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, true);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, true);
 #endif
 }
 
@@ -396,48 +396,48 @@ TEST(TestGpuIndexIVFFlat, Float16_32_Query_IP) {
 TEST(TestGpuIndexIVFFlat, Float32_Query_L2_64) {
     Options opt;
     opt.dim = 64;
-    queryTest(opt, faiss::METRIC_L2, false);
+    queryTest(opt, polaris::METRIC_L2, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_L2, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_L2, false);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float32_Query_IP_64) {
     Options opt;
     opt.dim = 64;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, false);
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, false);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float32_Query_L2_128) {
     Options opt;
     opt.dim = 128;
-    queryTest(opt, faiss::METRIC_L2, false);
+    queryTest(opt, polaris::METRIC_L2, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_L2, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_L2, false);
 #endif
 }
 
 TEST(TestGpuIndexIVFFlat, Float32_Query_IP_128) {
     Options opt;
     opt.dim = 128;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, false);
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, false);
 
 #if defined USE_NVIDIA_RAFT
     opt.useRaft = true;
-    opt.indicesOpt = faiss::gpu::INDICES_64_BIT;
-    queryTest(opt, faiss::METRIC_INNER_PRODUCT, false);
+    opt.indicesOpt = polaris::gpu::INDICES_64_BIT;
+    queryTest(opt, polaris::METRIC_INNER_PRODUCT, false);
 #endif
 }
 
@@ -464,8 +464,8 @@ TEST(TestGpuIndexIVFFlat, Float32_32_CopyFrom) {
 TEST(TestGpuIndexIVFFlat, Float32_negative) {
     Options opt;
 
-    auto trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    auto addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    auto trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    auto addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
     // Put all vecs on negative side
     for (auto& f : trainVecs) {
@@ -476,38 +476,38 @@ TEST(TestGpuIndexIVFFlat, Float32_negative) {
         f *= std::abs(f) * -1.0f;
     }
 
-    faiss::IndexFlatIP quantizerIP(opt.dim);
-    faiss::Index* quantizer = (faiss::Index*)&quantizerIP;
+    polaris::IndexFlatIP quantizerIP(opt.dim);
+    polaris::Index* quantizer = (polaris::Index*)&quantizerIP;
 
-    faiss::IndexIVFFlat cpuIndex(
-            quantizer, opt.dim, opt.numCentroids, faiss::METRIC_INNER_PRODUCT);
+    polaris::IndexIVFFlat cpuIndex(
+            quantizer, opt.dim, opt.numCentroids, polaris::METRIC_INNER_PRODUCT);
     cpuIndex.train(opt.numTrain, trainVecs.data());
     cpuIndex.add(opt.numAdd, addVecs.data());
     cpuIndex.nprobe = opt.nprobe;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
     // Construct a positive test set
-    auto queryVecs = faiss::gpu::randVecs(opt.numQuery, opt.dim);
+    auto queryVecs = polaris::gpu::randVecs(opt.numQuery, opt.dim);
 
     // Put all vecs on positive size
     for (auto& f : queryVecs) {
         f = std::abs(f);
     }
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = opt.device;
     config.indicesOptions = opt.indicesOpt;
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(
             &res, cpuIndex.d, cpuIndex.nlist, cpuIndex.metric_type, config);
     gpuIndex.copyFrom(&cpuIndex);
     gpuIndex.nprobe = opt.nprobe;
 
     bool compFloat16 = false;
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             queryVecs,
             cpuIndex,
             gpuIndex,
@@ -524,14 +524,14 @@ TEST(TestGpuIndexIVFFlat, Float32_negative) {
 
 #if defined USE_NVIDIA_RAFT
     config.use_raft = true;
-    config.indicesOptions = faiss::gpu::INDICES_64_BIT;
+    config.indicesOptions = polaris::gpu::INDICES_64_BIT;
 
-    faiss::gpu::GpuIndexIVFFlat raftGpuIndex(
+    polaris::gpu::GpuIndexIVFFlat raftGpuIndex(
             &res, cpuIndex.d, cpuIndex.nlist, cpuIndex.metric_type, config);
     raftGpuIndex.copyFrom(&cpuIndex);
     raftGpuIndex.nprobe = opt.nprobe;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             queryVecs,
             cpuIndex,
             raftGpuIndex,
@@ -555,10 +555,10 @@ TEST(TestGpuIndexIVFFlat, Float32_negative) {
 TEST(TestGpuIndexIVFFlat, QueryNaN) {
     Options opt;
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(opt.numAdd, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(opt.numAdd, opt.dim);
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
     int numQuery = 10;
@@ -566,16 +566,16 @@ TEST(TestGpuIndexIVFFlat, QueryNaN) {
             numQuery * opt.dim, std::numeric_limits<float>::quiet_NaN());
 
     std::vector<float> distances(numQuery * opt.k, 0);
-    std::vector<faiss::idx_t> indices(numQuery * opt.k, 0);
+    std::vector<polaris::idx_t> indices(numQuery * opt.k, 0);
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = opt.device;
     config.indicesOptions = opt.indicesOpt;
-    config.flatConfig.useFloat16 = faiss::gpu::randBool();
+    config.flatConfig.useFloat16 = polaris::gpu::randBool();
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(
-            &res, opt.dim, opt.numCentroids, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(
+            &res, opt.dim, opt.numCentroids, polaris::METRIC_L2, config);
     gpuIndex.nprobe = opt.nprobe;
 
     gpuIndex.train(opt.numTrain, trainVecs.data());
@@ -595,11 +595,11 @@ TEST(TestGpuIndexIVFFlat, QueryNaN) {
 
 #if defined USE_NVIDIA_RAFT
     config.use_raft = true;
-    config.indicesOptions = faiss::gpu::INDICES_64_BIT;
+    config.indicesOptions = polaris::gpu::INDICES_64_BIT;
     std::fill(distances.begin(), distances.end(), 0);
     std::fill(indices.begin(), indices.end(), 0);
-    faiss::gpu::GpuIndexIVFFlat raftGpuIndex(
-            &res, opt.dim, opt.numCentroids, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat raftGpuIndex(
+            &res, opt.dim, opt.numCentroids, polaris::METRIC_L2, config);
     raftGpuIndex.nprobe = opt.nprobe;
 
     raftGpuIndex.train(opt.numTrain, trainVecs.data());
@@ -622,7 +622,7 @@ TEST(TestGpuIndexIVFFlat, QueryNaN) {
 TEST(TestGpuIndexIVFFlat, AddNaN) {
     Options opt;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
     int numNans = 10;
@@ -635,15 +635,15 @@ TEST(TestGpuIndexIVFFlat, AddNaN) {
         nans[opt.dim + i] = i;
     }
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(opt.numTrain, opt.dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(opt.numTrain, opt.dim);
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = opt.device;
     config.indicesOptions = opt.indicesOpt;
-    config.flatConfig.useFloat16 = faiss::gpu::randBool();
+    config.flatConfig.useFloat16 = polaris::gpu::randBool();
     config.use_raft = false;
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(
-            &res, opt.dim, opt.numCentroids, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(
+            &res, opt.dim, opt.numCentroids, polaris::METRIC_L2, config);
     gpuIndex.nprobe = opt.nprobe;
     gpuIndex.train(opt.numTrain, trainVecs.data());
 
@@ -651,9 +651,9 @@ TEST(TestGpuIndexIVFFlat, AddNaN) {
     EXPECT_EQ(gpuIndex.ntotal, 0);
     gpuIndex.add(numNans, nans.data());
 
-    std::vector<float> queryVecs = faiss::gpu::randVecs(opt.numQuery, opt.dim);
+    std::vector<float> queryVecs = polaris::gpu::randVecs(opt.numQuery, opt.dim);
     std::vector<float> distance(opt.numQuery * opt.k, 0);
-    std::vector<faiss::idx_t> indices(opt.numQuery * opt.k, 0);
+    std::vector<polaris::idx_t> indices(opt.numQuery * opt.k, 0);
 
     // should not crash
     gpuIndex.search(
@@ -665,9 +665,9 @@ TEST(TestGpuIndexIVFFlat, AddNaN) {
 
 #if defined USE_NVIDIA_RAFT
     config.use_raft = true;
-    config.indicesOptions = faiss::gpu::INDICES_64_BIT;
-    faiss::gpu::GpuIndexIVFFlat raftGpuIndex(
-            &res, opt.dim, opt.numCentroids, faiss::METRIC_L2, config);
+    config.indicesOptions = polaris::gpu::INDICES_64_BIT;
+    polaris::gpu::GpuIndexIVFFlat raftGpuIndex(
+            &res, opt.dim, opt.numCentroids, polaris::METRIC_L2, config);
     raftGpuIndex.nprobe = opt.nprobe;
     raftGpuIndex.train(opt.numTrain, trainVecs.data());
 
@@ -688,9 +688,9 @@ TEST(TestGpuIndexIVFFlat, AddNaN) {
 TEST(TestGpuIndexIVFFlat, UnifiedMemory) {
     // Construct on a random device to test multi-device, if we have
     // multiple devices
-    int device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+    int device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
 
-    if (!faiss::gpu::getFullUnifiedMemSupport(device)) {
+    if (!polaris::gpu::getFullUnifiedMemSupport(device)) {
         return;
     }
 
@@ -706,31 +706,31 @@ TEST(TestGpuIndexIVFFlat, UnifiedMemory) {
     int k = 10;
     int nprobe = 8;
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(numTrain, dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(numAdd, dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(numTrain, dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(numAdd, dim);
 
-    faiss::IndexFlatL2 quantizer(dim);
-    faiss::IndexIVFFlat cpuIndex(
-            &quantizer, dim, numCentroids, faiss::METRIC_L2);
+    polaris::IndexFlatL2 quantizer(dim);
+    polaris::IndexIVFFlat cpuIndex(
+            &quantizer, dim, numCentroids, polaris::METRIC_L2);
 
     cpuIndex.train(numTrain, trainVecs.data());
     cpuIndex.add(numAdd, addVecs.data());
     cpuIndex.nprobe = nprobe;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = device;
-    config.memorySpace = faiss::gpu::MemorySpace::Unified;
+    config.memorySpace = polaris::gpu::MemorySpace::Unified;
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(
-            &res, dim, numCentroids, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(
+            &res, dim, numCentroids, polaris::METRIC_L2, config);
     gpuIndex.copyFrom(&cpuIndex);
     gpuIndex.nprobe = nprobe;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             numQuery,
@@ -743,13 +743,13 @@ TEST(TestGpuIndexIVFFlat, UnifiedMemory) {
 
 #if defined USE_NVIDIA_RAFT
     config.use_raft = true;
-    config.indicesOptions = faiss::gpu::INDICES_64_BIT;
-    faiss::gpu::GpuIndexIVFFlat raftGpuIndex(
-            &res, dim, numCentroids, faiss::METRIC_L2, config);
+    config.indicesOptions = polaris::gpu::INDICES_64_BIT;
+    polaris::gpu::GpuIndexIVFFlat raftGpuIndex(
+            &res, dim, numCentroids, polaris::METRIC_L2, config);
     raftGpuIndex.copyFrom(&cpuIndex);
     raftGpuIndex.nprobe = nprobe;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             raftGpuIndex,
             numQuery,
@@ -763,12 +763,12 @@ TEST(TestGpuIndexIVFFlat, UnifiedMemory) {
 }
 
 TEST(TestGpuIndexIVFFlat, LongIVFList) {
-    int device = faiss::gpu::randVal(0, faiss::gpu::getNumDevices() - 1);
+    int device = polaris::gpu::randVal(0, polaris::gpu::getNumDevices() - 1);
 
     // Skip this device if we do not have sufficient memory
     constexpr size_t kMem = size_t(24) * 1024 * 1024 * 1024;
 
-    if (faiss::gpu::getFreeMemory(device) < kMem) {
+    if (polaris::gpu::getFreeMemory(device) < kMem) {
         std::cout << "TestGpuIndexIVFFlat.LongIVFList: skipping due "
                      "to insufficient device memory\n";
         return;
@@ -785,31 +785,31 @@ TEST(TestGpuIndexIVFFlat, LongIVFList) {
     int numQuery = 5;
     int k = 10;
 
-    std::vector<float> trainVecs = faiss::gpu::randVecs(numTrain, dim);
-    std::vector<float> addVecs = faiss::gpu::randVecs(numAdd, dim);
+    std::vector<float> trainVecs = polaris::gpu::randVecs(numTrain, dim);
+    std::vector<float> addVecs = polaris::gpu::randVecs(numAdd, dim);
 
-    faiss::IndexFlatL2 quantizer(dim);
-    faiss::IndexIVFFlat cpuIndex(
-            &quantizer, dim, numCentroids, faiss::METRIC_L2);
+    polaris::IndexFlatL2 quantizer(dim);
+    polaris::IndexIVFFlat cpuIndex(
+            &quantizer, dim, numCentroids, polaris::METRIC_L2);
 
     cpuIndex.train(numTrain, trainVecs.data());
     cpuIndex.add(numAdd, addVecs.data());
     cpuIndex.nprobe = 1;
 
-    faiss::gpu::StandardGpuResources res;
+    polaris::gpu::StandardGpuResources res;
     res.noTempMemory();
 
-    faiss::gpu::GpuIndexIVFFlatConfig config;
+    polaris::gpu::GpuIndexIVFFlatConfig config;
     config.device = device;
     config.use_raft = false;
 
-    faiss::gpu::GpuIndexIVFFlat gpuIndex(
-            &res, dim, numCentroids, faiss::METRIC_L2, config);
+    polaris::gpu::GpuIndexIVFFlat gpuIndex(
+            &res, dim, numCentroids, polaris::METRIC_L2, config);
     gpuIndex.train(numTrain, trainVecs.data());
     gpuIndex.add(numAdd, addVecs.data());
     gpuIndex.nprobe = 1;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             gpuIndex,
             numQuery,
@@ -822,14 +822,14 @@ TEST(TestGpuIndexIVFFlat, LongIVFList) {
 
 #if defined USE_NVIDIA_RAFT
     config.use_raft = true;
-    config.indicesOptions = faiss::gpu::INDICES_64_BIT;
-    faiss::gpu::GpuIndexIVFFlat raftGpuIndex(
-            &res, dim, numCentroids, faiss::METRIC_L2, config);
+    config.indicesOptions = polaris::gpu::INDICES_64_BIT;
+    polaris::gpu::GpuIndexIVFFlat raftGpuIndex(
+            &res, dim, numCentroids, polaris::METRIC_L2, config);
     raftGpuIndex.train(numTrain, trainVecs.data());
     raftGpuIndex.add(numAdd, addVecs.data());
     raftGpuIndex.nprobe = 1;
 
-    faiss::gpu::compareIndices(
+    polaris::gpu::compareIndices(
             cpuIndex,
             raftGpuIndex,
             numQuery,
@@ -846,7 +846,7 @@ int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
 
     // just run with a fixed test seed
-    faiss::gpu::setTestSeed(100);
+    polaris::gpu::setTestSeed(100);
 
     return RUN_ALL_TESTS();
 }

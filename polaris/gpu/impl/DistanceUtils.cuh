@@ -15,7 +15,7 @@
 // Shared utilities for brute-force distance calculations
 //
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 struct IPDistance {
@@ -374,4 +374,4 @@ inline void chooseTileSize(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

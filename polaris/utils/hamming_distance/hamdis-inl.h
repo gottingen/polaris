@@ -23,7 +23,7 @@
 #include <polaris/utils/hamming_distance/generic-inl.h>
 #endif
 
-namespace faiss {
+namespace polaris {
 
 /***************************************************************************
  * Equivalence with a template class when code size is known at compile time
@@ -78,6 +78,6 @@ typename Consumer::T dispatch_HammingComputer(
     }
 }
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

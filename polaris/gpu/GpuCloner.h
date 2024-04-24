@@ -17,19 +17,19 @@
 #include <polaris/gpu/GpuIndex.h>
 #include <polaris/gpu/GpuIndicesOptions.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class GpuResourcesProvider;
 
 /// Cloner specialized for GPU -> CPU
-struct ToCPUCloner : faiss::Cloner {
+struct ToCPUCloner : polaris::Cloner {
     void merge_index(Index* dst, Index* src, bool successive_ids);
     Index* clone_Index(const Index* index) override;
 };
 
 /// Cloner specialized for CPU -> 1 GPU
-struct ToGpuCloner : faiss::Cloner, GpuClonerOptions {
+struct ToGpuCloner : polaris::Cloner, GpuClonerOptions {
     GpuResourcesProvider* provider;
     int device;
 
@@ -42,7 +42,7 @@ struct ToGpuCloner : faiss::Cloner, GpuClonerOptions {
 };
 
 /// Cloner specialized for CPU -> multiple GPUs
-struct ToGpuClonerMultiple : faiss::Cloner, GpuMultipleClonerOptions {
+struct ToGpuClonerMultiple : polaris::Cloner, GpuMultipleClonerOptions {
     std::vector<ToGpuCloner> sub_cloners;
 
     ToGpuClonerMultiple(
@@ -67,19 +67,19 @@ struct ToGpuClonerMultiple : faiss::Cloner, GpuMultipleClonerOptions {
 };
 
 /// converts any GPU index inside gpu_index to a CPU index
-faiss::Index* index_gpu_to_cpu(const faiss::Index* gpu_index);
+polaris::Index* index_gpu_to_cpu(const polaris::Index* gpu_index);
 
 /// converts any CPU index that can be converted to GPU
-faiss::Index* index_cpu_to_gpu(
+polaris::Index* index_cpu_to_gpu(
         GpuResourcesProvider* provider,
         int device,
-        const faiss::Index* index,
+        const polaris::Index* index,
         const GpuClonerOptions* options = nullptr);
 
-faiss::Index* index_cpu_to_gpu_multiple(
+polaris::Index* index_cpu_to_gpu_multiple(
         std::vector<GpuResourcesProvider*>& provider,
         std::vector<int>& devices,
-        const faiss::Index* index,
+        const polaris::Index* index,
         const GpuMultipleClonerOptions* options = nullptr);
 
 /// index factory for the ProgressiveDimClustering object
@@ -101,21 +101,21 @@ struct GpuProgressiveDimIndexFactory : ProgressiveDimIndexFactory {
  * Cloning binary indexes
  *********************************************/
 
-faiss::IndexBinary* index_binary_gpu_to_cpu(
-        const faiss::IndexBinary* gpu_index);
+polaris::IndexBinary* index_binary_gpu_to_cpu(
+        const polaris::IndexBinary* gpu_index);
 
 /// converts any CPU index that can be converted to GPU
-faiss::IndexBinary* index_binary_cpu_to_gpu(
+polaris::IndexBinary* index_binary_cpu_to_gpu(
         GpuResourcesProvider* provider,
         int device,
-        const faiss::IndexBinary* index,
+        const polaris::IndexBinary* index,
         const GpuClonerOptions* options = nullptr);
 
-faiss::IndexBinary* index_binary_cpu_to_gpu_multiple(
+polaris::IndexBinary* index_binary_cpu_to_gpu_multiple(
         std::vector<GpuResourcesProvider*>& provider,
         std::vector<int>& devices,
-        const faiss::IndexBinary* index,
+        const polaris::IndexBinary* index,
         const GpuMultipleClonerOptions* options = nullptr);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

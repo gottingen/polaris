@@ -9,7 +9,7 @@
 
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // output[x][i] += input[i] for all x
@@ -49,4 +49,4 @@ void runSumAlongRows(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

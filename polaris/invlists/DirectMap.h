@@ -13,7 +13,7 @@
 #include <polaris/invlists/InvertedLists.h>
 #include <unordered_map>
 
-namespace faiss {
+namespace polaris {
 
 struct IDSelector;
 
@@ -109,6 +109,6 @@ struct DirectMapAdd {
     ~DirectMapAdd();
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

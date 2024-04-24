@@ -9,7 +9,7 @@
 
 #include <polaris/MetricType.h>
 
-namespace faiss {
+namespace polaris {
 
 /**
  * Packing consists in combining a fixed number of codes of constant size
@@ -68,4 +68,4 @@ struct CodePackerFlat : CodePacker {
     void unpack_all(const uint8_t* block, uint8_t* flat_codes) const final;
 };
 
-} // namespace faiss
+} // namespace polaris

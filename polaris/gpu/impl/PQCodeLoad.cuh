@@ -9,7 +9,7 @@
 
 #include <polaris/gpu/utils/PtxUtils.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 #if __CUDA_ARCH__ >= 350
@@ -379,4 +379,4 @@ struct LoadCode32<96> {
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <polaris/gpu/utils/Tensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -190,4 +190,4 @@ void runTransposeAny(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

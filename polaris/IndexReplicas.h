@@ -11,9 +11,9 @@
 #include <polaris/IndexBinary.h>
 #include <polaris/impl/ThreadedIndex.h>
 
-namespace faiss {
+namespace polaris {
 
-/// Takes individual faiss::Index instances, and splits queries for
+/// Takes individual polaris::Index instances, and splits queries for
 /// sending to each Index instance, and joins the results together
 /// when done.
 /// Each index is managed by a separate CPU thread.
@@ -48,15 +48,15 @@ class IndexReplicasTemplate : public ThreadedIndex<IndexT> {
         this->removeIndex(index);
     }
 
-    /// faiss::Index API
+    /// polaris::Index API
     /// All indices receive the same call
     void train(idx_t n, const component_t* x) override;
 
-    /// faiss::Index API
+    /// polaris::Index API
     /// All indices receive the same call
     void add(idx_t n, const component_t* x) override;
 
-    /// faiss::Index API
+    /// polaris::Index API
     /// Query is partitioned into a slice for each sub-index
     /// split by ceil(n / #indices) for our sub-indices
     void search(
@@ -85,4 +85,4 @@ class IndexReplicasTemplate : public ThreadedIndex<IndexT> {
 using IndexReplicas = IndexReplicasTemplate<Index>;
 using IndexBinaryReplicas = IndexReplicasTemplate<IndexBinary>;
 
-} // namespace faiss
+} // namespace polaris

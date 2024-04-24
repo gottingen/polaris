@@ -23,7 +23,7 @@
 
 #include <polaris/utils/hamming_distance/common.h>
 
-namespace faiss {
+namespace polaris {
 
 /* Elementary Hamming distance computation: unoptimized  */
 template <size_t nbits, typename T>
@@ -327,7 +327,7 @@ struct HammingComputerDefault {
 
         int len256 = (quotient8 / 4) * 4;
         for (; i < len256; i += 4) {
-            accu += ::faiss::hamming<256>(a64 + i, b64 + i);
+            accu += ::polaris::hamming<256>(a64 + i, b64 + i);
             len -= 4;
         }
 
@@ -517,7 +517,7 @@ struct GenHammingComputerM8 {
     }
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif
 

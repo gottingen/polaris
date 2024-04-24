@@ -12,7 +12,7 @@
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 #include <polaris/gpu/utils/DeviceVector.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <
@@ -212,7 +212,7 @@ void ivfInterleavedScanImpl(
         IndicesOptions indicesOptions,
         DeviceVector<idx_t>& listLengths,
         const int k,
-        faiss::MetricType metric_name,
+        polaris::MetricType metric_name,
         const bool useResidual,
         Tensor<float, 3, true>& residualBase,
         GpuScalarQuantizer* scalarQ,
@@ -256,4 +256,4 @@ void ivfInterleavedScanImpl(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

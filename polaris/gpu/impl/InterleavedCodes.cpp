@@ -9,7 +9,7 @@
 #include <polaris/gpu/utils/StaticUtils.h>
 #include <polaris/impl/FaissAssert.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 inline uint8_t unpack5(int i, uint8_t vLower, uint8_t vUpper) {
@@ -556,4 +556,4 @@ std::vector<uint8_t> packInterleaved(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

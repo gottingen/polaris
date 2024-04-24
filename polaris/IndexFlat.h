@@ -14,7 +14,7 @@
 
 #include <polaris/IndexFlatCodes.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Index that stores the full vectors and performs exhaustive search */
 struct IndexFlat : IndexFlatCodes {
@@ -125,6 +125,6 @@ struct IndexFlat1D : IndexFlatL2 {
             const SearchParameters* params = nullptr) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

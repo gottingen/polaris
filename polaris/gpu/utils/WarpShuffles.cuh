@@ -10,7 +10,7 @@
 #include <cuda.h>
 #include <polaris/gpu/utils/DeviceDefs.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // defines to simplify the SASS assembly structure file/line in the profiler
@@ -124,4 +124,4 @@ inline __device__ half shfl_xor(half v, int laneMask, int width = kWarpSize) {
 #endif // CUDA_VERSION
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

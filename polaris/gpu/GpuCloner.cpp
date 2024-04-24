@@ -14,7 +14,7 @@
 
 #include <polaris/IndexBinaryFlat.h>
 #include <polaris/IndexFlat.h>
-#include <polaris/IndexIVF.h>
+#include <polaris/index_ivf.h>
 #include <polaris/IndexIVFFlat.h>
 #include <polaris/IndexIVFPQ.h>
 #include <polaris/IndexPreTransform.h>
@@ -32,7 +32,7 @@
 #include <polaris/impl/FaissAssert.h>
 #include <polaris/index_io.h>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /**********************************************************
@@ -104,7 +104,7 @@ Index* ToCPUCloner::clone_Index(const Index* index) {
     }
 }
 
-faiss::Index* index_gpu_to_cpu(const faiss::Index* gpu_index) {
+polaris::Index* index_gpu_to_cpu(const polaris::Index* gpu_index) {
     ToCPUCloner cl;
     return cl.clone_Index(gpu_index);
 }
@@ -147,7 +147,7 @@ Index* ToGpuCloner::clone_Index(const Index* index) {
         }
         assert(gif->getNumVecs() == index->ntotal);
         return gif;
-    } else if (auto ifl = dynamic_cast<const faiss::IndexIVFFlat*>(index)) {
+    } else if (auto ifl = dynamic_cast<const polaris::IndexIVFFlat*>(index)) {
         GpuIndexIVFFlatConfig config;
         config.device = device;
         config.indicesOptions = indicesOptions;
@@ -163,7 +163,7 @@ Index* ToGpuCloner::clone_Index(const Index* index) {
         res->copyFrom(ifl);
         return res;
     } else if (
-            auto ifl = dynamic_cast<const faiss::IndexIVFScalarQuantizer*>(
+            auto ifl = dynamic_cast<const polaris::IndexIVFScalarQuantizer*>(
                     index)) {
         GpuIndexIVFScalarQuantizerConfig config;
         config.device = device;
@@ -186,7 +186,7 @@ Index* ToGpuCloner::clone_Index(const Index* index) {
 
         res->copyFrom(ifl);
         return res;
-    } else if (auto ipq = dynamic_cast<const faiss::IndexIVFPQ*>(index)) {
+    } else if (auto ipq = dynamic_cast<const polaris::IndexIVFPQ*>(index)) {
         if (verbose) {
             printf("  IndexIVFPQ size %ld -> GpuIndexIVFPQ "
                    "indicesOptions=%d "
@@ -219,10 +219,10 @@ Index* ToGpuCloner::clone_Index(const Index* index) {
     }
 }
 
-faiss::Index* index_cpu_to_gpu(
+polaris::Index* index_cpu_to_gpu(
         GpuResourcesProvider* provider,
         int device,
-        const faiss::Index* index,
+        const polaris::Index* index,
         const GpuClonerOptions* options) {
     GpuClonerOptions defaults;
     ToGpuCloner cl(provider, device, options ? *options : defaults);
@@ -288,12 +288,12 @@ void ToGpuClonerMultiple::copy_ivf_shard(
 Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
     idx_t n = sub_cloners.size();
 
-    auto index_ivf = dynamic_cast<const faiss::IndexIVF*>(index);
-    auto index_ivfpq = dynamic_cast<const faiss::IndexIVFPQ*>(index);
-    auto index_ivfflat = dynamic_cast<const faiss::IndexIVFFlat*>(index);
+    auto index_ivf = dynamic_cast<const polaris::IndexIVF*>(index);
+    auto index_ivfpq = dynamic_cast<const polaris::IndexIVFPQ*>(index);
+    auto index_ivfflat = dynamic_cast<const polaris::IndexIVFFlat*>(index);
     auto index_ivfsq =
-            dynamic_cast<const faiss::IndexIVFScalarQuantizer*>(index);
-    auto index_flat = dynamic_cast<const faiss::IndexFlat*>(index);
+            dynamic_cast<const polaris::IndexIVFScalarQuantizer*>(index);
+    auto index_flat = dynamic_cast<const polaris::IndexFlat*>(index);
     FAISS_THROW_IF_NOT_MSG(
             index_ivfpq || index_ivfflat || index_flat || index_ivfsq,
             "IndexShards implemented only for "
@@ -318,7 +318,7 @@ Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
         }
     }
 
-    std::vector<faiss::Index*> shards(n);
+    std::vector<polaris::Index*> shards(n);
 
 #pragma omp parallel for
     for (idx_t i = 0; i < n; i++) {
@@ -329,7 +329,7 @@ Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
         // note: const_casts here are harmless because the indexes build here
         // are short-lived, translated immediately to GPU indexes.
         if (index_ivfpq) {
-            faiss::IndexIVFPQ idx2(
+            polaris::IndexIVFPQ idx2(
                     const_cast<Index*>(quantizer),
                     index_ivfpq->d,
                     index_ivfpq->nlist,
@@ -343,7 +343,7 @@ Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
             copy_ivf_shard(index_ivfpq, &idx2, n, i);
             shards[i] = sub_cloners[i].clone_Index(&idx2);
         } else if (index_ivfflat) {
-            faiss::IndexIVFFlat idx2(
+            polaris::IndexIVFFlat idx2(
                     const_cast<Index*>(quantizer),
                     index->d,
                     index_ivfflat->nlist,
@@ -353,7 +353,7 @@ Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
             copy_ivf_shard(index_ivfflat, &idx2, n, i);
             shards[i] = sub_cloners[i].clone_Index(&idx2);
         } else if (index_ivfsq) {
-            faiss::IndexIVFScalarQuantizer idx2(
+            polaris::IndexIVFScalarQuantizer idx2(
                     const_cast<Index*>(quantizer),
                     index->d,
                     index_ivfsq->nlist,
@@ -367,7 +367,7 @@ Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
             copy_ivf_shard(index_ivfsq, &idx2, n, i);
             shards[i] = sub_cloners[i].clone_Index(&idx2);
         } else if (index_flat) {
-            faiss::IndexFlat idx2(index->d, index->metric_type);
+            polaris::IndexFlat idx2(index->d, index->metric_type);
             shards[i] = sub_cloners[i].clone_Index(&idx2);
             if (index->ntotal > 0) {
                 idx_t i0 = index->ntotal * i / n;
@@ -378,18 +378,18 @@ Index* ToGpuClonerMultiple::clone_Index_to_shards(const Index* index) {
     }
 
     bool successive_ids = index_flat != nullptr;
-    faiss::IndexShards* res;
+    polaris::IndexShards* res;
     if (common_ivf_quantizer && index_ivf) {
         this->shard = false;
         Index* common_quantizer = clone_Index(index_ivf->quantizer);
         this->shard = true;
-        IndexShardsIVF* idx = new faiss::IndexShardsIVF(
+        IndexShardsIVF* idx = new polaris::IndexShardsIVF(
                 common_quantizer, index_ivf->nlist, true, false);
         idx->own_fields = true;
         idx->own_indices = true;
         res = idx;
     } else {
-        res = new faiss::IndexShards(index->d, true, successive_ids);
+        res = new polaris::IndexShards(index->d, true, successive_ids);
         res->own_indices = true;
     }
 
@@ -451,10 +451,10 @@ Index* ToGpuClonerMultiple::clone_Index(const Index* index) {
     }
 }
 
-faiss::Index* index_cpu_to_gpu_multiple(
+polaris::Index* index_cpu_to_gpu_multiple(
         std::vector<GpuResourcesProvider*>& provider,
         std::vector<int>& devices,
-        const faiss::Index* index,
+        const polaris::Index* index,
         const GpuMultipleClonerOptions* options) {
     GpuMultipleClonerOptions defaults;
     ToGpuClonerMultiple cl(provider, devices, options ? *options : defaults);
@@ -489,8 +489,8 @@ Index* GpuProgressiveDimIndexFactory::operator()(int dim) {
  * Cloning binary indexes
  *********************************************/
 
-faiss::IndexBinary* index_binary_gpu_to_cpu(
-        const faiss::IndexBinary* gpu_index) {
+polaris::IndexBinary* index_binary_gpu_to_cpu(
+        const polaris::IndexBinary* gpu_index) {
     if (auto ii = dynamic_cast<const GpuIndexBinaryFlat*>(gpu_index)) {
         IndexBinaryFlat* ret = new IndexBinaryFlat();
         ii->copyTo(ret);
@@ -500,10 +500,10 @@ faiss::IndexBinary* index_binary_gpu_to_cpu(
     }
 }
 
-faiss::IndexBinary* index_binary_cpu_to_gpu(
+polaris::IndexBinary* index_binary_cpu_to_gpu(
         GpuResourcesProvider* provider,
         int device,
-        const faiss::IndexBinary* index,
+        const polaris::IndexBinary* index,
         const GpuClonerOptions* options) {
     if (auto ii = dynamic_cast<const IndexBinaryFlat*>(index)) {
         GpuIndexBinaryFlatConfig config;
@@ -517,10 +517,10 @@ faiss::IndexBinary* index_binary_cpu_to_gpu(
     }
 }
 
-faiss::IndexBinary* index_binary_cpu_to_gpu_multiple(
+polaris::IndexBinary* index_binary_cpu_to_gpu_multiple(
         std::vector<GpuResourcesProvider*>& provider,
         std::vector<int>& devices,
-        const faiss::IndexBinary* index,
+        const polaris::IndexBinary* index,
         const GpuMultipleClonerOptions* options) {
     GpuMultipleClonerOptions defaults;
     FAISS_THROW_IF_NOT(devices.size() == provider.size());
@@ -557,4 +557,4 @@ faiss::IndexBinary* index_binary_cpu_to_gpu_multiple(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

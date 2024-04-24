@@ -10,15 +10,15 @@
 #include <polaris/gpu/GpuIndex.h>
 #include <memory>
 
-namespace faiss {
+namespace polaris {
 
 struct IndexFlat;
 struct IndexFlatL2;
 struct IndexFlatIP;
 
-} // namespace faiss
+} // namespace polaris
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 class FlatIndex;
@@ -34,44 +34,44 @@ struct GpuIndexFlatConfig : public GpuIndexConfig {
 };
 
 /// Wrapper around the GPU implementation that looks like
-/// faiss::IndexFlat; copies over centroid data from a given
-/// faiss::IndexFlat
+/// polaris::IndexFlat; copies over centroid data from a given
+/// polaris::IndexFlat
 class GpuIndexFlat : public GpuIndex {
    public:
-    /// Construct from a pre-existing faiss::IndexFlat instance, copying
+    /// Construct from a pre-existing polaris::IndexFlat instance, copying
     /// data over to the given GPU
     GpuIndexFlat(
             GpuResourcesProvider* provider,
-            const faiss::IndexFlat* index,
+            const polaris::IndexFlat* index,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     GpuIndexFlat(
             std::shared_ptr<GpuResources> resources,
-            const faiss::IndexFlat* index,
+            const polaris::IndexFlat* index,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     /// Construct an empty instance that can be added to
     GpuIndexFlat(
             GpuResourcesProvider* provider,
             int dims,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     GpuIndexFlat(
             std::shared_ptr<GpuResources> resources,
             int dims,
-            faiss::MetricType metric,
+            polaris::MetricType metric,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     ~GpuIndexFlat() override;
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(const faiss::IndexFlat* index);
+    void copyFrom(const polaris::IndexFlat* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexFlat* index) const;
+    void copyTo(polaris::IndexFlat* index) const;
 
     /// Returns the number of vectors we contain
     size_t getNumVecs() const;
@@ -140,20 +140,20 @@ class GpuIndexFlat : public GpuIndex {
 };
 
 /// Wrapper around the GPU implementation that looks like
-/// faiss::IndexFlatL2; copies over centroid data from a given
-/// faiss::IndexFlat
+/// polaris::IndexFlatL2; copies over centroid data from a given
+/// polaris::IndexFlat
 class GpuIndexFlatL2 : public GpuIndexFlat {
    public:
-    /// Construct from a pre-existing faiss::IndexFlatL2 instance, copying
+    /// Construct from a pre-existing polaris::IndexFlatL2 instance, copying
     /// data over to the given GPU
     GpuIndexFlatL2(
             GpuResourcesProvider* provider,
-            faiss::IndexFlatL2* index,
+            polaris::IndexFlatL2* index,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     GpuIndexFlatL2(
             std::shared_ptr<GpuResources> resources,
-            faiss::IndexFlatL2* index,
+            polaris::IndexFlatL2* index,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     /// Construct an empty instance that can be added to
@@ -169,28 +169,28 @@ class GpuIndexFlatL2 : public GpuIndexFlat {
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(faiss::IndexFlat* index);
+    void copyFrom(polaris::IndexFlat* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexFlat* index);
+    void copyTo(polaris::IndexFlat* index);
 };
 
 /// Wrapper around the GPU implementation that looks like
-/// faiss::IndexFlatIP; copies over centroid data from a given
-/// faiss::IndexFlat
+/// polaris::IndexFlatIP; copies over centroid data from a given
+/// polaris::IndexFlat
 class GpuIndexFlatIP : public GpuIndexFlat {
    public:
-    /// Construct from a pre-existing faiss::IndexFlatIP instance, copying
+    /// Construct from a pre-existing polaris::IndexFlatIP instance, copying
     /// data over to the given GPU
     GpuIndexFlatIP(
             GpuResourcesProvider* provider,
-            faiss::IndexFlatIP* index,
+            polaris::IndexFlatIP* index,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     GpuIndexFlatIP(
             std::shared_ptr<GpuResources> resources,
-            faiss::IndexFlatIP* index,
+            polaris::IndexFlatIP* index,
             GpuIndexFlatConfig config = GpuIndexFlatConfig());
 
     /// Construct an empty instance that can be added to
@@ -206,12 +206,12 @@ class GpuIndexFlatIP : public GpuIndexFlat {
 
     /// Initialize ourselves from the given CPU index; will overwrite
     /// all data in ourselves
-    void copyFrom(faiss::IndexFlat* index);
+    void copyFrom(polaris::IndexFlat* index);
 
     /// Copy ourselves to the given CPU index; will overwrite all data
     /// in the index instance
-    void copyTo(faiss::IndexFlat* index);
+    void copyTo(polaris::IndexFlat* index);
 };
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

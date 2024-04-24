@@ -7,7 +7,7 @@
 
 #pragma once
 
-// This file contains a custom fast implementation of faiss::Index::sa_decode()
+// This file contains a custom fast implementation of polaris::Index::sa_decode()
 //   function for the following index families:
 //   * IVF256,PQ[1]x8np
 //   * Residual[1]x8,PQ[2]x8
@@ -97,7 +97,7 @@
 // For example, "PQ8np" for 160-dim data translates into
 //   IndexPQDecoder<160,20>
 //
-// Unlike the general purpose version in faiss::Index::sa_decode(),
+// Unlike the general purpose version in polaris::Index::sa_decode(),
 //   this version provides the following functions (please note that
 //   pqCoarseCentroids params are not available for IndexPQDecoder,
 //   but the functionality is the same as for Index2LevelDecoder):
@@ -115,7 +115,7 @@
 // * ::accum(), which is used to create a linear combination
 //   of decoded vectors:
 //   {
-//     const faiss::Index* const index;
+//     const polaris::Index* const index;
 //     const uint8_t* const input;
 //     float weight;
 //
@@ -139,7 +139,7 @@
 //   per call. This provides an additional speedup because of a CPU
 //   superscalar architecture:
 //   {
-//     const faiss::Index* const index;
+//     const polaris::Index* const index;
 //     const uint8_t* const input0;
 //     float weight0;
 //     const uint8_t* const input1;
@@ -186,7 +186,7 @@
 // * And one more overload for ::accum() that decodes and accumulates
 //   three vectors per call.
 //   {
-//     const faiss::Index* const index;
+//     const polaris::Index* const index;
 //     const uint8_t* const input0;
 //     float weight0;
 //     const uint8_t* const input1;
@@ -265,8 +265,8 @@
 // In this case, please use the following contruction for the decoding,
 // basically, wrapping a kernel in a kernel:
 //   {
-//      using SubT = faiss::cppcontrib::Index2LevelDecoder<128, 128, 2>;
-//      using T = faiss::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
+//      using SubT = polaris::cppcontrib::Index2LevelDecoder<128, 128, 2>;
+//      using T = polaris::cppcontrib::IndexMinMaxFP16Decoder<SubT>;
 //      // do T::store(...) or T::accum(...)
 //   }
 //
@@ -294,7 +294,7 @@
 //   }
 // This is similar to the following regular pseudo-code:
 //   {
-//     const faiss::Index* const index;
+//     const polaris::Index* const index;
 //     const uint8_t* const __restrict input;
 //     const float* const __restrict weights;
 //     float* const __restrict output;

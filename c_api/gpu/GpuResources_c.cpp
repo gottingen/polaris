@@ -12,8 +12,8 @@
 #include <polaris/gpu/GpuResources.h>
 #include "macros_impl.h"
 
-using faiss::gpu::GpuResources;
-using faiss::gpu::GpuResourcesProvider;
+using polaris::gpu::GpuResources;
+using polaris::gpu::GpuResourcesProvider;
 
 DEFINE_DESTRUCTOR(GpuResources)
 

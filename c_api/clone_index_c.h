@@ -22,7 +22,7 @@ extern "C" {
 
 /* cloning functions */
 
-/** Clone an index. This is equivalent to `faiss::clone_index` */
+/** Clone an index. This is equivalent to `polaris::clone_index` */
 int faiss_clone_index(const FaissIndex*, FaissIndex** p_out);
 
 #ifdef __cplusplus

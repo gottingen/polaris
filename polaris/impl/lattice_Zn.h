@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /** returns the nearest vertex in the sphere to a query. Returns only
  * the coordinates, not an id.
@@ -183,6 +183,6 @@ struct ZnSphereCodecAlt : ZnSphereCodec {
     void decode(uint64_t code, float* c) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

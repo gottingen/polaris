@@ -21,7 +21,7 @@
 #include <polaris/utils/Heap.h>
 #include <polaris/utils/random.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Implementation of the Navigating Spreading-out Graph (NSG)
  * datastructure.
@@ -193,4 +193,4 @@ struct NSG {
     void check_graph() const;
 };
 
-} // namespace faiss
+} // namespace polaris

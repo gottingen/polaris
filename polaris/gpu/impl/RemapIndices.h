@@ -10,7 +10,7 @@
 #include <polaris/Index.h>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 /// Utility function to translate (list id, offset) to a user index on
@@ -23,4 +23,4 @@ void ivfOffsetToUserIndex(
         const std::vector<std::vector<idx_t>>& listOffsetToUserIndex);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

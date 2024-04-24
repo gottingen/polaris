@@ -7,7 +7,7 @@
 
 #include <polaris/gpu/utils/DeviceTensor.cuh>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 // Performs brute-force k-NN comparison between `vecs` and `query`, where they
@@ -21,4 +21,4 @@ void runBinaryDistance(
         cudaStream_t stream);
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

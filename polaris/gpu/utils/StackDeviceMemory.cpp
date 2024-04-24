@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <sstream>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 namespace {
@@ -205,4 +205,4 @@ void StackDeviceMemory::deallocMemory(
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

@@ -20,7 +20,7 @@
 
 #include <polaris/impl/FaissAssert.h>
 
-namespace faiss {
+namespace polaris {
 
 namespace detail {
 
@@ -1354,4 +1354,4 @@ simd8float32 gethigh128(const simd8float32& a, const simd8float32& b) {
 
 } // namespace
 
-} // namespace faiss
+} // namespace polaris

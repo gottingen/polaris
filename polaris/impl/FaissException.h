@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace faiss {
+namespace polaris {
 
 /// Base class for Faiss exceptions
 class FaissException : public std::exception {
@@ -61,6 +61,6 @@ struct TransformedVectors {
 /// make typeids more readable
 std::string demangle_cpp_symbol(const char* name);
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

@@ -14,7 +14,7 @@
 #include <polaris/utils/random.h>
 #include <polaris/utils/utils.h>
 
-using namespace faiss;
+using namespace polaris;
 
 static void bench(benchmark::State& state) {
     int d = 128;

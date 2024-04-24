@@ -14,7 +14,7 @@
 #include <polaris/impl/FaissAssert.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 template <typename C, uint32_t NBUCKETS, uint32_t N>
 struct HeapWithBuckets {
@@ -193,4 +193,4 @@ struct HeapWithBuckets<CMax<float, int>, NBUCKETS, N> {
     }
 };
 
-} // namespace faiss
+} // namespace polaris

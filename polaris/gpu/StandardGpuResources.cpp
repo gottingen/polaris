@@ -36,7 +36,7 @@
 #include <limits>
 #include <sstream>
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 namespace {
@@ -713,4 +713,4 @@ void StandardGpuResources::setLogMemoryAllocations(bool enable) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

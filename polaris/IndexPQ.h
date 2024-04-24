@@ -17,7 +17,7 @@
 #include <polaris/impl/ProductQuantizer.h>
 #include <polaris/impl/platform_macros.h>
 
-namespace faiss {
+namespace polaris {
 
 /** Index based on a product quantizer. Stored vectors are
  * approximated by PQ codes. */
@@ -189,6 +189,6 @@ struct MultiIndexQuantizer2 : MultiIndexQuantizer {
             const SearchParameters* params = nullptr) const override;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

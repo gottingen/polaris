@@ -14,7 +14,7 @@
 #include <polaris/impl/FaissAssert.h>
 #include <polaris/utils/Heap.h>
 
-namespace faiss {
+namespace polaris {
 
 // This is the implementation of the idea and it is very slow,
 // because a compiler is unable to vectorize it properly.
@@ -135,4 +135,4 @@ struct HeapWithBuckets<CMax<float, int>, NBUCKETS, N> {
     }
 };
 
-} // namespace faiss
+} // namespace polaris

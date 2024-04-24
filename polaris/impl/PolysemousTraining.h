@@ -12,7 +12,7 @@
 
 #include <polaris/impl/ProductQuantizer.h>
 
-namespace faiss {
+namespace polaris {
 
 /// parameters used for the simulated annealing method
 struct SimulatedAnnealingParameters {
@@ -151,6 +151,6 @@ struct PolysemousTraining : SimulatedAnnealingParameters {
     size_t memory_usage_per_thread(const ProductQuantizer& pq) const;
 };
 
-} // namespace faiss
+} // namespace polaris
 
 #endif

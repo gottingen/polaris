@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace faiss {
+namespace polaris {
 namespace gpu {
 
 template <typename T>
@@ -23,4 +23,4 @@ inline __device__ void assign(bool assign, T& x, T y) {
 }
 
 } // namespace gpu
-} // namespace faiss
+} // namespace polaris

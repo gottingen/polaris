@@ -10,5 +10,5 @@
 #include <polaris/utils/utils.h>
 
 TEST(Threading, openmp) {
-    EXPECT_TRUE(faiss::check_openmp());
+    EXPECT_TRUE(polaris::check_openmp());
 }

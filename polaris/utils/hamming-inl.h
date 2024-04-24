@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-namespace faiss {
+namespace polaris {
 
 // BitstringWriter and BitstringReader functions
 inline BitstringWriter::BitstringWriter(uint8_t* code, size_t code_size)
@@ -116,4 +116,4 @@ struct HCounterState {
     }
 };
 
-} // namespace faiss
+} // namespace polaris
