@@ -28,7 +28,7 @@ namespace {
 void sync_d(Index* index) {}
 
 void sync_d(IndexBinary* index) {
-    FAISS_THROW_IF_NOT(index->d % 8 == 0);
+    POLARIS_THROW_IF_NOT(index->d % 8 == 0);
     index->code_size = index->d / 8;
 }
 
@@ -40,7 +40,7 @@ void sync_d(IndexBinary* index) {
 
 template <typename IndexT>
 IndexIDMapTemplate<IndexT>::IndexIDMapTemplate(IndexT* index) : index(index) {
-    FAISS_THROW_IF_NOT_MSG(index->ntotal == 0, "index must be empty on input");
+    POLARIS_THROW_IF_NOT_MSG(index->ntotal == 0, "index must be empty on input");
     this->is_trained = index->is_trained;
     this->metric_type = index->metric_type;
     this->verbose = index->verbose;
@@ -52,7 +52,7 @@ template <typename IndexT>
 void IndexIDMapTemplate<IndexT>::add(
         idx_t,
         const typename IndexT::component_t*) {
-    FAISS_THROW_MSG(
+    POLARIS_THROW_MSG(
             "add does not make sense with IndexIDMap, "
             "use add_with_ids");
 }
@@ -120,7 +120,7 @@ void IndexIDMapTemplate<IndexT>::search(
 
         if (!idtrans) {
             /*
-            FAISS_THROW_IF_NOT_MSG(
+            POLARIS_THROW_IF_NOT_MSG(
                     idtrans,
                     "IndexIDMap requires an IDSelectorTranslated on input");
             */
@@ -178,7 +178,7 @@ size_t IndexIDMapTemplate<IndexT>::remove_ids(const IDSelector& sel) {
             j++;
         }
     }
-    FAISS_ASSERT(j == index->ntotal);
+    POLARIS_ASSERT(j == index->ntotal);
     this->ntotal = j;
     id_map.resize(this->ntotal);
     return nremove;
@@ -188,7 +188,7 @@ template <typename IndexT>
 void IndexIDMapTemplate<IndexT>::check_compatible_for_merge(
         const IndexT& otherIndex) const {
     auto other = dynamic_cast<const IndexIDMapTemplate<IndexT>*>(&otherIndex);
-    FAISS_THROW_IF_NOT(other);
+    POLARIS_THROW_IF_NOT(other);
     index->check_compatible_for_merge(*other->index);
 }
 
@@ -233,11 +233,11 @@ void IndexIDMap2Template<IndexT>::add_with_ids(
 
 template <typename IndexT>
 void IndexIDMap2Template<IndexT>::check_consistency() const {
-    FAISS_THROW_IF_NOT(rev_map.size() == this->id_map.size());
-    FAISS_THROW_IF_NOT(this->id_map.size() == this->ntotal);
+    POLARIS_THROW_IF_NOT(rev_map.size() == this->id_map.size());
+    POLARIS_THROW_IF_NOT(this->id_map.size() == this->ntotal);
     for (size_t i = 0; i < this->ntotal; i++) {
         idx_t ii = rev_map.at(this->id_map[i]);
-        FAISS_THROW_IF_NOT(ii == i);
+        POLARIS_THROW_IF_NOT(ii == i);
     }
 }
 
@@ -274,7 +274,7 @@ void IndexIDMap2Template<IndexT>::reconstruct(
     try {
         this->index->reconstruct(rev_map.at(key), recons);
     } catch (const std::out_of_range&) {
-        FAISS_THROW_FMT("key %" PRId64 " not found", key);
+        POLARIS_THROW_FMT("key %" PRId64 " not found", key);
     }
 }
 

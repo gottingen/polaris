@@ -38,9 +38,9 @@ void IndexBinaryFlat::search(
         int32_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     const idx_t block_size = query_batch_size;
     for (idx_t s = 0; s < n; s += block_size) {
@@ -108,7 +108,7 @@ void IndexBinaryFlat::range_search(
         int radius,
         RangeSearchResult* result,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
     hamming_range_search(x, xb.data(), n, ntotal, radius, code_size, result);
 }

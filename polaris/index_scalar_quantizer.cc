@@ -53,9 +53,9 @@ void IndexScalarQuantizer::search(
         const SearchParameters* params) const {
     const IDSelector* sel = params ? params->sel : nullptr;
 
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(
             metric_type == METRIC_L2 || metric_type == METRIC_INNER_PRODUCT);
 
 #pragma omp parallel
@@ -101,13 +101,13 @@ FlatCodesDistanceComputer* IndexScalarQuantizer::get_FlatCodesDistanceComputer()
 
 void IndexScalarQuantizer::sa_encode(idx_t n, const float* x, uint8_t* bytes)
         const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     sq.compute_codes(x, bytes, n);
 }
 
 void IndexScalarQuantizer::sa_decode(idx_t n, const uint8_t* bytes, float* x)
         const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     sq.decode(bytes, x, n);
 }
 
@@ -209,7 +209,7 @@ void IndexIVFScalarQuantizer::add_core(
         const idx_t* xids,
         const idx_t* coarse_idx,
         void* inverted_list_context) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     std::unique_ptr<ScalarQuantizer::SQuantizer> squant(sq.select_quantizer());
 

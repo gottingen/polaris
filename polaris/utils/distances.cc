@@ -143,7 +143,7 @@ void exhaustive_inner_product_seq(
             typename BlockResultHandler::SingleResultHandler;
     int nt = std::min(int(nx), omp_get_max_threads());
 
-    FAISS_ASSERT(use_sel == (sel != nullptr));
+    POLARIS_ASSERT(use_sel == (sel != nullptr));
 
 #pragma omp parallel num_threads(nt)
     {
@@ -180,7 +180,7 @@ void exhaustive_L2sqr_seq(
             typename BlockResultHandler::SingleResultHandler;
     int nt = std::min(int(nx), omp_get_max_threads());
 
-    FAISS_ASSERT(use_sel == (sel != nullptr));
+    POLARIS_ASSERT(use_sel == (sel != nullptr));
 
 #pragma omp parallel num_threads(nt)
     {
@@ -703,7 +703,7 @@ void knn_inner_product(
         size_t ny,
         float_minheap_array_t* res,
         const IDSelector* sel) {
-    FAISS_THROW_IF_NOT(nx == res->nh);
+    POLARIS_THROW_IF_NOT(nx == res->nh);
     knn_inner_product(x, y, d, nx, ny, res->k, res->val, res->ids, sel);
 }
 
@@ -758,7 +758,7 @@ void knn_L2sqr(
         float_maxheap_array_t* res,
         const float* y_norm2,
         const IDSelector* sel) {
-    FAISS_THROW_IF_NOT(res->nh == nx);
+    POLARIS_THROW_IF_NOT(res->nh == nx);
     knn_L2sqr(x, y, d, nx, ny, res->k, res->val, res->ids, y_norm2, sel);
 }
 

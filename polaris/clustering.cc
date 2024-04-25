@@ -258,7 +258,7 @@ void Clustering::train_encoded(
         const Index* codec,
         Index& index,
         const float* weights) {
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             nx >= k,
             "Number of training points (%" PRId64
             ") should be at least "
@@ -266,13 +266,13 @@ void Clustering::train_encoded(
             nx,
             k);
 
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             (!codec || codec->d == d),
             "Codec dimension %d not the same as data dimension %d",
             int(codec->d),
             int(d));
 
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             index.d == d,
             "Index dimension %d not the same as data dimension %d",
             int(index.d),
@@ -286,7 +286,7 @@ void Clustering::train_encoded(
         // reports.
         const float* x = reinterpret_cast<const float*>(x_in);
         for (size_t i = 0; i < nx * d; i++) {
-            FAISS_THROW_IF_NOT_MSG(
+            POLARIS_THROW_IF_NOT_MSG(
                     std::isfinite(x[i]), "input contains NaN's or Inf's");
         }
     }
@@ -365,7 +365,7 @@ void Clustering::train_encoded(
 
     // support input centroids
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             centroids.size() % d == 0,
             "size of provided input centroids not a multiple of dimension");
 

@@ -219,7 +219,7 @@ void IndexIVFPQR::reconstruct_from_offset(
 
 void IndexIVFPQR::merge_from(Index& otherIndex, idx_t add_id) {
     IndexIVFPQR* other = dynamic_cast<IndexIVFPQR*>(&otherIndex);
-    FAISS_THROW_IF_NOT(other);
+    POLARIS_THROW_IF_NOT(other);
 
     IndexIVF::merge_from(otherIndex, add_id);
 
@@ -231,7 +231,7 @@ void IndexIVFPQR::merge_from(Index& otherIndex, idx_t add_id) {
 }
 
 size_t IndexIVFPQR::remove_ids(const IDSelector& /*sel*/) {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
     return 0;
 }
 

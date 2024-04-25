@@ -16,114 +16,118 @@
 
 namespace polaris {
 
-/** Index that stores the full vectors and performs exhaustive search */
-struct IndexFlat : IndexFlatCodes {
-    explicit IndexFlat(
-            idx_t d, ///< dimensionality of the input vectors
-            MetricType metric = METRIC_L2);
+    /** Index that stores the full vectors and performs exhaustive search */
+    struct IndexFlat : IndexFlatCodes {
+        explicit IndexFlat(
+                idx_t d, ///< dimensionality of the input vectors
+                MetricType metric = METRIC_L2);
 
-    void search(
-            idx_t n,
-            const float* x,
-            idx_t k,
-            float* distances,
-            idx_t* labels,
-            const SearchParameters* params = nullptr) const override;
+        void search(
+                idx_t n,
+                const float *x,
+                idx_t k,
+                float *distances,
+                idx_t *labels,
+                const SearchParameters *params = nullptr) const override;
 
-    void range_search(
-            idx_t n,
-            const float* x,
-            float radius,
-            RangeSearchResult* result,
-            const SearchParameters* params = nullptr) const override;
+        void range_search(
+                idx_t n,
+                const float *x,
+                float radius,
+                RangeSearchResult *result,
+                const SearchParameters *params = nullptr) const override;
 
-    void reconstruct(idx_t key, float* recons) const override;
+        void reconstruct(idx_t key, float *recons) const override;
 
-    /** compute distance with a subset of vectors
-     *
-     * @param x       query vectors, size n * d
-     * @param labels  indices of the vectors that should be compared
-     *                for each query vector, size n * k
-     * @param distances
-     *                corresponding output distances, size n * k
-     */
-    void compute_distance_subset(
-            idx_t n,
-            const float* x,
-            idx_t k,
-            float* distances,
-            const idx_t* labels) const;
+        /** compute distance with a subset of vectors
+         *
+         * @param x       query vectors, size n * d
+         * @param labels  indices of the vectors that should be compared
+         *                for each query vector, size n * k
+         * @param distances
+         *                corresponding output distances, size n * k
+         */
+        void compute_distance_subset(
+                idx_t n,
+                const float *x,
+                idx_t k,
+                float *distances,
+                const idx_t *labels) const;
 
-    // get pointer to the floating point data
-    float* get_xb() {
-        return (float*)codes.data();
-    }
-    const float* get_xb() const {
-        return (const float*)codes.data();
-    }
+        // get pointer to the floating point data
+        float *get_xb() {
+            return (float *) codes.data();
+        }
 
-    IndexFlat() {}
+        const float *get_xb() const {
+            return (const float *) codes.data();
+        }
 
-    FlatCodesDistanceComputer* get_FlatCodesDistanceComputer() const override;
+        IndexFlat() {}
 
-    /* The stanadlone codec interface (just memcopies in this case) */
-    void sa_encode(idx_t n, const float* x, uint8_t* bytes) const override;
+        FlatCodesDistanceComputer *get_FlatCodesDistanceComputer() const override;
 
-    void sa_decode(idx_t n, const uint8_t* bytes, float* x) const override;
-};
+        /* The stanadlone codec interface (just memcopies in this case) */
+        void sa_encode(idx_t n, const float *x, uint8_t *bytes) const override;
 
-struct IndexFlatIP : IndexFlat {
-    explicit IndexFlatIP(idx_t d) : IndexFlat(d, METRIC_INNER_PRODUCT) {}
-    IndexFlatIP() {}
-};
+        void sa_decode(idx_t n, const uint8_t *bytes, float *x) const override;
+    };
 
-struct IndexFlatL2 : IndexFlat {
-    // Special cache for L2 norms.
-    // If this cache is set, then get_distance_computer() returns
-    // a special version that computes the distance using dot products
-    // and l2 norms.
-    std::vector<float> cached_l2norms;
+    struct IndexFlatIP : IndexFlat {
+        explicit IndexFlatIP(idx_t d) : IndexFlat(d, METRIC_INNER_PRODUCT) {}
 
-    /**
-     * @param d dimensionality of the input vectors
-     */
-    explicit IndexFlatL2(idx_t d) : IndexFlat(d, METRIC_L2) {}
-    IndexFlatL2() {}
+        IndexFlatIP() {}
+    };
 
-    // override for l2 norms cache.
-    FlatCodesDistanceComputer* get_FlatCodesDistanceComputer() const override;
+    struct IndexFlatL2 : IndexFlat {
+        // Special cache for L2 norms.
+        // If this cache is set, then get_distance_computer() returns
+        // a special version that computes the distance using dot products
+        // and l2 norms.
+        std::vector<float> cached_l2norms;
 
-    // compute L2 norms
-    void sync_l2norms();
-    // clear L2 norms
-    void clear_l2norms();
-};
+        /**
+         * @param d dimensionality of the input vectors
+         */
+        explicit IndexFlatL2(idx_t d) : IndexFlat(d, METRIC_L2) {}
 
-/// optimized version for 1D "vectors".
-struct IndexFlat1D : IndexFlatL2 {
-    bool continuous_update = true; ///< is the permutation updated continuously?
+        IndexFlatL2() {}
 
-    std::vector<idx_t> perm; ///< sorted database indices
+        // override for l2 norms cache.
+        FlatCodesDistanceComputer *get_FlatCodesDistanceComputer() const override;
 
-    explicit IndexFlat1D(bool continuous_update = true);
+        // compute L2 norms
+        void sync_l2norms();
 
-    /// if not continuous_update, call this between the last add and
-    /// the first search
-    void update_permutation();
+        // clear L2 norms
+        void clear_l2norms();
+    };
 
-    void add(idx_t n, const float* x) override;
+    /// optimized version for 1D "vectors".
+    struct IndexFlat1D : IndexFlatL2 {
+        bool continuous_update = true; ///< is the permutation updated continuously?
 
-    void reset() override;
+        std::vector<idx_t> perm; ///< sorted database indices
 
-    /// Warn: the distances returned are L1 not L2
-    void search(
-            idx_t n,
-            const float* x,
-            idx_t k,
-            float* distances,
-            idx_t* labels,
-            const SearchParameters* params = nullptr) const override;
-};
+        explicit IndexFlat1D(bool continuous_update = true);
+
+        /// if not continuous_update, call this between the last add and
+        /// the first search
+        void update_permutation();
+
+        void add(idx_t n, const float *x) override;
+
+        void reset() override;
+
+        /// Warn: the distances returned are L1 not L2
+        void search(
+                idx_t n,
+                const float *x,
+                idx_t k,
+                float *distances,
+                idx_t *labels,
+                const SearchParameters *params = nullptr) const override;
+    };
 
 } // namespace polaris
 

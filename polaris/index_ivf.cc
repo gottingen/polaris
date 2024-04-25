@@ -68,7 +68,7 @@ void Level1Quantizer::train_q1(
             printf("IVF quantizer trains alone...\n");
         quantizer->train(n, x);
         quantizer->verbose = verbose;
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 quantizer->ntotal == nlist,
                 "nlist not consistent with quantizer size");
     } else if (quantizer_trains_alone == 0) {
@@ -93,7 +93,7 @@ void Level1Quantizer::train_q1(
         }
         // also accept spherical centroids because in that case
         // L2 and IP are equivalent
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(
                 metric_type == METRIC_L2 ||
                 (metric_type == METRIC_INNER_PRODUCT && cp.spherical));
 
@@ -146,7 +146,7 @@ idx_t Level1Quantizer::decode_listno(const uint8_t* code) const {
         nbit += 8;
         nl >>= 8;
     }
-    FAISS_THROW_IF_NOT(list_no >= 0 && list_no < nlist);
+    POLARIS_THROW_IF_NOT(list_no >= 0 && list_no < nlist);
     return list_no;
 }
 
@@ -165,7 +165,7 @@ IndexIVF::IndexIVF(
           invlists(new ArrayInvertedLists(nlist, code_size)),
           own_invlists(true),
           code_size(code_size) {
-    FAISS_THROW_IF_NOT(d == quantizer->d);
+    POLARIS_THROW_IF_NOT(d == quantizer->d);
     is_trained = quantizer->is_trained && (quantizer->ntotal == nlist);
     // Spherical by default if the metric is inner_product
     if (metric_type == METRIC_INNER_PRODUCT) {
@@ -224,8 +224,8 @@ void IndexIVF::add_core(
         }
         return;
     }
-    FAISS_THROW_IF_NOT(coarse_idx);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(coarse_idx);
+    POLARIS_THROW_IF_NOT(is_trained);
     direct_map.check_can_add(xids);
 
     size_t nadd = 0, nminus1 = 0;
@@ -298,15 +298,15 @@ void IndexIVF::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params_in) const {
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
     const IVFSearchParameters* params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IVFSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
+        POLARIS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
     }
     const size_t nprobe =
             std::min(nlist, params ? params->nprobe : this->nprobe);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     // search function for a subset of queries
     auto sub_search_func = [this, k, nprobe, params](
@@ -373,7 +373,7 @@ void IndexIVF::search(
         }
 
         if (!exception_string.empty()) {
-            FAISS_THROW_MSG(exception_string.c_str());
+            POLARIS_THROW_MSG(exception_string.c_str());
         }
 
         // collect stats
@@ -398,11 +398,11 @@ void IndexIVF::search_preassigned(
         bool store_pairs,
         const IVFSearchParameters* params,
         IndexIVFStats* ivf_stats) const {
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     idx_t nprobe = params ? params->nprobe : this->nprobe;
     nprobe = std::min((idx_t)nlist, nprobe);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     const idx_t unlimited_list_size = std::numeric_limits<idx_t>::max();
     idx_t max_codes = params ? params->max_codes : this->max_codes;
@@ -416,11 +416,11 @@ void IndexIVF::search_preassigned(
         }
     }
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !(sel && store_pairs),
             "selector and store_pairs cannot be combined");
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !invlists->use_iterator || (max_codes == 0 && store_pairs == false),
             "iterable inverted lists don't support max_codes and store_pairs");
 
@@ -436,7 +436,7 @@ void IndexIVF::search_preassigned(
     int pmode = this->parallel_mode & ~PARALLEL_MODE_NO_HEAP_INIT;
     bool do_heap_init = !(this->parallel_mode & PARALLEL_MODE_NO_HEAP_INIT);
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             max_codes == 0 || pmode == 0 || pmode == 3,
             "max_codes supported only for parallel_mode = 0 or 3");
 
@@ -508,7 +508,7 @@ void IndexIVF::search_preassigned(
                 // not enough centroids for multiprobe
                 return (size_t)0;
             }
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     key < (idx_t)nlist,
                     "Invalid key=%" PRId64 " nlist=%zd\n",
                     key,
@@ -691,16 +691,16 @@ void IndexIVF::search_preassigned(
                 reorder_result(distances + i * k, labels + i * k);
             }
         } else {
-            FAISS_THROW_FMT("parallel_mode %d not supported\n", pmode);
+            POLARIS_THROW_FMT("parallel_mode %d not supported\n", pmode);
         }
     } // parallel section
 
     if (interrupt) {
         if (!exception_string.empty()) {
-            FAISS_THROW_FMT(
+            POLARIS_THROW_FMT(
                     "search interrupted with: %s", exception_string.c_str());
         } else {
-            FAISS_THROW_MSG("computation interrupted");
+            POLARIS_THROW_MSG("computation interrupted");
         }
     }
 
@@ -723,7 +723,7 @@ void IndexIVF::range_search(
     const SearchParameters* quantizer_params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IVFSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
+        POLARIS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
         quantizer_params = params->quantizer_params;
     }
     const size_t nprobe =
@@ -765,12 +765,12 @@ void IndexIVF::range_search_preassigned(
         IndexIVFStats* stats) const {
     idx_t nprobe = params ? params->nprobe : this->nprobe;
     nprobe = std::min((idx_t)nlist, nprobe);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     idx_t max_codes = params ? params->max_codes : this->max_codes;
     IDSelector* sel = params ? params->sel : nullptr;
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !invlists->use_iterator || (max_codes == 0 && store_pairs == false),
             "iterable inverted lists don't support max_codes and store_pairs");
 
@@ -798,7 +798,7 @@ void IndexIVF::range_search_preassigned(
         RangeSearchPartialResult pres(result);
         std::unique_ptr<InvertedListScanner> scanner(
                 get_InvertedListScanner(store_pairs, sel));
-        FAISS_THROW_IF_NOT(scanner.get());
+        POLARIS_THROW_IF_NOT(scanner.get());
         all_pres[omp_get_thread_num()] = &pres;
 
         // prepare the list scanning function
@@ -807,7 +807,7 @@ void IndexIVF::range_search_preassigned(
             idx_t key = keys[i * nprobe + ik]; /* select the list  */
             if (key < 0)
                 return;
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     key < (idx_t)nlist,
                     "Invalid key=%" PRId64 " at ik=%zd nlist=%zd\n",
                     key,
@@ -882,7 +882,7 @@ void IndexIVF::range_search_preassigned(
                 scan_list_func(i, ik, *qres);
             }
         } else {
-            FAISS_THROW_FMT("parallel_mode %d not supported\n", parallel_mode);
+            POLARIS_THROW_FMT("parallel_mode %d not supported\n", parallel_mode);
         }
         if (parallel_mode == 0) {
             pres.finalize();
@@ -896,10 +896,10 @@ void IndexIVF::range_search_preassigned(
 
     if (interrupt) {
         if (!exception_string.empty()) {
-            FAISS_THROW_FMT(
+            POLARIS_THROW_FMT(
                     "search interrupted with: %s", exception_string.c_str());
         } else {
-            FAISS_THROW_MSG("computation interrupted");
+            POLARIS_THROW_MSG("computation interrupted");
         }
     }
 
@@ -914,7 +914,7 @@ void IndexIVF::range_search_preassigned(
 InvertedListScanner* IndexIVF::get_InvertedListScanner(
         bool /*store_pairs*/,
         const IDSelector* /* sel */) const {
-    FAISS_THROW_MSG("get_InvertedListScanner not implemented");
+    POLARIS_THROW_MSG("get_InvertedListScanner not implemented");
 }
 
 void IndexIVF::reconstruct(idx_t key, float* recons) const {
@@ -923,7 +923,7 @@ void IndexIVF::reconstruct(idx_t key, float* recons) const {
 }
 
 void IndexIVF::reconstruct_n(idx_t i0, idx_t ni, float* recons) const {
-    FAISS_THROW_IF_NOT(ni == 0 || (i0 >= 0 && i0 + ni <= ntotal));
+    POLARIS_THROW_IF_NOT(ni == 0 || (i0 >= 0 && i0 + ni <= ntotal));
 
     for (idx_t list_no = 0; list_no < nlist; list_no++) {
         size_t list_size = invlists->list_size(list_no);
@@ -963,7 +963,7 @@ size_t IndexIVF::sa_code_size() const {
 }
 
 void IndexIVF::sa_encode(idx_t n, const float* x, uint8_t* bytes) const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     std::unique_ptr<int64_t[]> idx(new int64_t[n]);
     quantizer->assign(n, x, idx.get());
     encode_vectors(n, x, idx.get(), bytes, true);
@@ -980,11 +980,11 @@ void IndexIVF::search_and_reconstruct(
     const IVFSearchParameters* params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IVFSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
+        POLARIS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
     }
     const size_t nprobe =
             std::min(nlist, params ? params->nprobe : this->nprobe);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     std::unique_ptr<idx_t[]> idx(new idx_t[n * nprobe]);
     std::unique_ptr<float[]> coarse_dis(new float[n * nprobe]);
@@ -1036,11 +1036,11 @@ void IndexIVF::search_and_return_codes(
     const IVFSearchParameters* params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IVFSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
+        POLARIS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
     }
     const size_t nprobe =
             std::min(nlist, params ? params->nprobe : this->nprobe);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     std::unique_ptr<idx_t[]> idx(new idx_t[n * nprobe]);
     std::unique_ptr<float[]> coarse_dis(new float[n * nprobe]);
@@ -1095,7 +1095,7 @@ void IndexIVF::reconstruct_from_offset(
         int64_t /*list_no*/,
         int64_t /*offset*/,
         float* /*recons*/) const {
-    FAISS_THROW_MSG("reconstruct_from_offset not implemented");
+    POLARIS_THROW_MSG("reconstruct_from_offset not implemented");
 }
 
 void IndexIVF::reset() {
@@ -1115,17 +1115,17 @@ void IndexIVF::update_vectors(int n, const idx_t* new_ids, const float* x) {
         // just remove then add
         IDSelectorArray sel(n, new_ids);
         size_t nremove = remove_ids(sel);
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 nremove == n, "did not find all entries to remove");
         add_with_ids(n, x, new_ids);
         return;
     }
 
-    FAISS_THROW_IF_NOT(direct_map.type == DirectMap::Array);
+    POLARIS_THROW_IF_NOT(direct_map.type == DirectMap::Array);
     // here it is more tricky because we don't want to introduce holes
     // in continuous range of ids
 
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     std::vector<idx_t> assign(n);
     quantizer->assign(n, x, assign.data());
 
@@ -1190,15 +1190,15 @@ bool check_compatible_for_merge_expensive_check = true;
 void IndexIVF::check_compatible_for_merge(const Index& otherIndex) const {
     // minimal sanity checks
     const IndexIVF* other = dynamic_cast<const IndexIVF*>(&otherIndex);
-    FAISS_THROW_IF_NOT(other);
-    FAISS_THROW_IF_NOT(other->d == d);
-    FAISS_THROW_IF_NOT(other->nlist == nlist);
-    FAISS_THROW_IF_NOT(quantizer->ntotal == other->quantizer->ntotal);
-    FAISS_THROW_IF_NOT(other->code_size == code_size);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT(other);
+    POLARIS_THROW_IF_NOT(other->d == d);
+    POLARIS_THROW_IF_NOT(other->nlist == nlist);
+    POLARIS_THROW_IF_NOT(quantizer->ntotal == other->quantizer->ntotal);
+    POLARIS_THROW_IF_NOT(other->code_size == code_size);
+    POLARIS_THROW_IF_NOT_MSG(
             typeid(*this) == typeid(*other),
             "can only merge indexes of the same type");
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             this->direct_map.no() && other->direct_map.no(),
             "merge direct_map not implemented");
 
@@ -1207,7 +1207,7 @@ void IndexIVF::check_compatible_for_merge(const Index& otherIndex) const {
         for (size_t i = 0; i < nlist; i++) {
             quantizer->reconstruct(i, v.data());
             other->quantizer->reconstruct(i, v2.data());
-            FAISS_THROW_IF_NOT_MSG(
+            POLARIS_THROW_IF_NOT_MSG(
                     v == v2, "coarse quantizers should be the same");
         }
     }
@@ -1231,10 +1231,10 @@ void IndexIVF::replace_invlists(InvertedLists* il, bool own) {
         delete invlists;
         invlists = nullptr;
     }
-    // FAISS_THROW_IF_NOT (ntotal == 0);
+    // POLARIS_THROW_IF_NOT (ntotal == 0);
     if (il) {
-        FAISS_THROW_IF_NOT(il->nlist == nlist);
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(il->nlist == nlist);
+        POLARIS_THROW_IF_NOT(
                 il->code_size == code_size ||
                 il->code_size == InvertedLists::INVALID_CODE_SIZE);
     }

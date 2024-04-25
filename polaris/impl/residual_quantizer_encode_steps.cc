@@ -242,19 +242,19 @@ void beam_search_encode_step(
         Index* assign_index,
         ApproxTopK_mode_t approx_topk_mode) {
     // we have to fill in the whole output matrix
-    FAISS_THROW_IF_NOT(new_beam_size <= beam_size * K);
+    POLARIS_THROW_IF_NOT(new_beam_size <= beam_size * K);
 
     std::vector<float> cent_distances;
     std::vector<idx_t> cent_ids;
 
     if (assign_index) {
         // search beam_size distances per query
-        FAISS_THROW_IF_NOT(assign_index->d == d);
+        POLARIS_THROW_IF_NOT(assign_index->d == d);
         cent_distances.resize(n * beam_size * new_beam_size);
         cent_ids.resize(n * beam_size * new_beam_size);
         if (assign_index->ntotal != 0) {
             // then we assume the codebooks are already added to the index
-            FAISS_THROW_IF_NOT(assign_index->ntotal == K);
+            POLARIS_THROW_IF_NOT(assign_index->ntotal == K);
         } else {
             assign_index->add(K, cent);
         }
@@ -397,7 +397,7 @@ void beam_search_encode_step_tab(
         float* new_distances,               // n * new_beam_size
         ApproxTopK_mode_t approx_topk_mode) //
 {
-    FAISS_THROW_IF_NOT(ldc >= K);
+    POLARIS_THROW_IF_NOT(ldc >= K);
 
 #pragma omp parallel for if (n > 100) schedule(dynamic)
     for (int64_t i = 0; i < n; i++) {
@@ -797,7 +797,7 @@ void refine_beam_LUT_mp(
 
         codes_size = n * new_beam_size * (m + 1);
         distances_size = n * new_beam_size;
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(
                 cross_ofs + rq.codebook_offsets[m] * K <=
                 rq.codebook_cross_products.size());
         beam_search_encode_step_tab(
@@ -908,7 +908,7 @@ void compute_codes_add_centroids_mp_lut1(
     pool.codes.resize(rq.max_beam_size * rq.M * n);
     pool.distances.resize(rq.max_beam_size * n);
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             rq.M == 1 || rq.codebook_cross_products.size() > 0,
             "call compute_codebook_tables first");
 

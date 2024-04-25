@@ -20,7 +20,7 @@
 #include <polaris/index_flat.h>
 #include <polaris/index_ivf_flat.h>
 #include <polaris/index_io.h>
-#include <polaris/invlists/OnDiskInvertedLists.h>
+#include <polaris/invlists/on_disk_inverted_lists.h>
 #include <polaris/utils/random.h>
 
 namespace {

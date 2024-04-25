@@ -50,8 +50,14 @@ set(CARBIN_DEPS_LINK
 list(REMOVE_DUPLICATES CARBIN_DEPS_LINK)
 carbin_print_list_label("Denpendcies:" CARBIN_DEPS_LINK)
 
+list(APPEND CMAKE_PREFIX_PATH "/opt/EA/inf")
+find_package(collie REQUIRED)
+find_package(turbo REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(MKL REQUIRED)
+
+include_directories(${collie_INCLUDE_DIR})
+include_directories(${turbo_INCLUDE_DIR})
 
 set(POLARIS_DEPS_LINKS
         OpenMP::OpenMP_CXX

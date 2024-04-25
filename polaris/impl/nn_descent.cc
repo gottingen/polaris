@@ -376,8 +376,8 @@ void NNDescent::init_graph(DistanceComputer& qdis) {
 }
 
 void NNDescent::build(DistanceComputer& qdis, const int n, bool verbose) {
-    FAISS_THROW_IF_NOT_MSG(L >= K, "L should be >= K in NNDescent.build");
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_MSG(L >= K, "L should be >= K in NNDescent.build");
+    POLARIS_THROW_IF_NOT_FMT(
             n > NUM_EVAL_POINTS,
             "NNDescent.build cannot build a graph smaller than %d",
             int(NUM_EVAL_POINTS));
@@ -402,7 +402,7 @@ void NNDescent::build(DistanceComputer& qdis, const int n, bool verbose) {
     for (int i = 0; i < ntotal; i++) {
         std::sort(graph[i].pool.begin(), graph[i].pool.end());
         for (int j = 0; j < K; j++) {
-            FAISS_ASSERT(graph[i].pool[j].id < ntotal);
+            POLARIS_ASSERT(graph[i].pool[j].id < ntotal);
             final_graph[i * K + j] = graph[i].pool[j].id;
         }
     }
@@ -420,7 +420,7 @@ void NNDescent::search(
         idx_t* indices,
         float* dists,
         VisitedTable& vt) const {
-    FAISS_THROW_IF_NOT_MSG(has_built, "The index is not build yet.");
+    POLARIS_THROW_IF_NOT_MSG(has_built, "The index is not build yet.");
     int L_2 = std::max(search_L, topk);
 
     // candidate pool, the K best items is the result.

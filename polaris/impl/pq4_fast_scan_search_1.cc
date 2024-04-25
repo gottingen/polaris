@@ -144,10 +144,10 @@ void pq4_accumulate_loop_fixed_scaler(
         const uint8_t* LUT,
         ResultHandler& res,
         const Scaler& scaler) {
-    FAISS_THROW_IF_NOT(is_aligned_pointer(codes));
-    FAISS_THROW_IF_NOT(is_aligned_pointer(LUT));
-    FAISS_THROW_IF_NOT(bbs % 32 == 0);
-    FAISS_THROW_IF_NOT(nb % bbs == 0);
+    POLARIS_THROW_IF_NOT(is_aligned_pointer(codes));
+    POLARIS_THROW_IF_NOT(is_aligned_pointer(LUT));
+    POLARIS_THROW_IF_NOT(bbs % 32 == 0);
+    POLARIS_THROW_IF_NOT(nb % bbs == 0);
 
 #define DISPATCH(NQ, BB)                                                   \
     case NQ * 1000 + BB:                                                   \
@@ -165,7 +165,7 @@ void pq4_accumulate_loop_fixed_scaler(
         DISPATCH(3, 1);
         DISPATCH(4, 1);
         default:
-            FAISS_THROW_FMT("nq=%d bbs=%d not instantiated", nq, bbs);
+            POLARIS_THROW_FMT("nq=%d bbs=%d not instantiated", nq, bbs);
     }
 #undef DISPATCH
 }

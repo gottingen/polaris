@@ -62,7 +62,7 @@ struct HeapWithBuckets<CMax<float, int>, NBUCKETS, N> {
         // // Every iteration NBUCKETS * N elements are added to a regular heap.
         // // So, maximum number of added elements is beam_size * NBUCKETS * N.
         // // This number is expected to be less or equal than k.
-        // FAISS_THROW_IF_NOT_FMT(
+        // POLARIS_THROW_IF_NOT_FMT(
         //         beam_size * NBUCKETS * N >= k,
         //         "Cannot pick %d elements, only %d. "
         //         "Check the function and template arguments values.",

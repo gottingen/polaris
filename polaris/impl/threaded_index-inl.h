@@ -25,14 +25,14 @@ ThreadedIndex<IndexT>::~ThreadedIndex() {
     for (auto& p : indices_) {
         if (isThreaded_) {
             // should have worker thread
-            FAISS_ASSERT((bool)p.second);
+            POLARIS_ASSERT((bool)p.second);
 
             // This will also flush all pending work
             p.second->stop();
             p.second->waitForThreadExit();
         } else {
             // should not have worker thread
-            FAISS_ASSERT(!(bool)p.second);
+            POLARIS_ASSERT(!(bool)p.second);
         }
 
         if (own_indices) {
@@ -50,7 +50,7 @@ void ThreadedIndex<IndexT>::addIndex(IndexT* index) {
     }
 
     // The new index must match our set dimension
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             this->d == index->d,
             "addIndex: dimension mismatch for "
             "newly added index; expecting dim %d, "
@@ -61,14 +61,14 @@ void ThreadedIndex<IndexT>::addIndex(IndexT* index) {
     if (!indices_.empty()) {
         auto& existing = indices_.front().first;
 
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 index->metric_type == existing->metric_type,
                 "addIndex: newly added index is "
                 "of different metric type than old index");
 
         // Make sure this index is not duplicated
         for (auto& p : indices_) {
-            FAISS_THROW_IF_NOT_MSG(
+            POLARIS_THROW_IF_NOT_MSG(
                     p.first != index,
                     "addIndex: attempting to add index "
                     "that is already in the collection");
@@ -91,12 +91,12 @@ void ThreadedIndex<IndexT>::removeIndex(IndexT* index) {
             // to ensure that it has finished before function exit
             if (isThreaded_) {
                 // should have worker thread
-                FAISS_ASSERT((bool)it->second);
+                POLARIS_ASSERT((bool)it->second);
                 it->second->stop();
                 it->second->waitForThreadExit();
             } else {
                 // should not have worker thread
-                FAISS_ASSERT(!(bool)it->second);
+                POLARIS_ASSERT(!(bool)it->second);
             }
 
             indices_.erase(it);
@@ -111,7 +111,7 @@ void ThreadedIndex<IndexT>::removeIndex(IndexT* index) {
     }
 
     // could not find our index
-    FAISS_THROW_MSG("IndexReplicas::removeIndex: index not found");
+    POLARIS_THROW_MSG("IndexReplicas::removeIndex: index not found");
 }
 
 template <typename IndexT>

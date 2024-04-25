@@ -90,8 +90,8 @@ ResidualQuantizer::ResidualQuantizer(
 void ResidualQuantizer::initialize_from(
         const ResidualQuantizer& other,
         int skip_M) {
-    FAISS_THROW_IF_NOT(M + skip_M <= other.M);
-    FAISS_THROW_IF_NOT(skip_M >= 0);
+    POLARIS_THROW_IF_NOT(M + skip_M <= other.M);
+    POLARIS_THROW_IF_NOT(skip_M >= 0);
 
     Search_type_t this_search_type = search_type;
     int this_M = M;
@@ -111,7 +111,7 @@ void ResidualQuantizer::initialize_from(
 
     // resize codebooks if trained
     if (codebooks.size() > 0) {
-        FAISS_THROW_IF_NOT(codebooks.size() == other.total_codebook_size * d);
+        POLARIS_THROW_IF_NOT(codebooks.size() == other.total_codebook_size * d);
         codebooks.resize(total_codebook_size * d);
         memcpy(codebooks.data(),
                other.codebooks.data() + other.codebook_offsets[skip_M] * d,
@@ -288,7 +288,7 @@ void ResidualQuantizer::train(size_t n, const float* x) {
 }
 
 float ResidualQuantizer::retrain_AQ_codebook(size_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(n >= total_codebook_size, "too few training points");
+    POLARIS_THROW_IF_NOT_MSG(n >= total_codebook_size, "too few training points");
 
     if (verbose) {
         printf("  encoding %zd training vectors\n", n);
@@ -356,7 +356,7 @@ float ResidualQuantizer::retrain_AQ_codebook(size_t n, const float* x) {
                 &lwork,
                 iwork.data(),
                 &info);
-        FAISS_THROW_IF_NOT(info == 0);
+        POLARIS_THROW_IF_NOT(info == 0);
 
         lwork = worksize;
         std::vector<float> work(lwork);
@@ -375,7 +375,7 @@ float ResidualQuantizer::retrain_AQ_codebook(size_t n, const float* x) {
                 &lwork,
                 iwork.data(),
                 &info);
-        FAISS_THROW_IF_NOT_FMT(info == 0, "SGELS returned info=%d", int(info));
+        POLARIS_THROW_IF_NOT_FMT(info == 0, "SGELS returned info=%d", int(info));
         if (verbose) {
             printf("   sgelsd rank=%d/%d\n",
                    int(rank),
@@ -388,7 +388,7 @@ float ResidualQuantizer::retrain_AQ_codebook(size_t n, const float* x) {
     for (size_t i = 0; i < total_codebook_size; i++) {
         for (size_t j = 0; j < d; j++) {
             codebooks[i * d + j] = xt[j * n + i];
-            FAISS_THROW_IF_NOT(std::isfinite(codebooks[i * d + j]));
+            POLARIS_THROW_IF_NOT(std::isfinite(codebooks[i * d + j]));
         }
     }
 
@@ -426,7 +426,7 @@ void ResidualQuantizer::compute_codes_add_centroids(
         uint8_t* codes_out,
         size_t n,
         const float* centroids) const {
-    FAISS_THROW_IF_NOT_MSG(is_trained, "RQ is not trained yet.");
+    POLARIS_THROW_IF_NOT_MSG(is_trained, "RQ is not trained yet.");
 
     //
     size_t mem = memory_per_point();

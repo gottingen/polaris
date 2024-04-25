@@ -163,7 +163,7 @@ size_t get_mem_usage_kb() {
     char fname[256];
     snprintf(fname, 256, "/proc/%d/status", pid);
     FILE* f = fopen(fname, "r");
-    FAISS_THROW_IF_NOT_MSG(f, "cannot open proc status file");
+    POLARIS_THROW_IF_NOT_MSG(f, "cannot open proc status file");
     size_t sz = 0;
     for (;;) {
         char buf[256];
@@ -238,7 +238,7 @@ void reflection_ref(const float* u, float* x, size_t n, size_t d, size_t nu) {
  ***************************************************************************/
 
 void matrix_qr(int m, int n, float* a) {
-    FAISS_THROW_IF_NOT(m >= n);
+    POLARIS_THROW_IF_NOT(m >= n);
     FINTEGER mi = m, ni = n, ki = mi < ni ? mi : ni;
     std::vector<float> tau(ki);
     FINTEGER lwork = -1, info;
@@ -414,7 +414,7 @@ int ivec_hist(size_t n, const int* v, int vmax, int* hist) {
 }
 
 void bincode_hist(size_t n, size_t nbits, const uint8_t* codes, int* hist) {
-    FAISS_THROW_IF_NOT(nbits % 8 == 0);
+    POLARIS_THROW_IF_NOT(nbits % 8 == 0);
     size_t d = nbits / 8;
     std::vector<int> accu(d * 256);
     const uint8_t* c = codes;
@@ -605,7 +605,7 @@ void CombinerRangeKNN<T>::compute_sizes(int64_t* L_res_2) {
 
 template <typename T>
 void CombinerRangeKNN<T>::write_result(T* D_res, int64_t* I_res) {
-    FAISS_THROW_IF_NOT(L_res);
+    POLARIS_THROW_IF_NOT(L_res);
     int64_t j = 0;
     for (int64_t i = 0; i < nq; i++) {
         int64_t n_in = L_res[i + 1] - L_res[i];

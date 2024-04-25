@@ -192,7 +192,7 @@ void accumulate(
         DISPATCH(3);
         DISPATCH(4);
     }
-    FAISS_THROW_FMT("accumulate nq=%d not instantiated", nq);
+    POLARIS_THROW_FMT("accumulate nq=%d not instantiated", nq);
 
 #undef DISPATCH
 }
@@ -264,7 +264,7 @@ void pq4_accumulate_loop_qbs_fixed_scaler(
                 DISPATCH(4);
 #undef DISPATCH
                 default:
-                    FAISS_THROW_FMT("accumulate nq=%d not instantiated", nq);
+                    POLARIS_THROW_FMT("accumulate nq=%d not instantiated", nq);
             }
             i0 += nq;
             LUT += nq * nsq * 16;
@@ -329,7 +329,7 @@ void accumulate_to_mem(
         const uint8_t* codes,
         const uint8_t* LUT,
         uint16_t* accu) {
-    FAISS_THROW_IF_NOT(ntotal2 % 32 == 0);
+    POLARIS_THROW_IF_NOT(ntotal2 % 32 == 0);
     StoreResultHandler handler(accu, ntotal2);
     DummyScaler scaler;
     accumulate(nq, ntotal2, nsq, codes, LUT, handler, scaler);
@@ -349,7 +349,7 @@ int pq4_preferred_qbs(int n) {
         qbs |= (n % 3) << nbit;
         return qbs;
     } else {
-        FAISS_THROW_FMT("number of queries %d too large", n);
+        POLARIS_THROW_FMT("number of queries %d too large", n);
     }
 }
 

@@ -18,7 +18,7 @@
 #define READANDCHECK(ptr, n)                         \
     {                                                \
         size_t ret = (*f)(ptr, sizeof(*(ptr)), n);   \
-        FAISS_THROW_IF_NOT_FMT(                      \
+        POLARIS_THROW_IF_NOT_FMT(                      \
                 ret == (n),                          \
                 "read error in %s: %zd != %zd (%s)", \
                 f->name.c_str(),                     \
@@ -34,7 +34,7 @@
     {                                                                \
         size_t size;                                                 \
         READANDCHECK(&size, 1);                                      \
-        FAISS_THROW_IF_NOT(size >= 0 && size < (uint64_t{1} << 40)); \
+        POLARIS_THROW_IF_NOT(size >= 0 && size < (uint64_t{1} << 40)); \
         (vec).resize(size);                                          \
         READANDCHECK((vec).data(), size);                            \
     }
@@ -49,7 +49,7 @@
 #define WRITEANDCHECK(ptr, n)                         \
     {                                                 \
         size_t ret = (*f)(ptr, sizeof(*(ptr)), n);    \
-        FAISS_THROW_IF_NOT_FMT(                       \
+        POLARIS_THROW_IF_NOT_FMT(                       \
                 ret == (n),                           \
                 "write error in %s: %zd != %zd (%s)", \
                 f->name.c_str(),                      \
@@ -71,7 +71,7 @@
 
 #define WRITEXBVECTOR(vec)                         \
     {                                              \
-        FAISS_THROW_IF_NOT((vec).size() % 4 == 0); \
+        POLARIS_THROW_IF_NOT((vec).size() % 4 == 0); \
         size_t size = (vec).size() / 4;            \
         WRITEANDCHECK(&size, 1);                   \
         WRITEANDCHECK((vec).data(), size * 4);     \
@@ -81,7 +81,7 @@
     {                                                                \
         size_t size;                                                 \
         READANDCHECK(&size, 1);                                      \
-        FAISS_THROW_IF_NOT(size >= 0 && size < (uint64_t{1} << 40)); \
+        POLARIS_THROW_IF_NOT(size >= 0 && size < (uint64_t{1} << 40)); \
         size *= 4;                                                   \
         (vec).resize(size);                                          \
         READANDCHECK((vec).data(), size);                            \

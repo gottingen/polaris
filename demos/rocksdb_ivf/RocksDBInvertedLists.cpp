@@ -55,15 +55,15 @@ RocksDBInvertedLists::RocksDBInvertedLists(
 }
 
 size_t RocksDBInvertedLists::list_size(size_t /*list_no*/) const {
-    FAISS_THROW_MSG("list_size is not supported");
+    POLARIS_THROW_MSG("list_size is not supported");
 }
 
 const uint8_t* RocksDBInvertedLists::get_codes(size_t /*list_no*/) const {
-    FAISS_THROW_MSG("get_codes is not supported");
+    POLARIS_THROW_MSG("get_codes is not supported");
 }
 
 const idx_t* RocksDBInvertedLists::get_ids(size_t /*list_no*/) const {
-    FAISS_THROW_MSG("get_ids is not supported");
+    POLARIS_THROW_MSG("get_ids is not supported");
 }
 
 size_t RocksDBInvertedLists::add_entries(
@@ -93,11 +93,11 @@ void RocksDBInvertedLists::update_entries(
         size_t /*n_entry*/,
         const idx_t* /*ids*/,
         const uint8_t* /*code*/) {
-    FAISS_THROW_MSG("update_entries is not supported");
+    POLARIS_THROW_MSG("update_entries is not supported");
 }
 
 void RocksDBInvertedLists::resize(size_t /*list_no*/, size_t /*new_size*/) {
-    FAISS_THROW_MSG("resize is not supported");
+    POLARIS_THROW_MSG("resize is not supported");
 }
 
 InvertedListsIterator* RocksDBInvertedLists::get_iterator(

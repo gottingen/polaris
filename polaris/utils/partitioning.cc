@@ -67,7 +67,7 @@ typename C::T sample_threshold_median3(
         return val3[0];
     } else {
         return thresh_inf;
-        //   FAISS_THROW_MSG("too few values to compute a median");
+        //   POLARIS_THROW_MSG("too few values to compute a median");
     }
 }
 
@@ -143,7 +143,7 @@ typename C::T partition_fuzzy_median3(
     // compress the arrays afterwards. So it's a n*log(n) algoirithm rather than
     // qselect's O(n) but it avoids shuffling around the array.
 
-    FAISS_THROW_IF_NOT(n >= 3);
+    POLARIS_THROW_IF_NOT(n >= 3);
 
     T thresh_inf = C::Crev::neutral();
     T thresh_sup = C::neutral();
@@ -1180,7 +1180,7 @@ void simd_histogram_8(
         DISPATCH(12);
         DISPATCH(13);
         default:
-            FAISS_THROW_FMT("dispatch for shift=%d not instantiated", shift);
+            POLARIS_THROW_FMT("dispatch for shift=%d not instantiated", shift);
     }
 #undef DISPATCH
 
@@ -1235,7 +1235,7 @@ void simd_histogram_16(
         DISPATCH(11);
         DISPATCH(12);
         default:
-            FAISS_THROW_FMT("dispatch for shift=%d not instantiated", shift);
+            POLARIS_THROW_FMT("dispatch for shift=%d not instantiated", shift);
     }
 #undef DISPATCH
 

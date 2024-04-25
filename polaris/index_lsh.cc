@@ -34,7 +34,7 @@ IndexLSH::IndexLSH(idx_t d, int nbits, bool rotate_data, bool train_thresholds)
     if (rotate_data) {
         rrot.init(5);
     } else {
-        FAISS_THROW_IF_NOT(d >= nbits);
+        POLARIS_THROW_IF_NOT(d >= nbits);
     }
 }
 
@@ -105,10 +105,10 @@ void IndexLSH::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
     const float* xt = apply_preprocess(n, x);
     std::unique_ptr<const float[]> del(xt == x ? nullptr : xt);
 
@@ -130,7 +130,7 @@ void IndexLSH::search(
 void IndexLSH::transfer_thresholds(LinearTransform* vt) {
     if (!train_thresholds)
         return;
-    FAISS_THROW_IF_NOT(nbits == vt->d_out);
+    POLARIS_THROW_IF_NOT(nbits == vt->d_out);
     if (!vt->have_bias) {
         vt->b.resize(nbits, 0);
         vt->have_bias = true;
@@ -142,7 +142,7 @@ void IndexLSH::transfer_thresholds(LinearTransform* vt) {
 }
 
 void IndexLSH::sa_encode(idx_t n, const float* x, uint8_t* bytes) const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     const float* xt = apply_preprocess(n, x);
     std::unique_ptr<const float[]> del(xt == x ? nullptr : xt);
     fvecs2bitvecs(xt, bytes, nbits, n);

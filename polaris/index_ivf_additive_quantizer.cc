@@ -59,7 +59,7 @@ void IndexIVFAdditiveQuantizer::encode_vectors(
         const idx_t* list_nos,
         uint8_t* codes,
         bool include_listnos) const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     // first encode then possibly add listnos
 
@@ -182,8 +182,8 @@ struct AQInvertedListScannerDecompress : AQInvertedListScanner {
     float distance_to_code(const uint8_t* code) const final {
         std::vector<float> b(aq.d);
         aq.decode(code, b.data(), 1);
-        FAISS_ASSERT(q);
-        FAISS_ASSERT(b.data());
+        POLARIS_ASSERT(q);
+        POLARIS_ASSERT(b.data());
 
         return is_IP ? coarse_dis + fvec_inner_product(q, b.data(), aq.d)
                      : fvec_L2sqr(q, b.data(), aq.d);
@@ -240,7 +240,7 @@ struct AQInvertedListScannerLUT : AQInvertedListScanner {
 InvertedListScanner* IndexIVFAdditiveQuantizer::get_InvertedListScanner(
         bool store_pairs,
         const IDSelector* sel) const {
-    FAISS_THROW_IF_NOT(!sel);
+    POLARIS_THROW_IF_NOT(!sel);
     if (metric_type == METRIC_INNER_PRODUCT) {
         if (aq->search_type == AdditiveQuantizer::ST_decompress) {
             return new AQInvertedListScannerDecompress<true>(
@@ -270,7 +270,7 @@ InvertedListScanner* IndexIVFAdditiveQuantizer::get_InvertedListScanner(
                 A(ST_norm_cqint8)
 #undef A
             default:
-                FAISS_THROW_FMT(
+                POLARIS_THROW_FMT(
                         "search type %d not supported", aq->search_type);
         }
     }

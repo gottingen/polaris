@@ -70,7 +70,7 @@ void ProductAdditiveQuantizer::init(
     // ProductAdditiveQuantizer
     nsplits = aqs.size();
 
-    FAISS_THROW_IF_NOT(quantizers.empty());
+    POLARIS_THROW_IF_NOT(quantizers.empty());
     for (const auto& q : aqs) {
         auto aq = dynamic_cast<AdditiveQuantizer*>(clone_Quantizer(q));
         quantizers.push_back(aq);
@@ -197,7 +197,7 @@ void ProductAdditiveQuantizer::decode_unpacked(
         float* x,
         size_t n,
         int64_t ld_codes) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             is_trained, "The product additive quantizer is not trained yet.");
 
     if (ld_codes == -1) {
@@ -233,7 +233,7 @@ void ProductAdditiveQuantizer::decode_unpacked(
 
 void ProductAdditiveQuantizer::decode(const uint8_t* codes, float* x, size_t n)
         const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             is_trained, "The product additive quantizer is not trained yet.");
 
 #pragma omp parallel for if (n > 1000)
@@ -325,7 +325,7 @@ ProductLocalSearchQuantizer::ProductLocalSearchQuantizer(
     std::vector<AdditiveQuantizer*> aqs;
 
     if (nsplits > 0) {
-        FAISS_THROW_IF_NOT(d % nsplits == 0);
+        POLARIS_THROW_IF_NOT(d % nsplits == 0);
         size_t dsub = d / nsplits;
 
         for (size_t i = 0; i < nsplits; i++) {
@@ -356,7 +356,7 @@ ProductResidualQuantizer::ProductResidualQuantizer(
     std::vector<AdditiveQuantizer*> aqs;
 
     if (nsplits > 0) {
-        FAISS_THROW_IF_NOT(d % nsplits == 0);
+        POLARIS_THROW_IF_NOT(d % nsplits == 0);
         size_t dsub = d / nsplits;
 
         for (size_t i = 0; i < nsplits; i++) {

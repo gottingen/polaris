@@ -36,7 +36,7 @@ int HNSW::nb_neighbors(int layer_no) const {
 }
 
 void HNSW::set_nb_neighbors(int level_no, int n) {
-    FAISS_THROW_IF_NOT(levels.size() == 0);
+    POLARIS_THROW_IF_NOT(levels.size() == 0);
     int cur_n = nb_neighbors(level_no);
     for (int i = level_no + 1; i < cum_nneighbor_per_level.size(); i++) {
         cum_nneighbor_per_level[i] += n - cur_n;
@@ -105,7 +105,7 @@ void HNSW::reset() {
 }
 
 void HNSW::print_neighbor_stats(int level) const {
-    FAISS_THROW_IF_NOT(level < cum_nneighbor_per_level.size());
+    POLARIS_THROW_IF_NOT(level < cum_nneighbor_per_level.size());
     printf("stats on level %d, max %d neighbors per vertex:\n",
            level,
            nb_neighbors(level));
@@ -130,7 +130,7 @@ void HNSW::print_neighbor_stats(int level) const {
                 storage_idx_t i2 = neighbors[j];
                 if (i2 < 0)
                     break;
-                FAISS_ASSERT(i2 != i);
+                POLARIS_ASSERT(i2 != i);
                 size_t begin2, end2;
                 neighbor_range(i2, level, &begin2, &end2);
                 for (size_t j2 = begin2; j2 < end2; j2++) {
@@ -200,9 +200,9 @@ int HNSW::prepare_level_tab(size_t n, bool preset_levels) {
     size_t n0 = offsets.size() - 1;
 
     if (preset_levels) {
-        FAISS_ASSERT(n0 + n == levels.size());
+        POLARIS_ASSERT(n0 + n == levels.size());
     } else {
-        FAISS_ASSERT(n0 == levels.size());
+        POLARIS_ASSERT(n0 == levels.size());
         for (int i = 0; i < n; i++) {
             int pt_level = random_level();
             levels.push_back(pt_level + 1);
@@ -540,7 +540,7 @@ int search_from_candidates(
     for (int i = 0; i < candidates.size(); i++) {
         idx_t v1 = candidates.ids[i];
         float d = candidates.dis[i];
-        FAISS_ASSERT(v1 >= 0);
+        POLARIS_ASSERT(v1 >= 0);
         if (!sel || sel->is_member(v1)) {
             if (d < threshold) {
                 if (res.add_result(d, v1)) {

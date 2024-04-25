@@ -63,7 +63,7 @@ OneRecallAtRCriterion::OneRecallAtRCriterion(idx_t nq, idx_t R)
 
 double OneRecallAtRCriterion::evaluate(const float* /*D*/, const idx_t* I)
         const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             (gt_I.size() == gt_nnn * nq && gt_nnn >= 1 && nnn >= R),
             "ground truth not initialized");
     idx_t n_ok = 0;
@@ -85,7 +85,7 @@ IntersectionCriterion::IntersectionCriterion(idx_t nq, idx_t R)
 
 double IntersectionCriterion::evaluate(const float* /*D*/, const idx_t* I)
         const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             (gt_I.size() == gt_nnn * nq && gt_nnn >= R && nnn >= R),
             "ground truth not initialized");
     int64_t n_ok = 0;
@@ -284,7 +284,7 @@ std::string ParameterSpace::combination_name(size_t cno) const {
     char buf[1000], *wp = buf;
     *wp = 0;
     for (int i = 0; i < parameter_ranges.size(); i++) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 buf + 1000 - wp >= 0, "Overflow detected in snprintf");
         const ParameterRange& pr = parameter_ranges[i];
         size_t j = cno % pr.values.size();
@@ -436,7 +436,7 @@ void ParameterSpace::set_index_parameters(
         char name[100];
         double val;
         int ret = sscanf(tok, "%99[^=]=%lf", name, &val);
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 ret == 2, "could not interpret parameters %s", tok);
         set_index_parameter(index, name, val);
     }
@@ -568,7 +568,7 @@ void ParameterSpace::set_index_parameter(
         }
     }
 
-    FAISS_THROW_FMT(
+    POLARIS_THROW_FMT(
             "ParameterSpace::set_index_parameter:"
             "could not set parameter %s",
             name.c_str());
@@ -611,7 +611,7 @@ void ParameterSpace::explore(
         const float* xq,
         const AutoTuneCriterion& crit,
         OperatingPoints* ops) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             nq == crit.nq, "criterion does not have the same nb of queries");
 
     size_t n_comb = n_combinations();
@@ -646,7 +646,7 @@ void ParameterSpace::explore(
 
     if (n_exp > n_comb)
         n_exp = n_comb;
-    FAISS_THROW_IF_NOT(n_comb == 1 || n_exp > 2);
+    POLARIS_THROW_IF_NOT(n_comb == 1 || n_exp > 2);
     std::vector<int> perm(n_comb);
     // make sure the slowest and fastest experiment are run
     perm[0] = 0;

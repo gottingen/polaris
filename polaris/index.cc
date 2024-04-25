@@ -30,7 +30,7 @@ void Index::range_search(
         float,
         RangeSearchResult*,
         const SearchParameters* params) const {
-    FAISS_THROW_MSG("range search not implemented");
+    POLARIS_THROW_MSG("range search not implemented");
 }
 
 void Index::assign(idx_t n, const float* x, idx_t* labels, idx_t k) const {
@@ -42,16 +42,16 @@ void Index::add_with_ids(
         idx_t /*n*/,
         const float* /*x*/,
         const idx_t* /*xids*/) {
-    FAISS_THROW_MSG("add_with_ids not implemented for this type of index");
+    POLARIS_THROW_MSG("add_with_ids not implemented for this type of index");
 }
 
 size_t Index::remove_ids(const IDSelector& /*sel*/) {
-    FAISS_THROW_MSG("remove_ids not implemented for this type of index");
+    POLARIS_THROW_MSG("remove_ids not implemented for this type of index");
     return -1;
 }
 
 void Index::reconstruct(idx_t, float*) const {
-    FAISS_THROW_MSG("reconstruct not implemented for this type of index");
+    POLARIS_THROW_MSG("reconstruct not implemented for this type of index");
 }
 
 void Index::reconstruct_batch(idx_t n, const idx_t* keys, float* recons) const {
@@ -67,7 +67,7 @@ void Index::reconstruct_batch(idx_t n, const idx_t* keys, float* recons) const {
         }
     }
     if (!exception_string.empty()) {
-        FAISS_THROW_MSG(exception_string.c_str());
+        POLARIS_THROW_MSG(exception_string.c_str());
     }
 }
 
@@ -86,7 +86,7 @@ void Index::search_and_reconstruct(
         idx_t* labels,
         float* recons,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     search(n, x, k, distances, labels, params);
     for (idx_t i = 0; i < n; ++i) {
@@ -123,15 +123,15 @@ void Index::compute_residual_n(
 }
 
 size_t Index::sa_code_size() const {
-    FAISS_THROW_MSG("standalone codec not implemented for this type of index");
+    POLARIS_THROW_MSG("standalone codec not implemented for this type of index");
 }
 
 void Index::sa_encode(idx_t, const float*, uint8_t*) const {
-    FAISS_THROW_MSG("standalone codec not implemented for this type of index");
+    POLARIS_THROW_MSG("standalone codec not implemented for this type of index");
 }
 
 void Index::sa_decode(idx_t, const uint8_t*, float*) const {
-    FAISS_THROW_MSG("standalone codec not implemented for this type of index");
+    POLARIS_THROW_MSG("standalone codec not implemented for this type of index");
 }
 
 namespace {
@@ -170,16 +170,16 @@ DistanceComputer* Index::get_distance_computer() const {
     if (metric_type == METRIC_L2) {
         return new GenericDistanceComputer(*this);
     } else {
-        FAISS_THROW_MSG("get_distance_computer() not implemented");
+        POLARIS_THROW_MSG("get_distance_computer() not implemented");
     }
 }
 
 void Index::merge_from(Index& /* otherIndex */, idx_t /* add_id */) {
-    FAISS_THROW_MSG("merge_from() not implemented");
+    POLARIS_THROW_MSG("merge_from() not implemented");
 }
 
 void Index::check_compatible_for_merge(const Index& /* otherIndex */) const {
-    FAISS_THROW_MSG("check_compatible_for_merge() not implemented");
+    POLARIS_THROW_MSG("check_compatible_for_merge() not implemented");
 }
 
 } // namespace polaris

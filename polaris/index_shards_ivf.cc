@@ -54,8 +54,8 @@ IndexShardsIVF::IndexShardsIVF(
 
 void IndexShardsIVF::addIndex(Index* index) {
     auto index_ivf = dynamic_cast<IndexIVFInterface*>(index);
-    FAISS_THROW_IF_NOT_MSG(index_ivf, "can only add IndexIVFs");
-    FAISS_THROW_IF_NOT(index_ivf->nlist == nlist);
+    POLARIS_THROW_IF_NOT_MSG(index_ivf, "can only add IndexIVFs");
+    POLARIS_THROW_IF_NOT(index_ivf->nlist == nlist);
     IndexShardsTemplate<Index>::addIndex(index);
 }
 
@@ -99,17 +99,17 @@ void IndexShardsIVF::add_with_ids(
         IndexShardsTemplate<Index>::add_with_ids(n, x, xids);
         return;
     }
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !(successive_ids && xids),
             "It makes no sense to pass in ids and "
             "request them to be shifted");
 
     if (successive_ids) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 !xids,
                 "It makes no sense to pass in ids and "
                 "request them to be shifted");
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 this->ntotal == 0,
                 "when adding to IndexShards with successive_ids, "
                 "only add() in a single pass is supported");
@@ -162,12 +162,12 @@ void IndexShardsIVF::search(
         distance_t* distances,
         idx_t* labels,
         const SearchParameters* params_in) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(count() > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(count() > 0);
     const IVFSearchParameters* params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IVFSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
+        POLARIS_THROW_IF_NOT_MSG(params, "IndexIVF params have incorrect type");
     }
 
     auto index0 = dynamic_cast<const IndexIVFInterface*>(at(0));
@@ -199,7 +199,7 @@ void IndexShardsIVF::search(
 
         auto index = dynamic_cast<const IndexIVFInterface*>(indexIn);
 
-        FAISS_THROW_IF_NOT_MSG(index->nprobe == nprobe, "inconsistent nprobe");
+        POLARIS_THROW_IF_NOT_MSG(index->nprobe == nprobe, "inconsistent nprobe");
 
         index->search_preassigned(
                 n,

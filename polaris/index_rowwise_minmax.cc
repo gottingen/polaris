@@ -355,7 +355,7 @@ IndexRowwiseMinMaxBase::~IndexRowwiseMinMaxBase() {
 }
 
 void IndexRowwiseMinMaxBase::add(idx_t, const float*) {
-    FAISS_THROW_MSG("add not implemented for this type of index");
+    POLARIS_THROW_MSG("add not implemented for this type of index");
 }
 
 void IndexRowwiseMinMaxBase::search(
@@ -365,11 +365,11 @@ void IndexRowwiseMinMaxBase::search(
         float*,
         idx_t*,
         const SearchParameters*) const {
-    FAISS_THROW_MSG("search not implemented for this type of index");
+    POLARIS_THROW_MSG("search not implemented for this type of index");
 }
 
 void IndexRowwiseMinMaxBase::reset() {
-    FAISS_THROW_MSG("reset not implemented for this type of index");
+    POLARIS_THROW_MSG("reset not implemented for this type of index");
 }
 
 /*********************************************************

@@ -166,7 +166,7 @@ void pairwise_extra_distances(
         HANDLE_VAR(Jaccard);
 #undef HANDLE_VAR
         default:
-            FAISS_THROW_MSG("metric type not implemented");
+            POLARIS_THROW_MSG("metric type not implemented");
     }
 }
 
@@ -197,7 +197,7 @@ void knn_extra_metrics(
         HANDLE_VAR(Jaccard);
 #undef HANDLE_VAR
         default:
-            FAISS_THROW_MSG("metric type not implemented");
+            POLARIS_THROW_MSG("metric type not implemented");
     }
 }
 
@@ -244,7 +244,7 @@ FlatCodesDistanceComputer* get_extra_distance_computer(
         HANDLE_VAR(Jaccard);
 #undef HANDLE_VAR
         default:
-            FAISS_THROW_MSG("metric type not implemented");
+            POLARIS_THROW_MSG("metric type not implemented");
     }
 }
 

@@ -21,7 +21,7 @@
 #include <polaris/utils/simdlib.h>
 #include <polaris/utils/utils.h>
 
-#include <polaris/invlists/BlockInvertedLists.h>
+#include <polaris/invlists/block_inverted_lists.h>
 
 #include <polaris/impl/pq4_fast_scan.h>
 #include <polaris/impl/simd_result_handlers.h>
@@ -63,7 +63,7 @@ IndexIVFPQFastScan::IndexIVFPQFastScan(const IndexIVFPQ& orig, int bbs)
                   orig.pq.code_size,
                   orig.metric_type),
           pq(orig.pq) {
-    FAISS_THROW_IF_NOT(orig.pq.nbits == 4);
+    POLARIS_THROW_IF_NOT(orig.pq.nbits == 4);
 
     init_fastscan(orig.pq.M, orig.pq.nbits, orig.nlist, orig.metric_type, bbs);
 
@@ -271,7 +271,7 @@ void IndexIVFPQFastScan::compute_LUT(
             biases.resize(n * nprobe);
             memcpy(biases.get(), cq.dis, sizeof(float) * n * nprobe);
         } else {
-            FAISS_THROW_FMT("metric %d not supported", metric_type);
+            POLARIS_THROW_FMT("metric %d not supported", metric_type);
         }
 
     } else {
@@ -281,7 +281,7 @@ void IndexIVFPQFastScan::compute_LUT(
         } else if (metric_type == METRIC_INNER_PRODUCT) {
             pq.compute_inner_prod_tables(n, x, dis_tables.get());
         } else {
-            FAISS_THROW_FMT("metric %d not supported", metric_type);
+            POLARIS_THROW_FMT("metric %d not supported", metric_type);
         }
     }
 }

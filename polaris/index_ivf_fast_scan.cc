@@ -22,7 +22,7 @@
 #include <polaris/impl/lookup_table_scaler.h>
 #include <polaris/impl/pq4_fast_scan.h>
 #include <polaris/impl/simd_result_handlers.h>
-#include <polaris/invlists/BlockInvertedLists.h>
+#include <polaris/invlists/block_inverted_lists.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
 #include <polaris/utils/quantize_lut.h>
@@ -45,7 +45,7 @@ IndexIVFFastScan::IndexIVFFastScan(
         : IndexIVF(quantizer, d, nlist, code_size, metric) {
     // unlike other indexes, we prefer no residuals for performance reasons.
     by_residual = false;
-    FAISS_THROW_IF_NOT(metric == METRIC_L2 || metric == METRIC_INNER_PRODUCT);
+    POLARIS_THROW_IF_NOT(metric == METRIC_L2 || metric == METRIC_INNER_PRODUCT);
 }
 
 IndexIVFFastScan::IndexIVFFastScan() {
@@ -61,8 +61,8 @@ void IndexIVFFastScan::init_fastscan(
         size_t nlist,
         MetricType /* metric */,
         int bbs) {
-    FAISS_THROW_IF_NOT(bbs % 32 == 0);
-    FAISS_THROW_IF_NOT(nbits == 4);
+    POLARIS_THROW_IF_NOT(bbs % 32 == 0);
+    POLARIS_THROW_IF_NOT(nbits == 4);
 
     this->M = M;
     this->nbits = nbits;
@@ -77,7 +77,7 @@ void IndexIVFFastScan::init_fastscan(
 
 void IndexIVFFastScan::init_code_packer() {
     auto bil = dynamic_cast<BlockInvertedLists*>(invlists);
-    FAISS_THROW_IF_NOT(bil);
+    POLARIS_THROW_IF_NOT(bil);
     delete bil->packer; // in case there was one before
     bil->packer = get_CodePacker();
 }
@@ -92,7 +92,7 @@ void IndexIVFFastScan::add_with_ids(
         idx_t n,
         const float* x,
         const idx_t* xids) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     // do some blocking to avoid excessive allocs
     constexpr idx_t bs = 65536;
@@ -131,7 +131,7 @@ void IndexIVFFastScan::add_with_ids(
 
     DirectMapAdd dm_adder(direct_map, n, xids);
     BlockInvertedLists* bil = dynamic_cast<BlockInvertedLists*>(invlists);
-    FAISS_THROW_IF_NOT_MSG(bil, "only block inverted lists supported");
+    POLARIS_THROW_IF_NOT_MSG(bil, "only block inverted lists supported");
 
     // prepare batches
     std::vector<idx_t> order(n);
@@ -308,7 +308,7 @@ void IndexIVFFastScan::search(
         idx_t* labels,
         const SearchParameters* params) const {
     auto paramsi = dynamic_cast<const SearchParametersIVF*>(params);
-    FAISS_THROW_IF_NOT_MSG(!params || paramsi, "need IVFSearchParameters");
+    POLARIS_THROW_IF_NOT_MSG(!params || paramsi, "need IVFSearchParameters");
     search_preassigned(
             n, x, k, nullptr, nullptr, distances, labels, false, paramsi);
 }
@@ -326,15 +326,15 @@ void IndexIVFFastScan::search_preassigned(
         IndexIVFStats* stats) const {
     size_t nprobe = this->nprobe;
     if (params) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 !params->quantizer_params, "quantizer params not supported");
-        FAISS_THROW_IF_NOT(params->max_codes == 0);
+        POLARIS_THROW_IF_NOT(params->max_codes == 0);
         nprobe = params->nprobe;
     }
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !store_pairs, "store_pairs not supported for this index");
-    FAISS_THROW_IF_NOT_MSG(!stats, "stats not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT_MSG(!stats, "stats not supported for this index");
+    POLARIS_THROW_IF_NOT(k > 0);
 
     const CoarseQuantized cq = {nprobe, centroid_dis, assign};
     search_dispatch_implem(n, x, k, distances, labels, cq, nullptr);
@@ -346,7 +346,7 @@ void IndexIVFFastScan::range_search(
         float radius,
         RangeSearchResult* result,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(!params);
+    POLARIS_THROW_IF_NOT(!params);
     const CoarseQuantized cq = {nprobe, nullptr, nullptr};
     range_search_dispatch_implem(n, x, radius, *result, cq, nullptr);
 }
@@ -575,7 +575,7 @@ void IndexIVFFastScan::search_dispatch_implem(
         indexIVF_stats.ndis += ndis;
         indexIVF_stats.nlist += nlist_visited;
     } else {
-        FAISS_THROW_FMT("implem %d does not exist", implem);
+        POLARIS_THROW_FMT("implem %d does not exist", implem);
     }
 }
 
@@ -634,7 +634,7 @@ void IndexIVFFastScan::range_search_dispatch_implem(
             search_implem_10(
                     n, x, *handler.get(), cq, &ndis, &nlist_visited, scaler);
         } else {
-            FAISS_THROW_FMT("Range search implem %d not impemented", impl);
+            POLARIS_THROW_FMT("Range search implem %d not impemented", impl);
         }
     } else {
         // explicitly slice over threads
@@ -700,7 +700,7 @@ void IndexIVFFastScan::search_implem_1(
         idx_t* labels,
         const CoarseQuantized& cq,
         const NormTableScaler* scaler) const {
-    FAISS_THROW_IF_NOT(orig_invlists);
+    POLARIS_THROW_IF_NOT(orig_invlists);
 
     size_t dim12 = ksub * M;
     AlignedTable<float> dis_tables;
@@ -767,7 +767,7 @@ void IndexIVFFastScan::search_implem_2(
         idx_t* labels,
         const CoarseQuantized& cq,
         const NormTableScaler* scaler) const {
-    FAISS_THROW_IF_NOT(orig_invlists);
+    POLARIS_THROW_IF_NOT(orig_invlists);
 
     size_t dim12 = ksub * M2;
     AlignedTable<uint8_t> dis_tables;
@@ -925,7 +925,7 @@ void IndexIVFFastScan::search_implem_12(
     if (n == 0) { // does not work well with reservoir
         return;
     }
-    FAISS_THROW_IF_NOT(bbs == 32);
+    POLARIS_THROW_IF_NOT(bbs == 32);
 
     size_t dim12 = ksub * M2;
     AlignedTable<uint8_t> dis_tables;
@@ -1053,7 +1053,7 @@ void IndexIVFFastScan::search_implem_14(
     if (n == 0) { // does not work well with reservoir
         return;
     }
-    FAISS_THROW_IF_NOT(bbs == 32);
+    POLARIS_THROW_IF_NOT(bbs == 32);
 
     size_t dim12 = ksub * M2;
     AlignedTable<uint8_t> dis_tables;
@@ -1288,8 +1288,8 @@ void IndexIVFFastScan::reconstruct_from_offset(
 }
 
 void IndexIVFFastScan::reconstruct_orig_invlists() {
-    FAISS_THROW_IF_NOT(orig_invlists != nullptr);
-    FAISS_THROW_IF_NOT(orig_invlists->list_size(0) == 0);
+    POLARIS_THROW_IF_NOT(orig_invlists != nullptr);
+    POLARIS_THROW_IF_NOT(orig_invlists->list_size(0) == 0);
 
     for (size_t list_no = 0; list_no < nlist; list_no++) {
         InvertedLists::ScopedCodes codes(invlists, list_no);

@@ -24,23 +24,23 @@ struct DummyScaler {
     static constexpr int nscale = 0;
 
     inline simd32uint8 lookup(const simd32uint8&, const simd32uint8&) const {
-        FAISS_THROW_MSG("DummyScaler::lookup should not be called.");
+        POLARIS_THROW_MSG("DummyScaler::lookup should not be called.");
         return simd32uint8(0);
     }
 
     inline simd16uint16 scale_lo(const simd32uint8&) const {
-        FAISS_THROW_MSG("DummyScaler::scale_lo should not be called.");
+        POLARIS_THROW_MSG("DummyScaler::scale_lo should not be called.");
         return simd16uint16(0);
     }
 
     inline simd16uint16 scale_hi(const simd32uint8&) const {
-        FAISS_THROW_MSG("DummyScaler::scale_hi should not be called.");
+        POLARIS_THROW_MSG("DummyScaler::scale_hi should not be called.");
         return simd16uint16(0);
     }
 
     template <class dist_t>
     inline dist_t scale_one(const dist_t&) const {
-        FAISS_THROW_MSG("DummyScaler::scale_one should not be called.");
+        POLARIS_THROW_MSG("DummyScaler::scale_one should not be called.");
         return 0;
     }
 };

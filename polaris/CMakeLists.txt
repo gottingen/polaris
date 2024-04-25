@@ -78,6 +78,7 @@ set(POLARIS_SRC
         vector_transform.cc
         clone_index.cc
         index_factory.cc
+        unified_index.cc
         impl/aux_index_structures.cc
         impl/code_packer.cc
         impl/id_selector.cc
@@ -103,10 +104,10 @@ set(POLARIS_SRC
         impl/io.cc
         impl/lattice_Zn.cc
         impl/nn_descent.cc
-        invlists/BlockInvertedLists.cc
-        invlists/DirectMap.cc
-        invlists/InvertedLists.cc
-        invlists/InvertedListsIOHook.cc
+        invlists/block_inverted_lists.cc
+        invlists/direct_map.cc
+        invlists/inverted_lists.cc
+        invlists/inverted_lists_io_hook.cc
         utils/heap.cc
         utils/worker_thread.cc
         utils/distances.cc
@@ -165,6 +166,7 @@ set(POLARIS_HEADERS
         index_rowwise_minmax.h
         index_scalar_quantizer.h
         index_shards.h
+        unified_index.h
         index_shards_ivf.h
         matrix_stats.h
         meta_indexes.h
@@ -206,10 +208,10 @@ set(POLARIS_HEADERS
         impl/code_distance/code_distance.h
         impl/code_distance/code_distance-generic.h
         impl/code_distance/code_distance-avx2.h
-        invlists/BlockInvertedLists.h
-        invlists/DirectMap.h
-        invlists/InvertedLists.h
-        invlists/InvertedListsIOHook.h
+        invlists/block_inverted_lists.h
+        invlists/direct_map.h
+        invlists/inverted_lists.h
+        invlists/inverted_lists_io_hook.h
         utils/aligned_table.h
         utils/heap.h
         utils/worker_thread.h
@@ -250,8 +252,8 @@ set(POLARIS_HEADERS
 )
 
 if (NOT WIN32)
-    list(APPEND POLARIS_SRC invlists/OnDiskInvertedLists.cc)
-    list(APPEND POLARIS_HEADERS invlists/OnDiskInvertedLists.h)
+    list(APPEND POLARIS_SRC invlists/on_disk_inverted_lists.cc)
+    list(APPEND POLARIS_HEADERS invlists/on_disk_inverted_lists.h)
 endif ()
 
 

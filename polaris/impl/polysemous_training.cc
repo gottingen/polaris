@@ -59,7 +59,7 @@ SimulatedAnnealingOptimizer::SimulatedAnnealingOptimizer(
           n(obj->n),
           logfile(nullptr) {
     rnd = new RandomGenerator(p.seed);
-    FAISS_THROW_IF_NOT(n < 100000 && n >= 0);
+    POLARIS_THROW_IF_NOT(n < 100000 && n >= 0);
 }
 
 SimulatedAnnealingOptimizer::~SimulatedAnnealingOptimizer() {
@@ -257,7 +257,7 @@ struct ReproduceWithHammingObjective : PermutationObjective {
             double dis_weight_factor)
             : nbits(nbits), dis_weight_factor(dis_weight_factor) {
         n = 1 << nbits;
-        FAISS_THROW_IF_NOT(dis_table.size() == n * n);
+        POLARIS_THROW_IF_NOT(dis_table.size() == n * n);
         set_affine_target_dis(dis_table);
     }
 
@@ -765,7 +765,7 @@ void PolysemousTraining::optimize_reproduce_distances(
 
     size_t mem1 = memory_usage_per_thread(pq);
     int nt = std::min(omp_get_max_threads(), int(pq.M));
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             mem1 < max_memory,
             "Polysemous training will use %zd bytes per thread, while the max is set to %zd",
             mem1,
@@ -803,7 +803,7 @@ void PolysemousTraining::optimize_reproduce_distances(
             snprintf(fname, 256, log_pattern.c_str(), m);
             printf("opening log file %s\n", fname);
             optim.logfile = fopen(fname, "w");
-            FAISS_THROW_IF_NOT_MSG(optim.logfile, "could not open logfile");
+            POLARIS_THROW_IF_NOT_MSG(optim.logfile, "could not open logfile");
         }
         double final_cost = optim.run_optimization(perm.data());
 
@@ -839,7 +839,7 @@ void PolysemousTraining::optimize_ranking(
 
     pq.compute_codes(x, all_codes.data(), n);
 
-    FAISS_THROW_IF_NOT(pq.nbits == 8);
+    POLARIS_THROW_IF_NOT(pq.nbits == 8);
 
     if (n == 0) {
         pq.compute_sdc_table();
@@ -909,7 +909,7 @@ void PolysemousTraining::optimize_ranking(
             snprintf(fname, 256, log_pattern.c_str(), m);
             printf("opening log file %s\n", fname);
             optim.logfile = fopen(fname, "w");
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     optim.logfile, "could not open logfile %s", fname);
         }
 
@@ -964,7 +964,7 @@ size_t PolysemousTraining::memory_usage_per_thread(
             return n * n * n * sizeof(float);
     }
 
-    FAISS_THROW_MSG("Invalid optmization type");
+    POLARIS_THROW_MSG("Invalid optmization type");
     return 0;
 }
 

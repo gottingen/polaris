@@ -244,11 +244,11 @@ void hnsw_add_vertices(
                 }
             }
             if (interrupt) {
-                FAISS_THROW_MSG("computation interrupted");
+                POLARIS_THROW_MSG("computation interrupted");
             }
             i1 = i0;
         }
-        FAISS_ASSERT(i1 == 0);
+        POLARIS_ASSERT(i1 == 0);
     }
     if (verbose) {
         printf("Done in %.3f ms\n", getmillisecs() - t0);
@@ -278,7 +278,7 @@ IndexHNSW::~IndexHNSW() {
 }
 
 void IndexHNSW::train(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexHNSWFlat (or variants) instead of IndexHNSW directly");
     // hnsw structure does not require training
@@ -295,7 +295,7 @@ void hnsw_search(
         const float* x,
         BlockResultHandler& bres,
         const SearchParameters* params_in) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             index->storage,
             "Please use IndexHNSWFlat (or variants) instead of IndexHNSW directly");
     const SearchParametersHNSW* params = nullptr;
@@ -304,7 +304,7 @@ void hnsw_search(
     int efSearch = hnsw.efSearch;
     if (params_in) {
         params = dynamic_cast<const SearchParametersHNSW*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(params, "params type invalid");
+        POLARIS_THROW_IF_NOT_MSG(params, "params type invalid");
         efSearch = params->efSearch;
     }
     size_t n1 = 0, n2 = 0, n3 = 0, ndis = 0, nreorder = 0;
@@ -352,7 +352,7 @@ void IndexHNSW::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params_in) const {
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     using RH = HeapBlockResultHandler<HNSW::C>;
     RH bres(n, distances, labels, k);
@@ -387,10 +387,10 @@ void IndexHNSW::range_search(
 }
 
 void IndexHNSW::add(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexHNSWFlat (or variants) instead of IndexHNSW directly");
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     int n0 = ntotal;
     storage->add(n, x);
     ntotal = storage->ntotal;
@@ -454,8 +454,8 @@ void IndexHNSW::search_level_0(
         idx_t* labels,
         int nprobe,
         int search_type) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     storage_idx_t ntotal = hnsw.levels.size();
 
@@ -638,13 +638,13 @@ void IndexHNSW::link_singletons() {
 
     std::vector<float> recons(singletons.size() * d);
     for (int i = 0; i < singletons.size(); i++) {
-        FAISS_ASSERT(!"not implemented");
+        POLARIS_ASSERT(!"not implemented");
     }
 }
 
 void IndexHNSW::permute_entries(const idx_t* perm) {
     auto flat_storage = dynamic_cast<IndexFlatCodes*>(storage);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             flat_storage, "don't know how to permute this index");
     flat_storage->permute_entries(perm);
     hnsw.permute_entries(perm);
@@ -735,7 +735,7 @@ int search_from_candidates_2(
     int nres = nres_in;
     for (int i = 0; i < candidates.size(); i++) {
         idx_t v1 = candidates.ids[i];
-        FAISS_ASSERT(v1 >= 0);
+        POLARIS_ASSERT(v1 >= 0);
         vt.visited[v1] = vt.visno + 1;
     }
 
@@ -792,8 +792,8 @@ void IndexHNSW2Level::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
 
     if (dynamic_cast<const Index2Layer*>(storage)) {
@@ -895,7 +895,7 @@ void IndexHNSW2Level::search(
 void IndexHNSW2Level::flip_to_ivf() {
     Index2Layer* storage2l = dynamic_cast<Index2Layer*>(storage);
 
-    FAISS_THROW_IF_NOT(storage2l);
+    POLARIS_THROW_IF_NOT(storage2l);
 
     IndexIVFPQ* index_ivfpq = new IndexIVFPQ(
             storage2l->q1.quantizer,

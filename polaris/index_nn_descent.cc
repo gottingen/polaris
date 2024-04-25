@@ -120,7 +120,7 @@ IndexNNDescent::~IndexNNDescent() {
 }
 
 void IndexNNDescent::train(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNNDescentFlat (or variants) "
             "instead of IndexNNDescent directly");
@@ -136,9 +136,9 @@ void IndexNNDescent::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNNDescentFlat (or variants) "
             "instead of IndexNNDescent directly");
@@ -182,11 +182,11 @@ void IndexNNDescent::search(
 }
 
 void IndexNNDescent::add(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNNDescentFlat (or variants) "
             "instead of IndexNNDescent directly");
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     if (ntotal != 0) {
         fprintf(stderr,

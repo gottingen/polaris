@@ -40,7 +40,7 @@ IndexPreTransform::IndexPreTransform(VectorTransform* ltrans, Index* index)
 }
 
 void IndexPreTransform::prepend_transform(VectorTransform* ltrans) {
-    FAISS_THROW_IF_NOT(ltrans->d_out == d);
+    POLARIS_THROW_IF_NOT(ltrans->d_out == d);
     is_trained = is_trained && ltrans->is_trained;
     chain.insert(chain.begin(), ltrans);
     d = ltrans->d_in;
@@ -142,7 +142,7 @@ void IndexPreTransform::reverse_chain(idx_t n, const float* xt, float* x)
 }
 
 void IndexPreTransform::add(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     TransformedVectors tv(x, apply_chain(n, x));
     index->add(n, tv.x);
     ntotal = index->ntotal;
@@ -152,7 +152,7 @@ void IndexPreTransform::add_with_ids(
         idx_t n,
         const float* x,
         const idx_t* xids) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     TransformedVectors tv(x, apply_chain(n, x));
     index->add_with_ids(n, tv.x, xids);
     ntotal = index->ntotal;
@@ -175,8 +175,8 @@ void IndexPreTransform::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
     const float* xt = apply_chain(n, x);
     std::unique_ptr<const float[]> del(xt == x ? nullptr : xt);
     index->search(
@@ -189,7 +189,7 @@ void IndexPreTransform::range_search(
         float radius,
         RangeSearchResult* result,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     TransformedVectors tv(x, apply_chain(n, x));
     index->range_search(
             n, tv.x, radius, result, extract_index_search_params(params));
@@ -234,8 +234,8 @@ void IndexPreTransform::search_and_reconstruct(
         idx_t* labels,
         float* recons,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     TransformedVectors trans(x, apply_chain(n, x));
 
@@ -287,8 +287,8 @@ void IndexPreTransform::merge_from(Index& otherIndex, idx_t add_id) {
 void IndexPreTransform::check_compatible_for_merge(
         const Index& otherIndex) const {
     auto other = dynamic_cast<const IndexPreTransform*>(&otherIndex);
-    FAISS_THROW_IF_NOT(other);
-    FAISS_THROW_IF_NOT(chain.size() == other->chain.size());
+    POLARIS_THROW_IF_NOT(other);
+    POLARIS_THROW_IF_NOT(chain.size() == other->chain.size());
     for (int i = 0; i < chain.size(); i++) {
         chain[i]->check_identical(*other->chain[i]);
     }

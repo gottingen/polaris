@@ -20,7 +20,7 @@
 /// Assertions
 ///
 
-#define FAISS_ASSERT(X)                                  \
+#define POLARIS_ASSERT(X)                                  \
     do {                                                 \
         if (!(X)) {                                      \
             fprintf(stderr,                              \
@@ -34,7 +34,7 @@
         }                                                \
     } while (false)
 
-#define FAISS_ASSERT_MSG(X, MSG)                         \
+#define POLARIS_ASSERT_MSG(X, MSG)                         \
     do {                                                 \
         if (!(X)) {                                      \
             fprintf(stderr,                              \
@@ -48,7 +48,7 @@
         }                                                \
     } while (false)
 
-#define FAISS_ASSERT_FMT(X, FMT, ...)                    \
+#define POLARIS_ASSERT_FMT(X, FMT, ...)                    \
     do {                                                 \
         if (!(X)) {                                      \
             fprintf(stderr,                              \
@@ -67,13 +67,13 @@
 /// Exceptions for returning user errors
 ///
 
-#define FAISS_THROW_MSG(MSG)                                   \
+#define POLARIS_THROW_MSG(MSG)                                   \
     do {                                                       \
         throw polaris::FaissException(                           \
                 MSG, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
     } while (false)
 
-#define FAISS_THROW_FMT(FMT, ...)                              \
+#define POLARIS_THROW_FMT(FMT, ...)                              \
     do {                                                       \
         std::string __s;                                       \
         int __size = snprintf(nullptr, 0, FMT, __VA_ARGS__);   \
@@ -87,24 +87,24 @@
 /// Exceptions thrown upon a conditional failure
 ///
 
-#define FAISS_THROW_IF_NOT(X)                          \
+#define POLARIS_THROW_IF_NOT(X)                          \
     do {                                               \
         if (!(X)) {                                    \
-            FAISS_THROW_FMT("Error: '%s' failed", #X); \
+            POLARIS_THROW_FMT("Error: '%s' failed", #X); \
         }                                              \
     } while (false)
 
-#define FAISS_THROW_IF_NOT_MSG(X, MSG)                       \
+#define POLARIS_THROW_IF_NOT_MSG(X, MSG)                       \
     do {                                                     \
         if (!(X)) {                                          \
-            FAISS_THROW_FMT("Error: '%s' failed: " MSG, #X); \
+            POLARIS_THROW_FMT("Error: '%s' failed: " MSG, #X); \
         }                                                    \
     } while (false)
 
-#define FAISS_THROW_IF_NOT_FMT(X, FMT, ...)                               \
+#define POLARIS_THROW_IF_NOT_FMT(X, FMT, ...)                               \
     do {                                                                  \
         if (!(X)) {                                                       \
-            FAISS_THROW_FMT("Error: '%s' failed: " FMT, #X, __VA_ARGS__); \
+            POLARIS_THROW_FMT("Error: '%s' failed: " FMT, #X, __VA_ARGS__); \
         }                                                                 \
     } while (false)
 

@@ -48,7 +48,7 @@ IndexNSG::~IndexNSG() {
 }
 
 void IndexNSG::train(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNSGFlat (or variants) instead of IndexNSG directly");
     // nsg structure does not require training
@@ -63,9 +63,9 @@ void IndexNSG::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNSGFlat (or variants) instead of IndexNSG directly");
 
@@ -105,10 +105,10 @@ void IndexNSG::search(
 }
 
 void IndexNSG::build(idx_t n, const float* x, idx_t* knn_graph, int GK_2) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNSGFlat (or variants) instead of IndexNSG directly");
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !is_built && ntotal == 0, "The IndexNSG is already built");
 
     storage->add(n, x);
@@ -123,13 +123,13 @@ void IndexNSG::build(idx_t n, const float* x, idx_t* knn_graph, int GK_2) {
 }
 
 void IndexNSG::add(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             storage,
             "Please use IndexNSGFlat (or variants) "
             "instead of IndexNSG directly");
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !is_built && ntotal == 0,
             "NSG does not support incremental addition");
 
@@ -146,7 +146,7 @@ void IndexNSG::add(idx_t n, const float* x) {
 
         storage->add(n, x);
         ntotal = storage->ntotal;
-        FAISS_THROW_IF_NOT(ntotal == n);
+        POLARIS_THROW_IF_NOT(ntotal == n);
 
         knng.resize(ntotal * (GK + 1));
         storage->assign(ntotal, x, knng.data(), GK + 1);
@@ -200,7 +200,7 @@ void IndexNSG::add(idx_t n, const float* x) {
 
         // storage->add is already implicit called in IndexNSG.add
         ntotal = storage->ntotal;
-        FAISS_THROW_IF_NOT(ntotal == n);
+        POLARIS_THROW_IF_NOT(ntotal == n);
 
         knng.resize(ntotal * GK);
 
@@ -211,7 +211,7 @@ void IndexNSG::add(idx_t n, const float* x) {
             knng[i] = knn_graph[i];
         }
     } else {
-        FAISS_THROW_MSG("build_type should be 0 or 1");
+        POLARIS_THROW_MSG("build_type should be 0 or 1");
     }
 
     if (verbose) {
@@ -262,7 +262,7 @@ void IndexNSG::check_knn_graph(const idx_t* knn_graph, idx_t n, int K) const {
                 "has %" PRId64 " invalid entries\n",
                 total_count);
     }
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             total_count < n / 10,
             "There are too much invalid entries in the knn graph. "
             "It may be an invalid knn graph.");

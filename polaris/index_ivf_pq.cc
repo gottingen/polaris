@@ -241,7 +241,7 @@ void IndexIVFPQ::add_core_o(
 
     direct_map.check_can_add(xids);
 
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     double t0 = getmillisecs();
     const idx_t* idx;
     std::unique_ptr<idx_t[]> del_idx;
@@ -373,7 +373,7 @@ void initialize_IVFPQ_precomputed_table(
         bool verbose) {
     size_t nlist = quantizer->ntotal;
     size_t d = quantizer->d;
-    FAISS_THROW_IF_NOT(d == pq.d);
+    POLARIS_THROW_IF_NOT(d == pq.d);
 
     if (use_precomputed_table == -1) {
         precomputed_table.resize(0);
@@ -434,9 +434,9 @@ void initialize_IVFPQ_precomputed_table(
     } else if (use_precomputed_table == 2) {
         const MultiIndexQuantizer* miq =
                 dynamic_cast<const MultiIndexQuantizer*>(quantizer);
-        FAISS_THROW_IF_NOT(miq);
+        POLARIS_THROW_IF_NOT(miq);
         const ProductQuantizer& cpq = miq->pq;
-        FAISS_THROW_IF_NOT(pq.M % cpq.M == 0);
+        POLARIS_THROW_IF_NOT(pq.M % cpq.M == 0);
 
         precomputed_table.resize(cpq.ksub * pq.M * pq.ksub);
 
@@ -602,7 +602,7 @@ struct QueryTables {
         TIC;
         if (by_residual) {
             if (metric_type == METRIC_INNER_PRODUCT)
-                FAISS_THROW_MSG("not implemented");
+                POLARIS_THROW_MSG("not implemented");
             else
                 dis0 = precompute_list_table_pointers_L2();
         }
@@ -665,7 +665,7 @@ struct QueryTables {
 
             const MultiIndexQuantizer* miq =
                     dynamic_cast<const MultiIndexQuantizer*>(ivfpq.quantizer);
-            FAISS_THROW_IF_NOT(miq);
+            POLARIS_THROW_IF_NOT(miq);
             const ProductQuantizer& cpq = miq->pq;
             int Mf = pq.M / cpq.M;
 
@@ -719,7 +719,7 @@ struct QueryTables {
 
             const MultiIndexQuantizer* miq =
                     dynamic_cast<const MultiIndexQuantizer*>(ivfpq.quantizer);
-            FAISS_THROW_IF_NOT(miq);
+            POLARIS_THROW_IF_NOT(miq);
             const ProductQuantizer& cpq = miq->pq;
             int Mf = pq.M / cpq.M;
 
@@ -739,11 +739,11 @@ struct QueryTables {
                 m0 += Mf;
             }
         } else {
-            FAISS_THROW_MSG("need precomputed tables");
+            POLARIS_THROW_MSG("need precomputed tables");
         }
 
         if (polysemous_ht) {
-            FAISS_THROW_MSG("not implemented");
+            POLARIS_THROW_MSG("not implemented");
             // Not clear that it makes sense to implemente this,
             // because it costs M * ksub, which is what we wanted to
             // avoid with the tables pointers.
@@ -1249,7 +1249,7 @@ struct IVFPQScanner : IVFPQScannerT<idx_t, METRIC_TYPE, PQDecoder>,
         } else if (precompute_mode == 0) {
             this->scan_on_the_fly_dist(ncode, codes, res);
         } else {
-            FAISS_THROW_MSG("bad precomp mode");
+            POLARIS_THROW_MSG("bad precomp mode");
         }
         return res.nup;
     }
@@ -1277,7 +1277,7 @@ struct IVFPQScanner : IVFPQScannerT<idx_t, METRIC_TYPE, PQDecoder>,
         } else if (precompute_mode == 0) {
             this->scan_on_the_fly_dist(ncode, codes, res);
         } else {
-            FAISS_THROW_MSG("bad precomp mode");
+            POLARIS_THROW_MSG("bad precomp mode");
         }
     }
 };

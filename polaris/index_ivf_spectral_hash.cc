@@ -69,7 +69,7 @@ void IndexIVFSpectralHash::train_encoder(
     if (!vt->is_trained) {
         vt->train(n, x);
     }
-    FAISS_THROW_IF_NOT(!by_residual);
+    POLARIS_THROW_IF_NOT(!by_residual);
 
     if (threshold_type == Thresh_global) {
         // nothing to do
@@ -97,7 +97,7 @@ void IndexIVFSpectralHash::train_encoder(
 
     std::vector<size_t> sizes(nlist + 1);
     for (size_t i = 0; i < n; i++) {
-        FAISS_THROW_IF_NOT(idx[i] >= 0);
+        POLARIS_THROW_IF_NOT(idx[i] >= 0);
         sizes[idx[i]]++;
     }
 
@@ -165,8 +165,8 @@ void IndexIVFSpectralHash::encode_vectors(
         const idx_t* list_nos,
         uint8_t* codes,
         bool include_listnos) const {
-    FAISS_THROW_IF_NOT(is_trained);
-    FAISS_THROW_IF_NOT(!by_residual);
+    POLARIS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(!by_residual);
     float freq = 2.0 / period;
     size_t coarse_size = include_listnos ? coarse_code_size() : 0;
 
@@ -228,8 +228,8 @@ struct IVFScanner : InvertedListScanner {
     }
 
     void set_query(const float* query) override {
-        FAISS_THROW_IF_NOT(query);
-        FAISS_THROW_IF_NOT(q.size() == nbit);
+        POLARIS_THROW_IF_NOT(query);
+        POLARIS_THROW_IF_NOT(q.size() == nbit);
         index->vt->apply_noalloc(1, query, q.data());
 
         if (index->threshold_type == IndexIVFSpectralHash::Thresh_global) {
@@ -303,14 +303,14 @@ struct BuildScanner {
 InvertedListScanner* IndexIVFSpectralHash::get_InvertedListScanner(
         bool store_pairs,
         const IDSelector* sel) const {
-    FAISS_THROW_IF_NOT(!sel);
+    POLARIS_THROW_IF_NOT(!sel);
     BuildScanner bs;
     return dispatch_HammingComputer(code_size, bs, this, store_pairs);
 }
 
 void IndexIVFSpectralHash::replace_vt(VectorTransform* vt_in, bool own) {
-    FAISS_THROW_IF_NOT(vt_in->d_out == nbit);
-    FAISS_THROW_IF_NOT(vt_in->d_in == d);
+    POLARIS_THROW_IF_NOT(vt_in->d_out == nbit);
+    POLARIS_THROW_IF_NOT(vt_in->d_in == d);
     if (own_fields) {
         delete vt;
     }
@@ -329,12 +329,12 @@ void IndexIVFSpectralHash::replace_vt(VectorTransform* vt_in, bool own) {
 */
 
 void IndexIVFSpectralHash::replace_vt(IndexPreTransform* encoder, bool own) {
-    FAISS_THROW_IF_NOT(encoder->chain.size() == 1);
+    POLARIS_THROW_IF_NOT(encoder->chain.size() == 1);
     auto sub_index = dynamic_cast<IndexLSH*>(encoder->index);
-    FAISS_THROW_IF_NOT_MSG(sub_index, "final index should be LSH");
-    FAISS_THROW_IF_NOT(sub_index->nbits == nbit);
-    FAISS_THROW_IF_NOT(!sub_index->rotate_data);
-    FAISS_THROW_IF_NOT(!sub_index->train_thresholds);
+    POLARIS_THROW_IF_NOT_MSG(sub_index, "final index should be LSH");
+    POLARIS_THROW_IF_NOT(sub_index->nbits == nbit);
+    POLARIS_THROW_IF_NOT(!sub_index->rotate_data);
+    POLARIS_THROW_IF_NOT(!sub_index->train_thresholds);
     replace_vt(encoder->chain[0], own);
 }
 

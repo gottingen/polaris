@@ -641,7 +641,7 @@ void dispatch_SIMDResultHanlder_fixedCW(
     } else if (auto resh = dynamic_cast<ReservoirHandler<C, W>*>(&res)) {
         consumer.template f<ReservoirHandler<C, W>>(*resh, args...);
     } else { // generic handler -- will not be inlined
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 simd_result_handlers_accept_virtual,
                 "Running vitrual handler for %s",
                 typeid(res).name());
@@ -672,7 +672,7 @@ void dispatch_SIMDResultHanlder(
         } else if (auto resh = dynamic_cast<DummyResultHandler*>(&res)) {
             consumer.template f<DummyResultHandler>(*resh, args...);
         } else { // generic path
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     simd_result_handlers_accept_virtual,
                     "Running vitrual handler for %s",
                     typeid(res).name());
@@ -695,7 +695,7 @@ void dispatch_SIMDResultHanlder(
                     res, consumer, args...);
         }
     } else {
-        FAISS_THROW_FMT("Unknown id size %d", res.sizeof_ids);
+        POLARIS_THROW_FMT("Unknown id size %d", res.sizeof_ids);
     }
 }
 } // namespace simd_result_handlers

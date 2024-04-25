@@ -26,7 +26,7 @@ void IDSelectorRange::find_sorted_ids_bounds(
         const idx_t* ids,
         size_t* jmin_out,
         size_t* jmax_out) const {
-    FAISS_ASSERT(assume_sorted);
+    POLARIS_ASSERT(assume_sorted);
     if (list_size == 0 || imax <= ids[0] || imin > ids[list_size - 1]) {
         *jmin_out = *jmax_out = 0;
         return;

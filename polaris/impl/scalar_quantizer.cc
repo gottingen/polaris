@@ -601,7 +601,7 @@ ScalarQuantizer::SQuantizer* select_quantizer_1(
         case ScalarQuantizer::QT_8bit_direct:
             return new Quantizer8bitDirect<SIMDWIDTH>(d, trained);
     }
-    FAISS_THROW_MSG("unknown qtype");
+    POLARIS_THROW_MSG("unknown qtype");
 }
 
 /*******************************************************************
@@ -720,7 +720,7 @@ void train_Uniform(
         vmax = b + a * (k - 1);
 
     } else {
-        FAISS_THROW_MSG("Invalid qtype");
+        POLARIS_THROW_MSG("Invalid qtype");
     }
     vmax -= vmin;
 }
@@ -1402,7 +1402,7 @@ SQDistanceComputer* select_distance_computer(
                         SIMDWIDTH>(d, trained);
             }
     }
-    FAISS_THROW_MSG("unknown qtype");
+    POLARIS_THROW_MSG("unknown qtype");
     return nullptr;
 }
 
@@ -1512,7 +1512,7 @@ void ScalarQuantizer::decode(const uint8_t* codes, float* x, size_t n) const {
 
 SQDistanceComputer* ScalarQuantizer::get_distance_computer(
         MetricType metric) const {
-    FAISS_THROW_IF_NOT(metric == METRIC_L2 || metric == METRIC_INNER_PRODUCT);
+    POLARIS_THROW_IF_NOT(metric == METRIC_L2 || metric == METRIC_INNER_PRODUCT);
 #if defined(USE_F16C) || defined(__aarch64__)
     if (d % 8 == 0) {
         if (metric == METRIC_L2) {
@@ -1737,7 +1737,7 @@ InvertedListScanner* sel3_InvertedListScanner(
         return new IVFSQScannerIP<DCClass, use_sel>(
                 sq->d, sq->trained, sq->code_size, store_pairs, sel, r);
     } else {
-        FAISS_THROW_MSG("unsupported metric type");
+        POLARIS_THROW_MSG("unsupported metric type");
     }
 }
 
@@ -1818,7 +1818,7 @@ InvertedListScanner* sel1_InvertedListScanner(
             }
     }
 
-    FAISS_THROW_MSG("unknown qtype");
+    POLARIS_THROW_MSG("unknown qtype");
     return nullptr;
 }
 
@@ -1837,7 +1837,7 @@ InvertedListScanner* sel0_InvertedListScanner(
         return sel1_InvertedListScanner<SimilarityIP<SIMDWIDTH>>(
                 sq, quantizer, store_pairs, sel, by_residual);
     } else {
-        FAISS_THROW_MSG("unsupported metric type");
+        POLARIS_THROW_MSG("unsupported metric type");
     }
 }
 

@@ -21,11 +21,11 @@ namespace polaris {
  ***********************************************************************/
 
 int IOReader::fileno() {
-    FAISS_THROW_MSG("IOReader does not support memory mapping");
+    POLARIS_THROW_MSG("IOReader does not support memory mapping");
 }
 
 int IOWriter::fileno() {
-    FAISS_THROW_MSG("IOWriter does not support memory mapping");
+    POLARIS_THROW_MSG("IOWriter does not support memory mapping");
 }
 
 /***********************************************************************
@@ -64,7 +64,7 @@ FileIOReader::FileIOReader(FILE* rf) : f(rf) {}
 FileIOReader::FileIOReader(const char* fname) {
     name = fname;
     f = fopen(fname, "rb");
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             f, "could not open %s for reading: %s", fname, strerror(errno));
     need_close = true;
 }
@@ -94,7 +94,7 @@ FileIOWriter::FileIOWriter(FILE* wf) : f(wf) {}
 FileIOWriter::FileIOWriter(const char* fname) {
     name = fname;
     f = fopen(fname, "wb");
-    FAISS_THROW_IF_NOT_FMT(
+    POLARIS_THROW_IF_NOT_FMT(
             f, "could not open %s for writing: %s", fname, strerror(errno));
     need_close = true;
 }
@@ -200,7 +200,7 @@ size_t BufferedIOWriter::operator()(
         do {
             assert(ofs_2 < 10000000);
             size_t written = (*writer)(buffer.data() + ofs_2, 1, bsz - ofs_2);
-            FAISS_THROW_IF_NOT(written > 0);
+            POLARIS_THROW_IF_NOT(written > 0);
             ofs_2 += written;
         } while (ofs_2 != bsz);
 
@@ -221,19 +221,19 @@ BufferedIOWriter::~BufferedIOWriter() {
     while (ofs_2 != b0) {
         // printf("Destructor write %zd \n", b0 - ofs_2);
         size_t written = (*writer)(buffer.data() + ofs_2, 1, b0 - ofs_2);
-        FAISS_THROW_IF_NOT(written > 0);
+        POLARIS_THROW_IF_NOT(written > 0);
         ofs_2 += written;
     }
 }
 
 uint32_t fourcc(const char sx[4]) {
-    FAISS_THROW_IF_NOT(4 == strlen(sx));
+    POLARIS_THROW_IF_NOT(4 == strlen(sx));
     const unsigned char* x = (unsigned char*)sx;
     return x[0] | x[1] << 8 | x[2] << 16 | x[3] << 24;
 }
 
 uint32_t fourcc(const std::string& sx) {
-    FAISS_THROW_IF_NOT(sx.length() == 4);
+    POLARIS_THROW_IF_NOT(sx.length() == 4);
     const unsigned char* x = (unsigned char*)sx.c_str();
     return x[0] | x[1] << 8 | x[2] << 16 | x[3] << 24;
 }

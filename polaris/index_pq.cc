@@ -92,7 +92,7 @@ struct PQDistanceComputer : FlatCodesDistanceComputer {
     }
 
     float symmetric_dis(idx_t i, idx_t j) override {
-        FAISS_THROW_IF_NOT(sdc);
+        POLARIS_THROW_IF_NOT(sdc);
         const float* sdci = sdc;
         float accu = 0;
         PQDecoder codei(codes + i * code_size, pq.nbits);
@@ -155,16 +155,16 @@ void IndexPQ::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* iparams) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     const SearchParametersPQ* params = nullptr;
     Search_type_t search_type = this->search_type;
 
     if (iparams) {
         params = dynamic_cast<const SearchParametersPQ*>(iparams);
-        FAISS_THROW_IF_NOT_MSG(params, "invalid search params");
-        FAISS_THROW_IF_NOT_MSG(!params->sel, "selector not supported");
+        POLARIS_THROW_IF_NOT_MSG(params, "invalid search params");
+        POLARIS_THROW_IF_NOT_MSG(!params->sel, "selector not supported");
         search_type = params->search_type;
     }
 
@@ -185,7 +185,7 @@ void IndexPQ::search(
     } else if (
             search_type == ST_polysemous ||
             search_type == ST_polysemous_generalize) {
-        FAISS_THROW_IF_NOT(metric_type == METRIC_L2);
+        POLARIS_THROW_IF_NOT(metric_type == METRIC_L2);
         int polysemous_ht =
                 params ? params->polysemous_ht : this->polysemous_ht;
         search_core_polysemous(
@@ -204,7 +204,7 @@ void IndexPQ::search(
         if (!encode_signs) {
             pq.compute_codes(x, q_codes.get(), n);
         } else {
-            FAISS_THROW_IF_NOT(d == pq.nbits * pq.M);
+            POLARIS_THROW_IF_NOT(d == pq.nbits * pq.M);
             memset(q_codes.get(), 0, n * pq.code_size);
             for (size_t i = 0; i < n; i++) {
                 const float* xi = x + i * d;
@@ -324,8 +324,8 @@ void IndexPQ::search_core_polysemous(
         idx_t* labels,
         int polysemous_ht,
         bool generalized_hamming) const {
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(pq.nbits == 8);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(pq.nbits == 8);
 
     if (polysemous_ht == 0) {
         polysemous_ht = pq.nbits * pq.M + 1;
@@ -413,7 +413,7 @@ void IndexPQ::search_core_polysemous(
     }
 
     if (bad_code_size) {
-        FAISS_THROW_FMT(
+        POLARIS_THROW_FMT(
                 "code size %zd not supported for polysemous", pq.code_size);
     }
 
@@ -451,9 +451,9 @@ void IndexPQ::hamming_distance_histogram(
         idx_t nb,
         const float* xb,
         int64_t* hist) {
-    FAISS_THROW_IF_NOT(metric_type == METRIC_L2);
-    FAISS_THROW_IF_NOT(pq.code_size % 8 == 0);
-    FAISS_THROW_IF_NOT(pq.nbits == 8);
+    POLARIS_THROW_IF_NOT(metric_type == METRIC_L2);
+    POLARIS_THROW_IF_NOT(pq.code_size % 8 == 0);
+    POLARIS_THROW_IF_NOT(pq.nbits == 8);
 
     // Hamming embedding queries
     std::unique_ptr<uint8_t[]> q_codes(new uint8_t[n * pq.code_size]);
@@ -884,12 +884,12 @@ void MultiIndexQuantizer::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
     if (n == 0) {
         return;
     }
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     // the allocation just below can be severe...
     idx_t bs = multi_index_quantizer_search_bs;
@@ -967,13 +967,13 @@ void MultiIndexQuantizer::reconstruct(idx_t key, float* recons) const {
 }
 
 void MultiIndexQuantizer::add(idx_t /*n*/, const float* /*x*/) {
-    FAISS_THROW_MSG(
+    POLARIS_THROW_MSG(
             "This index has virtual elements, "
             "it does not support add");
 }
 
 void MultiIndexQuantizer::reset() {
-    FAISS_THROW_MSG(
+    POLARIS_THROW_MSG(
             "This index has virtual elements, "
             "it does not support reset");
 }
@@ -990,7 +990,7 @@ MultiIndexQuantizer2::MultiIndexQuantizer2(
         : MultiIndexQuantizer(d, M, nbits) {
     assign_indexes.resize(M);
     for (int i = 0; i < M; i++) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 indexes[i]->d == pq.dsub,
                 "Provided sub-index has incorrect size");
         assign_indexes[i] = indexes[i];
@@ -1004,7 +1004,7 @@ MultiIndexQuantizer2::MultiIndexQuantizer2(
         Index* assign_index_0,
         Index* assign_index_1)
         : MultiIndexQuantizer(d, 2, nbits) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             assign_index_0->d == pq.dsub && assign_index_1->d == pq.dsub,
             "Provided sub-index has incorrect size");
     assign_indexes.resize(2);
@@ -1028,7 +1028,7 @@ void MultiIndexQuantizer2::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
 
     if (n == 0) {
@@ -1036,7 +1036,7 @@ void MultiIndexQuantizer2::search(
     }
 
     int k2 = std::min(K, int64_t(pq.ksub));
-    FAISS_THROW_IF_NOT(k2);
+    POLARIS_THROW_IF_NOT(k2);
 
     int64_t M = pq.M;
     int64_t dsub = pq.dsub, ksub = pq.ksub;

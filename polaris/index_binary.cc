@@ -17,7 +17,7 @@ namespace polaris {
 
 IndexBinary::IndexBinary(idx_t d, MetricType metric)
         : d(d), code_size(d / 8), metric_type(metric) {
-    FAISS_THROW_IF_NOT(d % 8 == 0);
+    POLARIS_THROW_IF_NOT(d % 8 == 0);
 }
 
 IndexBinary::~IndexBinary() = default;
@@ -32,7 +32,7 @@ void IndexBinary::range_search(
         int,
         RangeSearchResult*,
         const SearchParameters*) const {
-    FAISS_THROW_MSG("range search not implemented");
+    POLARIS_THROW_MSG("range search not implemented");
 }
 
 void IndexBinary::assign(idx_t n, const uint8_t* x, idx_t* labels, idx_t k)
@@ -42,16 +42,16 @@ void IndexBinary::assign(idx_t n, const uint8_t* x, idx_t* labels, idx_t k)
 }
 
 void IndexBinary::add_with_ids(idx_t, const uint8_t*, const idx_t*) {
-    FAISS_THROW_MSG("add_with_ids not implemented for this type of index");
+    POLARIS_THROW_MSG("add_with_ids not implemented for this type of index");
 }
 
 size_t IndexBinary::remove_ids(const IDSelector&) {
-    FAISS_THROW_MSG("remove_ids not implemented for this type of index");
+    POLARIS_THROW_MSG("remove_ids not implemented for this type of index");
     return 0;
 }
 
 void IndexBinary::reconstruct(idx_t, uint8_t*) const {
-    FAISS_THROW_MSG("reconstruct not implemented for this type of index");
+    POLARIS_THROW_MSG("reconstruct not implemented for this type of index");
 }
 
 void IndexBinary::reconstruct_n(idx_t i0, idx_t ni, uint8_t* recons) const {
@@ -68,7 +68,7 @@ void IndexBinary::search_and_reconstruct(
         idx_t* labels,
         uint8_t* recons,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     search(n, x, k, distances, labels, params);
     for (idx_t i = 0; i < n; ++i) {
@@ -95,12 +95,12 @@ void IndexBinary::display() const {
 void IndexBinary::merge_from(
         IndexBinary& /* otherIndex */,
         idx_t /* add_id */) {
-    FAISS_THROW_MSG("merge_from() not implemented");
+    POLARIS_THROW_MSG("merge_from() not implemented");
 }
 
 void IndexBinary::check_compatible_for_merge(
         const IndexBinary& /* otherIndex */) const {
-    FAISS_THROW_MSG("check_compatible_for_merge() not implemented");
+    POLARIS_THROW_MSG("check_compatible_for_merge() not implemented");
 }
 
 } // namespace polaris

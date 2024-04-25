@@ -147,8 +147,8 @@ void NSG::search(
         idx_t* I,
         float* D,
         VisitedTable& vt) const {
-    FAISS_THROW_IF_NOT(is_built);
-    FAISS_THROW_IF_NOT(final_graph);
+    POLARIS_THROW_IF_NOT(is_built);
+    POLARIS_THROW_IF_NOT(final_graph);
 
     int pool_size = std::max(search_L, k);
     std::vector<Neighbor> retset;
@@ -167,7 +167,7 @@ void NSG::build(
         idx_t n,
         const nsg::Graph<idx_t>& knn_graph,
         bool verbose) {
-    FAISS_THROW_IF_NOT(!is_built && ntotal == 0);
+    POLARIS_THROW_IF_NOT(!is_built && ntotal == 0);
 
     if (verbose) {
         printf("NSG::build R=%d, L=%d, C=%d\n", R, L, C);
@@ -666,7 +666,7 @@ void NSG::check_graph() const {
     for (int i = 0; i < ntotal; i++) {
         for (int j = 0; j < R; j++) {
             int id = final_graph->at(i, j);
-            FAISS_THROW_IF_NOT(id < ntotal && (id >= 0 || id == EMPTY_ID));
+            POLARIS_THROW_IF_NOT(id < ntotal && (id >= 0 || id == EMPTY_ID));
         }
     }
 }

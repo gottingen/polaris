@@ -190,7 +190,7 @@ class Matrix {
 } // anonymous namespace
 
 double kmeans1d(const float* x, size_t n, size_t nclusters, float* centroids) {
-    FAISS_THROW_IF_NOT(n >= nclusters);
+    POLARIS_THROW_IF_NOT(n >= nclusters);
 
     // corner case
     if (n == nclusters) {
@@ -286,7 +286,7 @@ double kmeans1d(const float* x, size_t n, size_t nclusters, float* centroids) {
         const float sum =
                 std::accumulate(arr.data() + start, arr.data() + end, 0.0f);
         const idx_t size = end - start;
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 size > 0, "Cluster %d: size %d", int(k), int(size));
         centroids[k] = sum / size;
         end = start;

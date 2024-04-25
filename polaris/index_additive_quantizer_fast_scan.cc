@@ -38,15 +38,15 @@ void IndexAdditiveQuantizerFastScan::init(
         AdditiveQuantizer* aq_2,
         MetricType metric,
         int bbs) {
-    FAISS_THROW_IF_NOT(aq_2 != nullptr);
-    FAISS_THROW_IF_NOT(!aq_2->nbits.empty());
-    FAISS_THROW_IF_NOT(aq_2->nbits[0] == 4);
+    POLARIS_THROW_IF_NOT(aq_2 != nullptr);
+    POLARIS_THROW_IF_NOT(!aq_2->nbits.empty());
+    POLARIS_THROW_IF_NOT(aq_2->nbits[0] == 4);
     if (metric == METRIC_INNER_PRODUCT) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 aq_2->search_type == AdditiveQuantizer::ST_LUT_nonorm,
                 "Search type must be ST_LUT_nonorm for IP metric");
     } else {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 aq_2->search_type == AdditiveQuantizer::ST_norm_lsq2x4 ||
                         aq_2->search_type == AdditiveQuantizer::ST_norm_rq2x4,
                 "Search type must be lsq2x4 or rq2x4 for L2 metric");
@@ -111,7 +111,7 @@ void IndexAdditiveQuantizerFastScan::train(idx_t n, const float* x_in) {
 void IndexAdditiveQuantizerFastScan::estimate_norm_scale(
         idx_t n,
         const float* x_in) {
-    FAISS_THROW_IF_NOT(metric_type == METRIC_L2);
+    POLARIS_THROW_IF_NOT(metric_type == METRIC_L2);
 
     constexpr int seed = 0x980903;
     constexpr size_t max_points_estimated = 65536;
@@ -173,7 +173,7 @@ void IndexAdditiveQuantizerFastScan::compute_float_LUT(
             }
         }
         const float* norm_lut = norm_tabs.data();
-        FAISS_THROW_IF_NOT(norm_tabs.size() == norm_dim12);
+        POLARIS_THROW_IF_NOT(norm_tabs.size() == norm_dim12);
 
         // combine them
         for (idx_t i = 0; i < n; i++) {
@@ -192,9 +192,9 @@ void IndexAdditiveQuantizerFastScan::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
     bool rescale = (rescale_norm && norm_scale > 1 && metric_type == METRIC_L2);
     if (!rescale) {
         IndexFastScan::search(n, x, k, distances, labels);

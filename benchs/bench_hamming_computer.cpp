@@ -245,7 +245,7 @@ int main() {
             }
 
             for (int i = 0; i < n; i++) {
-                FAISS_THROW_IF_NOT_FMT(
+                POLARIS_THROW_IF_NOT_FMT(
                         (rst_m4[i] == rst_m8[i] && rst_m4[i] == rst_default[i]),
                         "wrong result i=%d, m4 %d m8 %d default %d",
                         i,

@@ -49,9 +49,9 @@ void IndexIVFFlat::add_core(
         const idx_t* xids,
         const idx_t* coarse_idx,
         void* inverted_list_context) {
-    FAISS_THROW_IF_NOT(is_trained);
-    FAISS_THROW_IF_NOT(coarse_idx);
-    FAISS_THROW_IF_NOT(!by_residual);
+    POLARIS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(coarse_idx);
+    POLARIS_THROW_IF_NOT(!by_residual);
     assert(invlists);
     direct_map.check_can_add(xids);
 
@@ -96,7 +96,7 @@ void IndexIVFFlat::encode_vectors(
         const idx_t* list_nos,
         uint8_t* codes,
         bool include_listnos) const {
-    FAISS_THROW_IF_NOT(!by_residual);
+    POLARIS_THROW_IF_NOT(!by_residual);
     if (!include_listnos) {
         memcpy(codes, x, code_size * n);
     } else {
@@ -215,7 +215,7 @@ InvertedListScanner* get_InvertedListScanner1(
         return new IVFFlatScanner<METRIC_L2, CMax<float, int64_t>, use_sel>(
                 ivf->d, store_pairs, sel);
     } else {
-        FAISS_THROW_MSG("metric type not supported");
+        POLARIS_THROW_MSG("metric type not supported");
     }
 }
 
@@ -279,9 +279,9 @@ void IndexIVFFlatDedup::add_with_ids(
         idx_t na,
         const float* x,
         const idx_t* xids) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     assert(invlists);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             direct_map.no(), "IVFFlatDedup not implemented with direct_map");
     std::unique_ptr<int64_t[]> idx(new int64_t[na]);
     quantizer->assign(na, x, idx.get());
@@ -354,7 +354,7 @@ void IndexIVFFlatDedup::search_preassigned(
         bool store_pairs,
         const IVFSearchParameters* params,
         IndexIVFStats* stats) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !store_pairs, "store_pairs not supported in IVFDedup");
 
     IndexIVFFlat::search_preassigned(
@@ -428,7 +428,7 @@ size_t IndexIVFFlatDedup::remove_ids(const IDSelector& sel) {
 
     // mostly copied from IndexIVF.cpp
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             direct_map.no(), "direct map remove not implemented");
 
     std::vector<int64_t> toremove(nlist);
@@ -478,16 +478,16 @@ void IndexIVFFlatDedup::range_search(
         float,
         RangeSearchResult*,
         const SearchParameters*) const {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void IndexIVFFlatDedup::update_vectors(int, const idx_t*, const float*) {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void IndexIVFFlatDedup::reconstruct_from_offset(int64_t, int64_t, float*)
         const {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 } // namespace polaris

@@ -78,7 +78,7 @@ int main() {
     int nrun = 100;
     for (size_t k : ks) {
         printf("benchmark with k=%zd n=%zd nrun=%d\n", k, n, nrun);
-        FAISS_THROW_IF_NOT(k < n);
+        POLARIS_THROW_IF_NOT(k < n);
 
         double tot_t1 = 0, tot_t2 = 0, tot_t3 = 0;
 #pragma omp parallel reduction(+ : tot_t1, tot_t2, tot_t3)
@@ -116,7 +116,7 @@ int main() {
             }
 
             for (size_t i = 0; i < k; i++) {
-                FAISS_THROW_IF_NOT_FMT(
+                POLARIS_THROW_IF_NOT_FMT(
                         heap_ids[i] == heap_ids_2[i],
                         "i=%ld (%ld, %g) != (%ld, %g)",
                         i,
@@ -124,12 +124,12 @@ int main() {
                         heap_dis[i],
                         size_t(heap_ids_2[i]),
                         heap_dis_2[i]);
-                FAISS_THROW_IF_NOT(heap_dis[i] == heap_dis_2[i]);
+                POLARIS_THROW_IF_NOT(heap_dis[i] == heap_dis_2[i]);
             }
 
             for (size_t i = 0; i < k; i++) {
-                FAISS_THROW_IF_NOT(heap_ids[i] == heap_ids_3[i]);
-                FAISS_THROW_IF_NOT(heap_dis[i] == heap_dis_3[i]);
+                POLARIS_THROW_IF_NOT(heap_ids[i] == heap_ids_3[i]);
+                POLARIS_THROW_IF_NOT(heap_dis[i] == heap_dis_3[i]);
             }
         }
         printf("default implem: %.3f ms\n", tot_t1 / nrun);

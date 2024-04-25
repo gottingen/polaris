@@ -19,7 +19,7 @@
 #include <polaris/index_ivf_pq.h>
 #include <polaris/index_pre_transform.h>
 #include <polaris/meta_indexes.h>
-#include <polaris/invlists/OnDiskInvertedLists.h>
+#include <polaris/invlists/on_disk_inverted_lists.h>
 
 namespace {
 

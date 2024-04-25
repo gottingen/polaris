@@ -2194,7 +2194,7 @@ void compute_PQ_dis_tables_dsub2(
         bool is_inner_product,
         float* dis_tables) {
     size_t M = d / 2;
-    FAISS_THROW_IF_NOT(ksub % 8 == 0);
+    POLARIS_THROW_IF_NOT(ksub % 8 == 0);
 
     for (size_t m0 = 0; m0 < M; m0 += 4) {
         int m1 = std::min(M, m0 + 4);

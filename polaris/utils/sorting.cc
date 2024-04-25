@@ -218,7 +218,7 @@ void bucket_sort_ref(
     double t0 = getmillisecs();
     memset(lims, 0, sizeof(*lims) * (vmax + 1));
     for (size_t i = 0; i < nval; i++) {
-        FAISS_THROW_IF_NOT(vals[i] < vmax);
+        POLARIS_THROW_IF_NOT(vals[i] < vmax);
         lims[vals[i] + 1]++;
     }
     double t1 = getmillisecs();
@@ -226,7 +226,7 @@ void bucket_sort_ref(
     for (size_t i = 0; i < vmax; i++) {
         lims[i + 1] += lims[i];
     }
-    FAISS_THROW_IF_NOT(lims[vmax] == nval);
+    POLARIS_THROW_IF_NOT(lims[vmax] == nval);
     double t2 = getmillisecs();
     // populate buckets
     for (size_t i = 0; i < nval; i++) {
@@ -286,7 +286,7 @@ void bucket_sort_parallel(
             for (size_t i = 0; i < vmax; i++) {
                 lims[i + 1] += lims[i];
             }
-            FAISS_THROW_IF_NOT(lims[vmax] == nval);
+            POLARIS_THROW_IF_NOT(lims[vmax] == nval);
         }
 #pragma omp barrier
 
@@ -340,12 +340,12 @@ void bucket_sort_inplace_ref(
         int64_t* lims) {
     double t0 = getmillisecs();
     size_t nval = nrow * ncol;
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT(
             nbucket < nval); // unclear what would happen in this case...
 
     memset(lims, 0, sizeof(*lims) * (nbucket + 1));
     for (size_t i = 0; i < nval; i++) {
-        FAISS_THROW_IF_NOT(vals[i] < nbucket);
+        POLARIS_THROW_IF_NOT(vals[i] < nbucket);
         lims[vals[i] + 1]++;
     }
     double t1 = getmillisecs();
@@ -353,7 +353,7 @@ void bucket_sort_inplace_ref(
     for (size_t i = 0; i < nbucket; i++) {
         lims[i + 1] += lims[i];
     }
-    FAISS_THROW_IF_NOT(lims[nbucket] == nval);
+    POLARIS_THROW_IF_NOT(lims[nbucket] == nval);
     double t2 = getmillisecs();
 
     std::vector<size_t> ptrs(nbucket);
@@ -419,7 +419,7 @@ struct ToWrite {
     }
 
     void bucket_sort() {
-        FAISS_THROW_IF_NOT(buckets.size() == rows.size());
+        POLARIS_THROW_IF_NOT(buckets.size() == rows.size());
         lims.resize(nbucket + 1);
         memset(lims.data(), 0, sizeof(lims[0]) * (nbucket + 1));
 
@@ -431,7 +431,7 @@ struct ToWrite {
         for (size_t i = 0; i < nbucket; i++) {
             lims[i + 1] += lims[i];
         }
-        FAISS_THROW_IF_NOT(lims[nbucket] == buckets.size());
+        POLARIS_THROW_IF_NOT(lims[nbucket] == buckets.size());
 
         // could also do a circular perm...
         std::vector<TI> new_rows(rows.size());
@@ -465,7 +465,7 @@ void bucket_sort_inplace_parallel(
     memset(lims, 0, sizeof(*lims) * (nbucket + 1));
     std::vector<ToWrite<TI>> all_to_write;
     size_t nval = nrow * ncol;
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT(
             nbucket < nval); // unclear what would happen in this case...
 
     // try to keep size of all_to_write < 5GiB
@@ -514,7 +514,7 @@ void bucket_sort_inplace_parallel(
             for (size_t i = 0; i < nbucket; i++) {
                 lims[i + 1] += lims[i];
             }
-            FAISS_THROW_IF_NOT(lims[nbucket] == nval);
+            POLARIS_THROW_IF_NOT(lims[nbucket] == nval);
             // at this point lims is final (read only!)
 
             memcpy(ptrs.data(), lims, sizeof(lims[0]) * nbucket);
@@ -778,7 +778,7 @@ void hashtable_int64_to_int64_add(
             }
         }
     }
-    FAISS_THROW_IF_NOT_MSG(num_errors == 0, "hashtable capacity exhausted");
+    POLARIS_THROW_IF_NOT_MSG(num_errors == 0, "hashtable capacity exhausted");
 }
 
 void hashtable_int64_to_int64_lookup(

@@ -41,8 +41,8 @@ void IndexFastScan::init_fastscan(
         size_t nbits_2,
         MetricType metric,
         int bbs) {
-    FAISS_THROW_IF_NOT(nbits_2 == 4);
-    FAISS_THROW_IF_NOT(bbs % 32 == 0);
+    POLARIS_THROW_IF_NOT(nbits_2 == 4);
+    POLARIS_THROW_IF_NOT(bbs % 32 == 0);
     this->d = d;
     this->M = M_2;
     this->nbits = nbits_2;
@@ -65,7 +65,7 @@ void IndexFastScan::reset() {
 }
 
 void IndexFastScan::add(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     // do some blocking to avoid excessive allocs
     constexpr idx_t bs = 65536;
@@ -130,12 +130,12 @@ size_t IndexFastScan::remove_ids(const IDSelector& sel) {
 void IndexFastScan::check_compatible_for_merge(const Index& otherIndex) const {
     const IndexFastScan* other =
             dynamic_cast<const IndexFastScan*>(&otherIndex);
-    FAISS_THROW_IF_NOT(other);
-    FAISS_THROW_IF_NOT(other->M == M);
-    FAISS_THROW_IF_NOT(other->bbs == bbs);
-    FAISS_THROW_IF_NOT(other->d == d);
-    FAISS_THROW_IF_NOT(other->code_size == code_size);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT(other);
+    POLARIS_THROW_IF_NOT(other->M == M);
+    POLARIS_THROW_IF_NOT(other->bbs == bbs);
+    POLARIS_THROW_IF_NOT(other->d == d);
+    POLARIS_THROW_IF_NOT(other->code_size == code_size);
+    POLARIS_THROW_IF_NOT_MSG(
             typeid(*this) == typeid(*other),
             "can only merge indexes of the same type");
 }
@@ -261,9 +261,9 @@ void IndexFastScan::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     if (metric_type == METRIC_L2) {
         search_dispatch_implem<true>(n, x, k, distances, labels, nullptr);
@@ -307,12 +307,12 @@ void IndexFastScan::search_dispatch_implem(
     }
 
     if (implem == 1) {
-        FAISS_THROW_MSG("not implemented");
+        POLARIS_THROW_MSG("not implemented");
     } else if (implem == 2 || implem == 3 || implem == 4) {
-        FAISS_THROW_IF_NOT(orig_codes != nullptr);
+        POLARIS_THROW_IF_NOT(orig_codes != nullptr);
         search_implem_234<Cfloat>(n, x, k, distances, labels, scaler);
     } else if (impl >= 12 && impl <= 15) {
-        FAISS_THROW_IF_NOT(ntotal < INT_MAX);
+        POLARIS_THROW_IF_NOT(ntotal < INT_MAX);
         int nt = std::min(omp_get_max_threads(), int(n));
         if (nt < 2) {
             if (impl == 12 || impl == 13) {
@@ -338,7 +338,7 @@ void IndexFastScan::search_dispatch_implem(
             }
         }
     } else {
-        FAISS_THROW_FMT("invalid implem %d impl=%d", implem, impl);
+        POLARIS_THROW_FMT("invalid implem %d impl=%d", implem, impl);
     }
 }
 
@@ -350,7 +350,7 @@ void IndexFastScan::search_implem_234(
         float* distances,
         idx_t* labels,
         const NormTableScaler* scaler) const {
-    FAISS_THROW_IF_NOT(implem == 2 || implem == 3 || implem == 4);
+    POLARIS_THROW_IF_NOT(implem == 2 || implem == 3 || implem == 4);
 
     const size_t dim12 = ksub * M;
     std::unique_ptr<float[]> dis_tables(new float[n * dim12]);
@@ -411,7 +411,7 @@ void IndexFastScan::search_implem_12(
         int impl,
         const NormTableScaler* scaler) const {
     using RH = ResultHandlerCompare<C, false>;
-    FAISS_THROW_IF_NOT(bbs == 32);
+    POLARIS_THROW_IF_NOT(bbs == 32);
 
     // handle qbs2 blocking by recursive call
     int64_t qbs2 = this->qbs == 0 ? 11 : pq4_qbs_to_nq(this->qbs);
@@ -454,7 +454,7 @@ void IndexFastScan::search_implem_12(
 
     int LUT_nq =
             pq4_pack_LUT_qbs(qbs, M2, quantized_dis_tables.get(), LUT.get());
-    FAISS_THROW_IF_NOT(LUT_nq == n);
+    POLARIS_THROW_IF_NOT(LUT_nq == n);
 
     std::unique_ptr<RH> handler(
             make_knn_handler<C>(impl, n, k, ntotal, distances, labels));
@@ -490,7 +490,7 @@ void IndexFastScan::search_implem_14(
         int impl,
         const NormTableScaler* scaler) const {
     using RH = ResultHandlerCompare<C, false>;
-    FAISS_THROW_IF_NOT(bbs % 32 == 0);
+    POLARIS_THROW_IF_NOT(bbs % 32 == 0);
 
     int qbs2 = qbs == 0 ? 4 : qbs;
 

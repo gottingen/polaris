@@ -26,11 +26,11 @@ IndexRefine::IndexRefine(Index* base_index, Index* refine_index)
           refine_index(refine_index) {
     own_fields = own_refine_index = false;
     if (refine_index != nullptr) {
-        FAISS_THROW_IF_NOT(base_index->d == refine_index->d);
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(base_index->d == refine_index->d);
+        POLARIS_THROW_IF_NOT(
                 base_index->metric_type == refine_index->metric_type);
         is_trained = base_index->is_trained && refine_index->is_trained;
-        FAISS_THROW_IF_NOT(base_index->ntotal == refine_index->ntotal);
+        POLARIS_THROW_IF_NOT(base_index->ntotal == refine_index->ntotal);
     } // other case is useful only to construct an IndexRefineFlat
     ntotal = base_index->ntotal;
 }
@@ -48,7 +48,7 @@ void IndexRefine::train(idx_t n, const float* x) {
 }
 
 void IndexRefine::add(idx_t n, const float* x) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     base_index->add(n, x);
     refine_index->add(n, x);
     ntotal = refine_index->ntotal;
@@ -100,7 +100,7 @@ void IndexRefine::search(
     const IndexRefineSearchParameters* params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IndexRefineSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 params, "IndexRefine params have incorrect type");
     }
 
@@ -109,13 +109,13 @@ void IndexRefine::search(
     SearchParameters* base_index_params =
             (params != nullptr) ? params->base_index_params : nullptr;
 
-    FAISS_THROW_IF_NOT(k_base >= k);
+    POLARIS_THROW_IF_NOT(k_base >= k);
 
-    FAISS_THROW_IF_NOT(base_index);
-    FAISS_THROW_IF_NOT(refine_index);
+    POLARIS_THROW_IF_NOT(base_index);
+    POLARIS_THROW_IF_NOT(refine_index);
 
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
     idx_t* base_labels = labels;
     float* base_distances = distances;
     std::unique_ptr<idx_t[]> del1;
@@ -164,7 +164,7 @@ void IndexRefine::search(
         reorder_2_heaps<C>(
                 n, k, labels, distances, k_base, base_labels, base_distances);
     } else {
-        FAISS_THROW_MSG("Metric type not supported");
+        POLARIS_THROW_MSG("Metric type not supported");
     }
 }
 
@@ -217,7 +217,7 @@ IndexRefineFlat::IndexRefineFlat(Index* base_index)
                   new IndexFlat(base_index->d, base_index->metric_type)) {
     is_trained = base_index->is_trained;
     own_refine_index = true;
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             base_index->ntotal == 0,
             "base_index should be empty in the beginning");
 }
@@ -244,7 +244,7 @@ void IndexRefineFlat::search(
     const IndexRefineSearchParameters* params = nullptr;
     if (params_in) {
         params = dynamic_cast<const IndexRefineSearchParameters*>(params_in);
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 params, "IndexRefineFlat params have incorrect type");
     }
 
@@ -253,13 +253,13 @@ void IndexRefineFlat::search(
     SearchParameters* base_index_params =
             (params != nullptr) ? params->base_index_params : nullptr;
 
-    FAISS_THROW_IF_NOT(k_base >= k);
+    POLARIS_THROW_IF_NOT(k_base >= k);
 
-    FAISS_THROW_IF_NOT(base_index);
-    FAISS_THROW_IF_NOT(refine_index);
+    POLARIS_THROW_IF_NOT(base_index);
+    POLARIS_THROW_IF_NOT(refine_index);
 
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(is_trained);
     idx_t* base_labels = labels;
     float* base_distances = distances;
     std::unique_ptr<idx_t[]> del1;
@@ -280,7 +280,7 @@ void IndexRefineFlat::search(
 
     // compute refined distances
     auto rf = dynamic_cast<const IndexFlat*>(refine_index);
-    FAISS_THROW_IF_NOT(rf);
+    POLARIS_THROW_IF_NOT(rf);
 
     rf->compute_distance_subset(n, x, k_base, base_distances, base_labels);
 
@@ -295,7 +295,7 @@ void IndexRefineFlat::search(
         reorder_2_heaps<C>(
                 n, k, labels, distances, k_base, base_labels, base_distances);
     } else {
-        FAISS_THROW_MSG("Metric type not supported");
+        POLARIS_THROW_MSG("Metric type not supported");
     }
 }
 

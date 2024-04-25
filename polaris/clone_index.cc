@@ -47,7 +47,7 @@
 #include <polaris/impl/scalar_quantizer.h>
 #include <polaris/impl/pq4_fast_scan.h>
 
-#include <polaris/invlists/BlockInvertedLists.h>
+#include <polaris/invlists/block_inverted_lists.h>
 
 namespace polaris {
 
@@ -76,7 +76,7 @@ VectorTransform* Cloner::clone_VectorTransform(const VectorTransform* vt) {
     TRYCLONE(ITQMatrix, vt)
     TRYCLONE(RandomRotationMatrix, vt)
     TRYCLONE(LinearTransform, vt) {
-        FAISS_THROW_MSG("clone not supported for this type of VectorTransform");
+        POLARIS_THROW_MSG("clone not supported for this type of VectorTransform");
     }
     return nullptr;
 }
@@ -102,7 +102,7 @@ IndexIVF* Cloner::clone_IndexIVF(const IndexIVF* ivf) {
     TRYCLONE(IndexIVFSpectralHash, ivf)
 
     TRYCLONE(IndexIVFScalarQuantizer, ivf) {
-        FAISS_THROW_MSG("clone not supported for this type of IndexIVF");
+        POLARIS_THROW_MSG("clone not supported for this type of IndexIVF");
     }
     return nullptr;
 }
@@ -110,14 +110,14 @@ IndexIVF* Cloner::clone_IndexIVF(const IndexIVF* ivf) {
 IndexRefine* clone_IndexRefine(const IndexRefine* ir) {
     TRYCLONE(IndexRefineFlat, ir)
     TRYCLONE(IndexRefine, ir) {
-        FAISS_THROW_MSG("clone not supported for this type of IndexRefine");
+        POLARIS_THROW_MSG("clone not supported for this type of IndexRefine");
     }
 }
 
 IndexIDMap* clone_IndexIDMap(const IndexIDMap* im) {
     TRYCLONE(IndexIDMap2, im)
     TRYCLONE(IndexIDMap, im) {
-        FAISS_THROW_MSG("clone not supported for this type of IndexIDMap");
+        POLARIS_THROW_MSG("clone not supported for this type of IndexIDMap");
     }
 }
 
@@ -127,14 +127,14 @@ IndexHNSW* clone_IndexHNSW(const IndexHNSW* ihnsw) {
     TRYCLONE(IndexHNSWPQ, ihnsw)
     TRYCLONE(IndexHNSWSQ, ihnsw)
     TRYCLONE(IndexHNSW, ihnsw) {
-        FAISS_THROW_MSG("clone not supported for this type of IndexHNSW");
+        POLARIS_THROW_MSG("clone not supported for this type of IndexHNSW");
     }
 }
 
 IndexNNDescent* clone_IndexNNDescent(const IndexNNDescent* innd) {
     TRYCLONE(IndexNNDescentFlat, innd)
     TRYCLONE(IndexNNDescent, innd) {
-        FAISS_THROW_MSG("clone not supported for this type of IndexNNDescent");
+        POLARIS_THROW_MSG("clone not supported for this type of IndexNNDescent");
     }
 }
 
@@ -143,7 +143,7 @@ IndexNSG* clone_IndexNSG(const IndexNSG* insg) {
     TRYCLONE(IndexNSGPQ, insg)
     TRYCLONE(IndexNSGSQ, insg)
     TRYCLONE(IndexNSG, insg) {
-        FAISS_THROW_MSG("clone not supported for this type of IndexNNDescent");
+        POLARIS_THROW_MSG("clone not supported for this type of IndexNNDescent");
     }
 }
 
@@ -151,7 +151,7 @@ IndexRowwiseMinMaxBase* clone_IndexRowwiseMinMax(
         const IndexRowwiseMinMaxBase* irmmb) {
     TRYCLONE(IndexRowwiseMinMaxFP16, irmmb)
     TRYCLONE(IndexRowwiseMinMax, irmmb) {
-        FAISS_THROW_MSG(
+        POLARIS_THROW_MSG(
                 "clone not supported for this type of IndexRowwiseMinMax");
     }
 }
@@ -210,7 +210,7 @@ void reset_AdditiveQuantizerIndex(Index* index) {
     } else if (TRYCAST(ResidualCoarseQuantizer)) {
         res->aq = &res->rq;
     } else {
-        FAISS_THROW_MSG(
+        POLARIS_THROW_MSG(
                 "clone not supported for this type of additive quantizer index");
     }
 }
@@ -231,7 +231,7 @@ Index* clone_AdditiveQuantizerIndex(const Index* index) {
     // AdditiveCoarseQuantizer
     TRYCLONE(ResidualCoarseQuantizer, index)
     TRYCLONE(LocalSearchCoarseQuantizer, index) {
-        FAISS_THROW_MSG(
+        POLARIS_THROW_MSG(
                 "clone not supported for this type of additive quantizer index");
     }
 }
@@ -246,12 +246,12 @@ InvertedLists* clone_InvertedLists(const InvertedLists* invlists) {
         auto* bils2 = new BlockInvertedLists(*bils);
         if (bils->packer) {
             auto* packerPQ4 = dynamic_cast<const CodePackerPQ4*>(bils->packer);
-            FAISS_THROW_IF_NOT(packerPQ4);
+            POLARIS_THROW_IF_NOT(packerPQ4);
             bils2->packer = new CodePackerPQ4(*packerPQ4);
         }
         return bils2;
     }
-    FAISS_THROW_FMT(
+    POLARIS_THROW_FMT(
             "clone not supported for this type of inverted lists %s",
             typeid(*invlists).name());
 }
@@ -367,7 +367,7 @@ Index* Cloner::clone_Index(const Index* index) {
         reset_AdditiveQuantizerIndex(res);
         return res;
     } else {
-        FAISS_THROW_FMT(
+        POLARIS_THROW_FMT(
                 "clone not supported for this Index type %s",
                 typeid(*index).name());
     }
@@ -379,14 +379,14 @@ Quantizer* clone_Quantizer(const Quantizer* quant) {
     TRYCLONE(LocalSearchQuantizer, quant)
     TRYCLONE(ProductQuantizer, quant)
     TRYCLONE(ScalarQuantizer, quant)
-    FAISS_THROW_MSG("Did not recognize quantizer to clone");
+    POLARIS_THROW_MSG("Did not recognize quantizer to clone");
 }
 
 IndexBinary* clone_binary_index(const IndexBinary* index) {
     if (auto ii = dynamic_cast<const IndexBinaryFlat*>(index)) {
         return new IndexBinaryFlat(*ii);
     } else {
-        FAISS_THROW_MSG("cannot clone this type of index");
+        POLARIS_THROW_MSG("cannot clone this type of index");
     }
 }
 

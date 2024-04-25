@@ -431,7 +431,7 @@ struct simd16uint16 {
                         detail::simdlib::unary_func(data)
                                 .call<detail::simdlib::vshrq<15>>()};
             default:
-                FAISS_THROW_FMT("Invalid shift %d", shift);
+                POLARIS_THROW_FMT("Invalid shift %d", shift);
         }
     }
 
@@ -492,7 +492,7 @@ struct simd16uint16 {
                         detail::simdlib::unary_func(data)
                                 .call<detail::simdlib::vshlq<15>>()};
             default:
-                FAISS_THROW_FMT("Invalid shift %d", shift);
+                POLARIS_THROW_FMT("Invalid shift %d", shift);
         }
     }
 

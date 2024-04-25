@@ -133,7 +133,7 @@ void AdditiveQuantizer::train_norm(size_t n, const float* norms) {
         aq->train(n, norms);
         // flatten aq codebooks
         std::vector<float> flat_codebooks(1 << 8);
-        FAISS_THROW_IF_NOT(aq->codebooks.size() == 32);
+        POLARIS_THROW_IF_NOT(aq->codebooks.size() == 32);
 
         // save norm tables for 4-bit fastscan search
         norm_tabs = aq->codebooks;
@@ -148,7 +148,7 @@ void AdditiveQuantizer::train_norm(size_t n, const float* norms) {
 
         qnorm.reset();
         qnorm.add(1 << 8, flat_codebooks.data());
-        FAISS_THROW_IF_NOT(qnorm.ntotal == (1 << 8));
+        POLARIS_THROW_IF_NOT(qnorm.ntotal == (1 << 8));
     }
 }
 
@@ -257,7 +257,7 @@ void AdditiveQuantizer::pack_codes(
 }
 
 void AdditiveQuantizer::decode(const uint8_t* code, float* x, size_t n) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             is_trained, "The additive quantizer is not trained yet.");
 
     // standard additive quantizer decoding
@@ -282,7 +282,7 @@ void AdditiveQuantizer::decode_unpacked(
         float* x,
         size_t n,
         int64_t ld_codes) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             is_trained, "The additive quantizer is not trained yet.");
 
     if (ld_codes == -1) {

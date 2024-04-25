@@ -94,8 +94,8 @@ int main() {
             double t3 = polaris::getmillisecs();
             printf("search time with nullptr selector: %.3f ms\n", t3 - t2);
         }
-        FAISS_THROW_IF_NOT(I1 == I2);
-        FAISS_THROW_IF_NOT(D1 == D2);
+        POLARIS_THROW_IF_NOT(I1 == I2);
+        POLARIS_THROW_IF_NOT(D1 == D2);
 
         {
             double t2 = polaris::getmillisecs();
@@ -108,8 +108,8 @@ int main() {
             double t3 = polaris::getmillisecs();
             printf("search time with selector: %.3f ms\n", t3 - t2);
         }
-        FAISS_THROW_IF_NOT(I1 == I2);
-        FAISS_THROW_IF_NOT(D1 == D2);
+        POLARIS_THROW_IF_NOT(I1 == I2);
+        POLARIS_THROW_IF_NOT(D1 == D2);
 
         std::vector<float> D3(nq * k);
         std::vector<idx_t> I3(nq * k);
@@ -137,8 +137,8 @@ int main() {
             printf("search time with null selector + manual parallel: %.3f ms\n",
                    t3 - t2);
         }
-        FAISS_THROW_IF_NOT(I1 == I3);
-        FAISS_THROW_IF_NOT(D1 == D3);
+        POLARIS_THROW_IF_NOT(I1 == I3);
+        POLARIS_THROW_IF_NOT(D1 == D3);
     }
 
     return 0;

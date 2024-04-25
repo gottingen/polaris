@@ -21,18 +21,18 @@ IndexIVFIndependentQuantizer::IndexIVFIndependentQuantizer(
           vt(vt),
           index_ivf(index_ivf) {
     if (vt) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 vt->d_in == d && vt->d_out == index_ivf->d,
                 "invalid vector dimensions");
     } else {
-        FAISS_THROW_IF_NOT_MSG(index_ivf->d == d, "invalid vector dimensions");
+        POLARIS_THROW_IF_NOT_MSG(index_ivf->d == d, "invalid vector dimensions");
     }
 
     if (quantizer->is_trained && quantizer->ntotal != 0) {
-        FAISS_THROW_IF_NOT(quantizer->ntotal == index_ivf->nlist);
+        POLARIS_THROW_IF_NOT(quantizer->ntotal == index_ivf->nlist);
     }
     if (index_ivf->is_trained && vt) {
-        FAISS_THROW_IF_NOT(vt->is_trained);
+        POLARIS_THROW_IF_NOT(vt->is_trained);
     }
     ntotal = index_ivf->ntotal;
     is_trained =
@@ -87,7 +87,7 @@ void IndexIVFIndependentQuantizer::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(!params, "search parameters not supported");
+    POLARIS_THROW_IF_NOT_MSG(!params, "search parameters not supported");
     int nprobe = index_ivf->nprobe;
     std::vector<float> D(n * nprobe);
     std::vector<idx_t> I(n * nprobe);

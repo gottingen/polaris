@@ -193,7 +193,7 @@ void hammings_knn_hc(
             // used instead of ::addn()
 #define HANDLE_APPROX(NB, BD)                                                \
     case ApproxTopK_mode_t::APPROX_TOPK_BUCKETS_B##NB##_D##BD:               \
-        FAISS_THROW_IF_NOT_FMT(                                              \
+        POLARIS_THROW_IF_NOT_FMT(                                              \
                 k <= NB * BD,                                                \
                 "The chosen mode (%d) of approximate top-k supports "        \
                 "up to %d values, but %zd is requested.",                    \
@@ -422,7 +422,7 @@ void bitvec_shuffle(
         const uint8_t* __restrict a,
         uint8_t* __restrict b) {
     for (size_t i = 0; i < db; i++) {
-        FAISS_THROW_IF_NOT(order[i] >= 0 && order[i] < da);
+        POLARIS_THROW_IF_NOT(order[i] >= 0 && order[i] < da);
     }
     size_t lda = (da + 7) / 8;
     size_t ldb = (db + 7) / 8;
@@ -453,7 +453,7 @@ void hammings(
         size_t nb,
         size_t ncodes,
         hamdis_t* __restrict dis) {
-    FAISS_THROW_IF_NOT(ncodes % 8 == 0);
+    POLARIS_THROW_IF_NOT(ncodes % 8 == 0);
     switch (ncodes) {
         case 8:
             polaris::hammings<64>(C64(a), C64(b), na, nb, dis);
@@ -550,7 +550,7 @@ void hamming_count_thres(
                     C64(bs1), C64(bs2), n1, n2, ht, nptr);
             return;
         default:
-            FAISS_THROW_FMT("not implemented for %zu bits", ncodes);
+            POLARIS_THROW_FMT("not implemented for %zu bits", ncodes);
     }
 }
 
@@ -575,7 +575,7 @@ void crosshamming_count_thres(
             polaris::crosshamming_count_thres<512>(C64(dbs), n, ht, nptr);
             return;
         default:
-            FAISS_THROW_FMT("not implemented for %zu bits", ncodes);
+            POLARIS_THROW_FMT("not implemented for %zu bits", ncodes);
     }
 }
 
@@ -603,7 +603,7 @@ size_t match_hamming_thres(
             return polaris::match_hamming_thres<512>(
                     C64(bs1), C64(bs2), n1, n2, ht, idx, dis);
         default:
-            FAISS_THROW_FMT("not implemented for %zu bits", ncodes);
+            POLARIS_THROW_FMT("not implemented for %zu bits", ncodes);
             return 0;
     }
 }
@@ -686,7 +686,7 @@ void pack_bitstrings(
         const int32_t* unpacked,
         uint8_t* packed,
         size_t code_size) {
-    FAISS_THROW_IF_NOT(code_size >= (M * nbit + 7) / 8);
+    POLARIS_THROW_IF_NOT(code_size >= (M * nbit + 7) / 8);
 #pragma omp parallel for if (n > 1000)
     for (int64_t i = 0; i < n; i++) {
         const int32_t* in = unpacked + i * M;
@@ -709,7 +709,7 @@ void pack_bitstrings(
     for (int j = 0; j < M; j++) {
         totbit += nbit[j];
     }
-    FAISS_THROW_IF_NOT(code_size >= (totbit + 7) / 8);
+    POLARIS_THROW_IF_NOT(code_size >= (totbit + 7) / 8);
 #pragma omp parallel for if (n > 1000)
     for (int64_t i = 0; i < n; i++) {
         const int32_t* in = unpacked + i * M;
@@ -728,7 +728,7 @@ void unpack_bitstrings(
         const uint8_t* packed,
         size_t code_size,
         int32_t* unpacked) {
-    FAISS_THROW_IF_NOT(code_size >= (M * nbit + 7) / 8);
+    POLARIS_THROW_IF_NOT(code_size >= (M * nbit + 7) / 8);
 #pragma omp parallel for if (n > 1000)
     for (int64_t i = 0; i < n; i++) {
         const uint8_t* in = packed + i * code_size;
@@ -751,7 +751,7 @@ void unpack_bitstrings(
     for (int j = 0; j < M; j++) {
         totbit += nbit[j];
     }
-    FAISS_THROW_IF_NOT(code_size >= (totbit + 7) / 8);
+    POLARIS_THROW_IF_NOT(code_size >= (totbit + 7) / 8);
 #pragma omp parallel for if (n > 1000)
     for (int64_t i = 0; i < n; i++) {
         const uint8_t* in = packed + i * code_size;

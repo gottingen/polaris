@@ -19,8 +19,8 @@
 #include <polaris/index.h>
 #include <polaris/impl/id_selector.h>
 #include <polaris/impl/platform_macros.h>
-#include <polaris/invlists/DirectMap.h>
-#include <polaris/invlists/InvertedLists.h>
+#include <polaris/invlists/direct_map.h>
+#include <polaris/invlists/inverted_lists.h>
 #include <polaris/utils/heap.h>
 
 namespace polaris {

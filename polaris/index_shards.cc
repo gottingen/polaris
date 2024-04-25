@@ -25,7 +25,7 @@ namespace {
 void sync_d(Index* index) {}
 
 void sync_d(IndexBinary* index) {
-    FAISS_THROW_IF_NOT(index->d % 8 == 0);
+    POLARIS_THROW_IF_NOT(index->d % 8 == 0);
     index->code_size = index->d / 8;
 }
 
@@ -99,9 +99,9 @@ void IndexShardsTemplate<IndexT>::syncWithSubIndexes() {
 
     for (int i = 1; i < this->count(); ++i) {
         auto index = this->at(i);
-        FAISS_THROW_IF_NOT(this->metric_type == index->metric_type);
-        FAISS_THROW_IF_NOT(this->d == index->d);
-        FAISS_THROW_IF_NOT(this->is_trained == index->is_trained);
+        POLARIS_THROW_IF_NOT(this->metric_type == index->metric_type);
+        POLARIS_THROW_IF_NOT(this->d == index->d);
+        POLARIS_THROW_IF_NOT(this->is_trained == index->is_trained);
 
         this->ntotal += index->ntotal;
     }
@@ -135,17 +135,17 @@ void IndexShardsTemplate<IndexT>::add_with_ids(
         idx_t n,
         const component_t* x,
         const idx_t* xids) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !(successive_ids && xids),
             "It makes no sense to pass in ids and "
             "request them to be shifted");
 
     if (successive_ids) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 !xids,
                 "It makes no sense to pass in ids and "
                 "request them to be shifted");
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 this->ntotal == 0,
                 "when adding to IndexShards with successive_ids, "
                 "only add() in a single pass is supported");
@@ -199,9 +199,9 @@ void IndexShardsTemplate<IndexT>::search(
         distance_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     int64_t nshard = this->count();
 

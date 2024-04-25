@@ -19,7 +19,7 @@ namespace {
 void sync_d(Index* index) {}
 
 void sync_d(IndexBinary* index) {
-    FAISS_THROW_IF_NOT(index->d % 8 == 0);
+    POLARIS_THROW_IF_NOT(index->d % 8 == 0);
     index->code_size = index->d / 8;
 }
 
@@ -48,7 +48,7 @@ void IndexReplicasTemplate<IndexT>::onAfterAddIndex(IndexT* index) {
     if (this->count() > 0 && this->at(0) != index) {
         auto existing = this->at(0);
 
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 index->ntotal == existing->ntotal,
                 "IndexReplicas: newly added index does "
                 "not have same number of vectors as prior index; "
@@ -56,12 +56,12 @@ void IndexReplicasTemplate<IndexT>::onAfterAddIndex(IndexT* index) {
                 existing->ntotal,
                 index->ntotal);
 
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 index->is_trained == existing->is_trained,
                 "IndexReplicas: newly added index does "
                 "not have same train status as prior index");
 
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 index->d == existing->d,
                 "IndexReplicas: newly added index does "
                 "not have same dimension as prior index");
@@ -113,7 +113,7 @@ void IndexReplicasTemplate<IndexT>::add(idx_t n, const component_t* x) {
 
 template <typename IndexT>
 void IndexReplicasTemplate<IndexT>::reconstruct(idx_t n, component_t* x) const {
-    FAISS_THROW_IF_NOT_MSG(this->count() > 0, "no replicas in index");
+    POLARIS_THROW_IF_NOT_MSG(this->count() > 0, "no replicas in index");
 
     // Just pass to the first replica
     this->at(0)->reconstruct(n, x);
@@ -127,10 +127,10 @@ void IndexReplicasTemplate<IndexT>::search(
         distance_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT_MSG(this->count() > 0, "no replicas in index");
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT_MSG(this->count() > 0, "no replicas in index");
 
     if (n == 0) {
         return;
@@ -142,7 +142,7 @@ void IndexReplicasTemplate<IndexT>::search(
     // Partition the query by the number of indices we have
     polaris::idx_t queriesPerIndex =
             (polaris::idx_t)(n + this->count() - 1) / (polaris::idx_t)this->count();
-    FAISS_ASSERT(n / queriesPerIndex <= this->count());
+    POLARIS_ASSERT(n / queriesPerIndex <= this->count());
 
     auto fn = [queriesPerIndex, componentsPerVec, n, x, k, distances, labels](
                       int i, const IndexT* index) {
@@ -193,10 +193,10 @@ void IndexReplicasTemplate<IndexT>::syncWithSubIndexes() {
 
     for (int i = 1; i < this->count(); ++i) {
         auto index = this->at(i);
-        FAISS_THROW_IF_NOT(this->metric_type == index->metric_type);
-        FAISS_THROW_IF_NOT(this->d == index->d);
-        FAISS_THROW_IF_NOT(this->is_trained == index->is_trained);
-        FAISS_THROW_IF_NOT(this->ntotal == index->ntotal);
+        POLARIS_THROW_IF_NOT(this->metric_type == index->metric_type);
+        POLARIS_THROW_IF_NOT(this->d == index->d);
+        POLARIS_THROW_IF_NOT(this->is_trained == index->is_trained);
+        POLARIS_THROW_IF_NOT(this->ntotal == index->ntotal);
     }
 }
 

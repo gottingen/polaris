@@ -22,7 +22,7 @@
 #include <polaris/impl/io_macros.h>
 #include <polaris/utils/hamming.h>
 
-#include <polaris/invlists/InvertedListsIOHook.h>
+#include <polaris/invlists/inverted_lists_io_hook.h>
 
 #include <polaris/index_2layer.h>
 #include <polaris/index_additive_quantizer.h>
@@ -114,8 +114,8 @@ VectorTransform* read_VectorTransform(IOReader* f) {
         READ1(lt->have_bias);
         READVECTOR(lt->A);
         READVECTOR(lt->b);
-        FAISS_THROW_IF_NOT(lt->A.size() >= lt->d_in * lt->d_out);
-        FAISS_THROW_IF_NOT(!lt->have_bias || lt->b.size() >= lt->d_out);
+        POLARIS_THROW_IF_NOT(lt->A.size() >= lt->d_in * lt->d_out);
+        POLARIS_THROW_IF_NOT(!lt->have_bias || lt->b.size() >= lt->d_out);
         lt->set_is_orthonormal();
         vt = lt;
     } else if (h == fourcc("RmDT")) {
@@ -137,20 +137,20 @@ VectorTransform* read_VectorTransform(IOReader* f) {
         READ1(itqt->do_pca);
         {
             ITQMatrix* itqm = dynamic_cast<ITQMatrix*>(read_VectorTransform(f));
-            FAISS_THROW_IF_NOT(itqm);
+            POLARIS_THROW_IF_NOT(itqm);
             itqt->itq = *itqm;
             delete itqm;
         }
         {
             LinearTransform* pi =
                     dynamic_cast<LinearTransform*>(read_VectorTransform(f));
-            FAISS_THROW_IF_NOT(pi);
+            POLARIS_THROW_IF_NOT(pi);
             itqt->pca_then_itq = *pi;
             delete pi;
         }
         vt = itqt;
     } else {
-        FAISS_THROW_FMT(
+        POLARIS_THROW_FMT(
                 "fourcc %ud (\"%s\") not recognized in %s",
                 h,
                 fourcc_inv_printable(h).c_str(),
@@ -170,16 +170,16 @@ static void read_ArrayInvertedLists_sizes(
     if (list_type == fourcc("full")) {
         size_t os = sizes.size();
         READVECTOR(sizes);
-        FAISS_THROW_IF_NOT(os == sizes.size());
+        POLARIS_THROW_IF_NOT(os == sizes.size());
     } else if (list_type == fourcc("sprs")) {
         std::vector<size_t> idsizes;
         READVECTOR(idsizes);
         for (size_t j = 0; j < idsizes.size(); j += 2) {
-            FAISS_THROW_IF_NOT(idsizes[j] < sizes.size());
+            POLARIS_THROW_IF_NOT(idsizes[j] < sizes.size());
             sizes[idsizes[j]] = idsizes[j + 1];
         }
     } else {
-        FAISS_THROW_FMT(
+        POLARIS_THROW_FMT(
                 "list_type %ud (\"%s\") not recognized",
                 list_type,
                 fourcc_inv_printable(list_type).c_str());
@@ -235,8 +235,8 @@ InvertedLists* read_InvertedLists(IOReader* f, int io_flags) {
 static void read_InvertedLists(IndexIVF* ivf, IOReader* f, int io_flags) {
     InvertedLists* ils = read_InvertedLists(f, io_flags);
     if (ils) {
-        FAISS_THROW_IF_NOT(ils->nlist == ivf->nlist);
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(ils->nlist == ivf->nlist);
+        POLARIS_THROW_IF_NOT(
                 ils->code_size == InvertedLists::INVALID_CODE_SIZE ||
                 ils->code_size == ivf->code_size);
     }
@@ -543,7 +543,7 @@ Index* read_index(IOReader* f, int io_flags) {
         read_index_header(idxf, f);
         idxf->code_size = idxf->d * sizeof(float);
         READXBVECTOR(idxf->codes);
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(
                 idxf->codes.size() == idxf->ntotal * idxf->code_size);
         // leak!
         idx = idxf;
@@ -558,7 +558,7 @@ Index* read_index(IOReader* f, int io_flags) {
         READ1(code_size_i);
         idxl->code_size = code_size_i;
         if (h == fourcc("IxHE")) {
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     idxl->nbits % 64 == 0,
                     "can only read old format IndexLSH with "
                     "nbits multiple of 64 (got %d)",
@@ -569,14 +569,14 @@ Index* read_index(IOReader* f, int io_flags) {
         {
             RandomRotationMatrix* rrot = dynamic_cast<RandomRotationMatrix*>(
                     read_VectorTransform(f));
-            FAISS_THROW_IF_NOT_MSG(rrot, "expected a random rotation");
+            POLARIS_THROW_IF_NOT_MSG(rrot, "expected a random rotation");
             idxl->rrot = *rrot;
             delete rrot;
         }
         READVECTOR(idxl->codes);
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(
                 idxl->rrot.d_in == idxl->d && idxl->rrot.d_out == idxl->nbits);
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(
                 idxl->codes.size() == idxl->ntotal * idxl->code_size);
         idx = idxl;
     } else if (
@@ -882,7 +882,7 @@ Index* read_index(IOReader* f, int io_flags) {
             indep->vt = read_VectorTransform(f);
         }
         indep->index_ivf = dynamic_cast<IndexIVF*>(read_index(f, io_flags));
-        FAISS_THROW_IF_NOT(indep->index_ivf);
+        POLARIS_THROW_IF_NOT(indep->index_ivf);
         if (auto index_ivfpq = dynamic_cast<IndexIVFPQ*>(indep->index_ivf)) {
             READ1(index_ivfpq->use_precomputed_table);
         }
@@ -1050,7 +1050,7 @@ Index* read_index(IOReader* f, int io_flags) {
 
         idx = imm;
     } else {
-        FAISS_THROW_FMT(
+        POLARIS_THROW_FMT(
                 "Index type 0x%08x (\"%s\") not recognized",
                 h,
                 fourcc_inv_printable(h).c_str());
@@ -1082,7 +1082,7 @@ VectorTransform* read_VectorTransform(const char* fname) {
 
 static void read_InvertedLists(IndexBinaryIVF* ivf, IOReader* f, int io_flags) {
     InvertedLists* ils = read_InvertedLists(f, io_flags);
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT(
             !ils ||
             (ils->nlist == ivf->nlist && ils->code_size == ivf->code_size));
     ivf->invlists = ils;
@@ -1133,7 +1133,7 @@ static void read_binary_hash_invlists(
         uint64_t ilsz = rd.read(il_nbit);
         auto& il = invlists[hash];
         READVECTOR(il.ids);
-        FAISS_THROW_IF_NOT(il.ids.size() == ilsz);
+        POLARIS_THROW_IF_NOT(il.ids.size() == ilsz);
         READVECTOR(il.vecs);
     }
 }
@@ -1150,7 +1150,7 @@ static void read_binary_multi_hash_map(
     std::vector<uint8_t> buf;
     READVECTOR(buf);
     size_t nbit = (b + id_bits) * sz + ntotal * id_bits;
-    FAISS_THROW_IF_NOT(buf.size() == (nbit + 7) / 8);
+    POLARIS_THROW_IF_NOT(buf.size() == (nbit + 7) / 8);
     BitstringReader rd(buf.data(), buf.size());
     map.reserve(sz);
     for (size_t i = 0; i < sz; i++) {
@@ -1171,7 +1171,7 @@ IndexBinary* read_index_binary(IOReader* f, int io_flags) {
         IndexBinaryFlat* idxf = new IndexBinaryFlat();
         read_index_binary_header(idxf, f);
         READVECTOR(idxf->xb);
-        FAISS_THROW_IF_NOT(idxf->xb.size() == idxf->ntotal * idxf->code_size);
+        POLARIS_THROW_IF_NOT(idxf->xb.size() == idxf->ntotal * idxf->code_size);
         // leak!
         idx = idxf;
     } else if (h == fourcc("IBwF")) {
@@ -1215,7 +1215,7 @@ IndexBinary* read_index_binary(IOReader* f, int io_flags) {
         IndexBinaryMultiHash* idxmh = new IndexBinaryMultiHash();
         read_index_binary_header(idxmh, f);
         idxmh->storage = dynamic_cast<IndexBinaryFlat*>(read_index_binary(f));
-        FAISS_THROW_IF_NOT(
+        POLARIS_THROW_IF_NOT(
                 idxmh->storage && idxmh->storage->ntotal == idxmh->ntotal);
         idxmh->own_fields = true;
         READ1(idxmh->b);
@@ -1228,7 +1228,7 @@ IndexBinary* read_index_binary(IOReader* f, int io_flags) {
         }
         idx = idxmh;
     } else {
-        FAISS_THROW_FMT(
+        POLARIS_THROW_FMT(
                 "Index type %08x (\"%s\") not recognized",
                 h,
                 fourcc_inv_printable(h).c_str());

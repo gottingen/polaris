@@ -87,7 +87,7 @@ void HeapArray<C>::addn_query_subset_with_ids(
         const T* vin,
         const TI* id_in,
         int64_t id_stride) {
-    FAISS_THROW_IF_NOT_MSG(id_in, "anonymous ids not supported");
+    POLARIS_THROW_IF_NOT_MSG(id_in, "anonymous ids not supported");
     if (id_stride < 0) {
         id_stride = nj;
     }

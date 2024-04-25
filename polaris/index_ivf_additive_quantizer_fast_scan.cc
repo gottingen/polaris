@@ -19,7 +19,7 @@
 #include <polaris/impl/faiss_assert.h>
 #include <polaris/impl/lookup_table_scaler.h>
 #include <polaris/impl/pq4_fast_scan.h>
-#include <polaris/invlists/BlockInvertedLists.h>
+#include <polaris/invlists/block_inverted_lists.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
 #include <polaris/utils/quantize_lut.h>
@@ -50,15 +50,15 @@ void IndexIVFAdditiveQuantizerFastScan::init(
         size_t nlist,
         MetricType metric,
         int bbs) {
-    FAISS_THROW_IF_NOT(aq != nullptr);
-    FAISS_THROW_IF_NOT(!aq->nbits.empty());
-    FAISS_THROW_IF_NOT(aq->nbits[0] == 4);
+    POLARIS_THROW_IF_NOT(aq != nullptr);
+    POLARIS_THROW_IF_NOT(!aq->nbits.empty());
+    POLARIS_THROW_IF_NOT(aq->nbits[0] == 4);
     if (metric == METRIC_INNER_PRODUCT) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 aq->search_type == AdditiveQuantizer::ST_LUT_nonorm,
                 "Search type must be ST_LUT_nonorm for IP metric");
     } else {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 aq->search_type == AdditiveQuantizer::ST_norm_lsq2x4 ||
                         aq->search_type == AdditiveQuantizer::ST_norm_rq2x4,
                 "Search type must be lsq2x4 or rq2x4 for L2 metric");
@@ -86,7 +86,7 @@ IndexIVFAdditiveQuantizerFastScan::IndexIVFAdditiveQuantizerFastScan(
                   0,
                   orig.metric_type),
           aq(orig.aq) {
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT(
             metric_type == METRIC_INNER_PRODUCT || !orig.by_residual);
 
     init(aq, nlist, metric_type, bbs);
@@ -189,7 +189,7 @@ void IndexIVFAdditiveQuantizerFastScan::train_encoder(
 void IndexIVFAdditiveQuantizerFastScan::estimate_norm_scale(
         idx_t n,
         const float* x_in) {
-    FAISS_THROW_IF_NOT(metric_type == METRIC_L2);
+    POLARIS_THROW_IF_NOT(metric_type == METRIC_L2);
 
     constexpr int seed = 0x980903;
     constexpr size_t max_points_estimated = 65536;
@@ -303,10 +303,10 @@ void IndexIVFAdditiveQuantizerFastScan::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
 
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
     bool rescale = (rescale_norm && norm_scale > 1 && metric_type == METRIC_L2);
     if (!rescale) {
         IndexIVFFastScan::search(n, x, k, distances, labels);
@@ -427,7 +427,7 @@ void IndexIVFAdditiveQuantizerFastScan::compute_LUT(
             }
         }
         const float* norm_lut = norm_tabs.data();
-        FAISS_THROW_IF_NOT(norm_tabs.size() == norm_dim12);
+        POLARIS_THROW_IF_NOT(norm_tabs.size() == norm_dim12);
 
         // combine them
 #pragma omp parallel for if (n > 100)
@@ -439,7 +439,7 @@ void IndexIVFAdditiveQuantizerFastScan::compute_LUT(
     } else if (metric_type == METRIC_INNER_PRODUCT) {
         aq->compute_LUT(n, x, dis_tables.get());
     } else {
-        FAISS_THROW_FMT("metric %d not supported", metric_type);
+        POLARIS_THROW_FMT("metric %d not supported", metric_type);
     }
 }
 
@@ -468,7 +468,7 @@ IndexIVFLocalSearchQuantizerFastScan::IndexIVFLocalSearchQuantizerFastScan(
                   metric,
                   bbs),
           lsq(d, M, nbits, search_type) {
-    FAISS_THROW_IF_NOT(nbits == 4);
+    POLARIS_THROW_IF_NOT(nbits == 4);
     init(&lsq, nlist, metric, bbs);
 }
 
@@ -494,7 +494,7 @@ IndexIVFResidualQuantizerFastScan::IndexIVFResidualQuantizerFastScan(
                   metric,
                   bbs),
           rq(d, M, nbits, search_type) {
-    FAISS_THROW_IF_NOT(nbits == 4);
+    POLARIS_THROW_IF_NOT(nbits == 4);
     init(&rq, nlist, metric, bbs);
 }
 
@@ -522,7 +522,7 @@ IndexIVFProductLocalSearchQuantizerFastScan::
                   metric,
                   bbs),
           plsq(d, nsplits, Msub, nbits, search_type) {
-    FAISS_THROW_IF_NOT(nbits == 4);
+    POLARIS_THROW_IF_NOT(nbits == 4);
     init(&plsq, nlist, metric, bbs);
 }
 
@@ -551,7 +551,7 @@ IndexIVFProductResidualQuantizerFastScan::
                   metric,
                   bbs),
           prq(d, nsplits, Msub, nbits, search_type) {
-    FAISS_THROW_IF_NOT(nbits == 4);
+    POLARIS_THROW_IF_NOT(nbits == 4);
     init(&prq, nlist, metric, bbs);
 }
 

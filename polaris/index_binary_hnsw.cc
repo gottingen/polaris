@@ -141,7 +141,7 @@ void hnsw_add_vertices(
             }
             i1 = i0;
         }
-        FAISS_ASSERT(i1 == 0);
+        POLARIS_ASSERT(i1 == 0);
     }
     if (verbose) {
         printf("Done in %.3f ms\n", getmillisecs() - t0);
@@ -196,9 +196,9 @@ void IndexBinaryHNSW::search(
         int32_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     // we use the buffer for distances as float but convert them back
     // to int in the end
@@ -229,7 +229,7 @@ void IndexBinaryHNSW::search(
 }
 
 void IndexBinaryHNSW::add(idx_t n, const uint8_t* x) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     int n0 = ntotal;
     storage->add(n, x);
     ntotal = storage->ntotal;
@@ -296,7 +296,7 @@ struct BuildDistanceComputer {
 
 DistanceComputer* IndexBinaryHNSW::get_distance_computer() const {
     IndexBinaryFlat* flat_storage = dynamic_cast<IndexBinaryFlat*>(storage);
-    FAISS_ASSERT(flat_storage != nullptr);
+    POLARIS_ASSERT(flat_storage != nullptr);
     BuildDistanceComputer bd;
     return dispatch_HammingComputer(code_size, bd, flat_storage);
 }

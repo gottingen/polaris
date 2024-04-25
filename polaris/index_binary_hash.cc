@@ -205,7 +205,7 @@ void IndexBinaryHash::range_search(
         int radius,
         RangeSearchResult* result,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
     size_t nlist = 0, ndis = 0, n0 = 0;
 
@@ -236,9 +236,9 @@ void IndexBinaryHash::search(
         int32_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     using HeapForL2 = CMax<int32_t, idx_t>;
     size_t nlist = 0, ndis = 0, n0 = 0;
@@ -295,7 +295,7 @@ IndexBinaryMultiHash::IndexBinaryMultiHash(int d, int nhash, int b)
           nhash(nhash),
           b(b),
           nflip(0) {
-    FAISS_THROW_IF_NOT(nhash * b <= d);
+    POLARIS_THROW_IF_NOT(nhash * b <= d);
 }
 
 IndexBinaryMultiHash::IndexBinaryMultiHash()
@@ -413,7 +413,7 @@ void IndexBinaryMultiHash::range_search(
         int radius,
         RangeSearchResult* result,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
     size_t nlist = 0, ndis = 0, n0 = 0;
 
@@ -444,9 +444,9 @@ void IndexBinaryMultiHash::search(
         int32_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
 
     using HeapForL2 = CMax<int32_t, idx_t>;
     size_t nlist = 0, ndis = 0, n0 = 0;

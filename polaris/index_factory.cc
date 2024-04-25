@@ -94,12 +94,12 @@ void find_matching_parentheses(
                 return;
             }
             if (st < 0) {
-                FAISS_THROW_FMT(
+                POLARIS_THROW_FMT(
                         "factory string %s: unbalanced parentheses", s.c_str());
             }
         }
     }
-    FAISS_THROW_FMT(
+    POLARIS_THROW_FMT(
             "factory string %s: unbalanced parentheses st=%d", s.c_str(), st);
 }
 
@@ -242,7 +242,7 @@ Index* parse_coarse_quantizer(
     }
     if (match("IMI2x([0-9]+)")) {
         int nbit = std::stoi(sm[1].str());
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 mt == METRIC_L2,
                 "MultiIndex not implemented for inner prod search");
         nlist = (size_t)1 << (2 * nbit);
@@ -261,13 +261,13 @@ Index* parse_coarse_quantizer(
     if (match("IVF([0-9]+)\\(Index([0-9])\\)")) {
         nlist = std::stoi(sm[1].str());
         int no = std::stoi(sm[2].str());
-        FAISS_ASSERT(no >= 0 && no < parenthesis_indexes.size());
+        POLARIS_ASSERT(no >= 0 && no < parenthesis_indexes.size());
         return parenthesis_indexes[no].release();
     }
 
     // these two generate Index2Layer's not IndexIVF's
     if (match("Residual([0-9]+)x([0-9]+)")) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 mt == METRIC_L2,
                 "MultiIndex not implemented for inner prod search");
         int M = mres_to_int(sm[1]), nbit = mres_to_int(sm[2]);
@@ -276,7 +276,7 @@ Index* parse_coarse_quantizer(
         return new MultiIndexQuantizer(d, M, nbit);
     }
     if (match("Residual([0-9]+)")) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 mt == METRIC_L2,
                 "Residual not implemented for inner prod search");
         use_2layer = true;
@@ -317,7 +317,7 @@ IndexIVF* parse_IndexIVF(
         return index_ivf;
     }
     if (match("PQ([0-9]+)\\+([0-9]+)")) {
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 mt == METRIC_L2,
                 "IVFPQR not implemented for inner product search");
         int M1 = mres_to_int(sm[1]), M2 = mres_to_int(sm[2]);
@@ -340,7 +340,7 @@ IndexIVF* parse_IndexIVF(
             index_ivf = new IndexIVFResidualQuantizer(
                     get_q(), d, nlist, nbits, mt, st);
         } else {
-            FAISS_THROW_IF_NOT(nbits.size() > 0);
+            POLARIS_THROW_IF_NOT(nbits.size() > 0);
             index_ivf = new IndexIVFLocalSearchQuantizer(
                     get_q(), d, nlist, nbits.size(), nbits[0], mt, st);
         }
@@ -529,7 +529,7 @@ Index* parse_other_indexes(
     if (match("LSH(r?)(t?)")) {
         bool rotate_data = sm[1].length() > 0;
         bool train_thresholds = sm[2].length() > 0;
-        FAISS_THROW_IF_NOT(metric == METRIC_L2);
+        POLARIS_THROW_IF_NOT(metric == METRIC_L2);
         return new IndexLSH(d, d, rotate_data, train_thresholds);
     }
 
@@ -677,7 +677,7 @@ std::unique_ptr<Index> index_factory_sub(
         } else { // RFlat
             index_rf = new IndexRefineFlat(filter_index.release(), nullptr);
         }
-        FAISS_ASSERT(index_rf != nullptr);
+        POLARIS_ASSERT(index_rf != nullptr);
         index_rf->own_fields = true;
         return std::unique_ptr<Index>(index_rf);
     }
@@ -777,7 +777,7 @@ std::unique_ptr<Index> index_factory_sub(
         }
 
         IndexHNSW* index = parse_IndexHNSW(code_string, d, metric, hnsw_M);
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 index,
                 "could not parse HNSW code description %s in %s",
                 code_string.c_str(),
@@ -800,7 +800,7 @@ std::unique_ptr<Index> index_factory_sub(
         }
 
         IndexNSG* index = parse_IndexNSG(code_string, d, metric, nsg_R);
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 index,
                 "could not parse NSG code description %s in %s",
                 code_string.c_str(),
@@ -852,7 +852,7 @@ std::unique_ptr<Index> index_factory_sub(
             if (use_2layer) {
                 bool ok =
                         re_match(code_description, "PQ([0-9]+)(x[0-9]+)?", sm);
-                FAISS_THROW_IF_NOT_FMT(
+                POLARIS_THROW_IF_NOT_FMT(
                         ok,
                         "could not parse 2 layer code description %s in %s",
                         code_description.c_str(),
@@ -869,7 +869,7 @@ std::unique_ptr<Index> index_factory_sub(
             IndexIVF* index_ivf =
                     parse_IndexIVF(code_description, quantizer, nlist, metric);
 
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     index_ivf,
                     "could not parse code description %s in %s",
                     code_description.c_str(),
@@ -877,7 +877,7 @@ std::unique_ptr<Index> index_factory_sub(
             return std::unique_ptr<Index>(fix_ivf_fields(index_ivf));
         }
     }
-    FAISS_THROW_FMT("could not parse index string %s", description.c_str());
+    POLARIS_THROW_FMT("could not parse index string %s", description.c_str());
     return nullptr;
 }
 
@@ -919,7 +919,7 @@ IndexBinary* index_binary_factory(int d, const char* description) {
         index = new IndexBinaryFlat(d);
 
     } else {
-        FAISS_THROW_IF_NOT_FMT(
+        POLARIS_THROW_IF_NOT_FMT(
                 index, "description %s did not generate an index", description);
     }
 

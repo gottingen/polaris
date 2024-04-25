@@ -31,7 +31,7 @@ IndexBinaryIVF::IndexBinaryIVF(IndexBinary* quantizer, size_t d, size_t nlist)
           invlists(new ArrayInvertedLists(nlist, code_size)),
           quantizer(quantizer),
           nlist(nlist) {
-    FAISS_THROW_IF_NOT(d == quantizer->d);
+    POLARIS_THROW_IF_NOT(d == quantizer->d);
     is_trained = quantizer->is_trained && (quantizer->ntotal == nlist);
     cp.niter = 10;
 }
@@ -54,7 +54,7 @@ void IndexBinaryIVF::add_core(
         const uint8_t* x,
         const idx_t* xids,
         const idx_t* precomputed_idx) {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
     assert(invlists);
     direct_map.check_can_add(xids);
 
@@ -114,10 +114,10 @@ void IndexBinaryIVF::search(
         int32_t* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(nprobe > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(nprobe > 0);
 
     const size_t nprobe_2 = std::min(nlist, this->nprobe);
     std::unique_ptr<idx_t[]> idx(new idx_t[n * nprobe_2]);
@@ -141,7 +141,7 @@ void IndexBinaryIVF::reconstruct(idx_t key, uint8_t* recons) const {
 }
 
 void IndexBinaryIVF::reconstruct_n(idx_t i0, idx_t ni, uint8_t* recons) const {
-    FAISS_THROW_IF_NOT(ni == 0 || (i0 >= 0 && i0 + ni <= ntotal));
+    POLARIS_THROW_IF_NOT(ni == 0 || (i0 >= 0 && i0 + ni <= ntotal));
 
     for (idx_t list_no = 0; list_no < nlist; list_no++) {
         size_t list_size = invlists->list_size(list_no);
@@ -167,11 +167,11 @@ void IndexBinaryIVF::search_and_reconstruct(
         idx_t* __restrict labels,
         uint8_t* __restrict recons,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
     const size_t nprobe_2 = std::min(nlist, this->nprobe);
-    FAISS_THROW_IF_NOT(k > 0);
-    FAISS_THROW_IF_NOT(nprobe_2 > 0);
+    POLARIS_THROW_IF_NOT(k > 0);
+    POLARIS_THROW_IF_NOT(nprobe_2 > 0);
 
     std::unique_ptr<idx_t[]> idx(new idx_t[n * nprobe_2]);
     std::unique_ptr<int32_t[]> coarse_dis(new int32_t[n * nprobe_2]);
@@ -275,14 +275,14 @@ void IndexBinaryIVF::train(idx_t n, const uint8_t* x) {
 void IndexBinaryIVF::check_compatible_for_merge(
         const IndexBinary& otherIndex) const {
     auto other = dynamic_cast<const IndexBinaryIVF*>(&otherIndex);
-    FAISS_THROW_IF_NOT(other);
-    FAISS_THROW_IF_NOT(other->d == d);
-    FAISS_THROW_IF_NOT(other->nlist == nlist);
-    FAISS_THROW_IF_NOT(other->code_size == code_size);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT(other);
+    POLARIS_THROW_IF_NOT(other->d == d);
+    POLARIS_THROW_IF_NOT(other->nlist == nlist);
+    POLARIS_THROW_IF_NOT(other->code_size == code_size);
+    POLARIS_THROW_IF_NOT_MSG(
             direct_map.no() && other->direct_map.no(),
             "direct map copy not implemented");
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             typeid(*this) == typeid(other),
             "can only merge indexes of the same type");
 }
@@ -297,7 +297,7 @@ void IndexBinaryIVF::merge_from(IndexBinary& otherIndex, idx_t add_id) {
 }
 
 void IndexBinaryIVF::replace_invlists(InvertedLists* il, bool own) {
-    FAISS_THROW_IF_NOT(il->nlist == nlist && il->code_size == code_size);
+    POLARIS_THROW_IF_NOT(il->nlist == nlist && il->code_size == code_size);
     if (own_invlists) {
         delete invlists;
     }
@@ -418,7 +418,7 @@ void search_knn_hamming_heap(
                     // not enough centroids for multiprobe
                     continue;
                 }
-                FAISS_THROW_IF_NOT_FMT(
+                POLARIS_THROW_IF_NOT_FMT(
                         key < (idx_t)ivf->nlist,
                         "Invalid key=%" PRId64 " at ik=%zd nlist=%zd\n",
                         key,
@@ -507,7 +507,7 @@ void search_knn_hamming_count(
                 // not enough centroids for multiprobe
                 continue;
             }
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     key < (idx_t)ivf->nlist,
                     "Invalid key=%" PRId64 " at ik=%zd nlist=%zd\n",
                     key,
@@ -648,8 +648,8 @@ void search_knn_hamming_per_invlist(
     idx_t nprobe = params ? params->nprobe : ivf->nprobe;
     nprobe = std::min((idx_t)ivf->nlist, nprobe);
     idx_t max_codes = params ? params->max_codes : ivf->max_codes;
-    FAISS_THROW_IF_NOT(max_codes == 0);
-    FAISS_THROW_IF_NOT(!store_pairs);
+    POLARIS_THROW_IF_NOT(max_codes == 0);
+    POLARIS_THROW_IF_NOT(!store_pairs);
 
     // reorder buckets
     std::vector<int64_t> lims(n + 1);
@@ -808,7 +808,7 @@ void IndexBinaryIVF::range_search(
         int radius,
         RangeSearchResult* __restrict res,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
     const size_t nprobe_2 = std::min(nlist, this->nprobe);
     std::unique_ptr<idx_t[]> idx(new idx_t[n * nprobe_2]);
@@ -844,7 +844,7 @@ void IndexBinaryIVF::range_search_preassigned(
         RangeSearchPartialResult pres(res);
         std::unique_ptr<BinaryInvertedListScanner> scanner(
                 get_InvertedListScanner(store_pairs));
-        FAISS_THROW_IF_NOT(scanner.get());
+        POLARIS_THROW_IF_NOT(scanner.get());
 
         all_pres[omp_get_thread_num()] = &pres;
 
@@ -852,7 +852,7 @@ void IndexBinaryIVF::range_search_preassigned(
             idx_t key = assign[i * nprobe_2 + ik]; /* select the list  */
             if (key < 0)
                 return;
-            FAISS_THROW_IF_NOT_FMT(
+            POLARIS_THROW_IF_NOT_FMT(
                     key < (idx_t)nlist,
                     "Invalid key=%" PRId64 " at ik=%zd nlist=%zd\n",
                     key,

@@ -29,7 +29,7 @@ IndexAdditiveQuantizer::IndexAdditiveQuantizer(
         AdditiveQuantizer* aq,
         MetricType metric)
         : IndexFlatCodes(aq->code_size, d, metric), aq(aq) {
-    FAISS_THROW_IF_NOT(metric == METRIC_INNER_PRODUCT || metric == METRIC_L2);
+    POLARIS_THROW_IF_NOT(metric == METRIC_INNER_PRODUCT || metric == METRIC_L2);
 }
 
 namespace {
@@ -198,7 +198,7 @@ FlatCodesDistanceComputer* IndexAdditiveQuantizer::
             VD vd = {size_t(d), metric_arg};
             return new AQDistanceComputerDecompress<VD>(*this, vd);
         } else {
-            FAISS_THROW_MSG("unsupported metric");
+            POLARIS_THROW_MSG("unsupported metric");
         }
     } else {
         if (metric_type == METRIC_INNER_PRODUCT) {
@@ -225,7 +225,7 @@ FlatCodesDistanceComputer* IndexAdditiveQuantizer::
                     break;
 #undef DISPATCH
                 default:
-                    FAISS_THROW_FMT(
+                    POLARIS_THROW_FMT(
                             "search type %d not supported", aq->search_type);
             }
         }
@@ -239,7 +239,7 @@ void IndexAdditiveQuantizer::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
 
     if (aq->search_type == AdditiveQuantizer::ST_decompress) {
@@ -281,7 +281,7 @@ void IndexAdditiveQuantizer::search(
                     break;
 #undef DISPATCH
                 default:
-                    FAISS_THROW_FMT(
+                    POLARIS_THROW_FMT(
                             "search type %d not supported", aq->search_type);
             }
         }
@@ -417,7 +417,7 @@ AdditiveCoarseQuantizer::AdditiveCoarseQuantizer(
         : Index(d, metric), aq(aq) {}
 
 void AdditiveCoarseQuantizer::add(idx_t, const float*) {
-    FAISS_THROW_MSG("not applicable");
+    POLARIS_THROW_MSG("not applicable");
 }
 
 void AdditiveCoarseQuantizer::reconstruct(idx_t key, float* recons) const {
@@ -425,7 +425,7 @@ void AdditiveCoarseQuantizer::reconstruct(idx_t key, float* recons) const {
 }
 
 void AdditiveCoarseQuantizer::reset() {
-    FAISS_THROW_MSG("not applicable");
+    POLARIS_THROW_MSG("not applicable");
 }
 
 void AdditiveCoarseQuantizer::train(idx_t n, const float* x) {
@@ -435,7 +435,7 @@ void AdditiveCoarseQuantizer::train(idx_t n, const float* x) {
     }
     size_t norms_size = sizeof(float) << aq->tot_bits;
 
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             norms_size <= aq->max_mem_distances,
             "the RCQ norms matrix will become too large, please reduce the number of quantization steps");
 
@@ -462,13 +462,13 @@ void AdditiveCoarseQuantizer::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
 
     if (metric_type == METRIC_INNER_PRODUCT) {
         aq->knn_centroids_inner_product(n, x, k, distances, labels);
     } else if (metric_type == METRIC_L2) {
-        FAISS_THROW_IF_NOT(centroid_norms.size() == ntotal);
+        POLARIS_THROW_IF_NOT(centroid_norms.size() == ntotal);
         aq->knn_centroids_L2(n, x, k, distances, labels, centroid_norms.data());
     }
 }
@@ -482,7 +482,7 @@ ResidualCoarseQuantizer::ResidualCoarseQuantizer(
         const std::vector<size_t>& nbits,
         MetricType metric)
         : AdditiveCoarseQuantizer(d, &rq, metric), rq(d, nbits) {
-    FAISS_THROW_IF_NOT(rq.tot_bits <= 63);
+    POLARIS_THROW_IF_NOT(rq.tot_bits <= 63);
     is_trained = false;
 }
 
@@ -499,7 +499,7 @@ ResidualCoarseQuantizer::ResidualCoarseQuantizer()
 void ResidualCoarseQuantizer::set_beam_factor(float new_beam_factor) {
     beam_factor = new_beam_factor;
     if (new_beam_factor > 0) {
-        FAISS_THROW_IF_NOT(new_beam_factor >= 1.0);
+        POLARIS_THROW_IF_NOT(new_beam_factor >= 1.0);
         if (rq.codebook_cross_products.size() == 0) {
             rq.compute_codebook_tables();
         }
@@ -532,7 +532,7 @@ void ResidualCoarseQuantizer::search(
         auto params =
                 dynamic_cast<const SearchParametersResidualCoarseQuantizer*>(
                         params_in);
-        FAISS_THROW_IF_NOT_MSG(
+        POLARIS_THROW_IF_NOT_MSG(
                 params,
                 "need SearchParametersResidualCoarseQuantizer parameters");
         beam_factor = params->beam_factor;
@@ -606,7 +606,7 @@ void ResidualCoarseQuantizer::search(
 
 void ResidualCoarseQuantizer::initialize_from(
         const ResidualCoarseQuantizer& other) {
-    FAISS_THROW_IF_NOT(rq.M <= other.rq.M);
+    POLARIS_THROW_IF_NOT(rq.M <= other.rq.M);
     rq.initialize_from(other.rq);
     set_beam_factor(other.beam_factor);
     is_trained = other.is_trained;
@@ -623,7 +623,7 @@ LocalSearchCoarseQuantizer::LocalSearchCoarseQuantizer(
         size_t nbits, ///< number of bit per subvector index
         MetricType metric)
         : AdditiveCoarseQuantizer(d, &lsq, metric), lsq(d, M, nbits) {
-    FAISS_THROW_IF_NOT(lsq.tot_bits <= 63);
+    POLARIS_THROW_IF_NOT(lsq.tot_bits <= 63);
     is_trained = false;
 }
 

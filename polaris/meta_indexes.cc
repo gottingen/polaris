@@ -46,14 +46,14 @@ void IndexSplitVectors::sync_with_sub_indexes() {
     ntotal = index0->ntotal;
     for (int i = 1; i < sub_indexes.size(); i++) {
         Index* index = sub_indexes[i];
-        FAISS_THROW_IF_NOT(metric_type == index->metric_type);
-        FAISS_THROW_IF_NOT(ntotal == index->ntotal);
+        POLARIS_THROW_IF_NOT(metric_type == index->metric_type);
+        POLARIS_THROW_IF_NOT(ntotal == index->ntotal);
         sum_d += index->d;
     }
 }
 
 void IndexSplitVectors::add(idx_t /*n*/, const float* /*x*/) {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void IndexSplitVectors::search(
@@ -63,10 +63,10 @@ void IndexSplitVectors::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT_MSG(k == 1, "search implemented only for k=1");
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(k == 1, "search implemented only for k=1");
+    POLARIS_THROW_IF_NOT_MSG(
             sum_d == d, "not enough indexes compared to # dimensions");
 
     int64_t nshard = sub_indexes.size();
@@ -142,11 +142,11 @@ void IndexSplitVectors::search(
 }
 
 void IndexSplitVectors::train(idx_t /*n*/, const float* /*x*/) {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void IndexSplitVectors::reset() {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 IndexSplitVectors::~IndexSplitVectors() {
@@ -181,9 +181,9 @@ void IndexRandom::search(
         float* distances,
         idx_t* labels,
         const SearchParameters* params) const {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !params, "search params not supported for this index");
-    FAISS_THROW_IF_NOT(k <= ntotal);
+    POLARIS_THROW_IF_NOT(k <= ntotal);
 #pragma omp parallel for if (n > 1000)
     for (idx_t i = 0; i < n; i++) {
         RandomGenerator rng(

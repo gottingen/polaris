@@ -31,18 +31,18 @@ void check_compatible_for_merge(const Index* index0, const Index* index1) {
     if (pt0) {
         const polaris::IndexPreTransform* pt1 =
                 dynamic_cast<const polaris::IndexPreTransform*>(index1);
-        FAISS_THROW_IF_NOT_MSG(pt1, "both indexes should be pretransforms");
+        POLARIS_THROW_IF_NOT_MSG(pt1, "both indexes should be pretransforms");
 
-        FAISS_THROW_IF_NOT(pt0->chain.size() == pt1->chain.size());
+        POLARIS_THROW_IF_NOT(pt0->chain.size() == pt1->chain.size());
         for (int i = 0; i < pt0->chain.size(); i++) {
-            FAISS_THROW_IF_NOT(typeid(pt0->chain[i]) == typeid(pt1->chain[i]));
+            POLARIS_THROW_IF_NOT(typeid(pt0->chain[i]) == typeid(pt1->chain[i]));
         }
 
         index0 = pt0->index;
         index1 = pt1->index;
     }
-    FAISS_THROW_IF_NOT(typeid(index0) == typeid(index1));
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT(typeid(index0) == typeid(index1));
+    POLARIS_THROW_IF_NOT(
             index0->d == index1->d &&
             index0->metric_type == index1->metric_type);
 
@@ -50,7 +50,7 @@ void check_compatible_for_merge(const Index* index0, const Index* index1) {
     if (ivf0) {
         const polaris::IndexIVF* ivf1 =
                 dynamic_cast<const polaris::IndexIVF*>(index1);
-        FAISS_THROW_IF_NOT(ivf1);
+        POLARIS_THROW_IF_NOT(ivf1);
 
         ivf0->check_compatible_for_merge(*ivf1);
     }
@@ -90,7 +90,7 @@ IndexIVF* try_extract_index_ivf(Index* index) {
 
 const IndexIVF* extract_index_ivf(const Index* index) {
     const IndexIVF* ivf = try_extract_index_ivf(index);
-    FAISS_THROW_IF_NOT(ivf);
+    POLARIS_THROW_IF_NOT(ivf);
     return ivf;
 }
 
@@ -178,7 +178,7 @@ SlidingIndexWindow::SlidingIndexWindow(Index* index) : index(index) {
     n_slice = 0;
     IndexIVF* index_ivf = const_cast<IndexIVF*>(extract_index_ivf(index));
     ils = dynamic_cast<ArrayInvertedLists*>(index_ivf->invlists);
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             ils, "only supports indexes with ArrayInvertedLists");
     nlist = ils->nlist;
     sizes.resize(nlist);
@@ -205,7 +205,7 @@ static void remove_from_begin(std::vector<T>& v, size_t remove) {
 }
 
 void SlidingIndexWindow::step(const Index* sub_index, bool remove_oldest) {
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             !remove_oldest || n_slice > 0,
             "cannot remove slice: there is none");
 
@@ -214,7 +214,7 @@ void SlidingIndexWindow::step(const Index* sub_index, bool remove_oldest) {
         check_compatible_for_merge(index, sub_index);
         ils2 = dynamic_cast<const ArrayInvertedLists*>(
                 extract_index_ivf(sub_index)->invlists);
-        FAISS_THROW_IF_NOT_MSG(ils2, "supports only ArrayInvertedLists");
+        POLARIS_THROW_IF_NOT_MSG(ils2, "supports only ArrayInvertedLists");
     }
     IndexIVF* index_ivf = extract_index_ivf(index);
 
@@ -255,7 +255,7 @@ void SlidingIndexWindow::step(const Index* sub_index, bool remove_oldest) {
         }
         n_slice--;
     } else {
-        FAISS_THROW_MSG("nothing to do???");
+        POLARIS_THROW_MSG("nothing to do???");
     }
     index->ntotal = index_ivf->ntotal;
 }
@@ -266,7 +266,7 @@ void SlidingIndexWindow::step(const Index* sub_index, bool remove_oldest) {
 ArrayInvertedLists* get_invlist_range(const Index* index, long i0, long i1) {
     const IndexIVF* ivf = extract_index_ivf(index);
 
-    FAISS_THROW_IF_NOT(0 <= i0 && i0 <= i1 && i1 <= ivf->nlist);
+    POLARIS_THROW_IF_NOT(0 <= i0 && i0 <= i1 && i1 <= ivf->nlist);
 
     const InvertedLists* src = ivf->invlists;
 
@@ -289,11 +289,11 @@ void set_invlist_range(
         ArrayInvertedLists* src) {
     IndexIVF* ivf = extract_index_ivf(index);
 
-    FAISS_THROW_IF_NOT(0 <= i0 && i0 <= i1 && i1 <= ivf->nlist);
+    POLARIS_THROW_IF_NOT(0 <= i0 && i0 <= i1 && i1 <= ivf->nlist);
 
     ArrayInvertedLists* dst = dynamic_cast<ArrayInvertedLists*>(ivf->invlists);
-    FAISS_THROW_IF_NOT_MSG(dst, "only ArrayInvertedLists supported");
-    FAISS_THROW_IF_NOT(
+    POLARIS_THROW_IF_NOT_MSG(dst, "only ArrayInvertedLists supported");
+    POLARIS_THROW_IF_NOT(
             src->nlist == i1 - i0 && dst->code_size == src->code_size);
 
     size_t ntotal = index->ntotal;
@@ -330,7 +330,7 @@ void search_with_parameters(
         const IVFSearchParameters* params,
         size_t* nb_dis_ptr,
         double* ms_per_stage) {
-    FAISS_THROW_IF_NOT(params);
+    POLARIS_THROW_IF_NOT(params);
     const float* prev_x = x;
     std::unique_ptr<const float[]> del;
 
@@ -350,7 +350,7 @@ void search_with_parameters(
     std::vector<float> Dq(params->nprobe * n);
 
     const IndexIVF* index_ivf = dynamic_cast<const IndexIVF*>(index);
-    FAISS_THROW_IF_NOT(index_ivf);
+    POLARIS_THROW_IF_NOT(index_ivf);
 
     index_ivf->quantizer->search(n, x, params->nprobe, Dq.data(), Iq.data());
 
@@ -380,7 +380,7 @@ void range_search_with_parameters(
         const IVFSearchParameters* params,
         size_t* nb_dis_ptr,
         double* ms_per_stage) {
-    FAISS_THROW_IF_NOT(params);
+    POLARIS_THROW_IF_NOT(params);
     const float* prev_x = x;
     std::unique_ptr<const float[]> del;
 
@@ -400,7 +400,7 @@ void range_search_with_parameters(
     std::vector<float> Dq(params->nprobe * n);
 
     const IndexIVF* index_ivf = dynamic_cast<const IndexIVF*>(index);
-    FAISS_THROW_IF_NOT(index_ivf);
+    POLARIS_THROW_IF_NOT(index_ivf);
 
     index_ivf->quantizer->search(n, x, params->nprobe, Dq.data(), Iq.data());
 
@@ -424,7 +424,7 @@ void range_search_with_parameters(
 IndexIVFResidualQuantizer* ivf_residual_from_quantizer(
         const ResidualQuantizer& rq,
         int nlevel) {
-    FAISS_THROW_IF_NOT(nlevel > 0 && nlevel + 1 < rq.M);
+    POLARIS_THROW_IF_NOT(nlevel > 0 && nlevel + 1 < rq.M);
 
     std::vector<size_t> nbits(nlevel);
     std::copy(rq.nbits.begin(), rq.nbits.begin() + nlevel, nbits.begin());
@@ -472,7 +472,7 @@ void ivf_residual_add_from_flat_codes(
     const ResidualCoarseQuantizer* rcq =
             dynamic_cast<const polaris::ResidualCoarseQuantizer*>(
                     index->quantizer);
-    FAISS_THROW_IF_NOT_MSG(rcq, "the coarse quantizer must be a RCQ");
+    POLARIS_THROW_IF_NOT_MSG(rcq, "the coarse quantizer must be a RCQ");
     if (code_size < 0) {
         code_size = index->code_size;
     }

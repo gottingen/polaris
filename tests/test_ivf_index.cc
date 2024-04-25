@@ -75,7 +75,7 @@ class TestInvertedListIterator : public polaris::InvertedListsIterator {
     virtual std::pair<polaris::idx_t, const uint8_t*> get_id_and_codes()
             override {
         if (it == context->codes.cend()) {
-            FAISS_THROW_MSG("invalid state");
+            POLARIS_THROW_MSG("invalid state");
         }
         return std::make_pair(it->first, it->second.data());
     }
@@ -95,7 +95,7 @@ class TestInvertedLists : public polaris::InvertedLists {
 
     ~TestInvertedLists() override {}
     size_t list_size(size_t /*list_no*/) const override {
-        FAISS_THROW_MSG("unexpected call");
+        POLARIS_THROW_MSG("unexpected call");
     }
 
     polaris::InvertedListsIterator* get_iterator(size_t list_no, void* context)
@@ -106,11 +106,11 @@ class TestInvertedLists : public polaris::InvertedLists {
     }
 
     const uint8_t* get_codes(size_t /* list_no */) const override {
-        FAISS_THROW_MSG("unexpected call");
+        POLARIS_THROW_MSG("unexpected call");
     }
 
     const polaris::idx_t* get_ids(size_t /* list_no */) const override {
-        FAISS_THROW_MSG("unexpected call");
+        POLARIS_THROW_MSG("unexpected call");
     }
 
     // store the codes in context object
@@ -129,7 +129,7 @@ class TestInvertedLists : public polaris::InvertedLists {
             size_t /*n_entry*/,
             const polaris::idx_t* /*ids*/,
             const uint8_t* /*code*/) override {
-        FAISS_THROW_MSG("unexpected call");
+        POLARIS_THROW_MSG("unexpected call");
     }
 
     void update_entries(
@@ -138,11 +138,11 @@ class TestInvertedLists : public polaris::InvertedLists {
             size_t /*n_entry*/,
             const polaris::idx_t* /*ids*/,
             const uint8_t* /*code*/) override {
-        FAISS_THROW_MSG("unexpected call");
+        POLARIS_THROW_MSG("unexpected call");
     }
 
     void resize(size_t /*list_no*/, size_t /*new_size*/) override {
-        FAISS_THROW_MSG("unexpected call");
+        POLARIS_THROW_MSG("unexpected call");
     }
 };
 } // namespace

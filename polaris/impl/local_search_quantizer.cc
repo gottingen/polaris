@@ -111,9 +111,9 @@ void fmat_inverse(float* a, int n) {
     std::vector<float> workspace(lwork);
 
     sgetrf_(&n, &n, a, &n, ipiv.data(), &info);
-    FAISS_THROW_IF_NOT(info == 0);
+    POLARIS_THROW_IF_NOT(info == 0);
     sgetri_(&n, a, &n, ipiv.data(), workspace.data(), &lwork, &info);
-    FAISS_THROW_IF_NOT(info == 0);
+    POLARIS_THROW_IF_NOT(info == 0);
 }
 
 // c and a and b can overlap
@@ -130,9 +130,9 @@ void dmat_inverse(double* a, int n) {
     std::vector<double> workspace(lwork);
 
     dgetrf_(&n, &n, a, &n, ipiv.data(), &info);
-    FAISS_THROW_IF_NOT(info == 0);
+    POLARIS_THROW_IF_NOT(info == 0);
     dgetri_(&n, a, &n, ipiv.data(), workspace.data(), &lwork, &info);
-    FAISS_THROW_IF_NOT(info == 0);
+    POLARIS_THROW_IF_NOT(info == 0);
 }
 
 void random_int32(
@@ -170,7 +170,7 @@ LocalSearchQuantizer::~LocalSearchQuantizer() {
 LocalSearchQuantizer::LocalSearchQuantizer() : LocalSearchQuantizer(0, 0, 0) {}
 
 void LocalSearchQuantizer::train(size_t n, const float* x) {
-    FAISS_THROW_IF_NOT(K == (1 << nbits[0]));
+    POLARIS_THROW_IF_NOT(K == (1 << nbits[0]));
     nperts = std::min(nperts, M);
 
     lsq_timer.reset();
@@ -293,7 +293,7 @@ void LocalSearchQuantizer::compute_codes_add_centroids(
         uint8_t* codes_out,
         size_t n,
         const float* centroids) const {
-    FAISS_THROW_IF_NOT_MSG(is_trained, "LSQ is not trained yet.");
+    POLARIS_THROW_IF_NOT_MSG(is_trained, "LSQ is not trained yet.");
 
     lsq_timer.reset();
     LSQTimerScope scope(&lsq_timer, "encode");
@@ -550,7 +550,7 @@ void LocalSearchQuantizer::icm_encode_impl(
     std::vector<float> best_objs(n, 0.0f);
     evaluate(codes, x, n, best_objs.data());
 
-    FAISS_THROW_IF_NOT(nperts <= M);
+    POLARIS_THROW_IF_NOT(nperts <= M);
     for (size_t iter1 = 0; iter1 < ils_iters; iter1++) {
         // add perturbation to codes
         perturb_codes(codes, n, gen);
@@ -594,8 +594,8 @@ void LocalSearchQuantizer::icm_encode_step(
         const float* binaries,
         size_t n,
         size_t n_iters) const {
-    FAISS_THROW_IF_NOT(M != 0 && K != 0);
-    FAISS_THROW_IF_NOT(binaries != nullptr);
+    POLARIS_THROW_IF_NOT(M != 0 && K != 0);
+    POLARIS_THROW_IF_NOT(binaries != nullptr);
 
 #pragma omp parallel for schedule(dynamic)
     for (int64_t i = 0; i < n; i++) {

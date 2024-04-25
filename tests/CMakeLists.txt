@@ -44,5 +44,13 @@ carbin_cc_test(
         CXXOPTS ${POLARIS_CXX_OPTIONS}
 )
 
+carbin_cc_test(
+        NAME doubly_buffered_data_test
+        MODULE run
+        SOURCES doubly_buffered_data_test.cc
+        DEFINES ${POLARIS_CXX_DEFINES}
+        LINKS ${POLARIS_DEPS_LINKS} GTest::gtest GTest::gtest_main
+        CXXOPTS ${POLARIS_CXX_OPTIONS}
+)
 #gtest_discover_tests(polaris_test)
 

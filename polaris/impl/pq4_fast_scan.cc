@@ -50,9 +50,9 @@ void pq4_pack_codes(
         size_t bbs,
         size_t nsq,
         uint8_t* blocks) {
-    FAISS_THROW_IF_NOT(bbs % 32 == 0);
-    FAISS_THROW_IF_NOT(nb % bbs == 0);
-    FAISS_THROW_IF_NOT(nsq % 2 == 0);
+    POLARIS_THROW_IF_NOT(bbs % 32 == 0);
+    POLARIS_THROW_IF_NOT(nb % bbs == 0);
+    POLARIS_THROW_IF_NOT(nsq % 2 == 0);
 
     if (nb == 0) {
         return;
@@ -254,7 +254,7 @@ void pq4_pack_LUT(int nq, int nsq, const uint8_t* src, uint8_t* dest) {
 }
 
 int pq4_pack_LUT_qbs(int qbs, int nsq, const uint8_t* src, uint8_t* dest) {
-    FAISS_THROW_IF_NOT(nsq % 2 == 0);
+    POLARIS_THROW_IF_NOT(nsq % 2 == 0);
     size_t dim12 = 16 * nsq;
     int i0 = 0;
     int qi = qbs;
@@ -296,7 +296,7 @@ int pq4_pack_LUT_qbs_q_map(
         const uint8_t* src,
         const int* q_map,
         uint8_t* dest) {
-    FAISS_THROW_IF_NOT(nsq % 2 == 0);
+    POLARIS_THROW_IF_NOT(nsq % 2 == 0);
     size_t dim12 = 16 * nsq;
     int i0 = 0;
     int qi = qbs;

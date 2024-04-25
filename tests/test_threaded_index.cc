@@ -47,7 +47,7 @@ struct MockIndex : public polaris::Index {
             float* distances,
             idx_t* labels,
             const polaris::SearchParameters* params) const override {
-        FAISS_THROW_IF_NOT(!params);
+        POLARIS_THROW_IF_NOT(!params);
         nCalled = n;
         xCalled = x;
         kCalled = k;

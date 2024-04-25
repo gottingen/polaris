@@ -76,7 +76,7 @@ void WorkerThread::threadMain() {
     threadLoop();
 
     // Call all pending tasks
-    FAISS_ASSERT(wantStop_);
+    POLARIS_ASSERT(wantStop_);
 
     // flush all pending operations
     for (auto& f : queue_) {

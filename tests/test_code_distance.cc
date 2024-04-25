@@ -46,7 +46,7 @@ void test(
         const size_t nbits,
         // number of codes to process
         const size_t n) {
-    FAISS_THROW_IF_NOT(nbits == 8);
+    POLARIS_THROW_IF_NOT(nbits == 8);
 
     // remove if benchmarking is needed
     omp_set_num_threads(1);

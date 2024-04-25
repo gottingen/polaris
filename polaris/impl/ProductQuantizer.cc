@@ -56,7 +56,7 @@ ProductQuantizer::ProductQuantizer() : ProductQuantizer(0, 1, 0) {}
 
 void ProductQuantizer::set_derived_values() {
     // quite a few derived values
-    FAISS_THROW_IF_NOT_MSG(
+    POLARIS_THROW_IF_NOT_MSG(
             d % M == 0,
             "The dimension of the vector (d) should be a multiple of the number of subquantizers (M)");
     dsub = d / M;
@@ -344,7 +344,7 @@ void ProductQuantizer::compute_codes_with_assign_index(
         const float* x,
         uint8_t* codes,
         size_t n) {
-    FAISS_THROW_IF_NOT(assign_index && assign_index->d == dsub);
+    POLARIS_THROW_IF_NOT(assign_index && assign_index->d == dsub);
 
     for (size_t m = 0; m < M; m++) {
         assign_index->reset();
@@ -745,7 +745,7 @@ void ProductQuantizer::search(
         const size_t ncodes,
         float_maxheap_array_t* res,
         bool init_finalize_heap) const {
-    FAISS_THROW_IF_NOT(nx == res->nh);
+    POLARIS_THROW_IF_NOT(nx == res->nh);
     std::unique_ptr<float[]> dis_tables(new float[nx * ksub * M]);
     compute_distance_tables(nx, x, dis_tables.get());
 
@@ -766,7 +766,7 @@ void ProductQuantizer::search_ip(
         const size_t ncodes,
         float_minheap_array_t* res,
         bool init_finalize_heap) const {
-    FAISS_THROW_IF_NOT(nx == res->nh);
+    POLARIS_THROW_IF_NOT(nx == res->nh);
     std::unique_ptr<float[]> dis_tables(new float[nx * ksub * M]);
     compute_inner_prod_tables(nx, x, dis_tables.get());
 
@@ -815,8 +815,8 @@ void ProductQuantizer::search_sdc(
         const size_t nb,
         float_maxheap_array_t* res,
         bool init_finalize_heap) const {
-    FAISS_THROW_IF_NOT(sdc_table.size() == M * ksub * ksub);
-    FAISS_THROW_IF_NOT(nbits == 8);
+    POLARIS_THROW_IF_NOT(sdc_table.size() == M * ksub * ksub);
+    POLARIS_THROW_IF_NOT(nbits == 8);
     size_t k = res->k;
 
 #pragma omp parallel for

@@ -113,13 +113,13 @@ void Index2Layer::search(
         float* /*distances*/,
         idx_t* /*labels*/,
         const SearchParameters* /* params */) const {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void Index2Layer::transfer_to_IVFPQ(IndexIVFPQ& other) const {
-    FAISS_THROW_IF_NOT(other.nlist == q1.nlist);
-    FAISS_THROW_IF_NOT(other.code_size == code_size_2);
-    FAISS_THROW_IF_NOT(other.ntotal == 0);
+    POLARIS_THROW_IF_NOT(other.nlist == q1.nlist);
+    POLARIS_THROW_IF_NOT(other.code_size == code_size_2);
+    POLARIS_THROW_IF_NOT(other.ntotal == 0);
 
     const uint8_t* rp = codes.data();
 
@@ -146,7 +146,7 @@ struct Distance2Level : DistanceComputer {
 
     explicit Distance2Level(const Index2Layer& storage) : storage(storage) {
         d = storage.d;
-        FAISS_ASSERT(storage.pq.dsub == 4);
+        POLARIS_ASSERT(storage.pq.dsub == 4);
         pq_l2_tab = storage.pq.centroids.data();
         buf.resize(2 * d);
     }
@@ -171,7 +171,7 @@ struct DistanceXPQ4 : Distance2Level {
         const IndexFlat* quantizer =
                 dynamic_cast<IndexFlat*>(storage.q1.quantizer);
 
-        FAISS_ASSERT(quantizer);
+        POLARIS_ASSERT(quantizer);
         M = storage.pq.M;
         pq_l1_tab = quantizer->get_xb();
     }
@@ -202,7 +202,7 @@ struct DistanceXPQ4 : Distance2Level {
         accu = _mm_hadd_ps(accu, accu);
         return _mm_cvtss_f32(accu);
 #else
-        FAISS_THROW_MSG("not implemented for non-x64 platforms");
+        POLARIS_THROW_MSG("not implemented for non-x64 platforms");
 #endif
     }
 };
@@ -216,8 +216,8 @@ struct Distance2xXPQ4 : Distance2Level {
         const MultiIndexQuantizer* mi =
                 dynamic_cast<MultiIndexQuantizer*>(storage.q1.quantizer);
 
-        FAISS_ASSERT(mi);
-        FAISS_ASSERT(storage.pq.M % 2 == 0);
+        POLARIS_ASSERT(mi);
+        POLARIS_ASSERT(storage.pq.M % 2 == 0);
         M_2 = storage.pq.M / 2;
         mi_nbits = mi->pq.nbits;
         pq_l1_tab = mi->pq.centroids.data();
@@ -255,7 +255,7 @@ struct Distance2xXPQ4 : Distance2Level {
         accu = _mm_hadd_ps(accu, accu);
         return _mm_cvtss_f32(accu);
 #else
-        FAISS_THROW_MSG("not implemented for non-x64 platforms");
+        POLARIS_THROW_MSG("not implemented for non-x64 platforms");
 #endif
     }
 };
@@ -287,7 +287,7 @@ DistanceComputer* Index2Layer::get_distance_computer() const {
 int index2layer_sa_encode_bs = 32768;
 
 void Index2Layer::sa_encode(idx_t n, const float* x, uint8_t* bytes) const {
-    FAISS_THROW_IF_NOT(is_trained);
+    POLARIS_THROW_IF_NOT(is_trained);
 
     idx_t bs = index2layer_sa_encode_bs;
     if (n > bs) {

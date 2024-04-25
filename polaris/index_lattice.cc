@@ -20,7 +20,7 @@ IndexLattice::IndexLattice(idx_t d, int nsq, int scale_nbit, int r2)
           dsq(d / nsq),
           zn_sphere_codec(dsq, r2),
           scale_nbit(scale_nbit) {
-    FAISS_THROW_IF_NOT(d % nsq == 0);
+    POLARIS_THROW_IF_NOT(d % nsq == 0);
 
     lattice_nbit = 0;
     while (!(((uint64_t)1 << lattice_nbit) >= zn_sphere_codec.nv)) {
@@ -115,7 +115,7 @@ void IndexLattice::sa_decode(idx_t n, const uint8_t* codes, float* x) const {
 }
 
 void IndexLattice::add(idx_t, const float*) {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void IndexLattice::search(
@@ -125,11 +125,11 @@ void IndexLattice::search(
         float*,
         idx_t*,
         const SearchParameters*) const {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 void IndexLattice::reset() {
-    FAISS_THROW_MSG("not implemented");
+    POLARIS_THROW_MSG("not implemented");
 }
 
 } // namespace polaris
