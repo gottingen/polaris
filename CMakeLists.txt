@@ -72,6 +72,7 @@ include(polaris_cxx_config)
 include(polaris_test)
 
 add_subdirectory(polaris)
+add_subdirectory(tools)
 #add_subdirectory(c_api)
 ####################################################################
 # belows are auto, edit it be cation

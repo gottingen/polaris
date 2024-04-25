@@ -17,157 +17,177 @@
 
 namespace polaris {
 
-/** Encapsulates a set of ids to handle. */
-struct IDSelector {
-    virtual bool is_member(idx_t id) const = 0;
-    virtual ~IDSelector() {}
-};
+    /** Encapsulates a set of ids to handle. */
+    struct IDSelector {
+        virtual bool is_member(idx_t id) const = 0;
 
-/** ids between [imin, imax) */
-struct IDSelectorRange : IDSelector {
-    idx_t imin, imax;
+        virtual ~IDSelector() {}
+    };
 
-    /// Assume that the ids to handle are sorted. In some cases this can speed
-    /// up processing
-    bool assume_sorted;
+    /** ids between [imin, imax) */
+    struct IDSelectorRange : IDSelector {
+        idx_t imin, imax;
 
-    IDSelectorRange(idx_t imin, idx_t imax, bool assume_sorted = false);
+        /// Assume that the ids to handle are sorted. In some cases this can speed
+        /// up processing
+        bool assume_sorted;
 
-    bool is_member(idx_t id) const final;
+        IDSelectorRange(idx_t imin, idx_t imax, bool assume_sorted = false);
 
-    /// for sorted ids, find the range of list indices where the valid ids are
-    /// stored
-    void find_sorted_ids_bounds(
-            size_t list_size,
-            const idx_t* ids,
-            size_t* jmin,
-            size_t* jmax) const;
+        bool is_member(idx_t id) const final;
 
-    ~IDSelectorRange() override {}
-};
+        /// for sorted ids, find the range of list indices where the valid ids are
+        /// stored
+        void find_sorted_ids_bounds(
+                size_t list_size,
+                const idx_t *ids,
+                size_t *jmin,
+                size_t *jmax) const;
 
-/** Simple array of elements
- *
- * is_member calls are very inefficient, but some operations can use the ids
- * directly.
- */
-struct IDSelectorArray : IDSelector {
-    size_t n;
-    const idx_t* ids;
+        ~IDSelectorRange() override {}
+    };
 
-    /** Construct with an array of ids to process
+    /** Simple array of elements
      *
-     * @param n number of ids to store
-     * @param ids elements to store. The pointer should remain valid during
-     *            IDSelectorArray's lifetime
+     * is_member calls are very inefficient, but some operations can use the ids
+     * directly.
      */
-    IDSelectorArray(size_t n, const idx_t* ids);
-    bool is_member(idx_t id) const final;
-    ~IDSelectorArray() override {}
-};
+    struct IDSelectorArray : IDSelector {
+        size_t n;
+        const idx_t *ids;
 
-/** Ids from a set.
- *
- * Repetitions of ids in the indices set passed to the constructor does not hurt
- * performance.
- *
- * The hash function used for the bloom filter and GCC's implementation of
- * unordered_set are just the least significant bits of the id. This works fine
- * for random ids or ids in sequences but will produce many hash collisions if
- * lsb's are always the same
- */
-struct IDSelectorBatch : IDSelector {
-    std::unordered_set<idx_t> set;
+        /** Construct with an array of ids to process
+         *
+         * @param n number of ids to store
+         * @param ids elements to store. The pointer should remain valid during
+         *            IDSelectorArray's lifetime
+         */
+        IDSelectorArray(size_t n, const idx_t *ids);
 
-    // Bloom filter to avoid accessing the unordered set if it is unlikely
-    // to be true
-    std::vector<uint8_t> bloom;
-    int nbits;
-    idx_t mask;
+        bool is_member(idx_t id) const final;
 
-    /** Construct with an array of ids to process
+        ~IDSelectorArray() override {}
+    };
+
+    /** Ids from a set.
      *
-     * @param n number of ids to store
-     * @param ids elements to store. The pointer can be released after
-     *            construction
-     */
-    IDSelectorBatch(size_t n, const idx_t* indices);
-    bool is_member(idx_t id) const final;
-    ~IDSelectorBatch() override {}
-};
-
-/** One bit per element. Constructed with a bitmap, size ceil(n / 8).
- */
-struct IDSelectorBitmap : IDSelector {
-    size_t n;
-    const uint8_t* bitmap;
-
-    /** Construct with a binary mask
+     * Repetitions of ids in the indices set passed to the constructor does not hurt
+     * performance.
      *
-     * @param n size of the bitmap array
-     * @param bitmap id will be selected iff id / 8 < n and bit number
-     *               (i%8) of bitmap[floor(i / 8)] is 1.
+     * The hash function used for the bloom filter and GCC's implementation of
+     * unordered_set are just the least significant bits of the id. This works fine
+     * for random ids or ids in sequences but will produce many hash collisions if
+     * lsb's are always the same
      */
-    IDSelectorBitmap(size_t n, const uint8_t* bitmap);
-    bool is_member(idx_t id) const final;
-    ~IDSelectorBitmap() override {}
-};
+    struct IDSelectorBatch : IDSelector {
+        std::unordered_set<idx_t> set;
 
-/** reverts the membership test of another selector */
-struct IDSelectorNot : IDSelector {
-    const IDSelector* sel;
-    IDSelectorNot(const IDSelector* sel) : sel(sel) {}
-    bool is_member(idx_t id) const final {
-        return !sel->is_member(id);
-    }
-    virtual ~IDSelectorNot() {}
-};
+        // Bloom filter to avoid accessing the unordered set if it is unlikely
+        // to be true
+        std::vector<uint8_t> bloom;
+        int nbits;
+        idx_t mask;
 
-/// selects all entries (useful for benchmarking)
-struct IDSelectorAll : IDSelector {
-    bool is_member(idx_t id) const final {
-        return true;
-    }
-    virtual ~IDSelectorAll() {}
-};
+        /** Construct with an array of ids to process
+         *
+         * @param n number of ids to store
+         * @param ids elements to store. The pointer can be released after
+         *            construction
+         */
+        IDSelectorBatch(size_t n, const idx_t *indices);
 
-/// does an AND operation on the the two given IDSelector's is_membership
-/// results.
-struct IDSelectorAnd : IDSelector {
-    const IDSelector* lhs;
-    const IDSelector* rhs;
-    IDSelectorAnd(const IDSelector* lhs, const IDSelector* rhs)
-            : lhs(lhs), rhs(rhs) {}
-    bool is_member(idx_t id) const final {
-        return lhs->is_member(id) && rhs->is_member(id);
-    }
-    virtual ~IDSelectorAnd() {}
-};
+        bool is_member(idx_t id) const final;
 
-/// does an OR operation on the the two given IDSelector's is_membership
-/// results.
-struct IDSelectorOr : IDSelector {
-    const IDSelector* lhs;
-    const IDSelector* rhs;
-    IDSelectorOr(const IDSelector* lhs, const IDSelector* rhs)
-            : lhs(lhs), rhs(rhs) {}
-    bool is_member(idx_t id) const final {
-        return lhs->is_member(id) || rhs->is_member(id);
-    }
-    virtual ~IDSelectorOr() {}
-};
+        ~IDSelectorBatch() override {}
+    };
 
-/// does an XOR operation on the the two given IDSelector's is_membership
-/// results.
-struct IDSelectorXOr : IDSelector {
-    const IDSelector* lhs;
-    const IDSelector* rhs;
-    IDSelectorXOr(const IDSelector* lhs, const IDSelector* rhs)
-            : lhs(lhs), rhs(rhs) {}
-    bool is_member(idx_t id) const final {
-        return lhs->is_member(id) ^ rhs->is_member(id);
-    }
-    virtual ~IDSelectorXOr() {}
-};
+    /** One bit per element. Constructed with a bitmap, size ceil(n / 8).
+     */
+    struct IDSelectorBitmap : IDSelector {
+        size_t n;
+        const uint8_t *bitmap;
+
+        /** Construct with a binary mask
+         *
+         * @param n size of the bitmap array
+         * @param bitmap id will be selected iff id / 8 < n and bit number
+         *               (i%8) of bitmap[floor(i / 8)] is 1.
+         */
+        IDSelectorBitmap(size_t n, const uint8_t *bitmap);
+
+        bool is_member(idx_t id) const final;
+
+        ~IDSelectorBitmap() override {}
+    };
+
+    /** reverts the membership test of another selector */
+    struct IDSelectorNot : IDSelector {
+        const IDSelector *sel;
+
+        IDSelectorNot(const IDSelector *sel) : sel(sel) {}
+
+        bool is_member(idx_t id) const final {
+            return !sel->is_member(id);
+        }
+
+        virtual ~IDSelectorNot() {}
+    };
+
+    /// selects all entries (useful for benchmarking)
+    struct IDSelectorAll : IDSelector {
+        bool is_member(idx_t id) const final {
+            return true;
+        }
+
+        virtual ~IDSelectorAll() {}
+    };
+
+    /// does an AND operation on the the two given IDSelector's is_membership
+    /// results.
+    struct IDSelectorAnd : IDSelector {
+        const IDSelector *lhs;
+        const IDSelector *rhs;
+
+        IDSelectorAnd(const IDSelector *lhs, const IDSelector *rhs)
+                : lhs(lhs), rhs(rhs) {}
+
+        bool is_member(idx_t id) const final {
+            return lhs->is_member(id) && rhs->is_member(id);
+        }
+
+        virtual ~IDSelectorAnd() {}
+    };
+
+    /// does an OR operation on the the two given IDSelector's is_membership
+    /// results.
+    struct IDSelectorOr : IDSelector {
+        const IDSelector *lhs;
+        const IDSelector *rhs;
+
+        IDSelectorOr(const IDSelector *lhs, const IDSelector *rhs)
+                : lhs(lhs), rhs(rhs) {}
+
+        bool is_member(idx_t id) const final {
+            return lhs->is_member(id) || rhs->is_member(id);
+        }
+
+        virtual ~IDSelectorOr() {}
+    };
+
+    /// does an XOR operation on the the two given IDSelector's is_membership
+    /// results.
+    struct IDSelectorXOr : IDSelector {
+        const IDSelector *lhs;
+        const IDSelector *rhs;
+
+        IDSelectorXOr(const IDSelector *lhs, const IDSelector *rhs)
+                : lhs(lhs), rhs(rhs) {}
+
+        bool is_member(idx_t id) const final {
+            return lhs->is_member(id) ^ rhs->is_member(id);
+        }
+
+        virtual ~IDSelectorXOr() {}
+    };
 
 } // namespace polaris

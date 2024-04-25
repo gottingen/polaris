@@ -24,122 +24,127 @@
 
 namespace polaris {
 
-struct IOReader {
-    // name that can be used in error messages
-    std::string name;
+    struct IOReader {
+        // name that can be used in error messages
+        std::string name;
 
-    // fread. Returns number of items read or 0 in case of EOF.
-    virtual size_t operator()(void* ptr, size_t size, size_t nitems) = 0;
+        // fread. Returns number of items read or 0 in case of EOF.
+        virtual size_t operator()(void *ptr, size_t size, size_t nitems) = 0;
 
-    // return a file number that can be memory-mapped
-    virtual int fileno();
+        // return a file number that can be memory-mapped
+        virtual int fileno();
 
-    virtual ~IOReader() {}
-};
+        virtual ~IOReader() {}
+    };
 
-struct IOWriter {
-    // name that can be used in error messages
-    std::string name;
+    struct IOWriter {
+        // name that can be used in error messages
+        std::string name;
 
-    // fwrite. Return number of items written
-    virtual size_t operator()(const void* ptr, size_t size, size_t nitems) = 0;
+        // fwrite. Return number of items written
+        virtual size_t operator()(const void *ptr, size_t size, size_t nitems) = 0;
 
-    // return a file number that can be memory-mapped
-    virtual int fileno();
+        // return a file number that can be memory-mapped
+        virtual int fileno();
 
-    virtual ~IOWriter() noexcept(false) {}
-};
+        virtual ~IOWriter() noexcept(false) {}
+    };
 
-struct VectorIOReader : IOReader {
-    std::vector<uint8_t> data;
-    size_t rp = 0;
-    size_t operator()(void* ptr, size_t size, size_t nitems) override;
-};
+    struct VectorIOReader : IOReader {
+        std::vector<uint8_t> data;
+        size_t rp = 0;
 
-struct VectorIOWriter : IOWriter {
-    std::vector<uint8_t> data;
-    size_t operator()(const void* ptr, size_t size, size_t nitems) override;
-};
+        size_t operator()(void *ptr, size_t size, size_t nitems) override;
+    };
 
-struct FileIOReader : IOReader {
-    FILE* f = nullptr;
-    bool need_close = false;
+    struct VectorIOWriter : IOWriter {
+        std::vector<uint8_t> data;
 
-    FileIOReader(FILE* rf);
+        size_t operator()(const void *ptr, size_t size, size_t nitems) override;
+    };
 
-    FileIOReader(const char* fname);
+    struct FileIOReader : IOReader {
+        FILE *f = nullptr;
+        bool need_close = false;
 
-    ~FileIOReader() override;
+        FileIOReader(FILE *rf);
 
-    size_t operator()(void* ptr, size_t size, size_t nitems) override;
+        FileIOReader(const char *fname);
 
-    int fileno() override;
-};
+        ~FileIOReader() override;
 
-struct FileIOWriter : IOWriter {
-    FILE* f = nullptr;
-    bool need_close = false;
+        size_t operator()(void *ptr, size_t size, size_t nitems) override;
 
-    FileIOWriter(FILE* wf);
+        int fileno() override;
+    };
 
-    FileIOWriter(const char* fname);
+    struct FileIOWriter : IOWriter {
+        FILE *f = nullptr;
+        bool need_close = false;
 
-    ~FileIOWriter() override;
+        FileIOWriter(FILE *wf);
 
-    size_t operator()(const void* ptr, size_t size, size_t nitems) override;
+        FileIOWriter(const char *fname);
 
-    int fileno() override;
-};
+        ~FileIOWriter() override;
 
-/*******************************************************
- * Buffered reader + writer
- *
- * They attempt to read and write only buffers of size bsz to the
- * underlying reader or writer. This is done by splitting or merging
- * the read/write functions.
- *******************************************************/
+        size_t operator()(const void *ptr, size_t size, size_t nitems) override;
 
-/** wraps an ioreader to make buffered reads to avoid too small reads */
-struct BufferedIOReader : IOReader {
-    IOReader* reader;
-    size_t bsz;
-    size_t ofs;    ///< offset in input stream
-    size_t ofs2;   ///< number of bytes returned to caller
-    size_t b0, b1; ///< range of available bytes in the buffer
-    std::vector<char> buffer;
+        int fileno() override;
+    };
 
-    /**
-     * @param bsz    buffer size (bytes). Reads will be done by batched of
-     *               this size
-     */
-    explicit BufferedIOReader(IOReader* reader, size_t bsz = 1024 * 1024);
+    /*******************************************************
+     * Buffered reader + writer
+     *
+     * They attempt to read and write only buffers of size bsz to the
+     * underlying reader or writer. This is done by splitting or merging
+     * the read/write functions.
+     *******************************************************/
 
-    size_t operator()(void* ptr, size_t size, size_t nitems) override;
-};
+    /** wraps an ioreader to make buffered reads to avoid too small reads */
+    struct BufferedIOReader : IOReader {
+        IOReader *reader;
+        size_t bsz;
+        size_t ofs;    ///< offset in input stream
+        size_t ofs2;   ///< number of bytes returned to caller
+        size_t b0, b1; ///< range of available bytes in the buffer
+        std::vector<char> buffer;
 
-struct BufferedIOWriter : IOWriter {
-    IOWriter* writer;
-    size_t bsz;
-    size_t ofs;
-    size_t ofs2; ///< number of bytes received from caller
-    size_t b0;   ///< amount of data in buffer
-    std::vector<char> buffer;
+        /**
+         * @param bsz    buffer size (bytes). Reads will be done by batched of
+         *               this size
+         */
+        explicit BufferedIOReader(IOReader *reader, size_t bsz = 1024 * 1024);
 
-    explicit BufferedIOWriter(IOWriter* writer, size_t bsz = 1024 * 1024);
+        size_t operator()(void *ptr, size_t size, size_t nitems) override;
+    };
 
-    size_t operator()(const void* ptr, size_t size, size_t nitems) override;
+    struct BufferedIOWriter : IOWriter {
+        IOWriter *writer;
+        size_t bsz;
+        size_t ofs;
+        size_t ofs2; ///< number of bytes received from caller
+        size_t b0;   ///< amount of data in buffer
+        std::vector<char> buffer;
 
-    // flushes
-    ~BufferedIOWriter() override;
-};
+        explicit BufferedIOWriter(IOWriter *writer, size_t bsz = 1024 * 1024);
 
-/// cast a 4-character string to a uint32_t that can be written and read easily
-uint32_t fourcc(const char sx[4]);
-uint32_t fourcc(const std::string& sx);
+        size_t operator()(const void *ptr, size_t size, size_t nitems) override;
 
-// decoding of fourcc (int32 -> string)
-void fourcc_inv(uint32_t x, char str[5]);
-std::string fourcc_inv(uint32_t x);
-std::string fourcc_inv_printable(uint32_t x);
+        // flushes
+        ~BufferedIOWriter() override;
+    };
+
+    /// cast a 4-character string to a uint32_t that can be written and read easily
+    uint32_t fourcc(const char sx[4]);
+
+    uint32_t fourcc(const std::string &sx);
+
+    // decoding of fourcc (int32 -> string)
+    void fourcc_inv(uint32_t x, char str[5]);
+
+    std::string fourcc_inv(uint32_t x);
+
+    std::string fourcc_inv_printable(uint32_t x);
 
 } // namespace polaris
