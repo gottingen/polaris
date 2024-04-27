@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/index_io.h>
+#include <polaris/core/index_io.h>
 #include <polaris/invlists/inverted_lists.h>
 #include <polaris/invlists/inverted_lists_io_hook.h>
 #include <polaris/utils/aligned_table.h>

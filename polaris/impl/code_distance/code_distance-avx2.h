@@ -13,7 +13,7 @@
 
 #include <type_traits>
 
-#include <polaris/impl/ProductQuantizer.h>
+#include <polaris/quantization/product_quantizer.h>
 #include <polaris/impl/code_distance/code_distance-generic.h>
 
 namespace {

@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <random>
 
-#include <polaris/index_flat.h>
+#include <polaris/index/index_flat.h>
 
 // 64-bit int
 using idx_t = polaris::idx_t;

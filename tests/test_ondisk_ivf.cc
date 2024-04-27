@@ -17,9 +17,9 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index_flat.h>
-#include <polaris/index_ivf_flat.h>
-#include <polaris/index_io.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_ivf_flat.h>
+#include <polaris/core/index_io.h>
 #include <polaris/invlists/on_disk_inverted_lists.h>
 #include <polaris/utils/random.h>
 

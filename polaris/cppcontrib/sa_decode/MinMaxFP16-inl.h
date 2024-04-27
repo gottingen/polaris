@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <polaris/utils/fp16.h>
+#include <polaris/internal/fp16.h>
 
 namespace polaris {
 namespace cppcontrib {

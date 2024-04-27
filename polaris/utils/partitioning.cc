@@ -10,12 +10,12 @@
 #include <cassert>
 #include <cmath>
 
-#include <polaris/impl/faiss_assert.h>
+#include <polaris/internal/polaris_assert.h>
 #include <polaris/utils/aligned_table.h>
-#include <polaris/utils/ordered_key_value.h>
+#include <polaris/core/ordered_key_value.h>
 #include <polaris/utils/simdlib.h>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 namespace polaris {
 

@@ -8,7 +8,7 @@
 /** In this file are the implementations of extra metrics beyond L2
  *  and inner product */
 
-#include <polaris/metric_type.h>
+#include <polaris/core/metric_type.h>
 #include <polaris/utils/distances.h>
 #include <type_traits>
 

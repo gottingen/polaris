@@ -19,8 +19,8 @@
 #include <tuple>
 #include <vector>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/ProductQuantizer.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/quantization/product_quantizer.h>
 #include <polaris/impl/code_distance/code_distance.h>
 
 size_t nMismatches(

@@ -11,8 +11,8 @@
 #include <limits>
 #include <utility>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/utils/heap.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/heap.h>
 
 namespace polaris {
 

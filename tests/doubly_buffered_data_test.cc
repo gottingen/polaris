@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/impl/doubly_buffered_data.h>
+#include <polaris/internal/doubly_buffered_data.h>
 
 #include <gtest/gtest.h>
 

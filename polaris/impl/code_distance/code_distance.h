@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 // This directory contains functions to compute a distance
 // from a given PQ code to a query vector, given that the

@@ -21,9 +21,9 @@
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
 #include <polaris/utils/random.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
-#include <polaris/impl/faiss_assert.h>
+#include <polaris/internal/polaris_assert.h>
 
 /*****************************************
  * Mixed PQ / Hamming

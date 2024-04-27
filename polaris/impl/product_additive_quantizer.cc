@@ -15,12 +15,12 @@
 
 #include <algorithm>
 
-#include <polaris/clone_index.h>
-#include <polaris/impl/aux_index_structures.h>
-#include <polaris/impl/faiss_assert.h>
+#include <polaris/index/clone_index.h>
+#include <polaris/core/aux_index_structures.h>
+#include <polaris/internal/polaris_assert.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 extern "C" {
 

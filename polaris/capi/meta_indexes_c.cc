@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include <polaris/capi/meta_indexes_c.h>
-#include <polaris/meta_indexes.h>
+#include <polaris/index/meta_indexes.h>
 #include <polaris/capi/macros_impl.h>
 
 using polaris::Index;

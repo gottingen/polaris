@@ -17,9 +17,9 @@
 
 #include <polaris/utils/approx_topk/approx_topk.h>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/faiss_exception.h>
-#include <polaris/utils/heap.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/internal/polaris_exception.h>
+#include <polaris/core/heap.h>
 
 //
 using namespace polaris;

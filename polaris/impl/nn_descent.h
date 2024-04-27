@@ -18,10 +18,10 @@
 
 #include <omp.h>
 
-#include <polaris/index.h>
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/platform_macros.h>
-#include <polaris/utils/heap.h>
+#include <polaris/core/index.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/internal/platform_macros.h>
+#include <polaris/core/heap.h>
 #include <polaris/utils/random.h>
 
 namespace polaris {

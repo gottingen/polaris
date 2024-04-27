@@ -13,10 +13,10 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index_flat.h>
-#include <polaris/index_ivf_pq.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_ivf_pq.h>
 #include <polaris/utils/distances.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 namespace {
 

@@ -13,10 +13,10 @@
 #include <algorithm>
 #include <cmath>
 
-#include <polaris/impl/aux_index_structures.h>
+#include <polaris/core/aux_index_structures.h>
 #include <polaris/impl/distance_computer.h>
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/utils/utils.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/utils.h>
 
 namespace polaris {
 

@@ -15,10 +15,10 @@
 
 #include <omp.h>
 
-#include <polaris/index.h>
-#include <polaris/impl/aux_index_structures.h>
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/utils/heap.h>
+#include <polaris/core/index.h>
+#include <polaris/core/aux_index_structures.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/heap.h>
 #include <polaris/utils/random.h>
 
 namespace polaris {

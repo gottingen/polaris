@@ -9,13 +9,13 @@
 
 #include <string>
 
-#include <polaris/impl/aux_index_structures.h>
+#include <polaris/core/aux_index_structures.h>
 #include <polaris/impl/distance_computer.h>
-#include <polaris/impl/id_selector.h>
-#include <polaris/impl/result_handler.h>
+#include <polaris/internal/id_selector.h>
+#include <polaris/core/result_handler.h>
 #include <polaris/utils/prefetch.h>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 #ifdef __AVX2__
 #include <immintrin.h>

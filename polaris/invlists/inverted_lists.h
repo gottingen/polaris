@@ -7,15 +7,14 @@
 
 // -*- c++ -*-
 
-#ifndef FAISS_INVERTEDLISTS_IVF_H
-#define FAISS_INVERTEDLISTS_IVF_H
+#pragma once
 
 /**
  * Definition of inverted lists + a few common classes that implement
  * the interface.
  */
 
-#include <polaris/metric_type.h>
+#include <polaris/core/metric_type.h>
 #include <vector>
 
 namespace polaris {
@@ -404,8 +403,8 @@ namespace polaris {
         void prefetch_lists(const idx_t *list_nos, int nlist) const override;
     };
 
-/** if the inverted list in il is smaller than maxsize then return it,
- *  otherwise return an empty invlist */
+    /** if the inverted list in il is smaller than maxsize then return it,
+     *  otherwise return an empty invlist */
     struct StopWordsInvertedLists : ReadOnlyInvertedLists {
         const InvertedLists *il0;
         size_t maxsize;
@@ -431,5 +430,3 @@ namespace polaris {
     };
 
 } // namespace polaris
-
-#endif

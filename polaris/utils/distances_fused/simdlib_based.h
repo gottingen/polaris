@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include <polaris/impl/result_handler.h>
-#include <polaris/impl/platform_macros.h>
+#include <polaris/core/result_handler.h>
+#include <polaris/internal/platform_macros.h>
 
-#include <polaris/utils/heap.h>
+#include <polaris/core/heap.h>
 
 #if defined(__AVX2__) || defined(__aarch64__)
 

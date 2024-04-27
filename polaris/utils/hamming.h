@@ -22,13 +22,12 @@
  * hamdis_t is defined in utils/hamming_distance/common.h
  */
 
-#ifndef FAISS_hamming_h
-#define FAISS_hamming_h
+#pragma once
 
 #include <stdint.h>
 
-#include <polaris/impl/platform_macros.h>
-#include <polaris/utils/heap.h>
+#include <polaris/internal/platform_macros.h>
+#include <polaris/core/heap.h>
 
 // Low-level Hamming distance computations and hamdis_t.
 #include <polaris/utils/hamming_distance/hamdis-inl.h>
@@ -100,7 +99,7 @@ namespace polaris {
      * Hamming distance computation functions
      **************************************************/
 
-    FAISS_API extern size_t hamming_batch_size;
+    POLARIS_API extern size_t hamming_batch_size;
 
     /** Compute a set of Hamming distances between na and nb binary vectors
      *
@@ -283,5 +282,3 @@ namespace polaris {
 } // namespace polaris
 
 #include <polaris/utils/hamming-inl.h>
-
-#endif /* FAISS_hamming_h */

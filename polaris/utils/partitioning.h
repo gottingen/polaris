@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 namespace polaris {
 
@@ -69,6 +69,6 @@ struct PartitionStats {
 };
 
 // global var that collects them all
-FAISS_API extern PartitionStats partition_stats;
+POLARIS_API extern PartitionStats partition_stats;
 
 } // namespace polaris

@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 TEST(Threading, openmp) {
     EXPECT_TRUE(polaris::check_openmp());

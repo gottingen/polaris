@@ -15,10 +15,10 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index_flat.h>
-#include <polaris/index_ivf_flat.h>
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/index_io.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_ivf_flat.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/index_io.h>
 
 namespace {
 

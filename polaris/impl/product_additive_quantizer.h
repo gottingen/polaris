@@ -10,10 +10,10 @@
 #include <cstdint>
 #include <vector>
 
-#include <polaris/index.h>
-#include <polaris/impl/additive_quantizer.h>
-#include <polaris/impl/local_search_quantizer.h>
-#include <polaris/impl/residual_quantizer.h>
+#include <polaris/core/index.h>
+#include <polaris/quantization/additive_quantizer.h>
+#include <polaris/quantization/local_search_quantizer.h>
+#include <polaris/quantization/residual_quantizer.h>
 
 namespace polaris {
 

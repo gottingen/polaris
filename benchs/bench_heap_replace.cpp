@@ -8,10 +8,10 @@
 #include <omp.h>
 #include <cstdio>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/utils/heap.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/heap.h>
 #include <polaris/utils/random.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 using namespace polaris;
 

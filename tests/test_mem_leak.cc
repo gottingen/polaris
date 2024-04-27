@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/index_flat.h>
-#include <polaris/index_ivf_flat.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_ivf_flat.h>
 #include <polaris/utils/random.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 #include <gtest/gtest.h>
 

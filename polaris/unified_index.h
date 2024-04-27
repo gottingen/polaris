@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <vector>
 #include <turbo/container/flat_hash_set.h>
-#include <polaris/impl/rwlock.h>
+#include <polaris/internal/rwlock.h>
 
 namespace polaris {
 

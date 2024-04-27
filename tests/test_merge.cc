@@ -13,12 +13,12 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/ivf_lib.h>
-#include <polaris/index_flat.h>
-#include <polaris/index_ivf_flat.h>
-#include <polaris/index_ivf_pq.h>
-#include <polaris/index_pre_transform.h>
-#include <polaris/meta_indexes.h>
+#include <polaris/index/ivf_lib.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_ivf_flat.h>
+#include <polaris/index/index_ivf_pq.h>
+#include <polaris/index/index_pre_transform.h>
+#include <polaris/index/meta_indexes.h>
 #include <polaris/invlists/on_disk_inverted_lists.h>
 
 namespace {

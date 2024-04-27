@@ -10,7 +10,7 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index_binary_flat.h>
+#include <polaris/index/index_binary_flat.h>
 #include <polaris/utils/hamming.h>
 
 TEST(BinaryFlat, accuracy) {

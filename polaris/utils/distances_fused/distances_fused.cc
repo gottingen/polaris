@@ -7,7 +7,7 @@
 
 #include <polaris/utils/distances_fused/distances_fused.h>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 #include <polaris/utils/distances_fused/avx512.h>
 #include <polaris/utils/distances_fused/simdlib_based.h>

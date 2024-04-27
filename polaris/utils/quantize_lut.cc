@@ -12,7 +12,7 @@
 #include <cstring>
 #include <vector>
 
-#include <polaris/impl/faiss_assert.h>
+#include <polaris/internal/polaris_assert.h>
 
 namespace polaris {
 

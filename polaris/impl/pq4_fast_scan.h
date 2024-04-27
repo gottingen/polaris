@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include <polaris/impl/code_packer.h>
+#include <polaris/internal/code_packer.h>
 
 /** PQ4 SIMD packing and accumulation functions
  *

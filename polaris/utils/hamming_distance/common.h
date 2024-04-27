@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 /* The Hamming distance type */
 using hamdis_t = int32_t;

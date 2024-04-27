@@ -9,9 +9,9 @@
 #include <cstdlib>
 #include <memory>
 
-#include <polaris/clustering.h>
-#include <polaris/index_flat.h>
-#include <polaris/index_hnsw.h>
+#include <polaris/quantization/clustering.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_hnsw.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/random.h>
 

@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 #include <immintrin.h>
 

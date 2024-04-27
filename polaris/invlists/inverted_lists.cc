@@ -12,8 +12,8 @@
 #include <cstdio>
 #include <memory>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/utils/utils.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/utils.h>
 
 namespace polaris {
 

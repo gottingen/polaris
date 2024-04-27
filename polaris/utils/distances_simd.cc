@@ -15,8 +15,8 @@
 #include <cstdio>
 #include <cstring>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/internal/platform_macros.h>
 #include <polaris/utils/simdlib.h>
 
 #ifdef __SSE3__

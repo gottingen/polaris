@@ -12,7 +12,7 @@
 #include <mutex>
 #include <string>
 
-#include <polaris/impl/aux_index_structures.h>
+#include <polaris/core/aux_index_structures.h>
 #include <polaris/impl/distance_computer.h>
 
 namespace polaris {

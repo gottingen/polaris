@@ -7,7 +7,7 @@
 
 #include <polaris/impl/pq4_fast_scan.h>
 
-#include <polaris/impl/faiss_assert.h>
+#include <polaris/internal/polaris_assert.h>
 #include <polaris/impl/lookup_table_scaler.h>
 #include <polaris/impl/simd_result_handlers.h>
 #include <polaris/utils/simdlib.h>

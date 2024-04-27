@@ -7,13 +7,13 @@
 
 #include <polaris/impl/residual_quantizer_encode_steps.h>
 
-#include <polaris/impl/aux_index_structures.h>
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/residual_quantizer.h>
-#include <polaris/utils/heap.h>
+#include <polaris/core/aux_index_structures.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/quantization/residual_quantizer.h>
+#include <polaris/core/heap.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/simdlib.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 #include <polaris/utils/approx_topk/approx_topk.h>
 

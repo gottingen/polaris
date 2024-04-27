@@ -7,9 +7,9 @@
 
 #include <polaris/invlists/inverted_lists_io_hook.h>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/io.h>
-#include <polaris/impl/io_macros.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/internal/io.h>
+#include <polaris/internal/io_macros.h>
 
 #include <polaris/invlists/block_inverted_lists.h>
 

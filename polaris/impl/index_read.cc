@@ -7,9 +7,9 @@
 
 // -*- c++ -*-
 
-#include <polaris/index_io.h>
+#include <polaris/core/index_io.h>
 
-#include <polaris/impl/io_macros.h>
+#include <polaris/internal/io_macros.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -17,45 +17,45 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/io.h>
-#include <polaris/impl/io_macros.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/internal/io.h>
+#include <polaris/internal/io_macros.h>
 #include <polaris/utils/hamming.h>
 
 #include <polaris/invlists/inverted_lists_io_hook.h>
 
-#include <polaris/index_2layer.h>
-#include <polaris/index_additive_quantizer.h>
-#include <polaris/index_additive_quantizer_fast_scan.h>
-#include <polaris/index_flat.h>
-#include <polaris/index_hnsw.h>
-#include <polaris/index_ivf.h>
-#include <polaris/index_ivf_additive_quantizer.h>
-#include <polaris/index_ivf_additive_quantizer_fast_scan.h>
-#include <polaris/index_ivf_flat.h>
-#include <polaris/index_ivf_independent_quantizer.h>
-#include <polaris/index_ivf_pq.h>
-#include <polaris/index_ivf_pq_fast_scan.h>
-#include <polaris/index_ivf_pqr.h>
-#include <polaris/index_ivf_spectral_hash.h>
-#include <polaris/index_lsh.h>
-#include <polaris/index_lattice.h>
-#include <polaris/index_nn_descent.h>
-#include <polaris/index_nsg.h>
-#include <polaris/index_pq.h>
-#include <polaris/index_pq_fast_scan.h>
-#include <polaris/index_pre_transform.h>
-#include <polaris/index_refine.h>
-#include <polaris/index_rowwise_minmax.h>
-#include <polaris/index_scalar_quantizer.h>
-#include <polaris/meta_indexes.h>
-#include <polaris/vector_transform.h>
+#include <polaris/index/index_2layer.h>
+#include <polaris/index/index_additive_quantizer.h>
+#include <polaris/index/index_additive_quantizer_fast_scan.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_hnsw.h>
+#include <polaris/index/index_ivf.h>
+#include <polaris/index/index_ivf_additive_quantizer.h>
+#include <polaris/index/index_ivf_additive_quantizer_fast_scan.h>
+#include <polaris/index/index_ivf_flat.h>
+#include <polaris/index/index_ivf_independent_quantizer.h>
+#include <polaris/index/index_ivf_pq.h>
+#include <polaris/index/index_ivf_pq_fast_scan.h>
+#include <polaris/index/index_ivf_pqr.h>
+#include <polaris/index/index_ivf_spectral_hash.h>
+#include <polaris/index/index_lsh.h>
+#include <polaris/index/index_lattice.h>
+#include <polaris/index/index_nn_descent.h>
+#include <polaris/index/index_nsg.h>
+#include <polaris/index/index_pq.h>
+#include <polaris/index/index_pq_fast_scan.h>
+#include <polaris/index/index_pre_transform.h>
+#include <polaris/index/index_refine.h>
+#include <polaris/index/index_rowwise_minmax.h>
+#include <polaris/index/index_scalar_quantizer.h>
+#include <polaris/index/meta_indexes.h>
+#include <polaris/index/vector_transform.h>
 
-#include <polaris/index_binary_flat.h>
-#include <polaris/index_binary_from_float.h>
-#include <polaris/index_binary_hnsw.h>
-#include <polaris/index_binary_hash.h>
-#include <polaris/index_binary_ivf.h>
+#include <polaris/index/index_binary_flat.h>
+#include <polaris/index/index_binary_from_float.h>
+#include <polaris/index/index_binary_hnsw.h>
+#include <polaris/index/index_binary_hash.h>
+#include <polaris/index/index_binary_ivf.h>
 
 namespace polaris {
 

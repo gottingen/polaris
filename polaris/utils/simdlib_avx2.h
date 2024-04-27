@@ -12,7 +12,7 @@
 
 #include <immintrin.h>
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 namespace polaris {
 

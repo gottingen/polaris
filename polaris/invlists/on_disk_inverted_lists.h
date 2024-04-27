@@ -7,15 +7,14 @@
 
 // -*- c++ -*-
 
-#ifndef FAISS_ON_DISK_INVERTED_LISTS_H
-#define FAISS_ON_DISK_INVERTED_LISTS_H
+#pragma once
 
 #include <list>
 #include <typeinfo>
 #include <vector>
 
-#include <polaris/index_ivf.h>
-#include <polaris/index_io.h>
+#include <polaris/index/index_ivf.h>
+#include <polaris/core/index_io.h>
 #include <polaris/invlists/inverted_lists_io_hook.h>
 
 namespace polaris {
@@ -161,5 +160,3 @@ namespace polaris {
     };
 
 } // namespace polaris
-
-#endif

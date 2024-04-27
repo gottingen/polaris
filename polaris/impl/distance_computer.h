@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/index.h>
+#include <polaris/core/index.h>
 
 namespace polaris {
 

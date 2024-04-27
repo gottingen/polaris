@@ -12,9 +12,9 @@
 #include <cassert>
 #include <cstdio>
 
-#include <polaris/impl/aux_index_structures.h>
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/impl/id_selector.h>
+#include <polaris/core/aux_index_structures.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/internal/id_selector.h>
 
 namespace polaris {
 

@@ -72,7 +72,7 @@
 
 #pragma once
 
-#include <polaris/impl/platform_macros.h>
+#include <polaris/internal/platform_macros.h>
 
 // the list of available modes is in the following file
 #include <polaris/utils/approx_topk/mode.h>

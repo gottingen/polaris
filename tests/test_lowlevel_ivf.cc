@@ -16,14 +16,14 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/auto_tune.h>
-#include <polaris/ivf_lib.h>
-#include <polaris/index_binary_ivf.h>
-#include <polaris/index_ivf.h>
-#include <polaris/index_pre_transform.h>
-#include <polaris/vector_transform.h>
-#include <polaris/index_factory.h>
-#include <polaris/index_io.h>
+#include <polaris/index/auto_tune.h>
+#include <polaris/index/ivf_lib.h>
+#include <polaris/index/index_binary_ivf.h>
+#include <polaris/index/index_ivf.h>
+#include <polaris/index/index_pre_transform.h>
+#include <polaris/index/vector_transform.h>
+#include <polaris/index/index_factory.h>
+#include <polaris/core/index_io.h>
 
 using namespace polaris;
 

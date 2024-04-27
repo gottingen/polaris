@@ -11,8 +11,8 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index_pq_fast_scan.h>
-#include <polaris/impl/ProductQuantizer.h>
+#include <polaris/index/index_pq_fast_scan.h>
+#include <polaris/quantization/product_quantizer.h>
 #include <polaris/impl/pq4_fast_scan.h>
 
 namespace {

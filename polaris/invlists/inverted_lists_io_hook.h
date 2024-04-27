@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/impl/io.h>
+#include <polaris/internal/io.h>
 #include <polaris/invlists/inverted_lists.h>
 #include <string>
 

@@ -7,8 +7,7 @@
 
 // -*- c++ -*-
 
-#ifndef FAISS_DIRECT_MAP_H
-#define FAISS_DIRECT_MAP_H
+#pragma once
 
 #include <polaris/invlists/inverted_lists.h>
 #include <unordered_map>
@@ -110,5 +109,3 @@ namespace polaris {
     };
 
 } // namespace polaris
-
-#endif

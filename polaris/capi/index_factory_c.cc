@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "index_factory_c.h"
-#include <polaris/index_factory.h>
+#include <polaris/index/index_factory.h>
 #include <cstring>
 #include <polaris/capi/macros_impl.h>
 

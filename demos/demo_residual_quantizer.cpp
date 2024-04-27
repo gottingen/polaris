@@ -9,14 +9,14 @@
 #include <cstdio>
 #include <memory>
 
-#include <polaris/ivf_lib.h>
-#include <polaris/index_additive_quantizer.h>
-#include <polaris/index_ivf_additive_quantizer.h>
-#include <polaris/metric_type.h>
+#include <polaris/index/ivf_lib.h>
+#include <polaris/index/index_additive_quantizer.h>
+#include <polaris/index/index_ivf_additive_quantizer.h>
+#include <polaris/core/metric_type.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
 #include <polaris/utils/random.h>
-#include <polaris/utils/utils.h>
+#include <polaris/core/utils.h>
 
 /* This demo file shows how to:
  * - use a DistanceComputer to compute distances with encoded vectors

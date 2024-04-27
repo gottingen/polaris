@@ -18,11 +18,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <polaris/impl/faiss_assert.h>
-#include <polaris/utils/utils.h>
+#include <polaris/internal/polaris_assert.h>
+#include <polaris/core/utils.h>
 
-#include <polaris/impl/io.h>
-#include <polaris/impl/io_macros.h>
+#include <polaris/internal/io.h>
+#include <polaris/internal/io_macros.h>
 
 namespace polaris {
 

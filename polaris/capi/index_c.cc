@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include <polaris/capi/index_c.h>
-#include <polaris/index.h>
-#include <polaris/impl/id_selector.h>
+#include <polaris/core/index.h>
+#include <polaris/internal/id_selector.h>
 #include <polaris/capi/macros_impl.h>
 
 extern "C" {

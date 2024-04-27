@@ -15,9 +15,9 @@
 
 #include <omp.h>
 
-#include <polaris/index_flat.h>
-#include <polaris/index_ivf_pq_fast_scan.h>
-#include <polaris/impl/aux_index_structures.h>
+#include <polaris/index/index_flat.h>
+#include <polaris/index/index_ivf_pq_fast_scan.h>
+#include <polaris/core/aux_index_structures.h>
 
 TEST(TestFastScan, knnVSrange) {
     // small vectors and database

@@ -7,10 +7,9 @@
 
 // -*- c++ -*-
 
-#ifndef FAISS_POLYSEMOUS_TRAINING_INCLUDED
-#define FAISS_POLYSEMOUS_TRAINING_INCLUDED
+#pragma once
 
-#include <polaris/impl/ProductQuantizer.h>
+#include <polaris/quantization/product_quantizer.h>
 
 namespace polaris {
 
@@ -153,4 +152,3 @@ struct PolysemousTraining : SimulatedAnnealingParameters {
 
 } // namespace polaris
 
-#endif
