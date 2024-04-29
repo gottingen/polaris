@@ -154,8 +154,8 @@ TEST(ThreadedIndex, MultipleException) {
         }
 
         // Multiple indices threw an exception that was aggregated into a
-        // FaissException
-        EXPECT_THROW(ti.runOnIndex(fn), polaris::FaissException);
+        // PolarisException
+        EXPECT_THROW(ti.runOnIndex(fn), polaris::PolarisException);
 
         // Index 2 should have processed
         EXPECT_TRUE(idxs[2]->flag);

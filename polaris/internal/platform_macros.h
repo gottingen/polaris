@@ -27,7 +27,7 @@
 #define strtok_r strtok_s
 #endif // _MSC_VER
 
-#define __PRETTY_FUNCTION__ __FUNCSIG__
+#define __PRETTY_FUNCTION__ __PRETTY_FUNCTION__
 
 #define posix_memalign(p, a, s) \
     (((*(p)) = _aligned_malloc((s), (a))), *(p) ? 0 : errno)
@@ -163,5 +163,29 @@ inline int __builtin_clzll(uint64_t x) {
 #define FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
 #define FAISS_PRAGMA_IMPRECISE_FUNCTION_END
 #endif
+
+
+// taken from
+// https://github.com/Microsoft/BLAS-on-flash/blob/master/include/utils.h
+// round up X to the nearest multiple of Y
+#define ROUND_UP(X, Y) ((((uint64_t)(X) / (Y)) + ((uint64_t)(X) % (Y) != 0)) * (Y))
+
+#define DIV_ROUND_UP(X, Y) (((uint64_t)(X) / (Y)) + ((uint64_t)(X) % (Y) != 0))
+
+// round down X to the nearest multiple of Y
+#define ROUND_DOWN(X, Y) (((uint64_t)(X) / (Y)) * (Y))
+
+// alignment tests
+#define IS_ALIGNED(X, Y) ((uint64_t)(X) % (uint64_t)(Y) == 0)
+#define IS_512_ALIGNED(X) IS_ALIGNED(X, 512)
+#define IS_4096_ALIGNED(X) IS_ALIGNED(X, 4096)
+#define METADATA_SIZE                                                                                                  \
+    4096 // all metadata of individual sub-component files is written in first
+// 4KB for unified files
+
+#define BUFFER_SIZE_FOR_CACHED_IO (size_t)1024 * (size_t)1048576
+
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
 
 // clang-format on

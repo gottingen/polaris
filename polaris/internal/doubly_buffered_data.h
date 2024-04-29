@@ -25,7 +25,7 @@
 #include <vector>
 #include <atomic>
 #include <mutex>
-#include <polaris/internal/rwlock.h>
+#include <polaris/core/lock.h>
 #include <polaris/internal/polaris_assert.h>
 
 namespace polaris {

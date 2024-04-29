@@ -17,10 +17,27 @@
 #endif
 
 namespace polaris {
+    std::string package_string(const std::string &item_name, const std::string &item_val)
+    {
+        return std::string("[") + item_name + ": " + std::string(item_val) + std::string("]");
+    }
 
-    FaissException::FaissException(const std::string &m) : msg(m) {}
 
-    FaissException::FaissException(
+    PolarisException::PolarisException(const std::string &m) : msg(m) {}
+    PolarisException::PolarisException(const std::string &message, int errorCode)
+            : msg(message), _errorCode(errorCode)
+    {
+    }
+
+    PolarisException::PolarisException(const std::string &message, int errorCode, const std::string &funcSig,
+                               const std::string &fileName, uint32_t lineNum)
+            : PolarisException(package_string(std::string("FUNC"), funcSig) + package_string(std::string("FILE"), fileName) +
+                           package_string(std::string("LINE"), std::to_string(lineNum)) + "  " + message,
+                           errorCode)
+    {
+    }
+
+    PolarisException::PolarisException(
             const std::string &m,
             const char *funcName,
             const char *file,
@@ -44,8 +61,16 @@ namespace polaris {
                 m.c_str());
     }
 
-    const char *FaissException::what() const noexcept {
+    const char *PolarisException::what() const noexcept {
         return msg.c_str();
+    }
+
+    FileException::FileException(const std::string &filename, std::system_error &e, const std::string &funcSig,
+                                 const std::string &fileName, uint32_t lineNum)
+            : PolarisException(std::string(" While opening file \'") + filename + std::string("\', error code: ") +
+                           std::to_string(e.code().value()) + "  " + e.code().message(),
+                           e.code().value(), funcSig, fileName, lineNum)
+    {
     }
 
     void handleExceptions(
@@ -76,7 +101,7 @@ namespace polaris {
                 }
             }
 
-            throw FaissException(ss.str());
+            throw PolarisException(ss.str());
         }
     }
 

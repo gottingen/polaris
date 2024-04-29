@@ -38,6 +38,13 @@ set(POLARIS_SRC
         core/utils.cc
         core/sorting.cc
         core/matrix_stats.cc
+        distance/distance.cc
+        datasets/fvecs.cc
+        datasets/ivecs.cc
+        datasets/tsv.cc
+        datasets/to_float.cc
+        datasets/random.cc
+        datasets/recall.cc
         index/index_flat.cc
         index/index_ivf.cc
         index/index_ivf_pq.cc
@@ -99,16 +106,23 @@ set(POLARIS_SRC
         internal/io.cc
         internal/lattice_zn.cc
         internal/code_packer.cc
+        internal/memory_mapper.cc
+        internal/natural_number_map.cc
+        internal/natural_number_set.cc
+        invlists/block_inverted_lists.cc
+        invlists/direct_map.cc
+        invlists/inverted_lists.cc
+        invlists/inverted_lists_io_hook.cc
+        io/linux_aligned_file_reader.cc
         quantization/product_quantizer.cc
         quantization/additive_quantizer.cc
         quantization/local_search_quantizer.cc
         quantization/residual_quantizer.cc
         quantization/scalar_quantizer.cc
         quantization/clustering.cc
-        invlists/block_inverted_lists.cc
-        invlists/direct_map.cc
-        invlists/inverted_lists.cc
-        invlists/inverted_lists_io_hook.cc
+        storage/abstract_data_store.cc
+        storage/in_mem_data_store.cc
+        storage/in_mem_graph_store.cc
         utils/worker_thread.cc
         utils/distances.cc
         utils/distances_simd.cc
@@ -120,6 +134,20 @@ set(POLARIS_SRC
         utils/distances_fused/avx512.cc
         utils/distances_fused/distances_fused.cc
         utils/distances_fused/simdlib_based.cc
+        graph/abstract_index.cc
+        graph/disk_utils.cc
+        graph/filter_utils.cc
+        graph/index.cc
+        graph/index_factory.cc
+        graph/logger.cc
+        graph/math_utils.cc
+        graph/partition.cc
+        graph/pq.cc
+        graph/pq_data_store.cc
+        graph/pq_flash_index.cc
+        graph/pq_l2_distance.cc
+        graph/scratch.cc
+        graph/utils.cc
 )
 
 
@@ -128,11 +156,23 @@ set(POLARIS_HEADERS
         core/aux_index_structures.h
         core/result_handler.h
         core/heap.h
+        core/lock.h
         core/ordered_key_value.h
         core/utils.h
         core/sorting.h
         core/matrix_stats.h
         core/metric_type.h
+        core/common_includes.h
+        distance/cosine_similarity.h
+        distance/distance.h
+        distance/primitive.h
+        distance/simd_utils.h
+        datasets/fvecs.h
+        datasets/ivecs.h
+        datasets/tsv.h
+        datasets/to_float.h
+        datasets/random.h
+        datasets/recall.h
         index/index_flat.h
         index/index_ivf.h
         index/index_ivf_pq.h
@@ -202,12 +242,24 @@ set(POLARIS_HEADERS
         internal/lattice_zn.h
         internal/kmeans1d.h
         internal/polaris_assert.h
-        internal/rwlock.h
         internal/doubly_buffered_data.h
         internal/fp16-fp16c.h
         internal/fp16-inl.h
         internal/fp16-arm.h
         internal/fp16.h
+        internal/memory_mapper.h
+        internal/natural_number_map.h
+        internal/natural_number_set.h
+        internal/tag_uint128.h
+        internal/any_wrappers.h
+        internal/types.h
+        io/aligned_file_reader.h
+        io/linux_aligned_file_reader.h
+        io/cached_io.h
+        invlists/block_inverted_lists.h
+        invlists/direct_map.h`
+        invlists/inverted_lists.h
+        invlists/inverted_lists_io_hook.h
         quantization/quantizer.h
         quantization/product_quantizer-inl.h
         quantization/additive_quantizer.h
@@ -216,10 +268,10 @@ set(POLARIS_HEADERS
         quantization/residual_quantizer.h
         quantization/scalar_quantizer.h
         quantization/clustering.h
-        invlists/block_inverted_lists.h
-        invlists/direct_map.h`
-        invlists/inverted_lists.h
-        invlists/inverted_lists_io_hook.h
+        storage/abstract_data_store.h
+        storage/abstract_graph_store.h
+        storage/in_mem_graph_store.h
+        storage/in_mem_data_store.h
         utils/aligned_table.h
         utils/worker_thread.h
         utils/distances.h
@@ -341,6 +393,29 @@ carbin_cc_library(
         ${POLARIS_DEPS_LINKS} polaris::polaris_simd
         PUBLIC
 )
+carbin_cc_binary(
+        NAMESPACE polaris
+        NAME pcli
+        SOURCES
+        tools/polaris_cli.cc
+        tools/datasets/datasets.cc
+        tools/datasets/compute_ground_truth.cc
+        tools/datasets/generate_synthetic_labels.cc
+        tools/info.cc
+        tools/vamana/vamana.cc
+        tools/vamana/build_disk_index.cc
+        tools/vamana/build_memory_index.cc
+        tools/vamana/search_disk_index.cc
+        tools/vamana/search_memory_index.cc
+        tools/vamana/merge_shards.cc
+        DEFINES ${POLARIS_CXX_DEFINES}
+        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
+        LINKS
+        polaris::polaris_simd
+        ${POLARIS_DEPS_LINKS}
+        PUBLIC
+)
+
 
 function(polaris_install_headers headers p)
     foreach(h ${headers})

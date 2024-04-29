@@ -1,4 +1,4 @@
-// Copyright 2024 The Elastic-AI Authors.
+// Copyright 2024 The EA Authors.
 // part of Elastic AI Search
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

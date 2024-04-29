@@ -68,7 +68,7 @@
 
 #define POLARIS_THROW_MSG(MSG)                                   \
     do {                                                       \
-        throw polaris::FaissException(                           \
+        throw polaris::PolarisException(                           \
                 MSG, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
     } while (false)
 
@@ -78,7 +78,7 @@
         int __size = snprintf(nullptr, 0, FMT, __VA_ARGS__);   \
         __s.resize(__size + 1);                                \
         snprintf(&__s[0], __s.size(), FMT, __VA_ARGS__);       \
-        throw polaris::FaissException(                           \
+        throw polaris::PolarisException(                           \
                 __s, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
     } while (false)
 

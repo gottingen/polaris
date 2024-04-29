@@ -14,15 +14,21 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <stdexcept>
+#include <system_error>
+#include <polaris/internal/platform_macros.h>
 
 namespace polaris {
 
     /// Base class for Faiss exceptions
-    class FaissException : public std::exception {
+    class PolarisException : public std::exception {
     public:
-        explicit FaissException(const std::string &msg);
+        explicit PolarisException(const std::string &msg);
+        POLARIS_API PolarisException(const std::string &message, int errorCode);
+        POLARIS_API PolarisException(const std::string &message, int errorCode, const std::string &funcSig,
+                                 const std::string &fileName, uint32_t lineNum);
 
-        FaissException(
+        PolarisException(
                 const std::string &msg,
                 const char *funcName,
                 const char *file,
@@ -32,6 +38,13 @@ namespace polaris {
         const char *what() const noexcept override;
 
         std::string msg;
+        int _errorCode;
+    };
+
+    class FileException : public PolarisException {
+    public:
+        POLARIS_API FileException(const std::string &filename, std::system_error &e, const std::string &funcSig,
+                                  const std::string &fileName, uint32_t lineNum);
     };
 
     /// Handle multiple exceptions from worker threads, throwing an appropriate

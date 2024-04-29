@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
             std::cout << std::endl;
         }
 
-    } catch (FaissException& e) {
+    } catch (PolarisException& e) {
         std::cerr << e.what() << '\n';
     } catch (std::exception& e) {
         std::cerr << e.what() << '\n';

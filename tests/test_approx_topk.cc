@@ -99,7 +99,7 @@ void test_approx_topk(
                     k,
                     approxDistances.data(),
                     approxIndices.data());
-        } catch (const polaris::FaissException&) {
+        } catch (const polaris::PolarisException&) {
             //
             if (verbose) {
                 printf("Skipping the case.\n");

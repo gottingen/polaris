@@ -21,7 +21,7 @@
 
 #ifdef NDEBUG
 #define CATCH_AND_HANDLE                                                      \
-    catch (polaris::FaissException & e) {                                       \
+    catch (polaris::PolarisException & e) {                                       \
         faiss_last_exception = std::make_exception_ptr(e);                    \
         return -2;                                                            \
     }                                                                         \
@@ -37,7 +37,7 @@
     return 0;
 #else
 #define CATCH_AND_HANDLE                                                      \
-    catch (polaris::FaissException & e) {                                       \
+    catch (polaris::PolarisException & e) {                                       \
         std::cerr << e.what() << '\n';                                        \
         faiss_last_exception = std::make_exception_ptr(e);                    \
         return -2;                                                            \

@@ -64,6 +64,7 @@ set(POLARIS_DEPS_LINKS
         ${MKL_LIBRARIES}
         ${CARBIN_DEPS_LINK}
         turbo::turbo_static
+        aio
         )
 
 

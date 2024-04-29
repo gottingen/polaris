@@ -32,6 +32,8 @@
 #include <stdint.h>
 
 namespace polaris {
+    using non_recursive_mutex = std::mutex;
+    using LockGuard = std::lock_guard<non_recursive_mutex>;
 
     enum LockMode {
         INVALID_LOCK, READ_LOCK, WRITE_LOCK
