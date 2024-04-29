@@ -1,5 +1,5 @@
 #pragma once
-#include "quantized_distance.h"
+#include <polaris/graph/quantized_distance.h>
 
 namespace polaris
 {

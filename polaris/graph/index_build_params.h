@@ -1,5 +1,5 @@
 #include <polaris/core/common_includes.h>
-#include "parameters.h"
+#include <polaris/graph/parameters.h>
 
 namespace polaris
 {

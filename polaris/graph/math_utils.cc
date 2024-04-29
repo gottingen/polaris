@@ -15,7 +15,7 @@
 
 #include <limits>
 #include <malloc.h>
-#include "math_utils.h"
+#include <polaris/graph/math_utils.h>
 #include <mkl.h>
 #include <polaris/graph/logger.h>
 #include <polaris/graph/utils.h>

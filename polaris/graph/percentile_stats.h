@@ -26,7 +26,7 @@
 #include <vector>
 
 #include <polaris/distance/distance.h>
-#include "parameters.h"
+#include <polaris/graph/parameters.h>
 
 namespace polaris
 {

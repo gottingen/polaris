@@ -1,7 +1,7 @@
-#include "index.h"
+#include <polaris/graph/index.h>
 #include <polaris/storage/abstract_graph_store.h>
 #include <polaris/storage/in_mem_graph_store.h>
-#include "pq_data_store.h"
+#include <polaris/graph/pq_data_store.h>
 
 namespace polaris
 {

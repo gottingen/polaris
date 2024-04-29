@@ -18,13 +18,13 @@
 
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/internal/concurrent_queue.h>
-#include "neighbor.h"
-#include "parameters.h"
-#include "percentile_stats.h"
-#include "pq.h"
+#include <polaris/graph/neighbor.h>
+#include <polaris/graph/parameters.h>
+#include <polaris/graph/percentile_stats.h>
+#include <polaris/graph/pq.h>
 #include <polaris/graph/utils.h>
 #include <polaris/internal/platform_macros.h>
-#include "scratch.h"
+#include <polaris/graph/scratch.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
 

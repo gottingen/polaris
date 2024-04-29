@@ -16,7 +16,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "logger_impl.h"
+#include <polaris/graph/logger_impl.h>
 #include <polaris/internal/platform_macros.h>
 
 namespace polaris

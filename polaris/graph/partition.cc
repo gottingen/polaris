@@ -24,15 +24,15 @@
 #include <turbo/container/flat_hash_set.h>
 
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
-#include "gperftools/malloc_extension.h"
+#include <gperftools/malloc_extension.h>
 #endif
 
 #include <polaris/graph/utils.h>
-#include "math_utils.h"
-#include "index.h"
-#include "parameters.h"
+#include <polaris/graph/math_utils.h>
+#include <polaris/graph/index.h>
+#include <polaris/graph/parameters.h>
 #include <polaris/internal/memory_mapper.h>
-#include "partition.h"
+#include <polaris/graph/partition.h>
 #ifdef _WINDOWS
 #include <xmmintrin.h>
 #endif

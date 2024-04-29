@@ -23,8 +23,8 @@
 
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/graph/abstract_scratch.h>
-#include "neighbor.h"
-#include "defaults.h"
+#include <polaris/graph/neighbor.h>
+#include <polaris/graph/defaults.h>
 #include <polaris/internal/concurrent_queue.h>
 #include <collie/container/dynamic_bitset.h>
 

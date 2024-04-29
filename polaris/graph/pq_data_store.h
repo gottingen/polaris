@@ -2,8 +2,8 @@
 
 #include <memory>
 #include <polaris/distance/distance.h>
-#include "quantized_distance.h"
-#include "pq.h"
+#include <polaris/graph/quantized_distance.h>
+#include <polaris/graph/pq.h>
 #include <polaris/storage/abstract_data_store.h>
 
 namespace polaris {

@@ -16,19 +16,19 @@
 #include <polaris/core/common_includes.h>
 
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
-#include "gperftools/malloc_extension.h"
+#include <gperftools/malloc_extension.h>
 #endif
 
 #include <polaris/graph/logger.h>
-#include "disk_utils.h"
+#include <polaris/graph/disk_utils.h>
 #include <polaris/io/cached_io.h>
-#include "index.h"
-#include "mkl.h"
-#include "omp.h"
-#include "percentile_stats.h"
-#include "partition.h"
-#include "pq_flash_index.h"
-#include "timer.h"
+#include <polaris/graph/index.h>
+#include <mkl.h>
+#include <omp.h>
+#include <polaris/graph/percentile_stats.h>
+#include <polaris/graph/partition.h>
+#include <polaris/graph/pq_flash_index.h>
+#include <polaris/graph/timer.h>
 #include <turbo/container/flat_hash_set.h>
 
 namespace polaris

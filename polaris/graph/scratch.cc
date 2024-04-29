@@ -16,8 +16,8 @@
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
 
-#include "scratch.h"
-#include "pq_scratch.h"
+#include <polaris/graph/scratch.h>
+#include <polaris/graph/pq_scratch.h>
 
 namespace polaris
 {

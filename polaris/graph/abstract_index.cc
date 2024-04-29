@@ -1,6 +1,6 @@
 #include <polaris/core/common_includes.h>
 #include <polaris/internal/platform_macros.h>
-#include "abstract_index.h"
+#include <polaris/graph/abstract_index.h>
 
 namespace polaris
 {

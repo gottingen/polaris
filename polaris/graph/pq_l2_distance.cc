@@ -1,7 +1,7 @@
 
-#include "pq.h"
-#include "pq_l2_distance.h"
-#include "pq_scratch.h"
+#include <polaris/graph/pq.h>
+#include <polaris/graph/pq_l2_distance.h>
+#include <polaris/graph/pq_scratch.h>
 
 // block size for reading/processing large files and matrices in blocks
 #define BLOCK_SIZE 5000000

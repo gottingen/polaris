@@ -20,8 +20,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "neighbor.h"
-#include "parameters.h"
+#include <polaris/graph/neighbor.h>
+#include <polaris/graph/parameters.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/graph/utils.h>
 

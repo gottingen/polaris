@@ -18,8 +18,8 @@
 #include <typeinfo>
 #include <unordered_map>
 
-#include "omp.h"
-#include "defaults.h"
+#include <omp.h>
+#include <polaris/graph/defaults.h>
 
 namespace polaris
 {

@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 
-#include "mkl.h"
+#include <mkl.h>
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
-#include "gperftools/malloc_extension.h"
+#include <gperftools/malloc_extension.h>
 #endif
-#include "pq.h"
-#include "partition.h"
-#include "math_utils.h"
+#include <polaris/graph/pq.h>
+#include <polaris/graph/partition.h>
+#include <polaris/graph/math_utils.h>
 #include <turbo/container/flat_hash_map.h>
 
 // block size for reading/processing large files and matrices in blocks

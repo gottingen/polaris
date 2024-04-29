@@ -20,17 +20,17 @@
 #include <polaris/core/lock.h>
 #include <polaris/internal/natural_number_map.h>
 #include <polaris/internal/natural_number_set.h>
-#include "neighbor.h"
-#include "parameters.h"
+#include <polaris/graph/neighbor.h>
+#include <polaris/graph/parameters.h>
 #include <polaris/graph/utils.h>
 #include <polaris/internal/platform_macros.h>
-#include "scratch.h"
+#include <polaris/graph/scratch.h>
 #include <polaris/storage/in_mem_data_store.h>
 #include <polaris/storage/in_mem_graph_store.h>
-#include "abstract_index.h"
+#include <polaris/graph/abstract_index.h>
 
-#include "quantized_distance.h"
-#include "pq_data_store.h"
+#include <polaris/graph/quantized_distance.h>
+#include <polaris/graph/pq_data_store.h>
 
 #define OVERHEAD_FACTOR 1.1
 #define EXPAND_IF_FULL 0

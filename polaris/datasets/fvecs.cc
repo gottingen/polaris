@@ -165,6 +165,7 @@ namespace polaris {
 
         reader.close();
         writer.close();
+        return turbo::ok_status();
     }
 
     static void block_convert(std::ofstream &writer, int8_t *write_buf, std::ifstream &reader, float *read_buf, size_t npts,
@@ -212,5 +213,6 @@ namespace polaris {
 
         writer.close();
         reader.close();
+        return turbo::ok_status();
     }
 } // namespace polaris

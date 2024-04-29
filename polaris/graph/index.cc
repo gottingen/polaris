@@ -17,23 +17,22 @@
 
 #include <type_traits>
 
-#include "boost/dynamic_bitset.hpp"
-#include "index_factory.h"
+#include <polaris/graph/index_factory.h>
 #include <polaris/internal/memory_mapper.h>
-#include "timer.h"
+#include <polaris/graph/timer.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/internal/platform_macros.h>
 #include <polaris/internal/tag_uint128.h>
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
-#include "gperftools/malloc_extension.h"
+#include <gperftools/malloc_extension.h>
 #endif
 
 #ifdef _WINDOWS
 #include <xmmintrin.h>
 #endif
 
-#include "index.h"
+#include <polaris/graph/index.h>
 
 #define MAX_POINTS_FOR_USING_BITSET 10000000
 

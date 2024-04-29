@@ -15,10 +15,10 @@
 
 #include <polaris/core/common_includes.h>
 
-#include "timer.h"
-#include "pq.h"
-#include "pq_scratch.h"
-#include "pq_flash_index.h"
+#include <polaris/graph/timer.h>
+#include <polaris/graph/pq.h>
+#include <polaris/graph/pq_scratch.h>
+#include <polaris/graph/pq_flash_index.h>
 #include <polaris/distance/cosine_similarity.h>
 #include <polaris/io/linux_aligned_file_reader.h>
 

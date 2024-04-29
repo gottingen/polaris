@@ -15,11 +15,11 @@
 #pragma once
 
 #include <polaris/distance/distance.h>
-#include "parameters.h"
+#include <polaris/graph/parameters.h>
 #include <polaris/graph/utils.h>
 #include <polaris/internal/types.h>
-#include "index_config.h"
-#include "index_build_params.h"
+#include <polaris/graph/index_config.h>
+#include <polaris/graph/index_build_params.h>
 #include <any>
 
 namespace polaris {
