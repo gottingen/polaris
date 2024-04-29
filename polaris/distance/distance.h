@@ -2,6 +2,7 @@
 
 #include <polaris/internal/platform_macros.h>
 #include <cstring>
+#include <polaris/core/metric_type.h>
 
 namespace polaris {
     enum Metric {

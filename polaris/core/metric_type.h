@@ -24,6 +24,8 @@ enum MetricType {
     METRIC_Linf,              ///< infinity distance
     METRIC_Lp,                ///< L_p distance, p is given by a polaris::Index
                               /// metric_arg
+    METRIC_COSINE,            ///< cosine similarity
+    METRIC_FAST_L2,           ///< fast L2 search
 
     /// some additional metrics defined in scipy.spatial.distance
     METRIC_Canberra = 20,
