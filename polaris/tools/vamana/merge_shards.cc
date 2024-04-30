@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 #include <collie/cli/cli.h>
-#include <polaris/graph/disk_utils.h>
+#include <polaris/graph/vamana/disk_utils.h>
 #include <polaris/io/cached_io.h>
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/utils.h>
 
 namespace polaris {
     void setup_merge_shards_cli(collie::App *app) {

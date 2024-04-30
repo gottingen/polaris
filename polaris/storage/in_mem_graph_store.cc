@@ -14,7 +14,7 @@
 //
 
 #include <polaris/storage/in_mem_graph_store.h>
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/utils.h>
 
 namespace polaris {
     InMemGraphStore::InMemGraphStore(const size_t total_pts, const size_t reserve_graph_degree)

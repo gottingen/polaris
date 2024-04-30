@@ -17,8 +17,8 @@
 #include <iostream>
 
 #include <polaris/distance/distance.h>
-#include <polaris/graph/utils.h>
-#include <polaris/graph/logger.h>
+#include <polaris/graph/vamana/utils.h>
+#include <polaris/graph/vamana/logger.h>
 #include <polaris/internal/polaris_exception.h>
 
 namespace polaris {

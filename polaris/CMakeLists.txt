@@ -134,20 +134,20 @@ set(POLARIS_SRC
         utils/distances_fused/avx512.cc
         utils/distances_fused/distances_fused.cc
         utils/distances_fused/simdlib_based.cc
-        graph/abstract_index.cc
-        graph/disk_utils.cc
-        graph/filter_utils.cc
-        graph/index.cc
-        graph/index_factory.cc
-        graph/logger.cc
-        graph/math_utils.cc
-        graph/partition.cc
-        graph/pq.cc
-        graph/pq_data_store.cc
-        graph/pq_flash_index.cc
-        graph/pq_l2_distance.cc
-        graph/scratch.cc
-        graph/utils.cc
+        graph/vamana/abstract_index.cc
+        graph/vamana/disk_utils.cc
+        graph/vamana/filter_utils.cc
+        graph/vamana/index.cc
+        graph/vamana/index_factory.cc
+        graph/vamana/logger.cc
+        graph/vamana/math_utils.cc
+        graph/vamana/partition.cc
+        graph/vamana/pq.cc
+        graph/vamana/pq_data_store.cc
+        graph/vamana/pq_flash_index.cc
+        graph/vamana/pq_l2_distance.cc
+        graph/vamana/scratch.cc
+        graph/vamana/utils.cc
 )
 
 
@@ -173,6 +173,32 @@ set(POLARIS_HEADERS
         datasets/to_float.h
         datasets/random.h
         datasets/recall.h
+        graph/vamana/abstract_index.h
+        graph/vamana/abstract_scratch.h
+        graph/vamana/defaults.h
+        graph/vamana/disk_utils.h
+        graph/vamana/filter_utils.h
+        graph/vamana/index.h
+        graph/vamana/index_build_params.h
+        graph/vamana/index_config.h
+        graph/vamana/index_factory.h
+        graph/vamana/logger.h
+        graph/vamana/logger_impl.h
+        graph/vamana/math_utils.h
+        graph/vamana/neighbor.h
+        graph/vamana/parameters.h
+        graph/vamana/partition.h
+        graph/vamana/percentile_stats.h
+        graph/vamana/pq.h
+        graph/vamana/pq_common.h
+        graph/vamana/pq_data_store.h
+        graph/vamana/pq_flash_index.h
+        graph/vamana/pq_l2_distance.h
+        graph/vamana/pq_scratch.h
+        graph/vamana/quantized_distance.h
+        graph/vamana/scratch.h
+        graph/vamana/timer.h
+        graph/vamana/utils.h
         index/index_flat.h
         index/index_ivf.h
         index/index_ivf_pq.h

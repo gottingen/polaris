@@ -33,8 +33,8 @@
 #include <turbo/container/flat_hash_set.h>
 #include <collie/cli/cli.h>
 #include <stdlib.h>
-#include <polaris/graph/filter_utils.h>
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/filter_utils.h>
+#include <polaris/graph/vamana/utils.h>
 
 // WORKS FOR UPTO 2 BILLION POINTS (as we use INT INSTEAD OF UNSIGNED)
 

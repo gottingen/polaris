@@ -17,10 +17,10 @@
 //
 #include <polaris/datasets/random.h>
 #include <polaris/internal/platform_macros.h>
-#include <polaris/graph/utils.h>
-#include <polaris/graph/math_utils.h>
-#include <polaris/graph/pq.h>
-#include <polaris/graph/partition.h>
+#include <polaris/graph/vamana/utils.h>
+#include <polaris/graph/vamana/math_utils.h>
+#include <polaris/graph/vamana/pq.h>
+#include <polaris/graph/vamana/partition.h>
 #include <iostream>
 
 #define KMEANS_ITERS_FOR_PQ 15

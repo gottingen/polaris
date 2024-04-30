@@ -14,10 +14,10 @@
 //
 
 #include <memory>
-#include <polaris/graph/abstract_scratch.h>
+#include <polaris/graph/vamana/abstract_scratch.h>
 #include <polaris/storage/in_mem_data_store.h>
 
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/utils.h>
 
 namespace polaris {
 

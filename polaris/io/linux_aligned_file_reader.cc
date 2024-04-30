@@ -18,7 +18,7 @@
 #include <cassert>
 #include <cstdio>
 #include <iostream>
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/utils.h>
 #define MAX_EVENTS 1024
 
 namespace

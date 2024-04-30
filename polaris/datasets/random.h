@@ -17,7 +17,7 @@
 
 #include <string>
 #include <turbo/status/status.h>
-#include <polaris/graph/partition.h>
+#include <polaris/graph/vamana/partition.h>
 
 namespace polaris {
 

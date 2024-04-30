@@ -20,7 +20,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <polaris/graph/logger.h>
+#include <polaris/graph/vamana/logger.h>
 #include <polaris/internal/polaris_exception.h>
 
 // sequential cached reads

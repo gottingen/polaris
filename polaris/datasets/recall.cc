@@ -14,7 +14,7 @@
 //
 #include <polaris/datasets/recall.h>
 #include <polaris/internal/platform_macros.h>
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/utils.h>
 #include <iostream>
 
 namespace polaris {

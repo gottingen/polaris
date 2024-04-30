@@ -29,7 +29,7 @@ typedef io_context_t IOContext;
 #include <mutex>
 #include <thread>
 #include <turbo/container/flat_hash_map.h>
-#include <polaris/graph/utils.h>
+#include <polaris/graph/vamana/utils.h>
 
 // NOTE :: all 3 fields must be 512-aligned
 struct AlignedRead

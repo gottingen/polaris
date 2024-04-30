@@ -16,18 +16,18 @@
 
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include <polaris/graph/utils.h>
-#include <polaris/graph/disk_utils.h>
-#include <polaris/graph/math_utils.h>
-#include <polaris/graph/index.h>
-#include <polaris/graph/partition.h>
+#include <polaris/graph/vamana/utils.h>
+#include <polaris/graph/vamana/disk_utils.h>
+#include <polaris/graph/vamana/math_utils.h>
+#include <polaris/graph/vamana/index.h>
+#include <polaris/graph/vamana/partition.h>
 
 #include <polaris/core/common_includes.h>
 #include <polaris/internal/memory_mapper.h>
-#include <polaris/graph/partition.h>
-#include <polaris/graph/pq_flash_index.h>
-#include <polaris/graph/timer.h>
-#include <polaris/graph/percentile_stats.h>
+#include <polaris/graph/vamana/partition.h>
+#include <polaris/graph/vamana/pq_flash_index.h>
+#include <polaris/graph/vamana/timer.h>
+#include <polaris/graph/vamana/percentile_stats.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>

@@ -15,12 +15,12 @@
 
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include  <polaris/graph/utils.h>
-#include  <polaris/graph/disk_utils.h>
-#include  <polaris/graph/math_utils.h>
-#include  <polaris/graph/index.h>
-#include  <polaris/graph/index_factory.h>
-#include  <polaris/graph/partition.h>
+#include <polaris/graph/vamana/utils.h>
+#include <polaris/graph/vamana/disk_utils.h>
+#include <polaris/graph/vamana/math_utils.h>
+#include <polaris/graph/vamana/index.h>
+#include <polaris/graph/vamana/index_factory.h>
+#include <polaris/graph/vamana/partition.h>
 
 
 namespace polaris {
