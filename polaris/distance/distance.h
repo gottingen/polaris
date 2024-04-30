@@ -5,14 +5,7 @@
 #include <polaris/core/metric_type.h>
 
 namespace polaris {
-    /*
-    enum Metric {
-        L2 = 0,
-        INNER_PRODUCT = 1,
-        COSINE = 2,
-        FAST_L2 = 3
-    };
-    */
+
     template<typename T>
     class Distance {
     public:
