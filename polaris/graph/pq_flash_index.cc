@@ -1429,7 +1429,7 @@ continue;
         return _num_points;
     }
 
-// instantiations
+    // instantiations
     template
     class PQFlashIndex<uint8_t>;
 

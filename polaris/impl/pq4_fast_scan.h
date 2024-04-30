@@ -24,82 +24,83 @@
 
 namespace polaris {
 
-struct NormTableScaler;
-struct SIMDResultHandler;
+    struct NormTableScaler;
+    struct SIMDResultHandler;
 
-/** Pack codes for consumption by the SIMD kernels.
- *  The unused bytes are set to 0.
- *
- * @param codes   input codes, size (ntotal, ceil(M / 2))
- * @param ntotal  number of input codes
- * @param nb      output number of codes (ntotal rounded up to a multiple of
- *                bbs)
- * @param nsq      number of sub-quantizers (=M rounded up to a muliple of 2)
- * @param bbs     size of database blocks (multiple of 32)
- * @param blocks  output array, size nb * nsq / 2.
- */
-void pq4_pack_codes(
-        const uint8_t* codes,
-        size_t ntotal,
-        size_t M,
-        size_t nb,
-        size_t bbs,
-        size_t nsq,
-        uint8_t* blocks);
+    /** Pack codes for consumption by the SIMD kernels.
+     *  The unused bytes are set to 0.
+     *
+     * @param codes   input codes, size (ntotal, ceil(M / 2))
+     * @param ntotal  number of input codes
+     * @param nb      output number of codes (ntotal rounded up to a multiple of
+     *                bbs)
+     * @param nsq      number of sub-quantizers (=M rounded up to a muliple of 2)
+     * @param bbs     size of database blocks (multiple of 32)
+     * @param blocks  output array, size nb * nsq / 2.
+     */
+    void pq4_pack_codes(
+            const uint8_t *codes,
+            size_t ntotal,
+            size_t M,
+            size_t nb,
+            size_t bbs,
+            size_t nsq,
+            uint8_t *blocks);
 
-/** Same as pack_codes but write in a given range of the output,
- * leaving the rest untouched. Assumes allocated entries are 0 on input.
- *
- * @param codes   input codes, size (i1 - i0, ceil(M / 2))
- * @param i0      first output code to write
- * @param i1      last output code to write
- * @param blocks  output array, size at least ceil(i1 / bbs) * bbs * nsq / 2
- */
-void pq4_pack_codes_range(
-        const uint8_t* codes,
-        size_t M,
-        size_t i0,
-        size_t i1,
-        size_t bbs,
-        size_t nsq,
-        uint8_t* blocks);
+    /** Same as pack_codes but write in a given range of the output,
+     * leaving the rest untouched. Assumes allocated entries are 0 on input.
+     *
+     * @param codes   input codes, size (i1 - i0, ceil(M / 2))
+     * @param i0      first output code to write
+     * @param i1      last output code to write
+     * @param blocks  output array, size at least ceil(i1 / bbs) * bbs * nsq / 2
+     */
+    void pq4_pack_codes_range(
+            const uint8_t *codes,
+            size_t M,
+            size_t i0,
+            size_t i1,
+            size_t bbs,
+            size_t nsq,
+            uint8_t *blocks);
 
-/** get a single element from a packed codes table
- *
- * @param vector_id        vector id
- * @param sq       subquantizer (< nsq)
- */
-uint8_t pq4_get_packed_element(
-        const uint8_t* data,
-        size_t bbs,
-        size_t nsq,
-        size_t vector_id,
-        size_t sq);
+    /** get a single element from a packed codes table
+     *
+     * @param vector_id        vector id
+     * @param sq       subquantizer (< nsq)
+     */
+    uint8_t pq4_get_packed_element(
+            const uint8_t *data,
+            size_t bbs,
+            size_t nsq,
+            size_t vector_id,
+            size_t sq);
 
-/** set a single element "code" into a packed codes table
- *
- * @param vector_id       vector id
- * @param sq       subquantizer (< nsq)
- */
-void pq4_set_packed_element(
-        uint8_t* data,
-        uint8_t code,
-        size_t bbs,
-        size_t nsq,
-        size_t vector_id,
-        size_t sq);
+    /** set a single element "code" into a packed codes table
+     *
+     * @param vector_id       vector id
+     * @param sq       subquantizer (< nsq)
+     */
+    void pq4_set_packed_element(
+            uint8_t *data,
+            uint8_t code,
+            size_t bbs,
+            size_t nsq,
+            size_t vector_id,
+            size_t sq);
 
 /** CodePacker API for the PQ4 fast-scan */
-struct CodePackerPQ4 : CodePacker {
-    size_t nsq;
+    struct CodePackerPQ4 : CodePacker {
+        size_t nsq;
 
-    CodePackerPQ4(size_t nsq, size_t bbs);
+        CodePackerPQ4(size_t nsq, size_t bbs);
 
-    void pack_1(const uint8_t* flat_code, size_t offset, uint8_t* block)
-            const final;
-    void unpack_1(const uint8_t* block, size_t offset, uint8_t* flat_code)
-            const final;
-};
+        void pack_1(const uint8_t *flat_code, size_t offset, uint8_t *block)
+        const final;
+
+        void unpack_1(const uint8_t *block, size_t offset, uint8_t *flat_code)
+        const final;
+    };
 
 /** Pack Look-up table for consumption by the kernel.
  *
@@ -108,7 +109,7 @@ struct CodePackerPQ4 : CodePacker {
  * @param src     input array, size (nq, 16)
  * @param dest    output array, size (nq, 16)
  */
-void pq4_pack_LUT(int nq, int nsq, const uint8_t* src, uint8_t* dest);
+    void pq4_pack_LUT(int nq, int nsq, const uint8_t *src, uint8_t *dest);
 
 /** Loop over database elements and accumulate results into result handler
  *
@@ -120,35 +121,35 @@ void pq4_pack_LUT(int nq, int nsq, const uint8_t* src, uint8_t* dest);
  * @param LUT     packed look-up table
  * @param scaler  scaler to scale the encoded norm
  */
-void pq4_accumulate_loop(
-        int nq,
-        size_t nb,
-        int bbs,
-        int nsq,
-        const uint8_t* codes,
-        const uint8_t* LUT,
-        SIMDResultHandler& res,
-        const NormTableScaler* scaler);
+    void pq4_accumulate_loop(
+            int nq,
+            size_t nb,
+            int bbs,
+            int nsq,
+            const uint8_t *codes,
+            const uint8_t *LUT,
+            SIMDResultHandler &res,
+            const NormTableScaler *scaler);
 
-/* qbs versions, supported only for bbs=32.
- *
- * The kernel function runs the kernel for *several* query blocks
- * and bbs database vectors. The sizes of the blocks are encoded in qbs as
- * base-16 digits.
- *
- * For example, qbs = 0x1223 means that the kernel will be run 4 times, the
- * first time with 3 query vectors, second time with 2 query vectors, then 2
- * vectors again and finally with 1 query vector. The output block will thus be
- * nq = 3 + 2 + 2 + 1 = 6 queries. For a given total block size, the optimal
- * decomposition into sub-blocks (measured empirically) is given by
- * preferred_qbs().
- */
+    /* qbs versions, supported only for bbs=32.
+     *
+     * The kernel function runs the kernel for *several* query blocks
+     * and bbs database vectors. The sizes of the blocks are encoded in qbs as
+     * base-16 digits.
+     *
+     * For example, qbs = 0x1223 means that the kernel will be run 4 times, the
+     * first time with 3 query vectors, second time with 2 query vectors, then 2
+     * vectors again and finally with 1 query vector. The output block will thus be
+     * nq = 3 + 2 + 2 + 1 = 6 queries. For a given total block size, the optimal
+     * decomposition into sub-blocks (measured empirically) is given by
+     * preferred_qbs().
+     */
 
-/* compute the number of queries from a base-16 decomposition */
-int pq4_qbs_to_nq(int qbs);
+    /* compute the number of queries from a base-16 decomposition */
+    int pq4_qbs_to_nq(int qbs);
 
-/** return the preferred decomposition in blocks for a nb of queries. */
-int pq4_preferred_qbs(int nq);
+    /** return the preferred decomposition in blocks for a nb of queries. */
+    int pq4_preferred_qbs(int nq);
 
 /** Pack Look-up table for consumption by the kernel.
  *
@@ -159,16 +160,16 @@ int pq4_preferred_qbs(int nq);
  * @param dest    output array, size (nq, 16)
  * @return nq
  */
-int pq4_pack_LUT_qbs(int fqbs, int nsq, const uint8_t* src, uint8_t* dest);
+    int pq4_pack_LUT_qbs(int fqbs, int nsq, const uint8_t *src, uint8_t *dest);
 
 /** Same as pq4_pack_LUT_qbs, except the source vectors are remapped with q_map
  */
-int pq4_pack_LUT_qbs_q_map(
-        int qbs,
-        int nsq,
-        const uint8_t* src,
-        const int* q_map,
-        uint8_t* dest);
+    int pq4_pack_LUT_qbs_q_map(
+            int qbs,
+            int nsq,
+            const uint8_t *src,
+            const int *q_map,
+            uint8_t *dest);
 
 /** Run accumulation loop.
  *
@@ -180,13 +181,13 @@ int pq4_pack_LUT_qbs_q_map(
  * @param res     call-back for the resutls
  * @param scaler  scaler to scale the encoded norm
  */
-void pq4_accumulate_loop_qbs(
-        int qbs,
-        size_t nb,
-        int nsq,
-        const uint8_t* codes,
-        const uint8_t* LUT,
-        SIMDResultHandler& res,
-        const NormTableScaler* scaler = nullptr);
+    void pq4_accumulate_loop_qbs(
+            int qbs,
+            size_t nb,
+            int nsq,
+            const uint8_t *codes,
+            const uint8_t *LUT,
+            SIMDResultHandler &res,
+            const NormTableScaler *scaler = nullptr);
 
 } // namespace polaris

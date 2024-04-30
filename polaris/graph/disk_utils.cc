@@ -48,7 +48,7 @@ void add_new_file_to_single_index(std::string index_file, std::string new_file)
     size_t index_ending_offset = metadata[nr - 1];
     size_t read_blk_size = 64 * 1024 * 1024;
     cached_ofstream writer(index_file, read_blk_size);
-    size_t check_file_size = get_file_size(index_file);
+    size_t check_file_size = collie::filesystem::file_size(index_file);
     if (check_file_size != index_ending_offset)
     {
         std::stringstream stream;
@@ -201,7 +201,7 @@ T *load_warmup(const std::string &cache_warmup_file, uint64_t &warmup_num, uint6
 void read_idmap(const std::string &fname, std::vector<uint32_t> &ivecs)
 {
     uint32_t npts32, dim;
-    size_t actual_file_size = get_file_size(fname);
+    size_t actual_file_size = collie::filesystem::file_size(fname);
     std::ifstream reader(fname.c_str(), std::ios::binary);
     reader.read((char *)&npts32, sizeof(uint32_t));
     reader.read((char *)&dim, sizeof(uint32_t));
@@ -849,7 +849,7 @@ void create_disk_layout(const std::string base_file, const std::string mem_index
     if (reorder_data_file != std::string(""))
     {
         append_reorder_data = true;
-        size_t reorder_data_file_size = get_file_size(reorder_data_file);
+        size_t reorder_data_file_size = collie::filesystem::file_size(reorder_data_file);
         reorder_data_reader.exceptions(std::ofstream::failbit | std::ofstream::badbit);
 
         try
@@ -871,7 +871,7 @@ void create_disk_layout(const std::string base_file, const std::string mem_index
     }
 
     // create cached reader + writer
-    size_t actual_file_size = get_file_size(mem_index_file);
+    size_t actual_file_size = collie::filesystem::file_size(mem_index_file);
     polaris::cout << "Vamana index file size=" << actual_file_size << std::endl;
     std::ifstream vamana_reader(mem_index_file, std::ios::binary);
     cached_ofstream diskann_writer(output_file, write_blk_size);
