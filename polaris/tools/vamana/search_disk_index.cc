@@ -49,7 +49,7 @@ void print_stats(std::string category, std::vector<float> percentiles, std::vect
 }
 
 template<typename T, typename LabelT = uint32_t>
-int search_disk_index(polaris::Metric &metric, const std::string &index_path_prefix,
+int search_disk_index(polaris::MetricType &metric, const std::string &index_path_prefix,
                       const std::string &result_output_prefix, const std::string &query_file, std::string &gt_file,
                       const uint32_t num_threads, const uint32_t recall_at, const uint32_t beamwidth,
                       const uint32_t num_nodes_to_cache, const uint32_t search_io_limit,
@@ -338,13 +338,13 @@ namespace polaris {
     }
 
     void run_search_disk_index_cli() {
-        polaris::Metric metric;
+        polaris::MetricType metric;
         if (ctx.dist_fn == std::string("mips")) {
-            metric = polaris::Metric::INNER_PRODUCT;
+            metric = polaris::MetricType::METRIC_INNER_PRODUCT;
         } else if (ctx.dist_fn == std::string("l2")) {
-            metric = polaris::Metric::L2;
+            metric = polaris::MetricType::METRIC_L2;
         } else if (ctx.dist_fn == std::string("cosine")) {
-            metric = polaris::Metric::COSINE;
+            metric = polaris::MetricType::METRIC_COSINE;
         } else {
             std::cout << "Unsupported distance function. Currently only L2/ Inner "
                          "Product/Cosine are supported."
@@ -352,7 +352,7 @@ namespace polaris {
             exit(-1);
         }
 
-        if ((ctx.data_type != std::string("float")) && (metric == polaris::Metric::INNER_PRODUCT)) {
+        if ((ctx.data_type != std::string("float")) && (metric == polaris::MetricType::METRIC_INNER_PRODUCT)) {
             std::cout << "Currently support only floating point data for Inner Product." << std::endl;
             exit(-1);
         }

@@ -606,7 +606,7 @@ void extract_shard_labels(const std::string &in_label_file, const std::string &s
 }
 
 template <typename T, typename LabelT>
-int build_merged_vamana_index(std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R,
+int build_merged_vamana_index(std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R,
                               double sampling_rate, double ram_budget, std::string mem_index_path,
                               std::string medoids_file, std::string centroids_file, size_t build_pq_bytes, bool use_opq,
                               uint32_t num_threads, bool use_filters, const std::string &label_file,
@@ -1080,7 +1080,7 @@ void create_disk_layout(const std::string base_file, const std::string mem_index
 
 template <typename T, typename LabelT>
 int build_disk_index(const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
-                     polaris::Metric compareMetric, bool use_opq, const std::string &codebook_prefix, bool use_filters,
+                     polaris::MetricType compareMetric, bool use_opq, const std::string &codebook_prefix, bool use_filters,
                      const std::string &label_file, const std::string &universal_label, const uint32_t filter_threshold,
                      const uint32_t Lf)
 {
@@ -1111,7 +1111,7 @@ int build_disk_index(const char *dataFilePath, const char *indexFilePath, const 
     }
 
     if (!std::is_same<T, float>::value &&
-        (compareMetric == polaris::Metric::INNER_PRODUCT || compareMetric == polaris::Metric::COSINE))
+        (compareMetric == polaris::MetricType::METRIC_INNER_PRODUCT || compareMetric == polaris::MetricType::METRIC_COSINE))
     {
         std::stringstream stream;
         stream << "Disk-index build currently only supports floating point data for Max "
@@ -1185,7 +1185,7 @@ int build_disk_index(const char *dataFilePath, const char *indexFilePath, const 
     // output a new base file which contains extra dimension with sqrt(1 -
     // ||x||^2/M^2) for every x, M is max norm of all points. Extra space on
     // disk needed!
-    if (compareMetric == polaris::Metric::INNER_PRODUCT)
+    if (compareMetric == polaris::MetricType::METRIC_INNER_PRODUCT)
     {
         Timer timer;
         std::cout << "Using Inner Product search, so need to pre-process base "
@@ -1200,7 +1200,7 @@ int build_disk_index(const char *dataFilePath, const char *indexFilePath, const 
         polaris::cout << timer.elapsed_seconds_for_step("preprocessing data for inner product") << std::endl;
         created_temp_file_for_processed_data = true;
     }
-    else if (compareMetric == polaris::Metric::COSINE)
+    else if (compareMetric == polaris::MetricType::METRIC_COSINE)
     {
         Timer timer;
         std::cout << "Normalizing data for cosine to temporary file, please ensure there is additional "
@@ -1304,7 +1304,7 @@ int build_disk_index(const char *dataFilePath, const char *indexFilePath, const 
 #endif
     // Whether it is cosine or inner product, we still L2 metric due to the pre-processing.
     timer.reset();
-    polaris::build_merged_vamana_index<T, LabelT>(data_file_to_use.c_str(), polaris::Metric::L2, L, R, p_val,
+    polaris::build_merged_vamana_index<T, LabelT>(data_file_to_use.c_str(), polaris::MetricType::METRIC_L2, L, R, p_val,
                                                   indexing_ram_budget, mem_index_path, medoids_path, centroids_path,
                                                   build_pq_bytes, use_opq, num_threads, use_filters, labels_file_to_use,
                                                   labels_to_medoids_path, universal_label, Lf);
@@ -1398,21 +1398,21 @@ template POLARIS_API uint32_t optimize_beamwidth<float, uint16_t>(
 
 template POLARIS_API int build_disk_index<int8_t, uint32_t>(const char *dataFilePath, const char *indexFilePath,
                                                                   const char *indexBuildParameters,
-                                                                  polaris::Metric compareMetric, bool use_opq,
+                                                                  polaris::MetricType compareMetric, bool use_opq,
                                                                   const std::string &codebook_prefix, bool use_filters,
                                                                   const std::string &label_file,
                                                                   const std::string &universal_label,
                                                                   const uint32_t filter_threshold, const uint32_t Lf);
 template POLARIS_API int build_disk_index<uint8_t, uint32_t>(const char *dataFilePath, const char *indexFilePath,
                                                                    const char *indexBuildParameters,
-                                                                   polaris::Metric compareMetric, bool use_opq,
+                                                                   polaris::MetricType compareMetric, bool use_opq,
                                                                    const std::string &codebook_prefix, bool use_filters,
                                                                    const std::string &label_file,
                                                                    const std::string &universal_label,
                                                                    const uint32_t filter_threshold, const uint32_t Lf);
 template POLARIS_API int build_disk_index<float, uint32_t>(const char *dataFilePath, const char *indexFilePath,
                                                                  const char *indexBuildParameters,
-                                                                 polaris::Metric compareMetric, bool use_opq,
+                                                                 polaris::MetricType compareMetric, bool use_opq,
                                                                  const std::string &codebook_prefix, bool use_filters,
                                                                  const std::string &label_file,
                                                                  const std::string &universal_label,
@@ -1420,54 +1420,54 @@ template POLARIS_API int build_disk_index<float, uint32_t>(const char *dataFileP
 // LabelT = uint16
 template POLARIS_API int build_disk_index<int8_t, uint16_t>(const char *dataFilePath, const char *indexFilePath,
                                                                   const char *indexBuildParameters,
-                                                                  polaris::Metric compareMetric, bool use_opq,
+                                                                  polaris::MetricType compareMetric, bool use_opq,
                                                                   const std::string &codebook_prefix, bool use_filters,
                                                                   const std::string &label_file,
                                                                   const std::string &universal_label,
                                                                   const uint32_t filter_threshold, const uint32_t Lf);
 template POLARIS_API int build_disk_index<uint8_t, uint16_t>(const char *dataFilePath, const char *indexFilePath,
                                                                    const char *indexBuildParameters,
-                                                                   polaris::Metric compareMetric, bool use_opq,
+                                                                   polaris::MetricType compareMetric, bool use_opq,
                                                                    const std::string &codebook_prefix, bool use_filters,
                                                                    const std::string &label_file,
                                                                    const std::string &universal_label,
                                                                    const uint32_t filter_threshold, const uint32_t Lf);
 template POLARIS_API int build_disk_index<float, uint16_t>(const char *dataFilePath, const char *indexFilePath,
                                                                  const char *indexBuildParameters,
-                                                                 polaris::Metric compareMetric, bool use_opq,
+                                                                 polaris::MetricType compareMetric, bool use_opq,
                                                                  const std::string &codebook_prefix, bool use_filters,
                                                                  const std::string &label_file,
                                                                  const std::string &universal_label,
                                                                  const uint32_t filter_threshold, const uint32_t Lf);
 
 template POLARIS_API int build_merged_vamana_index<int8_t, uint32_t>(
-    std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R, double sampling_rate,
+    std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
     double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
     size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
     const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
 template POLARIS_API int build_merged_vamana_index<float, uint32_t>(
-    std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R, double sampling_rate,
+    std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
     double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
     size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
     const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
 template POLARIS_API int build_merged_vamana_index<uint8_t, uint32_t>(
-    std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R, double sampling_rate,
+    std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
     double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
     size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
     const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
 // Label=16_t
 template POLARIS_API int build_merged_vamana_index<int8_t, uint16_t>(
-    std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R, double sampling_rate,
+    std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
     double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
     size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
     const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
 template POLARIS_API int build_merged_vamana_index<float, uint16_t>(
-    std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R, double sampling_rate,
+    std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
     double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
     size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
     const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
 template POLARIS_API int build_merged_vamana_index<uint8_t, uint16_t>(
-    std::string base_file, polaris::Metric compareMetric, uint32_t L, uint32_t R, double sampling_rate,
+    std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
     double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
     size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
     const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);

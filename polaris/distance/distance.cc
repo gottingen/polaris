@@ -37,7 +37,7 @@ namespace polaris {
     }
 
     template<typename T>
-    polaris::Metric Distance<T>::get_metric() const {
+    polaris::MetricType Distance<T>::get_metric() const {
         return _distance_metric;
     }
 
@@ -533,8 +533,8 @@ namespace polaris {
 
 // Get the right distance function for the given metric.
     template<>
-    polaris::Distance<float> *get_distance_function(polaris::Metric m) {
-        if (m == polaris::Metric::L2) {
+    polaris::Distance<float> *get_distance_function(polaris::MetricType m) {
+        if (m == polaris::MetricType::METRIC_L2) {
             if (Avx2SupportedCPU) {
                 polaris::cout << "L2: Using AVX2 distance computation DistanceL2Float" << std::endl;
                 return new polaris::DistanceL2Float();
@@ -545,15 +545,15 @@ namespace polaris {
                 polaris::cout << "L2: Older CPU. Using slow distance computation" << std::endl;
                 return new polaris::SlowDistanceL2<float>();
             }
-        } else if (m == polaris::Metric::COSINE) {
+        } else if (m == polaris::MetricType::METRIC_COSINE) {
             polaris::cout << "Cosine: Using either AVX or AVX2 implementation" << std::endl;
             return new polaris::DistanceCosineFloat();
-        } else if (m == polaris::Metric::INNER_PRODUCT) {
+        } else if (m == polaris::MetricType::METRIC_INNER_PRODUCT) {
             polaris::cout << "Inner product: Using AVX2 implementation "
                              "AVXDistanceInnerProductFloat"
                           << std::endl;
             return new polaris::AVXDistanceInnerProductFloat();
-        } else if (m == polaris::Metric::FAST_L2) {
+        } else if (m == polaris::MetricType::METRIC_FAST_L2) {
             polaris::cout << "Fast_L2: Using AVX2 implementation with norm "
                              "memoization DistanceFastL2<float>"
                           << std::endl;
@@ -569,8 +569,8 @@ namespace polaris {
     }
 
     template<>
-    polaris::Distance<int8_t> *get_distance_function(polaris::Metric m) {
-        if (m == polaris::Metric::L2) {
+    polaris::Distance<int8_t> *get_distance_function(polaris::MetricType m) {
+        if (m == polaris::MetricType::METRIC_L2) {
             if (Avx2SupportedCPU) {
                 polaris::cout << "Using AVX2 distance computation DistanceL2Int8." << std::endl;
                 return new polaris::DistanceL2Int8();
@@ -583,7 +583,7 @@ namespace polaris {
                               << std::endl;
                 return new polaris::SlowDistanceL2<int8_t>();
             }
-        } else if (m == polaris::Metric::COSINE) {
+        } else if (m == polaris::MetricType::METRIC_COSINE) {
             polaris::cout << "Using either AVX or AVX2 for Cosine similarity "
                              "DistanceCosineInt8."
                           << std::endl;
@@ -597,17 +597,10 @@ namespace polaris {
     }
 
     template<>
-    polaris::Distance<uint8_t> *get_distance_function(polaris::Metric m) {
-        if (m == polaris::Metric::L2) {
-#ifdef _WINDOWS
-            polaris::cout << "WARNING: AVX/AVX2 distance function not defined for Uint8. "
-                             "Using "
-                             "slow version. "
-                             "Contact gopalsr@microsoft.com if you need AVX/AVX2 support."
-                          << std::endl;
-#endif
+    polaris::Distance<uint8_t> *get_distance_function(polaris::MetricType m) {
+        if (m == polaris::MetricType::METRIC_L2) {
             return new polaris::DistanceL2UInt8();
-        } else if (m == polaris::Metric::COSINE) {
+        } else if (m == polaris::MetricType::METRIC_COSINE) {
             polaris::cout << "AVX/AVX2 distance function not defined for Uint8. Using "
                              "slow version SlowDistanceCosineUint8() "
                              "Contact gopalsr@microsoft.com if you need AVX/AVX2 support."
@@ -648,10 +641,10 @@ namespace polaris {
     template POLARIS_API
     class SlowDistanceL2<uint8_t>;
 
-    template POLARIS_API Distance<float> *get_distance_function(Metric m);
+    template POLARIS_API Distance<float> *get_distance_function(MetricType m);
 
-    template POLARIS_API Distance<int8_t> *get_distance_function(Metric m);
+    template POLARIS_API Distance<int8_t> *get_distance_function(MetricType m);
 
-    template POLARIS_API Distance<uint8_t> *get_distance_function(Metric m);
+    template POLARIS_API Distance<uint8_t> *get_distance_function(MetricType m);
 
 } // namespace polaris

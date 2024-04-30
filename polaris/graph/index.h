@@ -65,7 +65,7 @@ namespace polaris {
                           std::shared_ptr<AbstractDataStore<T>> pq_data_store = nullptr);
 
         // Constructor for incremental index
-        POLARIS_API Index(Metric m, const size_t dim, const size_t max_points,
+        POLARIS_API Index(MetricType m, const size_t dim, const size_t max_points,
                           const std::shared_ptr<IndexWriteParameters> index_parameters,
                           const std::shared_ptr<IndexSearchParams> index_search_params,
                           const size_t num_frozen_pts = 0, const bool dynamic_index = false,
@@ -344,7 +344,7 @@ namespace polaris {
 
     private:
         // Distance functions
-        Metric _dist_metric = polaris::L2;
+        MetricType _dist_metric = polaris::MetricType::METRIC_L2;
 
         // Data
         std::shared_ptr<AbstractDataStore<T>> _data_store;

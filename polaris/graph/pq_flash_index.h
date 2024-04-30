@@ -37,7 +37,7 @@ template <typename T, typename LabelT = uint32_t> class PQFlashIndex
 {
   public:
     POLARIS_API PQFlashIndex(std::shared_ptr<AlignedFileReader> &fileReader,
-                                   polaris::Metric metric = polaris::Metric::L2);
+                                   polaris::MetricType metric = polaris::MetricType::METRIC_L2);
     POLARIS_API ~PQFlashIndex();
 
     // load compressed data, and obtains the handle to the disk-resident index
@@ -87,7 +87,7 @@ template <typename T, typename LabelT = uint32_t> class PQFlashIndex
 
     std::shared_ptr<AlignedFileReader> &reader;
 
-    POLARIS_API polaris::Metric get_metric();
+    POLARIS_API polaris::MetricType get_metric();
 
     //
     // node_ids: input list of node_ids to be read
@@ -153,7 +153,7 @@ template <typename T, typename LabelT = uint32_t> class PQFlashIndex
     uint64_t _reorder_data_start_sector = 0;
     uint64_t _nvecs_per_sector = 0;
 
-    polaris::Metric metric = polaris::Metric::L2;
+    polaris::MetricType metric = polaris::MetricType::METRIC_L2;
 
     // used only for inner product search to re-scale the result value
     // (due to the pre-processing of base during index build)

@@ -118,13 +118,13 @@ namespace polaris {
 
     void run_build_disk_index() {
         bool use_filters = (build_disk_index_context.label_file != "") ? true : false;
-        polaris::Metric metric;
+        polaris::MetricType metric;
         if (build_disk_index_context.dist_fn == std::string("l2"))
-            metric = polaris::Metric::L2;
+            metric = polaris::MetricType::METRIC_L2;
         else if (build_disk_index_context.dist_fn == std::string("mips"))
-            metric = polaris::Metric::INNER_PRODUCT;
+            metric = polaris::MetricType::METRIC_INNER_PRODUCT;
         else if (build_disk_index_context.dist_fn == std::string("cosine"))
-            metric = polaris::Metric::COSINE;
+            metric = polaris::MetricType::METRIC_COSINE;
         else {
             std::cout << "Error. Only l2 and mips distance functions are supported" << std::endl;
             exit(-1);

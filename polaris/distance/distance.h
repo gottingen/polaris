@@ -5,17 +5,18 @@
 #include <polaris/core/metric_type.h>
 
 namespace polaris {
+    /*
     enum Metric {
         L2 = 0,
         INNER_PRODUCT = 1,
         COSINE = 2,
         FAST_L2 = 3
     };
-
+    */
     template<typename T>
     class Distance {
     public:
-        POLARIS_API Distance(polaris::Metric dist_metric) : _distance_metric(dist_metric) {
+        POLARIS_API Distance(polaris::MetricType dist_metric) : _distance_metric(dist_metric) {
         }
 
         // distance comparison function
@@ -30,7 +31,7 @@ namespace polaris {
         // changes the dimension.
         POLARIS_API virtual uint32_t post_normalization_dimension(uint32_t orig_dimension) const;
 
-        POLARIS_API virtual polaris::Metric get_metric() const;
+        POLARIS_API virtual polaris::MetricType get_metric() const;
 
         // This is for efficiency. If no normalization is required, the callers
         // can simply ignore the normalize_data_for_build() function.
@@ -66,13 +67,13 @@ namespace polaris {
         POLARIS_API virtual ~Distance() = default;
 
     protected:
-        polaris::Metric _distance_metric;
+        polaris::MetricType _distance_metric;
         size_t _alignment_factor = 8;
     };
 
     class DistanceCosineInt8 : public Distance<int8_t> {
     public:
-        DistanceCosineInt8() : Distance<int8_t>(polaris::Metric::COSINE) {
+        DistanceCosineInt8() : Distance<int8_t>(polaris::MetricType::METRIC_COSINE) {
         }
 
         POLARIS_API virtual float compare(const int8_t *a, const int8_t *b, uint32_t length) const;
@@ -80,7 +81,7 @@ namespace polaris {
 
     class DistanceL2Int8 : public Distance<int8_t> {
     public:
-        DistanceL2Int8() : Distance<int8_t>(polaris::Metric::L2) {
+        DistanceL2Int8() : Distance<int8_t>(polaris::MetricType::METRIC_L2) {
         }
 
         POLARIS_API virtual float compare(const int8_t *a, const int8_t *b, uint32_t size) const;
@@ -89,7 +90,7 @@ namespace polaris {
     // AVX implementations. Borrowed from HNSW code.
     class AVXDistanceL2Int8 : public Distance<int8_t> {
     public:
-        AVXDistanceL2Int8() : Distance<int8_t>(polaris::Metric::L2) {
+        AVXDistanceL2Int8() : Distance<int8_t>(polaris::MetricType::METRIC_L2) {
         }
 
         POLARIS_API virtual float compare(const int8_t *a, const int8_t *b, uint32_t length) const;
@@ -97,7 +98,7 @@ namespace polaris {
 
     class DistanceCosineFloat : public Distance<float> {
     public:
-        DistanceCosineFloat() : Distance<float>(polaris::Metric::COSINE) {
+        DistanceCosineFloat() : Distance<float>(polaris::MetricType::METRIC_COSINE) {
         }
 
         POLARIS_API virtual float compare(const float *a, const float *b, uint32_t length) const;
@@ -105,7 +106,7 @@ namespace polaris {
 
     class DistanceL2Float : public Distance<float> {
     public:
-        DistanceL2Float() : Distance<float>(polaris::Metric::L2) {
+        DistanceL2Float() : Distance<float>(polaris::MetricType::METRIC_L2) {
         }
 
         POLARIS_API virtual float compare(const float *a, const float *b, uint32_t size) const __attribute__((hot));
@@ -114,7 +115,7 @@ namespace polaris {
 
     class AVXDistanceL2Float : public Distance<float> {
     public:
-        AVXDistanceL2Float() : Distance<float>(polaris::Metric::L2) {
+        AVXDistanceL2Float() : Distance<float>(polaris::MetricType::METRIC_L2) {
         }
 
         POLARIS_API virtual float compare(const float *a, const float *b, uint32_t length) const;
@@ -123,7 +124,7 @@ namespace polaris {
     template<typename T>
     class SlowDistanceL2 : public Distance<T> {
     public:
-        SlowDistanceL2() : Distance<T>(polaris::Metric::L2) {
+        SlowDistanceL2() : Distance<T>(polaris::MetricType::METRIC_L2) {
         }
 
         POLARIS_API virtual float compare(const T *a, const T *b, uint32_t length) const;
@@ -131,7 +132,7 @@ namespace polaris {
 
     class SlowDistanceCosineUInt8 : public Distance<uint8_t> {
     public:
-        SlowDistanceCosineUInt8() : Distance<uint8_t>(polaris::Metric::COSINE) {
+        SlowDistanceCosineUInt8() : Distance<uint8_t>(polaris::MetricType::METRIC_COSINE) {
         }
 
         POLARIS_API virtual float compare(const uint8_t *a, const uint8_t *b, uint32_t length) const;
@@ -139,7 +140,7 @@ namespace polaris {
 
     class DistanceL2UInt8 : public Distance<uint8_t> {
     public:
-        DistanceL2UInt8() : Distance<uint8_t>(polaris::Metric::L2) {
+        DistanceL2UInt8() : Distance<uint8_t>(polaris::MetricType::METRIC_L2) {
         }
 
         POLARIS_API virtual float compare(const uint8_t *a, const uint8_t *b, uint32_t size) const;
@@ -148,10 +149,10 @@ namespace polaris {
     template<typename T>
     class DistanceInnerProduct : public Distance<T> {
     public:
-        DistanceInnerProduct() : Distance<T>(polaris::Metric::INNER_PRODUCT) {
+        DistanceInnerProduct() : Distance<T>(polaris::MetricType::METRIC_INNER_PRODUCT) {
         }
 
-        DistanceInnerProduct(polaris::Metric metric) : Distance<T>(metric) {
+        DistanceInnerProduct(polaris::MetricType metric) : Distance<T>(metric) {
         }
 
         inline float inner_product(const T *a, const T *b, unsigned size) const;
@@ -170,7 +171,7 @@ namespace polaris {
         // currently defined only for float.
         // templated for future use.
     public:
-        DistanceFastL2() : DistanceInnerProduct<T>(polaris::Metric::FAST_L2) {
+        DistanceFastL2() : DistanceInnerProduct<T>(polaris::MetricType::METRIC_FAST_L2) {
         }
 
         float norm(const T *a, unsigned size) const;
@@ -180,7 +181,7 @@ namespace polaris {
 
     class AVXDistanceInnerProductFloat : public Distance<float> {
     public:
-        AVXDistanceInnerProductFloat() : Distance<float>(polaris::Metric::INNER_PRODUCT) {
+        AVXDistanceInnerProductFloat() : Distance<float>(polaris::MetricType::METRIC_INNER_PRODUCT) {
         }
 
         POLARIS_API virtual float compare(const float *a, const float *b, uint32_t length) const;
@@ -194,7 +195,7 @@ namespace polaris {
         void normalize_and_copy(const float *a, uint32_t length, float *a_norm) const;
 
     public:
-        AVXNormalizedCosineDistanceFloat() : Distance<float>(polaris::Metric::COSINE) {
+        AVXNormalizedCosineDistanceFloat() : Distance<float>(polaris::MetricType::METRIC_COSINE) {
         }
 
         POLARIS_API virtual float compare(const float *a, const float *b, uint32_t length) const {
@@ -215,6 +216,6 @@ namespace polaris {
     };
 
     template<typename T>
-    Distance<T> *get_distance_function(Metric m);
+    Distance<T> *get_distance_function(MetricType m);
 
 } // namespace polaris

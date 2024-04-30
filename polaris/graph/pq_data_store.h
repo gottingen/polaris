@@ -98,7 +98,7 @@ namespace polaris {
         // its own class. Remove later.
         bool _use_opq = false;
 
-        Metric _distance_metric;
+        MetricType _distance_metric;
         std::unique_ptr<Distance<data_t>> _distance_fn = nullptr;
         std::unique_ptr<QuantizedDistance<data_t>> _pq_distance_fn = nullptr;
     };

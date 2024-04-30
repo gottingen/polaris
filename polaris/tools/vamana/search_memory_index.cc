@@ -35,7 +35,7 @@
 
 
 template<typename T, typename LabelT = uint32_t>
-int search_memory_index(polaris::Metric &metric, const std::string &index_path, const std::string &result_path_prefix,
+int search_memory_index(polaris::MetricType &metric, const std::string &index_path, const std::string &result_path_prefix,
                         const std::string &query_file, const std::string &truthset_file, const uint32_t num_threads,
                         const uint32_t recall_at, const bool print_all_recalls, const std::vector<uint32_t> &Lvec,
                         const bool dynamic, const bool tags, const bool show_qps_per_thread,
@@ -95,7 +95,7 @@ int search_memory_index(polaris::Metric &metric, const std::string &index_path, 
     index->load(index_path.c_str(), num_threads, *(std::max_element(Lvec.begin(), Lvec.end())));
     std::cout << "Index loaded" << std::endl;
 
-    if (metric == polaris::FAST_L2)
+    if (metric == polaris::MetricType::METRIC_FAST_L2)
         index->optimize_index_layout();
 
     std::cout << "Using " << num_threads << " threads to search" << std::endl;
@@ -162,7 +162,7 @@ int search_memory_index(polaris::Metric &metric, const std::string &index_path, 
                                                          query_result_ids[test_id].data() + i * recall_at,
                                                          query_result_dists[test_id].data() + i * recall_at);
                 cmp_stats[i] = retval.second;
-            } else if (metric == polaris::FAST_L2) {
+            } else if (metric == polaris::MetricType::METRIC_FAST_L2) {
                 index->search_with_optimized_layout(query + i * query_aligned_dim, recall_at, L,
                                                     query_result_ids[test_id].data() + i * recall_at);
             } else if (tags) {
@@ -305,15 +305,15 @@ namespace polaris {
     }
 
     void run_search_memory_index_cli() {
-        polaris::Metric metric;
+        polaris::MetricType metric;
         if ((ctx.dist_fn == std::string("mips")) && (ctx.data_type == std::string("float"))) {
-            metric = polaris::Metric::INNER_PRODUCT;
+            metric = polaris::MetricType::METRIC_INNER_PRODUCT;
         } else if (ctx.dist_fn == std::string("l2")) {
-            metric = polaris::Metric::L2;
+            metric = polaris::MetricType::METRIC_L2;
         } else if (ctx.dist_fn == std::string("cosine")) {
-            metric = polaris::Metric::COSINE;
+            metric = polaris::MetricType::METRIC_COSINE;
         } else if ((ctx.dist_fn == std::string("fast_l2")) && (ctx.data_type == std::string("float"))) {
-            metric = polaris::Metric::FAST_L2;
+            metric = polaris::MetricType::METRIC_FAST_L2;
         } else {
             std::cout << "Unsupported distance function. Currently only l2/ cosine are "
                          "supported in general, and mips/fast_l2 only for floating "

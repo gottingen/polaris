@@ -22,7 +22,7 @@ namespace polaris {
                 throw PolarisException("ERROR: Dynamic Indexing not supported with PQ distance based "
                                        "index construction",
                                        -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-            if (_config->metric == polaris::Metric::INNER_PRODUCT)
+            if (_config->metric == polaris::MetricType::METRIC_INNER_PRODUCT)
                 throw PolarisException("ERROR: Inner product metrics not yet supported "
                                        "with PQ distance "
                                        "base index",
@@ -44,8 +44,8 @@ namespace polaris {
     }
 
     template<typename T>
-    Distance<T> *IndexFactory::construct_inmem_distance_fn(Metric metric) {
-        if (metric == polaris::Metric::COSINE && std::is_same<T, float>::value) {
+    Distance<T> *IndexFactory::construct_inmem_distance_fn(MetricType metric) {
+        if (metric == polaris::MetricType::METRIC_COSINE && std::is_same<T, float>::value) {
             return (Distance<T> *) new AVXNormalizedCosineDistanceFloat();
         } else {
             return (Distance<T> *) get_distance_function<T>(metric);
@@ -56,7 +56,7 @@ namespace polaris {
     std::shared_ptr<AbstractDataStore<T>> IndexFactory::construct_datastore(DataStoreStrategy strategy,
                                                                             size_t total_internal_points,
                                                                             size_t dimension,
-                                                                            Metric metric) {
+                                                                            MetricType metric) {
         std::unique_ptr<Distance<T>> distance;
         switch (strategy) {
             case DataStoreStrategy::MEMORY:
@@ -82,7 +82,7 @@ namespace polaris {
 
     template<typename T>
     std::shared_ptr<PQDataStore<T>> IndexFactory::construct_pq_datastore(DataStoreStrategy strategy, size_t num_points,
-                                                                         size_t dimension, Metric m,
+                                                                         size_t dimension, MetricType m,
                                                                          size_t num_pq_chunks,
                                                                          bool use_opq) {
         std::unique_ptr<Distance<T>> distance_fn;
@@ -168,10 +168,10 @@ namespace polaris {
     }
 
 // template POLARIS_API std::shared_ptr<AbstractDataStore<uint8_t>> IndexFactory::construct_datastore(
-//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, Metric m);
+//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, MetricType m);
 // template POLARIS_API std::shared_ptr<AbstractDataStore<int8_t>> IndexFactory::construct_datastore(
-//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, Metric m);
+//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, MetricType m);
 // template POLARIS_API std::shared_ptr<AbstractDataStore<float>> IndexFactory::construct_datastore(
-//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, Metric m);
+//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, MetricType m);
 
 } // namespace polaris

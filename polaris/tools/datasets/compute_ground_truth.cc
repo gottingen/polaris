@@ -135,7 +135,7 @@ void exact_knn(const size_t dim, const size_t k,
                size_t npoints,
                float *points_in, // points in Col major
                size_t nqueries, float *queries_in,
-               polaris::Metric metric = polaris::Metric::L2) // queries in Col major
+               polaris::MetricType metric = polaris::MetricType::METRIC_L2) // queries in Col major
 {
     float *points_l2sq = new float[npoints];
     float *queries_l2sq = new float[nqueries];
@@ -145,7 +145,7 @@ void exact_knn(const size_t dim, const size_t k,
     float *points = points_in;
     float *queries = queries_in;
 
-    if (metric == polaris::Metric::COSINE) { // we convert cosine distance as
+    if (metric == polaris::MetricType::METRIC_COSINE) { // we convert cosine distance as
         // normalized L2 distnace
         points = new float[npoints * dim];
         queries = new float[nqueries * dim];
@@ -177,9 +177,9 @@ void exact_knn(const size_t dim, const size_t k,
 
     std::cout << "Going to compute " << k << " NNs for " << nqueries << " queries over " << npoints << " points in "
               << dim << " dimensions using";
-    if (metric == polaris::Metric::INNER_PRODUCT)
+    if (metric == polaris::MetricType::METRIC_INNER_PRODUCT)
         std::cout << " MIPS ";
-    else if (metric == polaris::Metric::COSINE)
+    else if (metric == polaris::MetricType::METRIC_COSINE)
         std::cout << " Cosine ";
     else
         std::cout << " L2 ";
@@ -192,7 +192,7 @@ void exact_knn(const size_t dim, const size_t k,
         int64_t q_b = b * q_batch_size;
         int64_t q_e = ((b + 1) * q_batch_size > nqueries) ? nqueries : (b + 1) * q_batch_size;
 
-        if (metric == polaris::Metric::L2 || metric == polaris::Metric::COSINE) {
+        if (metric == polaris::MetricType::METRIC_L2 || metric == polaris::MetricType::METRIC_COSINE) {
             distsq_to_points(dim, dist_matrix, npoints, points, points_l2sq, q_e - q_b,
                              queries + (ptrdiff_t) q_b * (ptrdiff_t) dim, queries_l2sq + q_b);
         } else {
@@ -228,7 +228,7 @@ void exact_knn(const size_t dim, const size_t k,
     delete[] points_l2sq;
     delete[] queries_l2sq;
 
-    if (metric == polaris::Metric::COSINE) {
+    if (metric == polaris::MetricType::METRIC_COSINE) {
         delete[] points;
         delete[] queries;
     }
@@ -322,7 +322,7 @@ template<typename T>
 std::vector<std::vector<std::pair<uint32_t, float>>> processUnfilteredParts(const std::string &base_file,
                                                                             size_t &nqueries, size_t &npoints,
                                                                             size_t &dim, size_t &k, float *query_data,
-                                                                            const polaris::Metric &metric,
+                                                                            const polaris::MetricType &metric,
                                                                             std::vector<uint32_t> &location_to_tag) {
     float *base_data = nullptr;
     int num_parts = get_num_parts<T>(base_file.c_str());
@@ -359,7 +359,7 @@ std::vector<std::vector<std::pair<uint32_t, float>>> processUnfilteredParts(cons
 
 template<typename T>
 int aux_main(const std::string &base_file, const std::string &query_file, const std::string &gt_file, size_t k,
-             const polaris::Metric &metric, const std::string &tags_file = std::string("")) {
+             const polaris::MetricType &metric, const std::string &tags_file = std::string("")) {
     size_t npoints, nqueries, dim;
 
     float *query_data;
@@ -393,7 +393,7 @@ int aux_main(const std::string &base_file, const std::string &query_file, const 
                 closest_points[i * k + j] = (int32_t) iter.first;
             }
 
-            if (metric == polaris::Metric::INNER_PRODUCT)
+            if (metric == polaris::MetricType::METRIC_INNER_PRODUCT)
                 dist_closest_points[i * k + j] = -iter.second;
             else
                 dist_closest_points[i * k + j] = iter.second;
@@ -488,13 +488,13 @@ namespace polaris {
             exit(-1);
         }
 
-        polaris::Metric metric;
+        polaris::MetricType metric;
         if (dist_fn == std::string("l2")) {
-            metric = polaris::Metric::L2;
+            metric = polaris::MetricType::METRIC_L2;
         } else if (dist_fn == std::string("mips")) {
-            metric = polaris::Metric::INNER_PRODUCT;
+            metric = polaris::MetricType::METRIC_INNER_PRODUCT;
         } else if (dist_fn == std::string("cosine")) {
-            metric = polaris::Metric::COSINE;
+            metric = polaris::MetricType::METRIC_COSINE;
         } else {
             std::cerr << "Unsupported distance function. Use l2/mips/cosine." << std::endl;
             exit(-1);

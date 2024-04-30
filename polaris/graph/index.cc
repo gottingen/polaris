@@ -65,7 +65,7 @@ namespace polaris {
                 throw PolarisException("ERROR: Dynamic Indexing not supported with PQ distance based "
                                        "index construction",
                                        -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-            if (_dist_metric == polaris::Metric::INNER_PRODUCT)
+            if (_dist_metric == polaris::MetricType::METRIC_INNER_PRODUCT)
                 throw PolarisException("ERROR: Inner product metrics not yet supported "
                                        "with PQ distance "
                                        "base index",
@@ -119,7 +119,7 @@ namespace polaris {
     }
 
     template<typename T, typename TagT, typename LabelT>
-    Index<T, TagT, LabelT>::Index(Metric m, const size_t dim, const size_t max_points,
+    Index<T, TagT, LabelT>::Index(MetricType m, const size_t dim, const size_t max_points,
                                   const std::shared_ptr<IndexWriteParameters> index_parameters,
                                   const std::shared_ptr<IndexSearchParams> index_search_params,
                                   const size_t num_frozen_pts,
@@ -968,10 +968,10 @@ namespace polaris {
                         continue;
 
                     float djk = _data_store->get_distance(iter2->id, iter->id);
-                    if (_dist_metric == polaris::Metric::L2 || _dist_metric == polaris::Metric::COSINE) {
+                    if (_dist_metric == polaris::MetricType::METRIC_L2 || _dist_metric == polaris::MetricType::METRIC_COSINE) {
                         occlude_factor[t] = (djk == 0) ? std::numeric_limits<float>::max()
                                                        : std::max(occlude_factor[t], iter2->distance / djk);
-                    } else if (_dist_metric == polaris::Metric::INNER_PRODUCT) {
+                    } else if (_dist_metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
                         // Improvization for flipping max and min dist for MIPS
                         float x = -iter2->distance;
                         float y = -djk;
@@ -1722,7 +1722,7 @@ namespace polaris {
                 // and IDType will be uint32_t or uint64_t
                 indices[pos] = (IdType) best_L_nodes[i].id;
                 if (distances != nullptr) {
-                    distances[pos] = _dist_metric == polaris::Metric::INNER_PRODUCT ? -1 * best_L_nodes[i].distance
+                    distances[pos] = _dist_metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 * best_L_nodes[i].distance
                                                                                     : best_L_nodes[i].distance;
                 }
                 pos++;
@@ -1806,7 +1806,7 @@ namespace polaris {
                 indices[pos] = (IdType) best_L_nodes[i].id;
 
                 if (distances != nullptr) {
-                    distances[pos] = _dist_metric == polaris::Metric::INNER_PRODUCT ? -1 * best_L_nodes[i].distance
+                    distances[pos] = _dist_metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 * best_L_nodes[i].distance
                                                                                     : best_L_nodes[i].distance;
                 }
                 pos++;
@@ -1890,7 +1890,7 @@ namespace polaris {
                 }
 
                 if (distances != nullptr) {
-                    distances[pos] = _dist_metric == INNER_PRODUCT ? -1 * node.distance : node.distance;
+                    distances[pos] = _dist_metric == MetricType::METRIC_INNER_PRODUCT ? -1 * node.distance : node.distance;
                 }
                 pos++;
                 // If res_vectors.size() < k, clip at the value.

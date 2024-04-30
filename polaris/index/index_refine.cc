@@ -164,7 +164,7 @@ namespace polaris {
             reorder_2_heaps<C>(
                     n, k, labels, distances, k_base, base_labels, base_distances);
         } else {
-            POLARIS_THROW_MSG("Metric type not supported");
+            POLARIS_THROW_MSG("MetricType type not supported");
         }
     }
 
@@ -295,7 +295,7 @@ namespace polaris {
             reorder_2_heaps<C>(
                     n, k, labels, distances, k_base, base_labels, base_distances);
         } else {
-            POLARIS_THROW_MSG("Metric type not supported");
+            POLARIS_THROW_MSG("MetricType type not supported");
         }
     }
 

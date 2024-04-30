@@ -55,7 +55,7 @@ namespace polaris {
             size_t number_of_label_points, dimension;
             polaris::get_bin_metadata(curr_label_input_data_path, number_of_label_points, dimension);
 
-            polaris::Index<T> index(polaris::Metric::L2, dimension, number_of_label_points,
+            polaris::Index<T> index(polaris::MetricType::METRIC_L2, dimension, number_of_label_points,
                                     std::make_shared<polaris::IndexWriteParameters>(label_index_build_parameters),
                                     nullptr,
                                     0, false, false, false, false, 0, false);
