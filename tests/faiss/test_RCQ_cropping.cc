@@ -7,7 +7,7 @@
 
 #include <polaris/index/index_additive_quantizer.h>
 #include <polaris/index/index_scalar_quantizer.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <gtest/gtest.h>
 
 /* This test creates a 3-level RCQ and performs a search on it.

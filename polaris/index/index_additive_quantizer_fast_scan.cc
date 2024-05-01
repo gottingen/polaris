@@ -18,7 +18,7 @@
 #include <polaris/impl/lookup_table_scaler.h>
 #include <polaris/quantization/residual_quantizer.h>
 #include <polaris/impl/pq4_fast_scan.h>
-#include <polaris/utils/quantize_lut.h>
+#include <polaris/internal/quantize_lut.h>
 #include <polaris/core/utils.h>
 
 namespace polaris {

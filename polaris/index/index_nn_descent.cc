@@ -26,7 +26,7 @@
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/core/heap.h>
 #include <polaris/utils/distances.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 
 extern "C" {
 

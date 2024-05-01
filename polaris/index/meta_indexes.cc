@@ -18,8 +18,8 @@
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/internal/id_selector.h>
 #include <polaris/core/heap.h>
-#include <polaris/utils/worker_thread.h>
-#include <polaris/utils/random.h>
+#include <polaris/internal/worker_thread.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 namespace polaris {

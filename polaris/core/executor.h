@@ -12,21 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+//
 #pragma once
 
-#include <collie/simd/simd.h>
-
-#if !COLLIE_SIMD_WITH_AVX2 && !COLLIE_SIMD_WITH_NEON64
-#error "No AVX2 support or NEON64 support"
-#endif
-
-#include <vector>
+#include <collie/taskflow/taskflow.h>
 
 namespace polaris {
 
-    static constexpr size_t kAlignment = collie::simd::best_arch::alignment();
+    void set_global_executor_thread_num(int num);
+    collie::tf::Executor *get_global_executor();
 
-    template<typename T>
-    using aligned_vector = std::vector<T, collie::aligned_allocator<T, kAlignment>>;
-
-}  // namespace polaris
+} // namespace polaris

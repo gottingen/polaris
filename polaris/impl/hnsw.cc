@@ -13,7 +13,7 @@
 #include <polaris/impl/distance_computer.h>
 #include <polaris/internal/id_selector.h>
 #include <polaris/core/result_handler.h>
-#include <polaris/utils/prefetch.h>
+#include <polaris/internal/prefetch.h>
 
 #include <polaris/internal/platform_macros.h>
 

@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/utils/aligned_table.h>
-#include <polaris/utils/partitioning.h>
+#include <polaris/internal/aligned_table.h>
+#include <polaris/internal/partitioning.h>
 
 using namespace polaris;
 

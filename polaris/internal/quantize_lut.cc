@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/utils/quantize_lut.h>
+#include <polaris/internal/quantize_lut.h>
 
 #include <algorithm>
 #include <cmath>

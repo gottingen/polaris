@@ -18,7 +18,7 @@
 #include <typeinfo>
 
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 #include <polaris/index/index_flat.h>

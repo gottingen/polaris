@@ -59,7 +59,7 @@ namespace polaris {
 /*********************************************************
  * Reference implementations
  */
-
+/*
 float fvec_L1_ref(const float* x, const float* y, size_t d) {
     size_t i;
     float res = 0;
@@ -90,7 +90,7 @@ void fvec_L2sqr_ny_ref(
         y += d;
     }
 }
-
+*/
 void fvec_L2sqr_ny_y_transposed_ref(
         float* dis,
         const float* x,
@@ -158,7 +158,7 @@ size_t fvec_L2sqr_ny_nearest_y_transposed_ref(
 
     return nearest_idx;
 }
-
+/*
 void fvec_inner_products_ny_ref(
         float* ip,
         const float* x,
@@ -181,51 +181,25 @@ void fvec_inner_products_ny_ref(
     }
 }
 
-/*********************************************************
- * Autovectorized implementations
- */
 
-FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
-float fvec_inner_product(const float* x, const float* y, size_t d) {
-    float res = 0.F;
-    FAISS_PRAGMA_IMPRECISE_LOOP
-    for (size_t i = 0; i != d; ++i) {
-        res += x[i] * y[i];
-    }
-    return res;
-}
-FAISS_PRAGMA_IMPRECISE_FUNCTION_END
-
-FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
+POLARIS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
 float fvec_norm_L2sqr(const float* x, size_t d) {
     // the double in the _ref is suspected to be a typo. Some of the manual
     // implementations this replaces used float.
     float res = 0;
-    FAISS_PRAGMA_IMPRECISE_LOOP
+    POLARIS_PRAGMA_IMPRECISE_LOOP
     for (size_t i = 0; i != d; ++i) {
         res += x[i] * x[i];
     }
 
     return res;
 }
-FAISS_PRAGMA_IMPRECISE_FUNCTION_END
-
-FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
-float fvec_L2sqr(const float* x, const float* y, size_t d) {
-    size_t i;
-    float res = 0;
-    FAISS_PRAGMA_IMPRECISE_LOOP
-    for (i = 0; i < d; i++) {
-        const float tmp = x[i] - y[i];
-        res += tmp * tmp;
-    }
-    return res;
-}
-FAISS_PRAGMA_IMPRECISE_FUNCTION_END
+POLARIS_PRAGMA_IMPRECISE_FUNCTION_END
+*/
 
 /// Special version of inner product that computes 4 distances
 /// between x and yi
-FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
+POLARIS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
 void fvec_inner_product_batch_4(
         const float* __restrict x,
         const float* __restrict y0,
@@ -241,7 +215,7 @@ void fvec_inner_product_batch_4(
     float d1 = 0;
     float d2 = 0;
     float d3 = 0;
-    FAISS_PRAGMA_IMPRECISE_LOOP
+    POLARIS_PRAGMA_IMPRECISE_LOOP
     for (size_t i = 0; i < d; ++i) {
         d0 += x[i] * y0[i];
         d1 += x[i] * y1[i];
@@ -254,11 +228,11 @@ void fvec_inner_product_batch_4(
     dis2 = d2;
     dis3 = d3;
 }
-FAISS_PRAGMA_IMPRECISE_FUNCTION_END
+POLARIS_PRAGMA_IMPRECISE_FUNCTION_END
 
 /// Special version of L2sqr that computes 4 distances
 /// between x and yi, which is performance oriented.
-FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
+POLARIS_PRAGMA_IMPRECISE_FUNCTION_BEGIN
 void fvec_L2sqr_batch_4(
         const float* x,
         const float* y0,
@@ -274,7 +248,7 @@ void fvec_L2sqr_batch_4(
     float d1 = 0;
     float d2 = 0;
     float d3 = 0;
-    FAISS_PRAGMA_IMPRECISE_LOOP
+    POLARIS_PRAGMA_IMPRECISE_LOOP
     for (size_t i = 0; i < d; ++i) {
         const float q0 = x[i] - y0[i];
         const float q1 = x[i] - y1[i];
@@ -291,7 +265,7 @@ void fvec_L2sqr_batch_4(
     dis2 = d2;
     dis3 = d3;
 }
-FAISS_PRAGMA_IMPRECISE_FUNCTION_END
+POLARIS_PRAGMA_IMPRECISE_FUNCTION_END
 
 /*********************************************************
  * SSE and AVX implementations
@@ -904,7 +878,7 @@ void fvec_op_ny_D12(float* dis, const float* x, const float* y, size_t ny) {
 }
 
 } // anonymous namespace
-
+/*
 void fvec_L2sqr_ny(
         float* dis,
         const float* x,
@@ -954,7 +928,7 @@ void fvec_inner_products_ny(
     }
 #undef DISPATCH
 }
-
+*/
 #ifdef __AVX2__
 template <size_t DIM>
 void fvec_L2sqr_ny_y_transposed_D(
@@ -1066,7 +1040,7 @@ void fvec_L2sqr_ny_transposed(
 }
 
 #ifdef __AVX2__
-
+/*
 size_t fvec_L2sqr_ny_nearest_D2(
         float* distances_tmp_buffer,
         const float* x,
@@ -1428,8 +1402,9 @@ size_t fvec_L2sqr_ny_nearest_D8(
 
     return current_min_index;
 }
-
+*/
 #else
+/*
 size_t fvec_L2sqr_ny_nearest_D2(
         float* distances_tmp_buffer,
         const float* x,
@@ -1453,8 +1428,9 @@ size_t fvec_L2sqr_ny_nearest_D8(
         size_t ny) {
     return fvec_L2sqr_ny_nearest_ref(distances_tmp_buffer, x, y, 8, ny);
 }
+ */
 #endif
-
+/*
 size_t fvec_L2sqr_ny_nearest(
         float* distances_tmp_buffer,
         const float* x,
@@ -1475,7 +1451,7 @@ size_t fvec_L2sqr_ny_nearest(
     }
 #undef DISPATCH
 }
-
+*/
 #ifdef __AVX2__
 template <size_t DIM>
 size_t fvec_L2sqr_ny_nearest_y_transposed_D(
@@ -1629,7 +1605,7 @@ size_t fvec_L2sqr_ny_nearest_y_transposed(
 #endif
 
 #ifdef USE_AVX
-
+/*
 float fvec_L1(const float* x, const float* y, size_t d) {
     __m256 msum1 = _mm256_setzero_ps();
     __m256 signmask = _mm256_castsi256_ps(_mm256_set1_epi32(0x7fffffffUL));
@@ -1669,7 +1645,8 @@ float fvec_L1(const float* x, const float* y, size_t d) {
     msum2 = _mm_hadd_ps(msum2, msum2);
     return _mm_cvtss_f32(msum2);
 }
-
+*/
+/*
 float fvec_Linf(const float* x, const float* y, size_t d) {
     __m256 msum1 = _mm256_setzero_ps();
     __m256 signmask = _mm256_castsi256_ps(_mm256_set1_epi32(0x7fffffffUL));
@@ -1709,9 +1686,9 @@ float fvec_Linf(const float* x, const float* y, size_t d) {
     msum2 = _mm_max_ps(msum2, _mm_shuffle_ps(msum2, msum2, 1));
     return _mm_cvtss_f32(msum2);
 }
-
+*/
 #elif defined(__SSE3__) // But not AVX
-
+/*
 float fvec_L1(const float* x, const float* y, size_t d) {
     return fvec_L1_ref(x, y, d);
 }
@@ -1719,10 +1696,11 @@ float fvec_L1(const float* x, const float* y, size_t d) {
 float fvec_Linf(const float* x, const float* y, size_t d) {
     return fvec_Linf_ref(x, y, d);
 }
-
+*/
 #elif defined(__aarch64__)
 
 // not optimized for ARM
+/*
 void fvec_L2sqr_ny(
         float* dis,
         const float* x,
@@ -1731,7 +1709,7 @@ void fvec_L2sqr_ny(
         size_t ny) {
     fvec_L2sqr_ny_ref(dis, x, y, d, ny);
 }
-
+*/
 void fvec_L2sqr_ny_transposed(
         float* dis,
         const float* x,
@@ -1763,7 +1741,7 @@ size_t fvec_L2sqr_ny_nearest_y_transposed(
     return fvec_L2sqr_ny_nearest_y_transposed_ref(
             distances_tmp_buffer, x, y, y_sqlen, d, d_offset, ny);
 }
-
+/*
 float fvec_L1(const float* x, const float* y, size_t d) {
     return fvec_L1_ref(x, y, d);
 }
@@ -1780,10 +1758,10 @@ void fvec_inner_products_ny(
         size_t ny) {
     fvec_inner_products_ny_ref(dis, x, y, d, ny);
 }
-
+*/
 #else
 // scalar implementation
-
+/*
 float fvec_L1(const float* x, const float* y, size_t d) {
     return fvec_L1_ref(x, y, d);
 }
@@ -1800,7 +1778,7 @@ void fvec_L2sqr_ny(
         size_t ny) {
     fvec_L2sqr_ny_ref(dis, x, y, d, ny);
 }
-
+*/
 void fvec_L2sqr_ny_transposed(
         float* dis,
         const float* x,
@@ -1832,7 +1810,7 @@ size_t fvec_L2sqr_ny_nearest_y_transposed(
     return fvec_L2sqr_ny_nearest_y_transposed_ref(
             distances_tmp_buffer, x, y, y_sqlen, d, d_offset, ny);
 }
-
+/*
 void fvec_inner_products_ny(
         float* dis,
         const float* x,
@@ -1841,13 +1819,13 @@ void fvec_inner_products_ny(
         size_t ny) {
     fvec_inner_products_ny_ref(dis, x, y, d, ny);
 }
-
+*/
 #endif
 
 /***************************************************************************
  * heavily optimized table computations
  ***************************************************************************/
-
+/*
 [[maybe_unused]] static inline void fvec_madd_ref(
         size_t n,
         const float* a,
@@ -1857,8 +1835,9 @@ void fvec_inner_products_ny(
     for (size_t i = 0; i < n; i++)
         c[i] = a[i] + bf * b[i];
 }
-
+*/
 #ifdef __AVX2__
+/*
 static inline void fvec_madd_avx2(
         const size_t n,
         const float* __restrict a,
@@ -1910,11 +1889,11 @@ static inline void fvec_madd_avx2(
         const __m256 abmul = _mm256_fmadd_ps(bfmm, bx, ax);
         _mm256_maskstore_ps(c + idx, mask, abmul);
     }
-}
+}*/
 #endif
 
 #ifdef __SSE3__
-
+/*
 [[maybe_unused]] static inline void fvec_madd_sse(
         size_t n,
         const float* a,
@@ -1934,7 +1913,8 @@ static inline void fvec_madd_avx2(
         c4++;
     }
 }
-
+*/
+/*
 void fvec_madd(size_t n, const float* a, float bf, const float* b, float* c) {
 #ifdef __AVX2__
     fvec_madd_avx2(n, a, bf, b, c);
@@ -1945,9 +1925,9 @@ void fvec_madd(size_t n, const float* a, float bf, const float* b, float* c) {
         fvec_madd_ref(n, a, bf, b, c);
 #endif
 }
-
+*/
 #elif defined(__aarch64__)
-
+/*
 void fvec_madd(size_t n, const float* a, float bf, const float* b, float* c) {
     const size_t n_simd = n - (n & 3);
     const float32x4_t bfv = vdupq_n_f32(bf);
@@ -1960,16 +1940,16 @@ void fvec_madd(size_t n, const float* a, float bf, const float* b, float* c) {
     }
     for (; i < n; ++i)
         c[i] = a[i] + bf * b[i];
-}
+}*/
 
 #else
-
+/*
 void fvec_madd(size_t n, const float* a, float bf, const float* b, float* c) {
     fvec_madd_ref(n, a, bf, b, c);
 }
-
+*/
 #endif
-
+/*
 static inline int fvec_madd_and_argmin_ref(
         size_t n,
         const float* a,
@@ -1988,9 +1968,9 @@ static inline int fvec_madd_and_argmin_ref(
     }
     return imin;
 }
-
+*/
 #ifdef __SSE3__
-
+/*
 static inline int fvec_madd_and_argmin_sse(
         size_t n,
         const float* a,
@@ -2041,8 +2021,8 @@ static inline int fvec_madd_and_argmin_sse(
         // vmin4 = _mm_min_ps (vmin4, vc4);
     }
     return _mm_cvtsi128_si32(imin4);
-}
-
+}*/
+/*
 int fvec_madd_and_argmin(
         size_t n,
         const float* a,
@@ -2054,9 +2034,9 @@ int fvec_madd_and_argmin(
     else
         return fvec_madd_and_argmin_ref(n, a, bf, b, c);
 }
-
+*/
 #elif defined(__aarch64__)
-
+/*
 int fvec_madd_and_argmin(
         size_t n,
         const float* a,
@@ -2105,9 +2085,9 @@ int fvec_madd_and_argmin(
     }
     return static_cast<int>(imin);
 }
-
+*/
 #else
-
+/*
 int fvec_madd_and_argmin(
         size_t n,
         const float* a,
@@ -2116,7 +2096,7 @@ int fvec_madd_and_argmin(
         float* c) {
     return fvec_madd_and_argmin_ref(n, a, bf, b, c);
 }
-
+*/
 #endif
 
 /***************************************************************************
@@ -2243,7 +2223,7 @@ void compute_PQ_dis_tables_dsub2(
 /*********************************************************
  * Vector to vector functions
  *********************************************************/
-
+/*
 void fvec_sub(size_t d, const float* a, const float* b, float* c) {
     size_t i;
     for (i = 0; i + 7 < d; i += 8) {
@@ -2288,5 +2268,5 @@ void fvec_add(size_t d, const float* a, float b, float* c) {
         c[i] = a[i] + b;
     }
 }
-
+*/
 } // namespace polaris

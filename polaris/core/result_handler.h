@@ -13,7 +13,7 @@
 
 #include <polaris/core/aux_index_structures.h>
 #include <polaris/core/heap.h>
-#include <polaris/utils/partitioning.h>
+#include <polaris/internal/partitioning.h>
 
 namespace polaris {
 

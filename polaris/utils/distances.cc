@@ -58,6 +58,7 @@ namespace polaris {
  ***************************************************************************/
 
 /* Compute the L2 norm of a set of nx vectors */
+/*
 void fvec_norms_L2(
         float* __restrict nr,
         const float* __restrict x,
@@ -67,8 +68,9 @@ void fvec_norms_L2(
     for (int64_t i = 0; i < nx; i++) {
         nr[i] = sqrtf(fvec_norm_L2sqr(x + i * d, d));
     }
-}
+}*/
 
+/*
 void fvec_norms_L2sqr(
         float* __restrict nr,
         const float* __restrict x,
@@ -77,7 +79,7 @@ void fvec_norms_L2sqr(
 #pragma omp parallel for if (nx > 10000)
     for (int64_t i = 0; i < nx; i++)
         nr[i] = fvec_norm_L2sqr(x + i * d, d);
-}
+}*/
 
 // The following is a workaround to a problem
 // in OpenMP in fbcode. The crash occurs
@@ -811,12 +813,12 @@ void range_search_inner_product(
  ***************************************************************************/
 
 /* compute the inner product between x and a subset y of ny vectors,
-   whose indices are given by idy.  */
+   whose indices are given by idy.
 void fvec_inner_products_by_idx(
         float* __restrict ip,
         const float* x,
         const float* y,
-        const int64_t* __restrict ids, /* for y vecs */
+        const int64_t* __restrict ids,
         size_t d,
         size_t nx,
         size_t ny) {
@@ -834,31 +836,7 @@ void fvec_inner_products_by_idx(
         }
     }
 }
-
-/* compute the inner product between x and a subset y of ny vectors,
-   whose indices are given by idy.  */
-void fvec_L2sqr_by_idx(
-        float* __restrict dis,
-        const float* x,
-        const float* y,
-        const int64_t* __restrict ids, /* ids of y vecs */
-        size_t d,
-        size_t nx,
-        size_t ny) {
-#pragma omp parallel for
-    for (int64_t j = 0; j < nx; j++) {
-        const int64_t* __restrict idsj = ids + j * ny;
-        const float* xj = x + j * d;
-        float* __restrict disj = dis + j * ny;
-        for (size_t i = 0; i < ny; i++) {
-            if (idsj[i] < 0) {
-                disj[i] = INFINITY;
-            } else {
-                disj[i] = fvec_L2sqr(xj, y + d * idsj[i], d);
-            }
-        }
-    }
-}
+*/
 
 void pairwise_indexed_L2sqr(
         size_t d,

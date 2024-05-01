@@ -20,33 +20,47 @@
 
 namespace polaris {
 
-    template<typename T, typename Arch = collie::simd::default_arch>
-    struct NormL2 {
-        static float norm_l2_sqr(const T *x, size_t d) {
-            float sum = 0.0f;
-            for (uint32_t i = 0; i < d; i++) {
-                sum += x[i] * x[i];
-            }
-            return sum;
-        }
-
-        static float norm_l2(const T *x, size_t d) {
-            return std::sqrt(norm_l2_sqr(x, d));
-        }
+    template<typename T>
+    struct simd_type_promotion {
+        using type = T;
     };
 
-    template<typename Arch>
-    struct NormL2<float, Arch> {
-        static float norm_l2_sqr(const float *x, size_t d) {
-            using b_type = collie::simd::batch<float, Arch>;
-            using aligend_tag = typename std::conditional<collie::simd::is_aligned<Arch>(x),
-                    collie::simd::aligned_mode, collie::simd::unaligned_mode>::type;
+    template<>
+    struct simd_type_promotion<int8_t> {
+        using type = int32_t;
+    };
+
+    template<>
+    struct simd_type_promotion<uint8_t> {
+        using type = uint32_t;
+    };
+
+    template<>
+    struct simd_type_promotion<int16_t> {
+        using type = int32_t;
+    };
+
+    template<>
+    struct simd_type_promotion<uint16_t> {
+        using type = uint32_t;
+    };
+
+    template<typename T>
+    using simd_type_promotion_t = typename simd_type_promotion<T>::type;
+
+    template<typename T, typename Arch, typename Tag, bool>
+    struct NormL2Impl;
+
+    template<typename T, typename Arch, typename Tag>
+    struct NormL2Impl<T, Arch, Tag, true> {
+        static float norm_l2_sqr(const T *x, size_t d) {
+            using b_type = collie::simd::batch<T, Arch>;
             std::size_t inc = b_type::size;
             std::size_t vec_size = d - d % inc;
             float sum = 0.0;
             b_type sum_vec = collie::simd::broadcast(0.0f);
             for (std::size_t i = 0; i < vec_size; i += inc) {
-                b_type xvec = b_type::load(x + i, aligend_tag());
+                b_type xvec = b_type::load(x + i, Tag());
                 sum_vec += xvec * xvec;
             }
             sum = collie::simd::reduce_add(sum_vec);
@@ -56,34 +70,48 @@ namespace polaris {
             return sum;
         }
 
-        static float norm_l2(const float *x, size_t d) {
+        static float norm_l2(const T *x, size_t d) {
             return norm_l2_sqr(x, d);
         }
     };
 
-    template<typename T, typename Arch = collie::simd::default_arch>
-    struct NormalizerL2 {
-        static void normalize(T *x, size_t d) {
-            float norm = NormL2<T, Arch>::norm_l2(x, d);
-            for (uint32_t i = 0; i < d; i++) {
-                x[i] /= norm;
+    template<typename T, typename Arch, typename Tag>
+    struct NormL2Impl<T, Arch, Tag, false> {
+        static float norm_l2_sqr(const T *x, size_t d) {
+            using U = simd_type_promotion_t<T>;
+            using b_type = collie::simd::batch<U, Arch>;
+            using index_type = typename collie::simd::as_integer_t<b_type>;
+            const index_type index = collie::simd::detail::make_sequence_as_batch<index_type>();
+            std::size_t inc = b_type::size;
+            std::size_t vec_size = d - d % inc;
+            float sum = 0.0;
+            b_type sum_vec = collie::simd::broadcast(U(0));
+            for (std::size_t i = 0; i < vec_size; i += inc) {
+                b_type xvec =b_type::gather(x + i, index);
+                sum_vec += xvec * xvec;
             }
+            sum = collie::simd::reduce_add(sum_vec);
+            for (std::size_t i = vec_size; i < d; ++i) {
+                sum += x[i] * x[i];
+            }
+            return sum;
+        }
+
+        static float norm_l2(const T *x, size_t d) {
+            return norm_l2_sqr(x, d);
         }
     };
 
-    template<typename Arch>
-    struct NormalizerL2<float, Arch> {
-        static void normalize(float *x, size_t d) {
-            float norm = NormL2<float, Arch>::norm_l2(x, d);
-            for (uint32_t i = 0; i < d; i++) {
-                x[i] /= norm;
-            }
+
+
+    template<typename T, typename Arch, typename Tag>
+    struct NormL2 {
+        static float norm_l2_sqr(const T *x, size_t d) {
+            return NormL2Impl<T, Arch, Tag, std::is_same_v<T, simd_type_promotion_t<T>>>::norm_l2_sqr(x, d);
         }
 
-        static void normalize(float *x, size_t d, float norm) {
-            for (uint32_t i = 0; i < d; i++) {
-                x[i] /= norm;
-            }
+        static float norm_l2(const T *x, size_t d) {
+            return norm_l2_sqr(x, d);
         }
     };
 

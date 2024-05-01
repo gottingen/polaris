@@ -15,7 +15,7 @@
 #include <polaris/core/metric_type.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 /* This demo file shows how to:

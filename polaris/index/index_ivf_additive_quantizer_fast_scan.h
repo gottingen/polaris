@@ -13,7 +13,7 @@
 #include <polaris/index/index_ivf_fast_scan.h>
 #include <polaris/quantization/additive_quantizer.h>
 #include <polaris/impl/product_additive_quantizer.h>
-#include <polaris/utils/aligned_table.h>
+#include <polaris/internal/aligned_table.h>
 
 namespace polaris {
 

@@ -31,7 +31,7 @@
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/core/result_handler.h>
 #include <polaris/utils/distances.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/sorting.h>
 
 extern "C" {

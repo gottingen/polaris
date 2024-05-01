@@ -20,7 +20,7 @@
 
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 #include <polaris/internal/polaris_assert.h>

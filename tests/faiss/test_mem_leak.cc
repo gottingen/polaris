@@ -7,7 +7,7 @@
 
 #include <polaris/index/index_flat.h>
 #include <polaris/index/index_ivf_flat.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 #include <gtest/gtest.h>

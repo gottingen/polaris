@@ -17,8 +17,8 @@
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/core/result_handler.h>
 #include <polaris/internal/platform_macros.h>
-#include <polaris/utils/aligned_table.h>
-#include <polaris/utils/partitioning.h>
+#include <polaris/internal/aligned_table.h>
+#include <polaris/internal/partitioning.h>
 
 /** This file contains callbacks for kernels that compute distances.
  */

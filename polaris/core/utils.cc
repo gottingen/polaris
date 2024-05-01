@@ -35,7 +35,7 @@
 #include <polaris/core/aux_index_structures.h>
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/internal/platform_macros.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 
 #ifndef FINTEGER
 #define FINTEGER long

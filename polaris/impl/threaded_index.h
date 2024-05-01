@@ -9,7 +9,7 @@
 
 #include <polaris/core/index.h>
 #include <polaris/index/index_binary.h>
-#include <polaris/utils/worker_thread.h>
+#include <polaris/internal/worker_thread.h>
 #include <memory>
 #include <vector>
 

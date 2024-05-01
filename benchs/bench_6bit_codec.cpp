@@ -11,7 +11,7 @@
 #include <benchmark/benchmark.h>
 #include <polaris/quantization/scalar_quantizer.h>
 #include <polaris/utils/distances.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 using namespace polaris;

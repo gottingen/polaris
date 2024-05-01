@@ -22,8 +22,7 @@
 #include <polaris/invlists/block_inverted_lists.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/hamming.h>
-#include <polaris/utils/quantize_lut.h>
-#include <polaris/utils/simdlib.h>
+#include <polaris/internal/quantize_lut.h>
 #include <polaris/core/utils.h>
 
 namespace polaris {

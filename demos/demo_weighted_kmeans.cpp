@@ -13,7 +13,7 @@
 #include <polaris/index/index_flat.h>
 #include <polaris/index/index_hnsw.h>
 #include <polaris/utils/distances.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 
 namespace {
 

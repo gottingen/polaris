@@ -10,7 +10,7 @@
 #include <memory>
 
 #include <polaris/index/index_ivf.h>
-#include <polaris/utils/aligned_table.h>
+#include <polaris/internal/aligned_table.h>
 
 namespace polaris {
 

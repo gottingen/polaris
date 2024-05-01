@@ -14,7 +14,7 @@
 #include <polaris/index/index_ivf.h>
 #include <polaris/index/index_pq.h>
 #include <polaris/internal/platform_macros.h>
-#include <polaris/utils/aligned_table.h>
+#include <polaris/internal/aligned_table.h>
 
 namespace polaris {
 

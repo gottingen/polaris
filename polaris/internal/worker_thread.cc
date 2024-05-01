@@ -6,7 +6,7 @@
  */
 
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/utils/worker_thread.h>
+#include <polaris/internal/worker_thread.h>
 #include <exception>
 
 namespace polaris {

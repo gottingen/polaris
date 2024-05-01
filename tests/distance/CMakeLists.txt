@@ -13,8 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-find_package(GTest REQUIRED PATHS /opt/EA/inf)
-add_subdirectory(hnsw)
-add_subdirectory(faiss)
-add_subdirectory(distance)
 
+carbin_cc_test(
+        NAME type_trans_test
+        MODULE distance
+        SOURCES
+        type_trans_test.cc
+        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
+        LINKS
+        polaris::polaris
+        ${POLARIS_DEPS_LINKS}
+)

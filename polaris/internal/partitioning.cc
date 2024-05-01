@@ -5,16 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/utils/partitioning.h>
+#include <polaris/internal/partitioning.h>
 
 #include <cassert>
 #include <cmath>
 
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/utils/aligned_table.h>
+#include <polaris/internal/aligned_table.h>
 #include <polaris/core/ordered_key_value.h>
 #include <polaris/utils/simdlib.h>
-
 #include <polaris/internal/platform_macros.h>
 
 namespace polaris {

@@ -22,7 +22,7 @@
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/internal/kmeans1d.h>
 #include <polaris/utils/distances.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 namespace polaris {

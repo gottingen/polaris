@@ -19,7 +19,7 @@
 #include <polaris/core/aux_index_structures.h>
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/core/heap.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 
 namespace polaris {
 

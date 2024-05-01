@@ -22,7 +22,7 @@
 #include <polaris/internal/polaris_assert.h>
 #include <polaris/internal/platform_macros.h>
 #include <polaris/core/heap.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 
 namespace polaris {
 

@@ -38,6 +38,9 @@ set(POLARIS_SRC
         core/utils.cc
         core/sorting.cc
         core/matrix_stats.cc
+        core/executor.cc
+        core/random.cc
+        distance/distance.cc
         distance/distance_impl.cc
         datasets/fvecs.cc
         datasets/ivecs.cc
@@ -109,6 +112,9 @@ set(POLARIS_SRC
         internal/memory_mapper.cc
         internal/natural_number_map.cc
         internal/natural_number_set.cc
+        internal/worker_thread.cc
+        internal/partitioning.cc
+        internal/quantize_lut.cc
         invlists/block_inverted_lists.cc
         invlists/direct_map.cc
         invlists/inverted_lists.cc
@@ -123,14 +129,10 @@ set(POLARIS_SRC
         storage/abstract_data_store.cc
         storage/in_mem_data_store.cc
         storage/in_mem_graph_store.cc
-        utils/worker_thread.cc
         utils/distances.cc
         utils/distances_simd.cc
         utils/extra_distances.cc
         utils/hamming.cc
-        utils/partitioning.cc
-        utils/quantize_lut.cc
-        utils/random.cc
         utils/distances_fused/avx512.cc
         utils/distances_fused/distances_fused.cc
         utils/distances_fused/simdlib_based.cc
@@ -163,6 +165,8 @@ set(POLARIS_HEADERS
         core/matrix_stats.h
         core/metric_type.h
         core/common_includes.h
+        core/executor.h
+        core/random.h
         distance/cosine_similarity.h
         distance/distance_impl.h
         distance/primitive.h
@@ -279,6 +283,10 @@ set(POLARIS_HEADERS
         internal/tag_uint128.h
         internal/any_wrappers.h
         internal/types.h
+        internal/worker_thread.h
+        internal/aligned_table.h
+        internal/partitioning.h
+        internal/quantize_lut.h
         io/aligned_file_reader.h
         io/linux_aligned_file_reader.h
         io/cached_io.h
@@ -298,17 +306,12 @@ set(POLARIS_HEADERS
         storage/abstract_graph_store.h
         storage/in_mem_graph_store.h
         storage/in_mem_data_store.h
-        utils/aligned_table.h
-        utils/worker_thread.h
         utils/distances.h
         utils/extra_distances-inl.h
         utils/extra_distances.h
         utils/hamming-inl.h
         utils/hamming.h
-        utils/partitioning.h
         utils/prefetch.h
-        utils/quantize_lut.h
-        utils/random.h
         utils/simdlib.h
         utils/simdlib_avx2.h
         utils/simdlib_emulated.h

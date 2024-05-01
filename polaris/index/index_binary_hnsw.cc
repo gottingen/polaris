@@ -29,7 +29,7 @@
 #include <polaris/core/result_handler.h>
 #include <polaris/core/heap.h>
 #include <polaris/utils/hamming.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 
 namespace polaris {
 

@@ -13,7 +13,7 @@
 #include <polaris/core/heap.h>
 #include <polaris/utils/distances.h>
 #include <polaris/utils/extra_distances.h>
-#include <polaris/utils/prefetch.h>
+#include <polaris/internal/prefetch.h>
 #include <polaris/core/sorting.h>
 #include <polaris/core/utils.h>
 #include <collie/taskflow/taskflow.h>

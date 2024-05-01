@@ -20,12 +20,12 @@
 #include <polaris/utils/distances.h>
 #include <polaris/utils/extra_distances.h>
 #include <polaris/utils/hamming.h>
-#include <polaris/utils/random.h>
+#include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 
 #include <polaris/impl/pq4_fast_scan.h>
 #include <polaris/impl/simd_result_handlers.h>
-#include <polaris/utils/quantize_lut.h>
+#include <polaris/internal/quantize_lut.h>
 
 namespace polaris {
 
