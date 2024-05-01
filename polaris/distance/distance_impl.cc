@@ -16,7 +16,8 @@
 #include <polaris/distance/cosine_similarity.h>
 #include <iostream>
 
-#include <polaris/distance/distance.h>
+#include <polaris/distance/distance_impl.h>
+#include <polaris/distance/norm.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/graph/vamana/logger.h>
 #include <polaris/internal/polaris_exception.h>

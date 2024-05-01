@@ -39,7 +39,7 @@ carbin_cc_test(
         MODULE run
         SOURCES ${FAISS_TEST_SRC}
         DEFINES ${POLARIS_CXX_DEFINES}
-        LINKS polaris::polaris_simd ${POLARIS_DEPS_LINKS} GTest::gtest GTest::gtest_main
+        LINKS polaris::polaris ${POLARIS_DEPS_LINKS} GTest::gtest GTest::gtest_main
         CXXOPTS ${POLARIS_CXX_OPTIONS}
 )
 

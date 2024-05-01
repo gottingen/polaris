@@ -24,6 +24,7 @@
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/internal/platform_macros.h>
 #include <polaris/internal/tag_uint128.h>
+#include <polaris/distance/distance_impl.h>
 
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
 #include <gperftools/malloc_extension.h>

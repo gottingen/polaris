@@ -10,6 +10,7 @@
 #pragma once
 
 #include <polaris/core/metric_type.h>
+#include <polaris/core/defines.h>
 #include <cstdio>
 #include <sstream>
 #include <string>

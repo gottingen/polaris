@@ -21,7 +21,7 @@ carbin_cc_binary(
         epsilon_search_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 carbin_cc_binary(
@@ -31,7 +31,7 @@ carbin_cc_binary(
         multi_thread_load_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 carbin_cc_binary(
@@ -41,7 +41,7 @@ carbin_cc_binary(
         multi_thread_replace_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 
@@ -52,7 +52,7 @@ carbin_cc_binary(
         multivector_search_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 
@@ -63,7 +63,7 @@ carbin_cc_binary(
         search_knn_closer_first_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 
@@ -74,7 +74,7 @@ carbin_cc_binary(
         search_knn_with_filter_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 
@@ -85,6 +85,6 @@ carbin_cc_binary(
         updates_test.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )

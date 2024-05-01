@@ -15,6 +15,7 @@
 
 #include <polaris/graph/vamana/index_factory.h>
 #include <polaris/graph/vamana/pq_l2_distance.h>
+#include <polaris/distance/distance_impl.h>
 
 namespace polaris {
 

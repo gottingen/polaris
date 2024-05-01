@@ -73,16 +73,16 @@ namespace polaris {
             path input_data_path, turbo::flat_hash_map<std::string, uint32_t> labels_to_number_of_points,
             std::vector<label_set> point_ids_to_labels, label_set all_labels);
 
-/*
- * For each label, generates a file containing all vectors that have said label.
- * Also copies data from original bin file to new dimension-aligned file.
- *
- * Utilizes POSIX functions mmap and writev in order to minimize memory
- * overhead, so we include an STL version as well.
- *
- * Each data file is saved under the following format:
- *    input_data_path + "_" + label
- */
+    /*
+     * For each label, generates a file containing all vectors that have said label.
+     * Also copies data from original bin file to new dimension-aligned file.
+     *
+     * Utilizes POSIX functions mmap and writev in order to minimize memory
+     * overhead, so we include an STL version as well.
+     *
+     * Each data file is saved under the following format:
+     *    input_data_path + "_" + label
+     */
 
     template<typename T>
     inline turbo::flat_hash_map<std::string, std::vector<uint32_t>> generate_label_specific_vector_files(

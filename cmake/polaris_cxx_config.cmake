@@ -357,14 +357,13 @@ endif ()
 # set it to haswell arch
 ##############################################################################
 set(CARBIN_CXX_OPTIONS ${CARBIN_DEFAULT_COPTS} ${CARBIN_ARCH_OPTION} ${CARBIN_RANDOM_RANDEN_COPTS})
-set(CARBIN_CXX_NORMAL_OPTIONS ${CARBIN_DEFAULT_COPTS} ${CARBIN_RANDOM_RANDEN_COPTS})
 ###############################
 #
 # define you options here
 # eg.
 list(REMOVE_DUPLICATES CARBIN_CXX_OPTIONS)
 set(POLARIS_CXX_OPTIONS ${CARBIN_CXX_OPTIONS})
-set(POLARIS_CXX_NORMAL_OPTIONS ${CARBIN_CXX_NORMAL_OPTIONS})
 list(APPEND POLARIS_CXX_OPTIONS "-fopenmp" "-Wno-maybe-uninitialized" "-mf16c")
-list(APPEND POLARIS_CXX_NORMAL_OPTIONS "-fopenmp" "-Wno-maybe-uninitialized" "-mf16c")
+list(REMOVE_DUPLICATES POLARIS_CXX_OPTIONS)
 set(POLARIS_CXX_DEFINES -DFINTEGER=int)
+carbin_print_list_label("POLARIS_CXX_OPTIONS" POLARIS_CXX_OPTIONS)

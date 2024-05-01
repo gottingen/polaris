@@ -38,7 +38,7 @@ set(POLARIS_SRC
         core/utils.cc
         core/sorting.cc
         core/matrix_stats.cc
-        distance/distance.cc
+        distance/distance_impl.cc
         datasets/fvecs.cc
         datasets/ivecs.cc
         datasets/tsv.cc
@@ -164,7 +164,7 @@ set(POLARIS_HEADERS
         core/metric_type.h
         core/common_includes.h
         distance/cosine_similarity.h
-        distance/distance.h
+        distance/distance_impl.h
         distance/primitive.h
         distance/simd_utils.h
         datasets/fvecs.h
@@ -345,19 +345,6 @@ carbin_cc_library(
         ${POLARIS_SRC}
         DEFINES ${POLARIS_CXX_DEFINES}
         CXXOPTS
-        ${POLARIS_CXX_NORMAL_OPTIONS}
-        PLINKS
-        ${POLARIS_DEPS_LINKS}
-        PUBLIC
-)
-
-carbin_cc_library(
-        NAMESPACE polaris
-        NAME polaris_simd
-        SOURCES
-        ${POLARIS_SRC}
-        DEFINES ${POLARIS_CXX_DEFINES}
-        CXXOPTS
         ${POLARIS_CXX_OPTIONS}
         PLINKS
         ${POLARIS_DEPS_LINKS}
@@ -401,22 +388,9 @@ carbin_cc_library(
         ${POLARIS_C_SRC}
         DEFINES ${POLARIS_CXX_DEFINES}
         CXXOPTS
-        ${POLARIS_CXX_NORMAL_OPTIONS}
-        PLINKS
-        ${POLARIS_DEPS_LINKS} polaris::polaris
-        PUBLIC
-)
-
-carbin_cc_library(
-        NAMESPACE polaris
-        NAME polaris_c_simd
-        SOURCES
-        ${POLARIS_C_SRC}
-        DEFINES ${POLARIS_CXX_DEFINES}
-        CXXOPTS
         ${POLARIS_CXX_OPTIONS}
         PLINKS
-        ${POLARIS_DEPS_LINKS} polaris::polaris_simd
+        ${POLARIS_DEPS_LINKS} polaris::polaris
         PUBLIC
 )
 carbin_cc_binary(
@@ -437,7 +411,7 @@ carbin_cc_binary(
         DEFINES ${POLARIS_CXX_DEFINES}
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris_simd
+        polaris::polaris
         ${POLARIS_DEPS_LINKS}
         PUBLIC
 )
