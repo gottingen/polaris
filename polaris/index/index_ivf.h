@@ -16,7 +16,7 @@
 
 #include <polaris/quantization/clustering.h>
 #include <polaris/core/index.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 #include <polaris/internal/platform_macros.h>
 #include <polaris/invlists/direct_map.h>
 #include <polaris/invlists/inverted_lists.h>

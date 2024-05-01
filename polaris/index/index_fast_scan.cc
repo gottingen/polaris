@@ -14,7 +14,7 @@
 #include <omp.h>
 
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 #include <polaris/impl/lookup_table_scaler.h>
 #include <polaris/core/result_handler.h>
 #include <polaris/utils/distances.h>

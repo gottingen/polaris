@@ -9,7 +9,7 @@
 
 #include <polaris/core/index.h>
 #include <polaris/index/index_binary.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 
 #include <unordered_map>
 #include <vector>

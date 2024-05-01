@@ -20,7 +20,7 @@
 #include <polaris/index/index_ivf.h>
 #include <polaris/index/clone_index.h>
 #include <polaris/core/aux_index_structures.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 #include <polaris/index/index_factory.h>
 
 using namespace polaris;

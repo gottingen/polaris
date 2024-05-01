@@ -11,7 +11,7 @@
 
 #include <polaris/core/aux_index_structures.h>
 #include <polaris/impl/distance_computer.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 #include <polaris/core/result_handler.h>
 #include <polaris/internal/prefetch.h>
 

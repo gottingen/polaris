@@ -27,7 +27,7 @@
 #include <polaris/core/aux_index_structures.h>
 #include <polaris/internal/code_packer.h>
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 
 namespace polaris {
 

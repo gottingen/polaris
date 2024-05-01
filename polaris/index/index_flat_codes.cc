@@ -11,7 +11,7 @@
 #include <polaris/internal/code_packer.h>
 #include <polaris/impl/distance_computer.h>
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 
 namespace polaris {
 

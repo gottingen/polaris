@@ -11,7 +11,7 @@
 
 #include <polaris/index/ivf_lib.h>
 #include <polaris/index/index_ivf.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 #include <polaris/index/index_factory.h>
 #include <polaris/core/index_io.h>
 #include <polaris/core/random.h>

@@ -40,6 +40,7 @@ set(POLARIS_SRC
         core/matrix_stats.cc
         core/executor.cc
         core/random.cc
+        core/id_selector.cc
         distance/distance.cc
         distance/distance_impl.cc
         datasets/fvecs.cc
@@ -103,7 +104,6 @@ set(POLARIS_SRC
         impl/pq4_fast_scan_search_qbs.cc
         impl/residual_quantizer_encode_steps.cc
         impl/nn_descent.cc
-        internal/id_selector.cc
         internal/polaris_exception.cc
         internal/kmeans1d.cc
         internal/io.cc
@@ -167,6 +167,7 @@ set(POLARIS_HEADERS
         core/common_includes.h
         core/executor.h
         core/random.h
+        core/id_selector.h
         distance/cosine_similarity.h
         distance/distance_impl.h
         distance/primitive.h
@@ -263,7 +264,6 @@ set(POLARIS_HEADERS
         impl/code_distance/code_distance.h
         impl/code_distance/code_distance-generic.h
         impl/code_distance/code_distance-avx2.h
-        internal/id_selector.h
         internal/platform_macros.h
         internal/polaris_exception.h
         internal/code_packer.h

@@ -20,7 +20,7 @@
 #include <polaris/index/index_ivf.h>
 #include <polaris/core/aux_index_structures.h>
 #include <polaris/internal/polaris_assert.h>
-#include <polaris/internal/id_selector.h>
+#include <polaris/core/id_selector.h>
 #include <polaris/internal/fp16.h>
 #include <polaris/core/utils.h>
 
