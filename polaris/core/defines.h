@@ -1,4 +1,4 @@
-// Copyright 2023 The Elastic-AI Authors.
+// Copyright 2024 The EA Authors.
 // part of Elastic AI Search
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,66 @@
 #if !COLLIE_SIMD_WITH_AVX2 && !COLLIE_SIMD_WITH_NEON64
 #error "No AVX2 support or NEON64 support"
 #endif
+
+/*
+#cmakedefine NGT_GRAPH_CHECK_VECTOR		// use vector to check whether accessed
+#cmakedefine NGT_AVX_DISABLED			// not use avx
+#cmakedefine NGT_AVX2				// use avx2
+#cmakedefine NGT_LARGE_DATASET			// more than 10M objects
+#cmakedefine NGT_DISTANCE_COMPUTATION_COUNT	// count # of distance computations
+#cmakedefine NGT_QBG_DISABLED
+#cmakedefine NGTQG_ZERO_GLOBAL
+#cmakedefine NGTQG_NO_ROTATION
+#cmakedefine NGT_BFLOAT_DISABLED		// not use bfloat
+#cmakedefine NGT_BFLOAT_ENABLED
+// End of cmake defines
+*/
+//////////////////////////////////////////////////////////////////////////
+// Release Definitions for OSS
+
+//#define		NGT_DISTANCE_COMPUTATION_COUNT
+//#define		NGT_SEARCH_TIMER
+
+#define		NGT_CREATION_EDGE_SIZE			10
+#define		NGT_EXPLORATION_COEFFICIENT		1.1
+#define		NGT_INSERTION_EXPLORATION_COEFFICIENT	1.1
+#define		NGT_SHARED_MEMORY_MAX_SIZE		1024	// MB
+#define		NGT_FORCED_REMOVE		// When errors occur due to the index inconsistency, ignore them.
+
+#define		NGT_COMPACT_VECTOR
+#define		NGT_GRAPH_READ_ONLY_GRAPH
+#define		NGT_HALF_FLOAT
+
+#ifdef	NGT_BFLOAT_ENABLED
+#define		NGT_BFLOAT
+#endif
+#ifdef	NGT_BFLOAT_DISABLED
+#undef			NGT_BFLOAT
+#endif
+
+#ifdef	NGT_LARGE_DATASET
+#define	NGT_GRAPH_CHECK_HASH_BASED_BOOLEAN_SET
+#else
+#define	NGT_GRAPH_CHECK_VECTOR
+#endif
+
+#define NGT_INNER_PRODUCT
+
+
+#if defined(NGT_AVX_DISABLED)
+#define NGT_NO_AVX
+#elif defined(NGT_AVX2)
+#undef NGT_AVX512
+#else
+#if defined(__AVX512F__) && defined(__AVX512DQ__)
+#define NGT_AVX512
+#elif defined(__AVX2__)
+#define NGT_AVX2
+#else
+#define NGT_NO_AVX
+#endif
+#endif
+
 
 #include <vector>
 

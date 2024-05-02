@@ -136,6 +136,21 @@ set(POLARIS_SRC
         utils/distances_fused/avx512.cc
         utils/distances_fused/distances_fused.cc
         utils/distances_fused/simdlib_based.cc
+        graph/ngt/array_file.cc
+        graph/ngt/command.cc
+        graph/ngt/graph.cc
+        graph/ngt/index.cc
+        graph/ngt/mmap_manager.cc
+        graph/ngt/node.cc
+        graph/ngt/object_space.cc
+        graph/ngt/shared_memory_allocator.cc
+        graph/ngt/thread.cc
+        graph/ngt/tree.cc
+        graph/ngt/version.cc
+        graph/ngt/ngtq/hierarchical_kmeans.cc
+        graph/ngt/ngtq/optimizer.cc
+        graph/ngt/ngtq/qbg_cli.cc
+        graph/ngt/ngtq/quantized_graph.cc
         graph/vamana/abstract_index.cc
         graph/vamana/disk_utils.cc
         graph/vamana/filter_utils.cc
@@ -178,6 +193,35 @@ set(POLARIS_HEADERS
         datasets/to_float.h
         datasets/random.h
         datasets/recall.h
+        graph/ngt/array_file.h
+        graph/ngt/command.h
+        graph/ngt/common.h
+        graph/ngt/clustering.h
+        graph/ngt/graph_optimizer.h
+        graph/ngt/graph_reconstructor.h
+        graph/ngt/hash_based_boolean_set.h
+        graph/ngt/index.h
+        graph/ngt/mmap_manager.h
+        graph/ngt/mmap_manager_defs.h
+        graph/ngt/mmap_manager_exception.h
+        graph/ngt/mmap_manager_impl.h
+        graph/ngt/node.h
+        graph/ngt/object_repository.h
+        graph/ngt/object_space.h
+        graph/ngt/object_space_repository.h
+        graph/ngt/optimizer.h
+        graph/ngt/primitive_comparator.h
+        graph/ngt/shared_memory_allocator.h
+        graph/ngt/thread.h
+        graph/ngt/tree.h
+        graph/ngt/version.h
+        graph/ngt/ngtq/hierarchical_kmeans.h
+        graph/ngt/ngtq/matrix.h
+        graph/ngt/ngtq/optimizer.h
+        graph/ngt/ngtq/qbg_cli.h
+        graph/ngt/ngtq/quantized_blob_graph.h
+        graph/ngt/ngtq/quantized_graph.h
+        graph/ngt/ngtq/quantizer.h
         graph/vamana/abstract_index.h
         graph/vamana/abstract_scratch.h
         graph/vamana/defaults.h
@@ -277,6 +321,7 @@ set(POLARIS_HEADERS
         internal/fp16-inl.h
         internal/fp16-arm.h
         internal/fp16.h
+        internal/half.hpp
         internal/memory_mapper.h
         internal/natural_number_map.h
         internal/natural_number_set.h
@@ -382,6 +427,8 @@ set(POLARIS_C_SRC
         capi/index_io_c.cc
         capi/impl/auxIndex_structures_c.cc
         capi/utils/distances_c.cc
+        capi/ngtq_api.cc
+        capi/ngt_api.cc
 )
 
 carbin_cc_library(

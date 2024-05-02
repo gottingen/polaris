@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
+file(COPY data DESTINATION ${PROJECT_BINARY_DIR})
 add_subdirectory(ngt)
+add_subdirectory(hnsw)
