@@ -630,7 +630,7 @@ int build_merged_vamana_index(std::string base_file, polaris::MetricType compare
                                                   .with_num_threads(num_threads)
                                                   .build();
         using TagT = uint32_t;
-        polaris::Index<T, TagT, LabelT> _index(compareMetric, base_dim, base_num,
+        polaris::VamanaIndex<T, TagT, LabelT> _index(compareMetric, base_dim, base_num,
                                                std::make_shared<polaris::IndexWriteParameters>(paras), nullptr,
                                                defaults::NUM_FROZEN_POINTS_STATIC, false, false, false,
                                                build_pq_bytes > 0, build_pq_bytes, use_opq, use_filters);
@@ -701,7 +701,7 @@ int build_merged_vamana_index(std::string base_file, polaris::MetricType compare
         uint64_t shard_base_dim, shard_base_pts;
         get_bin_metadata(shard_base_file, shard_base_pts, shard_base_dim);
 
-        polaris::Index<T> _index(compareMetric, shard_base_dim, shard_base_pts,
+        polaris::VamanaIndex<T> _index(compareMetric, shard_base_dim, shard_base_pts,
                                  std::make_shared<polaris::IndexWriteParameters>(low_degree_params), nullptr,
                                  defaults::NUM_FROZEN_POINTS_STATIC, false, false, false, build_pq_bytes > 0,
                                  build_pq_bytes, use_opq);
@@ -884,7 +884,7 @@ void create_disk_layout(const std::string base_file, const std::string mem_index
     if (index_file_size != actual_file_size)
     {
         std::stringstream stream;
-        stream << "Vamana Index file size does not match expected size per "
+        stream << "VamanaIndex file size does not match expected size per "
                   "meta-data."
                << " file size from file: " << index_file_size << " actual file size: " << actual_file_size << std::endl;
 
@@ -1046,7 +1046,7 @@ void create_disk_layout(const std::string base_file, const std::string mem_index
 
     if (append_reorder_data)
     {
-        polaris::cout << "Index written. Appending reorder data..." << std::endl;
+        polaris::cout << "VamanaIndex written. Appending reorder data..." << std::endl;
 
         auto vec_len = ndims_reorder_file * sizeof(float);
         std::unique_ptr<char[]> vec_buf = std::make_unique<char[]>(vec_len);

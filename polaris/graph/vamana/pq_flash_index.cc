@@ -890,7 +890,7 @@ continue;
             READ_U64(index_metadata, this->_nvecs_per_sector);
         }
 
-        polaris::cout << "Disk-Index File Meta-data: ";
+        polaris::cout << "VamanaIndex File Meta-data: ";
         polaris::cout << "# nodes per sector: " << _nnodes_per_sector;
         polaris::cout << ", max node len (bytes): " << _max_node_len;
         polaris::cout << ", max node degree: " << _max_degree << std::endl;

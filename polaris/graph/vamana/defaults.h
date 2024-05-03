@@ -31,7 +31,7 @@ const uint32_t NUM_FROZEN_POINTS_DYNAMIC = 1;
 // In-mem index related limits
 const float GRAPH_SLACK_FACTOR = 1.3f;
 
-// SSD Index related limits
+// SSD VamanaIndex related limits
 const uint64_t MAX_GRAPH_DEGREE = 512;
 const uint64_t SECTOR_LEN = 4096;
 const uint64_t MAX_N_SECTOR_READS = 128;

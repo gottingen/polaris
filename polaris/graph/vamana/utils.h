@@ -762,7 +762,7 @@ struct PivotContainer {
 
 inline bool validate_index_file_size(std::ifstream &in) {
     if (!in.is_open())
-        throw polaris::PolarisException("Index file size check called on unopened file stream", -1, __PRETTY_FUNCTION__,
+        throw polaris::PolarisException("VamanaIndex file size check called on unopened file stream", -1, __PRETTY_FUNCTION__,
                                         __FILE__,
                                         __LINE__);
     in.seekg(0, in.end);
@@ -772,7 +772,7 @@ inline bool validate_index_file_size(std::ifstream &in) {
     in.read((char *) &expected_file_size, sizeof(uint64_t));
     in.seekg(0, in.beg);
     if (actual_file_size != expected_file_size) {
-        polaris::cerr << "Index file size error. Expected size (metadata): " << expected_file_size
+        polaris::cerr << "VamanaIndex file size error. Expected size (metadata): " << expected_file_size
                       << ", actual file size : " << actual_file_size << "." << std::endl;
         return false;
     }

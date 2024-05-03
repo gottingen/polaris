@@ -48,7 +48,7 @@ namespace polaris {
     }
 
     template<typename T, typename TagT = uint32_t, typename LabelT = uint32_t>
-    class Index : public AbstractIndex {
+    class VamanaIndex : public AbstractIndex {
         /**************************************************************************
          *
          * Public functions acquire one or more of _update_lock, _consolidate_lock,
@@ -60,12 +60,12 @@ namespace polaris {
     public:
         // Constructor for Bulk operations and for creating the index object solely
         // for loading a prexisting index.
-        POLARIS_API Index(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
+        POLARIS_API VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
                           std::unique_ptr<AbstractGraphStore> graph_store,
                           std::shared_ptr<AbstractDataStore<T>> pq_data_store = nullptr);
 
         // Constructor for incremental index
-        POLARIS_API Index(MetricType m, const size_t dim, const size_t max_points,
+        POLARIS_API VamanaIndex(MetricType m, const size_t dim, const size_t max_points,
                           const std::shared_ptr<IndexWriteParameters> index_parameters,
                           const std::shared_ptr<IndexSearchParams> index_search_params,
                           const size_t num_frozen_pts = 0, const bool dynamic_index = false,
@@ -73,7 +73,7 @@ namespace polaris {
                           const bool pq_dist_build = false, const size_t num_pq_chunks = 0,
                           const bool use_opq = false, const bool filtered_index = false);
 
-        POLARIS_API ~Index();
+        POLARIS_API ~VamanaIndex();
 
         // Saves graph, data, metadata and associated tags.
         POLARIS_API void save(const char *filename, bool compact_before_save = false);
@@ -238,9 +238,9 @@ namespace polaris {
         virtual void _set_universal_label(const LabelType universal_label) override;
 
         // No copy/assign.
-        Index(const Index<T, TagT, LabelT> &) = delete;
+        VamanaIndex(const VamanaIndex<T, TagT, LabelT> &) = delete;
 
-        Index<T, TagT, LabelT> &operator=(const Index<T, TagT, LabelT> &) = delete;
+        VamanaIndex<T, TagT, LabelT> &operator=(const VamanaIndex<T, TagT, LabelT> &) = delete;
 
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling

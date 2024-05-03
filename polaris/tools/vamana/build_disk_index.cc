@@ -187,7 +187,7 @@ namespace polaris {
                     exit(-1);
                 }
                 if (r != 0) {
-                    polaris::cerr << "Index build failed." << std::endl;
+                    polaris::cerr << "VamanaIndex build failed." << std::endl;
                     exit(-1);
                 }
             } else {
@@ -227,14 +227,14 @@ namespace polaris {
                     exit(-1);
                 }
                 if (r != 0) {
-                    polaris::cerr << "Index build failed." << std::endl;
+                    polaris::cerr << "VamanaIndex build failed." << std::endl;
                     exit(-1);
                 }
             }
         }
         catch (const std::exception &e) {
             std::cout << std::string(e.what()) << std::endl;
-            polaris::cerr << "Index build failed." << std::endl;
+            polaris::cerr << "VamanaIndex build failed." << std::endl;
             exit(-1);
         }
     }

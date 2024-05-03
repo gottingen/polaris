@@ -93,7 +93,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     auto index_factory = polaris::IndexFactory(config);
     auto index = index_factory.create_instance();
     index->load(index_path.c_str(), num_threads, *(std::max_element(Lvec.begin(), Lvec.end())));
-    std::cout << "Index loaded" << std::endl;
+    std::cout << "VamanaIndex loaded" << std::endl;
 
     if (metric == polaris::MetricType::METRIC_FAST_L2)
         index->optimize_index_layout();
@@ -405,7 +405,7 @@ namespace polaris {
         }
         catch (std::exception &e) {
             std::cout << std::string(e.what()) << std::endl;
-            polaris::cerr << "Index search failed." << std::endl;
+            polaris::cerr << "VamanaIndex search failed." << std::endl;
             exit(-1);
         }
 

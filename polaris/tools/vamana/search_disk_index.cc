@@ -437,7 +437,7 @@ namespace polaris {
         }
         catch (const std::exception &e) {
             std::cout << std::string(e.what()) << std::endl;
-            polaris::cerr << "Index search failed." << std::endl;
+            polaris::cerr << "VamanaIndex search failed." << std::endl;
             exit(-1);
         }
     }

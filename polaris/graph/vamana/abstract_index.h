@@ -43,8 +43,8 @@ namespace polaris {
         }
     };
 
-    /* A templated independent class for intercation with Index. Uses Type Erasure to add virtual implemetation of methods
-    that can take any type(using std::any) and Provides a clean API that can be inherited by different type of Index.
+    /* A templated independent class for intercation with VamanaIndex. Uses Type Erasure to add virtual implemetation of methods
+    that can take any type(using std::any) and Provides a clean API that can be inherited by different type of VamanaIndex.
     */
     class AbstractIndex {
     public:

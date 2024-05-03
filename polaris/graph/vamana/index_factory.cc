@@ -141,7 +141,7 @@ namespace polaris {
 
         // REFACTOR TODO: Must construct in-memory PQDatastore if strategy == ONDISK and must construct
         // in-mem and on-disk PQDataStore if strategy == ONDISK and diskPQ is required.
-        return std::make_unique<polaris::Index<data_type, tag_type, label_type>>(*_config, data_store,
+        return std::make_unique<polaris::VamanaIndex<data_type, tag_type, label_type>>(*_config, data_store,
                                                                                  std::move(graph_store), pq_data_store);
     }
 

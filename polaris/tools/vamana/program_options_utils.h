@@ -79,7 +79,7 @@ namespace program_options_utils {
                                     "denser graphs with lower diameter";
     static const char *BUIlD_GRAPH_PQ_BYTES = "Number of PQ bytes to build the index; 0 for full precision build";
     static const char *USE_OPQ = "Use Optimized Product Quantization (OPQ).";
-    static const char *LABEL_FILE = "Input label file in txt format for Filtered Index build. The file should contain comma "
+    static const char *LABEL_FILE = "Input label file in txt format for Filtered VamanaIndex build. The file should contain comma "
                              "separated filters for each node with each line corresponding to a graph node";
     static const char *UNIVERSAL_LABEL =
             "Universal label, Use only in conjunction with label file for filtered index build. If a "

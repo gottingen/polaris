@@ -53,7 +53,7 @@ namespace polaris {
 
         // Preprocess the query by computing chunk distances from the query vector to
         // various centroids. Since we don't want this class to do scratch management,
-        // we will take a PQScratch object which can come either from Index class or
+        // we will take a PQScratch object which can come either from VamanaIndex class or
         // PQFlashIndex class.
         virtual void preprocess_query(const data_t *query_vec, uint32_t query_dim, PQScratch<data_t> &pq_scratch) = 0;
 
