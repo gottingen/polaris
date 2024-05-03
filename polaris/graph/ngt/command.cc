@@ -220,11 +220,9 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         case 'E':
             property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedL2;
             break;
-#ifdef NGT_INNER_PRODUCT
         case 'i':
             property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeInnerProduct;
             break;
-#endif
         case 'p':  // added by Nyapicom
             property.distanceType = NGT::Index::Property::DistanceType::DistanceTypePoincare;
             break;
@@ -329,7 +327,6 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
         vector<string> tokens;
         NGT::Common::tokenize(line, tokens, "\t, ");
         for (auto &v: tokens) object.push_back(NGT::Common::strtod(v));
-#ifdef NGT_INNER_PRODUCT
         if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
             double mag = 0.0;
             for (auto &v: object) {
@@ -341,7 +338,6 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
             //object.emplace_back(sqrt(maxMag - mag));
             object.emplace_back(mag);
         }
-#endif
 #ifdef NGT_REFINEMENT
         if (destination == 'r') {
       index.appendToRefinement(object);
@@ -364,7 +360,6 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
             timer.restart();
         }
     }
-#ifdef NGT_INNER_PRODUCT
     if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
         NGT::ObjectSpace *rep = 0;
 #ifdef NGT_REFINEMENT
@@ -392,7 +387,6 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
 #endif
         }
     }
-#endif
 }
 
 void appendTextVectors(std::string &indexPath, std::string &data, size_t dataSize, char appendMode, char destination,

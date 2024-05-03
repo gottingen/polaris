@@ -4086,12 +4086,10 @@ public:
       gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedL2;
       lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
       break;
-#ifdef NGT_INNER_PRODUCT
     case DistanceType::DistanceTypeInnerProduct:
       gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
       lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
       break;
-#endif
     default:
       {
 	stringstream msg;

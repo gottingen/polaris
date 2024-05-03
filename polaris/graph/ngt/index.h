@@ -85,9 +85,7 @@ namespace NGT {
 	databaseType	= DatabaseType::Memory;
 	prefetchOffset	= 0;
 	prefetchSize	= 0;
-#ifdef NGT_INNER_PRODUCT
         maxMagnitude	= 0.0;
-#endif
 	nOfNeighborsForInsertionOrder = 0;
 	epsilonForInsertionOrder = 0.1;
       }
@@ -106,9 +104,7 @@ namespace NGT {
 	prefetchOffset	= -1;
 	prefetchSize	= -1;
 	accuracyTable	= "";
-#ifdef NGT_INNER_PRODUCT
         maxMagnitude	= -1;
-#endif
 	nOfNeighborsForInsertionOrder = -1;
 	epsilonForInsertionOrder = -1;
       }
@@ -152,9 +148,7 @@ namespace NGT {
 	case DistanceType::DistanceTypeNormalizedAngle:		p.set("DistanceType", "NormalizedAngle"); break;
 	case DistanceType::DistanceTypeNormalizedCosine:	p.set("DistanceType", "NormalizedCosine"); break;
 	case DistanceType::DistanceTypeNormalizedL2:		p.set("DistanceType", "NormalizedL2"); break;
-#ifdef NGT_INNER_PRODUCT
 	case DistanceType::DistanceTypeInnerProduct:		p.set("DistanceType", "InnerProduct"); break;
-#endif
 	case DistanceType::DistanceTypePoincare:		p.set("DistanceType", "Poincare"); break;  // added by Nyapicom
 	case DistanceType::DistanceTypeLorentz:			p.set("DistanceType", "Lorentz"); break;  // added by Nyapicom
 	default : std::cerr << "Fatal error. Invalid distance type. " << distanceType << std::endl; abort();
@@ -179,9 +173,7 @@ namespace NGT {
 	p.set("PrefetchOffset", prefetchOffset);
 	p.set("PrefetchSize", prefetchSize);
 	p.set("AccuracyTable", accuracyTable);
-#ifdef NGT_INNER_PRODUCT
         p.set("MaxMagnitude", maxMagnitude);
-#endif
 	p.set("NumberOfNeighborsForInsertionOrder", nOfNeighborsForInsertionOrder);
 	p.set("EpsilonForInsertionOrder", epsilonForInsertionOrder);
       }
@@ -262,10 +254,8 @@ namespace NGT {
 	    distanceType = DistanceType::DistanceTypeNormalizedCosine;
 	  } else if (it->second == "NormalizedL2") {
 	    distanceType = DistanceType::DistanceTypeNormalizedL2;
-#ifdef NGT_INNER_PRODUCT
 	  } else if (it->second == "InnerProduct") {
 	    distanceType = DistanceType::DistanceTypeInnerProduct;
-#endif
 	  } else {
 	    std::cerr << "Invalid Distance Type in the property. " << it->first << ":" << it->second << std::endl;
 	  }
@@ -322,9 +312,7 @@ namespace NGT {
 	if (it != p.end()) {
 	  searchType = it->second;
 	}
-#ifdef NGT_INNER_PRODUCT
 	maxMagnitude = p.getf("MaxMagnitude", maxMagnitude);
-#endif
 	nOfNeighborsForInsertionOrder = p.getl("NumberOfNeighborsForInsertionOrder", nOfNeighborsForInsertionOrder);
 	epsilonForInsertionOrder = p.getf("EpsilonForInsertionOrder", epsilonForInsertionOrder);
       }
@@ -343,9 +331,7 @@ namespace NGT {
       int		prefetchSize;
       std::string	accuracyTable;
       std::string	searchType;	// test
-#ifdef NGT_INNER_PRODUCT
       float		maxMagnitude;
-#endif
       int		nOfNeighborsForInsertionOrder;
       float		epsilonForInsertionOrder;
 #ifdef NGT_REFINEMENT

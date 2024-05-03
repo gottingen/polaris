@@ -116,9 +116,7 @@ namespace NGT {
       DistanceTypeJaccard		= 7,
       DistanceTypeSparseJaccard		= 8,
       DistanceTypeNormalizedL2		= 9,
-#ifdef NGT_INNER_PRODUCT
       DistanceTypeInnerProduct		= 10,
-#endif
       DistanceTypePoincare		= 100,  // added by Nyapicom
       DistanceTypeLorentz		= 101  // added by Nyapicom
     };
@@ -192,10 +190,8 @@ namespace NGT {
     virtual void getObject(size_t idx, std::vector<float> &v) = 0;
     virtual std::vector<float> getObject(Object &object) = 0;
     virtual void getObjects(const std::vector<size_t> &idxs, std::vector<std::vector<float>> &vs) = 0;
-#ifdef NGT_INNER_PRODUCT
     virtual float computeMaxMagnitude(ObjectID beginId) = 0;
     virtual void setMagnitude(float maxMag, NGT::Repository<void> &graphNodes, ObjectID beginId) = 0;
-#endif
     DistanceType getDistanceType() { return distanceType; }
     size_t getDimension() { return dimension; }
     size_t getPaddedDimension() { return ((dimension - 1) / 16 + 1) * 16; }

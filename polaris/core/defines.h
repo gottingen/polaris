@@ -62,8 +62,6 @@
 #define	NGT_GRAPH_CHECK_VECTOR
 #endif
 
-#define NGT_INNER_PRODUCT
-
 
 #if defined(NGT_AVX_DISABLED)
 #define NGT_NO_AVX

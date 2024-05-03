@@ -305,7 +305,6 @@ NGT::Index::createIndex(size_t threadNumber, size_t sizeOfRepository) {
         InsertionOrder insertionOrder;
         NGT::Property prop;
         getProperty(prop);
-#ifdef NGT_INNER_PRODUCT
         if (prop.distanceType == ObjectSpace::DistanceTypeInnerProduct) {
             size_t beginId = 1;
             NGT::GraphRepository &graphRepository = static_cast<NGT::GraphIndex &>(getIndex()).repository;
@@ -319,7 +318,6 @@ NGT::Index::createIndex(size_t threadNumber, size_t sizeOfRepository) {
                 getObjectSpace().setMagnitude(maxMag, graphNodeVector, beginId);
             }
         }
-#endif
         if (prop.nOfNeighborsForInsertionOrder != 0) {
             insertionOrder.nOfNeighboringNodes = prop.nOfNeighborsForInsertionOrder;
             insertionOrder.epsilon = prop.epsilonForInsertionOrder;
@@ -349,9 +347,7 @@ NGT::Index::Property::set(NGT::Property &prop) {
     if (prop.prefetchOffset != -1) prefetchOffset = prop.prefetchOffset;
     if (prop.prefetchSize != -1) prefetchSize = prop.prefetchSize;
     if (prop.accuracyTable != "") accuracyTable = prop.accuracyTable;
-#ifdef NGT_INNER_PRODUCT
     if (prop.maxMagnitude != -1) maxMagnitude = prop.maxMagnitude;
-#endif
     if (prop.nOfNeighborsForInsertionOrder != -1) nOfNeighborsForInsertionOrder = prop.nOfNeighborsForInsertionOrder;
     if (prop.epsilonForInsertionOrder != -1) epsilonForInsertionOrder = prop.epsilonForInsertionOrder;
 }
@@ -371,9 +367,7 @@ NGT::Index::Property::get(NGT::Property &prop) {
     prop.prefetchOffset = prefetchOffset;
     prop.prefetchSize = prefetchSize;
     prop.accuracyTable = accuracyTable;
-#ifdef NGT_INNER_PRODUCT
     prop.maxMagnitude = maxMagnitude;
-#endif
     prop.nOfNeighborsForInsertionOrder = nOfNeighborsForInsertionOrder;
     prop.epsilonForInsertionOrder = epsilonForInsertionOrder;
 }
@@ -514,16 +508,10 @@ void
 NGT::GraphIndex::constructObjectSpace(NGT::Property &prop) {
     assert(prop.dimension != 0);
     size_t dimension = prop.dimension;
-#ifdef NGT_INNER_PRODUCT
     if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeSparseJaccard ||
         prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
         dimension++;
     }
-#else
-    if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeSparseJaccard) {
-      dimension++;
-    }
-#endif
 
     switch (prop.objectType) {
         case NGT::ObjectSpace::ObjectType::Float :

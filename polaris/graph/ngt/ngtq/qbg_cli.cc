@@ -112,9 +112,7 @@ public:
     case 'a': creation.distanceType = NGTQ::DistanceType::DistanceTypeAngle; break;
     case 'C': creation.distanceType = NGTQ::DistanceType::DistanceTypeNormalizedCosine; break;
     case 'E': creation.distanceType = NGTQ::DistanceType::DistanceTypeL2; break;
-#ifdef NGT_INNER_PRODUCT
     case 'i': creation.distanceType = NGTQ::DistanceType::DistanceTypeInnerProduct; break;
-#endif
     default:
       std::stringstream msg;
       msg << "Command::CreateParameters: Error: Invalid distance type. " << distanceType;
