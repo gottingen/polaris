@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <polaris/graph/ngt/mmap_manager.h>
+#include <polaris/utility/mmap_manager.h>
 
 #include <unistd.h>
 

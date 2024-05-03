@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <polaris/graph/ngt/mmap_manager_defs.h>
-#include <polaris/graph/ngt/mmap_manager_exception.h>
+#include <polaris/utility/mmap_manager_defs.h>
+#include <polaris/utility/mmap_manager_exception.h>
 
 #include <sys/mman.h>
 #include <sys/types.h>

@@ -21,7 +21,7 @@
 #include <polaris/core/defines.h>
 #include <polaris/graph/ngt/common.h>
 #include <polaris/graph/ngt/object_space_repository.h>
-#include <polaris/graph/ngt/hash_based_boolean_set.h>
+#include <polaris/utility/hash_based_boolean_set.h>
 
 #ifndef NGT_GRAPH_CHECK_VECTOR
 #include <unordered_set>

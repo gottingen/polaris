@@ -17,7 +17,7 @@
 #pragma once
 
 #include <polaris/graph/ngt/index.h>
-#include <polaris/graph/ngt/array_file.h>
+#include <polaris/io/array_file.h>
 #include <polaris/graph/ngt/clustering.h>
 #include <unordered_map>
 #include <polaris/graph/ngt/ngtq/object_file.h>

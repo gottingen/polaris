@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/ngt/mmap_manager_impl.h>
+#include <polaris/utility/mmap_manager_impl.h>
 
 namespace MemoryManager {
     // static method ---

@@ -128,14 +128,13 @@ set(POLARIS_SRC
         faiss/internal/partitioning.cc
         faiss/internal/quantize_lut.cc
         io/linux_aligned_file_reader.cc
+        io/array_file.cc
         storage/abstract_data_store.cc
         storage/in_mem_data_store.cc
         storage/in_mem_graph_store.cc
-        graph/ngt/array_file.cc
         graph/ngt/command.cc
         graph/ngt/graph.cc
         graph/ngt/index.cc
-        graph/ngt/mmap_manager.cc
         graph/ngt/node.cc
         graph/ngt/object_space.cc
         graph/ngt/shared_memory_allocator.cc
@@ -164,6 +163,7 @@ set(POLARIS_SRC
         utility/memory_mapper.cc
         utility/natural_number_map.cc
         utility/natural_number_set.cc
+        utility/mmap_manager.cc
         unified_index.cc
 )
 
@@ -193,18 +193,12 @@ set(POLARIS_HEADERS
         datasets/to_float.h
         datasets/random.h
         datasets/recall.h
-        graph/ngt/array_file.h
         graph/ngt/command.h
         graph/ngt/common.h
         graph/ngt/clustering.h
         graph/ngt/graph_optimizer.h
         graph/ngt/graph_reconstructor.h
-        graph/ngt/hash_based_boolean_set.h
         graph/ngt/index.h
-        graph/ngt/mmap_manager.h
-        graph/ngt/mmap_manager_defs.h
-        graph/ngt/mmap_manager_exception.h
-        graph/ngt/mmap_manager_impl.h
         graph/ngt/node.h
         graph/ngt/object_repository.h
         graph/ngt/object_space.h
@@ -359,6 +353,7 @@ set(POLARIS_HEADERS
         io/aligned_file_reader.h
         io/linux_aligned_file_reader.h
         io/cached_io.h
+        io/array_file.h
         storage/abstract_data_store.h
         storage/abstract_graph_store.h
         storage/in_mem_graph_store.h
@@ -375,6 +370,11 @@ set(POLARIS_HEADERS
         utility/polaris_exception.h
         utility/tag_uint128.h
         utility/types.h
+        utility/hash_based_boolean_set.h
+        utility/mmap_manager.h
+        utility/mmap_manager_defs.h
+        utility/mmap_manager_exception.h
+        utility/mmap_manager_impl.h
         unified_index.h
 )
 
