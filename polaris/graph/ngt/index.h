@@ -30,13 +30,13 @@
 #include <stdint.h>
 
 #include <polaris/core/defines.h>
-#include <polaris/graph/ngt/common.h>
+#include <polaris/utility/common.h>
 #include <polaris/graph/ngt/tree.h>
 #include <polaris/graph/ngt/thread.h>
 #include <polaris/graph/ngt/graph.h>
 
 
-namespace NGT {
+namespace polaris {
 
     class Property;
 
@@ -112,7 +112,7 @@ namespace NGT {
                 epsilonForInsertionOrder = -1;
             }
 
-            void exportProperty(NGT::PropertySet &p) {
+            void exportProperty(polaris::PropertySet &p) {
                 p.set("Dimension", dimension);
                 p.set("ThreadPoolSize", threadPoolSize);
                 switch (objectType) {
@@ -233,7 +233,7 @@ namespace NGT {
                 p.set("EpsilonForInsertionOrder", epsilonForInsertionOrder);
             }
 
-            void importProperty(NGT::PropertySet &p) {
+            void importProperty(polaris::PropertySet &p) {
                 setDefault();
                 dimension = p.getl("Dimension", dimension);
                 threadPoolSize = p.getl("ThreadPoolSize", threadPoolSize);
@@ -370,9 +370,9 @@ namespace NGT {
                 epsilonForInsertionOrder = p.getf("EpsilonForInsertionOrder", epsilonForInsertionOrder);
             }
 
-            void set(NGT::Property &prop);
+            void set(polaris::Property &prop);
 
-            void get(NGT::Property &prop);
+            void get(polaris::Property &prop);
 
             int dimension;
             int threadPoolSize;
@@ -504,29 +504,29 @@ namespace NGT {
             if (!CpuInfo::isAVX2()) {
                 std::stringstream msg;
                 msg
-                        << "NGT::Index: Fatal Error!. Despite that this NGT library is built with AVX2, this CPU doesn't support AVX2. This CPU supoorts "
+                        << "polaris::Index: Fatal Error!. Despite that this NGT library is built with AVX2, this CPU doesn't support AVX2. This CPU supoorts "
                         << CpuInfo::getSupportedSimdTypes();
                 POLARIS_THROW_EX(msg);
             }
 #elif defined(NGT_AVX512)
             if (!CpuInfo::isAVX512()) {
           std::stringstream msg;
-          msg << "NGT::Index: Fatal Error!. Despite that this NGT library is built with AVX512, this CPU doesn't support AVX512. This CPU supoorts " << CpuInfo::getSupportedSimdTypes();
+          msg << "polaris::Index: Fatal Error!. Despite that this NGT library is built with AVX512, this CPU doesn't support AVX512. This CPU supoorts " << CpuInfo::getSupportedSimdTypes();
           POLARIS_THROW_EX(msg);
             }
 #endif
         }
 
-        Index(NGT::Property &prop);
+        Index(polaris::Property &prop);
 
         Index(const std::string &database, bool rdOnly = false, Index::OpenType openType = Index::OpenTypeNone) : index(
                 0), redirect(false) { open(database, rdOnly, openType); }
 
-        Index(const std::string &database, NGT::Property &prop) : index(0), redirect(false) { open(database, prop); }
+        Index(const std::string &database, polaris::Property &prop) : index(0), redirect(false) { open(database, prop); }
 
         virtual ~Index() { close(); }
 
-        void open(const std::string &database, NGT::Property &prop) {
+        void open(const std::string &database, polaris::Property &prop) {
             open(database);
             setProperty(prop);
         }
@@ -543,7 +543,7 @@ namespace NGT {
 
         void save() {
             if (path.empty()) {
-                POLARIS_THROW_EX("NGT::Index::saveIndex: path is empty");
+                POLARIS_THROW_EX("polaris::Index::saveIndex: path is empty");
             }
             saveIndex(path);
         }
@@ -555,23 +555,23 @@ namespace NGT {
         static void mkdir(const std::string &dir) {
             if (::mkdir(dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
                 std::stringstream msg;
-                msg << "NGT::Index::mkdir: Cannot make the specified directory. " << dir;
+                msg << "polaris::Index::mkdir: Cannot make the specified directory. " << dir;
                 POLARIS_THROW_EX(msg);
             }
         }
 
-        static void create(const std::string &database, NGT::Property &prop, bool redirect = false) {
+        static void create(const std::string &database, polaris::Property &prop, bool redirect = false) {
             createGraphAndTree(database, prop, redirect);
         }
 
-        static void createGraphAndTree(const std::string &database, NGT::Property &prop, const std::string &dataFile,
+        static void createGraphAndTree(const std::string &database, polaris::Property &prop, const std::string &dataFile,
                                        size_t dataSize = 0, bool redirect = false);
 
-        static void createGraphAndTree(const std::string &database, NGT::Property &prop,
+        static void createGraphAndTree(const std::string &database, polaris::Property &prop,
                                        bool redirect = false) { createGraphAndTree(database, prop, "", redirect); }
 
         static void
-        createGraph(const std::string &database, NGT::Property &prop, const std::string &dataFile, size_t dataSize = 0,
+        createGraph(const std::string &database, polaris::Property &prop, const std::string &dataFile, size_t dataSize = 0,
                     bool redirect = false);
 
         template<typename T>
@@ -694,23 +694,23 @@ namespace NGT {
 
         virtual size_t getSizeOfElement() { return getIndex().getSizeOfElement(); }
 
-        virtual void setProperty(NGT::Property &prop) { getIndex().setProperty(prop); }
+        virtual void setProperty(polaris::Property &prop) { getIndex().setProperty(prop); }
 
-        virtual void getProperty(NGT::Property &prop) { getIndex().getProperty(prop); }
+        virtual void getProperty(polaris::Property &prop) { getIndex().getProperty(prop); }
 
         virtual void deleteObject(Object *po) { getIndex().deleteObject(po); }
 
-        virtual void linearSearch(NGT::SearchContainer &sc) { getIndex().linearSearch(sc); }
+        virtual void linearSearch(polaris::SearchContainer &sc) { getIndex().linearSearch(sc); }
 
-        virtual void linearSearch(NGT::SearchQuery &sc) { getIndex().linearSearch(sc); }
+        virtual void linearSearch(polaris::SearchQuery &sc) { getIndex().linearSearch(sc); }
 
-        virtual void search(NGT::SearchContainer &sc) { getIndex().search(sc); }
+        virtual void search(polaris::SearchContainer &sc) { getIndex().search(sc); }
 
-        virtual void search(NGT::SearchQuery &sc) { getIndex().search(sc); }
+        virtual void search(polaris::SearchQuery &sc) { getIndex().search(sc); }
 
-        virtual void search(NGT::SearchContainer &sc, ObjectDistances &seeds) { getIndex().search(sc, seeds); }
+        virtual void search(polaris::SearchContainer &sc, ObjectDistances &seeds) { getIndex().search(sc, seeds); }
 
-        virtual void getSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, size_t n) {
+        virtual void getSeeds(polaris::SearchContainer &sc, ObjectDistances &seeds, size_t n) {
             getIndex().getSeeds(sc, seeds, n);
         }
 
@@ -740,15 +740,15 @@ namespace NGT {
 
         float getEpsilonFromExpectedAccuracy(double accuracy);
 
-        void searchUsingOnlyGraph(NGT::SearchContainer &sc);
+        void searchUsingOnlyGraph(polaris::SearchContainer &sc);
 
-        void searchUsingOnlyGraph(NGT::SearchQuery &searchQuery);
+        void searchUsingOnlyGraph(polaris::SearchQuery &searchQuery);
 
         std::vector<float> makeSparseObject(std::vector<uint32_t> &object);
 
         Index &getIndex() {
             if (index == 0) {
-                POLARIS_THROW_EX("NGT::Index::getIndex: Index is unavailable.");
+                POLARIS_THROW_EX("polaris::Index::getIndex: Index is unavailable.");
             }
             return *index;
         }
@@ -776,11 +776,11 @@ namespace NGT {
         size_t getDimension();
 
     protected:
-        Object *allocateQuery(NGT::QueryContainer &queryContainer) {
+        Object *allocateQuery(polaris::QueryContainer &queryContainer) {
             auto *vec = queryContainer.getQuery();
             if (vec == 0) {
                 std::stringstream msg;
-                msg << "NGT::Index::allocateObject: Object is not set. ";
+                msg << "polaris::Index::allocateObject: Object is not set. ";
                 POLARIS_THROW_EX(msg);
             }
             Object *object = 0;
@@ -795,7 +795,7 @@ namespace NGT {
                 object = allocateObject(*static_cast<std::vector<float16> *>(vec));
             } else {
                 std::stringstream msg;
-                msg << "NGT::Index::allocateObject: Unavailable object type.";
+                msg << "polaris::Index::allocateObject: Unavailable object type.";
                 POLARIS_THROW_EX(msg);
             }
             return object;
@@ -815,11 +815,11 @@ namespace NGT {
 
         GraphIndex(const std::string &database, bool rdOnly = false, Index::OpenType openType = Index::OpenTypeNone);
 
-        GraphIndex(NGT::Property &prop) : readOnly(false) {
+        GraphIndex(polaris::Property &prop) : readOnly(false) {
             initialize(prop);
         }
 
-        void initialize(NGT::Property &prop) {
+        void initialize(polaris::Property &prop) {
             constructObjectSpace(prop);
             setProperty(prop);
         }
@@ -829,7 +829,7 @@ namespace NGT {
             destructObjectSpace();
         }
 
-        void constructObjectSpace(NGT::Property &prop);
+        void constructObjectSpace(polaris::Property &prop);
 
         void destructObjectSpace() {
 #ifdef NGT_REFINEMENT
@@ -843,15 +843,15 @@ namespace NGT {
             if (objectSpace == 0) {
                 return;
             }
-            if (property.objectType == NGT::ObjectSpace::ObjectType::Float) {
+            if (property.objectType == polaris::ObjectSpace::ObjectType::Float) {
                 ObjectSpaceRepository<float, double> *os = (ObjectSpaceRepository<float, double> *) objectSpace;
                 os->deleteAll();
                 delete os;
-            } else if (property.objectType == NGT::ObjectSpace::ObjectType::Uint8) {
+            } else if (property.objectType == polaris::ObjectSpace::ObjectType::Uint8) {
                 ObjectSpaceRepository<unsigned char, int> *os = (ObjectSpaceRepository<unsigned char, int> *) objectSpace;
                 os->deleteAll();
                 delete os;
-            } else if (property.objectType == NGT::ObjectSpace::ObjectType::Float16) {
+            } else if (property.objectType == polaris::ObjectSpace::ObjectType::Float16) {
                 ObjectSpaceRepository<float16, float> *os = (ObjectSpaceRepository<float16, float> *) objectSpace;
                 os->deleteAll();
                 delete os;
@@ -969,9 +969,9 @@ namespace NGT {
 
         void exportProperty(const std::string &file);
 
-        static void loadGraph(const std::string &ifile, NGT::GraphRepository &graph);
+        static void loadGraph(const std::string &ifile, polaris::GraphRepository &graph);
 
-        virtual void loadIndex(const std::string &ifile, bool readOnly, NGT::Index::OpenType openType);
+        virtual void loadIndex(const std::string &ifile, bool readOnly, polaris::Index::OpenType openType);
 
         virtual void exportIndex(const std::string &ofile) {
             try {
@@ -999,17 +999,17 @@ namespace NGT {
             repository.deserializeAsText(isg);
         }
 
-        void linearSearch(NGT::SearchContainer &sc) {
+        void linearSearch(polaris::SearchContainer &sc) {
             ObjectSpace::ResultSet results;
             objectSpace->linearSearch(sc.object, sc.radius, sc.size, results);
             ObjectDistances &qresults = sc.getResult();
             qresults.moveFrom(results);
         }
 
-        void linearSearch(NGT::SearchQuery &searchQuery) {
+        void linearSearch(polaris::SearchQuery &searchQuery) {
             Object *query = Index::allocateQuery(searchQuery);
             try {
-                NGT::SearchContainer sc(searchQuery, *query);
+                polaris::SearchContainer sc(searchQuery, *query);
                 GraphIndex::linearSearch(sc);
                 searchQuery.distanceComputationCount = sc.distanceComputationCount;
                 searchQuery.visitCount = sc.visitCount;
@@ -1021,7 +1021,7 @@ namespace NGT {
         }
 
         // GraphIndex
-        virtual void search(NGT::SearchContainer &sc) {
+        virtual void search(polaris::SearchContainer &sc) {
             sc.distanceComputationCount = 0;
             sc.visitCount = 0;
             ObjectDistances seeds;
@@ -1029,10 +1029,10 @@ namespace NGT {
         }
 
         // GraphIndex
-        void search(NGT::SearchQuery &searchQuery) {
+        void search(polaris::SearchQuery &searchQuery) {
             Object *query = Index::allocateQuery(searchQuery);
             try {
-                NGT::SearchContainer sc(searchQuery, *query);
+                polaris::SearchContainer sc(searchQuery, *query);
 #ifdef NGT_REFINEMENT
                 auto expansion = searchQuery.getRefinementExpansion();
                 if (expansion < 1.0) {
@@ -1051,7 +1051,7 @@ namespace NGT {
                   }
                   auto &ros = getRefinementObjectSpace();
                   auto &rrepo = ros.getRepository();
-                  NGT::Object *robject = 0;
+                  polaris::Object *robject = 0;
                   if (searchQuery.getQueryType() == typeid(float)) {
                     auto &v = *static_cast<std::vector<float>*>(searchQuery.getQuery());
                     robject = ros.allocateNormalizedObject(v);
@@ -1113,7 +1113,7 @@ namespace NGT {
             deleteObject(query);
         }
 
-        void getSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, size_t n) {
+        void getSeeds(polaris::SearchContainer &sc, ObjectDistances &seeds, size_t n) {
             getRandomSeeds(repository, seeds, n);
             setupDistances(sc, seeds);
             std::sort(seeds.begin(), seeds.end());
@@ -1159,14 +1159,14 @@ namespace NGT {
             try {
                 getObjectRepository().remove(id);
             } catch (polaris::PolarisException &err) {
-                std::cerr << "NGT::GraphIndex::remove:: cannot remove from feature. id=" << id << " " << err.what()
+                std::cerr << "polaris::GraphIndex::remove:: cannot remove from feature. id=" << id << " " << err.what()
                           << std::endl;
                 throw err;
             }
         }
 
         virtual void searchForNNGInsertion(Object &po, ObjectDistances &result) {
-            NGT::SearchContainer sc(po);
+            polaris::SearchContainer sc(po);
             sc.setResults(&result);
             sc.size = NeighborhoodGraph::property.edgeSizeForCreation;
             sc.radius = FLT_MAX;
@@ -1382,7 +1382,7 @@ namespace NGT {
 
         void extractInsertionOrder(InsertionOrder &insertionOrder);
 
-        static bool showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode = '-', size_t edgeSize = UINT_MAX);
+        static bool showStatisticsOfGraph(polaris::GraphIndex &outGraph, char mode = '-', size_t edgeSize = UINT_MAX);
 
         size_t getNumberOfObjects() { return objectSpace->getRepository().count(); }
 
@@ -1390,7 +1390,7 @@ namespace NGT {
             ObjectRepository &repo = objectSpace->getRepository();
             GraphRepository &graphRepo = repository;
             size_t count = 0;
-            for (NGT::ObjectID id = 1; id < repo.size() && id < graphRepo.size(); id++) {
+            for (polaris::ObjectID id = 1; id < repo.size() && id < graphRepo.size(); id++) {
                 if (repo[id] != 0 && graphRepo[id] != 0) {
                     count++;
                 }
@@ -1444,9 +1444,9 @@ namespace NGT {
         ObjectSpace &getRefinementObjectSpace() { return *refinementObjectSpace; }
 #endif
 
-        void setupPrefetch(NGT::Property &prop);
+        void setupPrefetch(polaris::Property &prop);
 
-        void setProperty(NGT::Property &prop) {
+        void setProperty(polaris::Property &prop) {
             setupPrefetch(prop);
             GraphIndex::property.set(prop);
             NeighborhoodGraph::property.set(prop);
@@ -1454,7 +1454,7 @@ namespace NGT {
             accuracyTable.set(property.accuracyTable);
         }
 
-        void getProperty(NGT::Property &prop) {
+        void getProperty(polaris::Property &prop) {
             GraphIndex::property.get(prop);
             NeighborhoodGraph::property.get(prop);
         }
@@ -1501,7 +1501,7 @@ namespace NGT {
     protected:
 
         // GraphIndex
-        virtual void search(NGT::SearchContainer &sc, ObjectDistances &seeds) {
+        virtual void search(polaris::SearchContainer &sc, ObjectDistances &seeds) {
             if (sc.size == 0) {
                 while (!sc.workingResult.empty()) sc.workingResult.pop();
                 return;
@@ -1544,7 +1544,7 @@ namespace NGT {
         bool readOnly;
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
 
-        void (*searchUnupdatableGraph)(NGT::NeighborhoodGraph &, NGT::SearchContainer &, NGT::ObjectDistances &);
+        void (*searchUnupdatableGraph)(polaris::NeighborhoodGraph &, polaris::SearchContainer &, polaris::ObjectDistances &);
 
 #endif
 
@@ -1558,7 +1558,7 @@ namespace NGT {
             GraphAndTreeIndex::loadIndex(database, rdOnly);
         }
 
-        GraphAndTreeIndex(NGT::Property &prop) : GraphIndex(prop) {
+        GraphAndTreeIndex(polaris::Property &prop) : GraphIndex(prop) {
             DVPTree::objectSpace = GraphIndex::objectSpace;
         }
 
@@ -1567,11 +1567,11 @@ namespace NGT {
         void create() {}
 
         void alignObjects() {
-            NGT::ObjectSpace &space = getObjectSpace();
-            NGT::ObjectRepository &repo = space.getRepository();
+            polaris::ObjectSpace &space = getObjectSpace();
+            polaris::ObjectRepository &repo = space.getRepository();
             Object **object = repo.getPtr();
             std::vector<bool> exist(repo.size(), false);
-            std::vector<NGT::Node::ID> leafNodeIDs;
+            std::vector<polaris::Node::ID> leafNodeIDs;
             DVPTree::getAllLeafNodeIDs(leafNodeIDs);
             size_t objectCount = 0;
             for (size_t i = 0; i < leafNodeIDs.size(); i++) {
@@ -1700,7 +1700,7 @@ namespace NGT {
             std::ifstream ist(ifile + "/tre");
             DVPTree::deserialize(ist);
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
-            if (property.objectAlignment == NGT::Index::Property::ObjectAlignmentTrue) {
+            if (property.objectAlignment == polaris::Index::Property::ObjectAlignmentTrue) {
                 alignObjects();
             }
 #endif
@@ -1752,7 +1752,7 @@ namespace NGT {
                 GraphIndex::remove(id, force);
                 return;
             }
-            NGT::SearchContainer so(*obj);
+            polaris::SearchContainer so(*obj);
             ObjectDistances results;
             so.setResults(&results);
             so.id = 0;
@@ -1815,7 +1815,7 @@ namespace NGT {
         }
 
         void searchForNNGInsertion(Object &po, ObjectDistances &result) {
-            NGT::SearchContainer sc(po);
+            polaris::SearchContainer sc(po);
             sc.setResults(&result);
             sc.size = NeighborhoodGraph::property.edgeSizeForCreation;
             sc.radius = FLT_MAX;
@@ -1872,12 +1872,12 @@ namespace NGT {
                                            size_t sizeOfRepository = 0);
 
         void
-        createIndex(const std::vector<std::pair<NGT::Object *, size_t> > &objects, std::vector<InsertionResult> &ids,
+        createIndex(const std::vector<std::pair<polaris::Object *, size_t> > &objects, std::vector<InsertionResult> &ids,
                     float range, size_t threadNumber);
 
         void createTreeIndex();
 
-        void getSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, size_t n) {
+        void getSeeds(polaris::SearchContainer &sc, ObjectDistances &seeds, size_t n) {
             DVPTree::SearchContainer tso(sc.object);
             tso.mode = DVPTree::SearchContainer::SearchLeaf;
             tso.radius = 0.0;
@@ -1911,7 +1911,7 @@ namespace NGT {
         }
 
         // GraphAndTreeIndex
-        void getSeedsFromTree(NGT::SearchContainer &sc, ObjectDistances &seeds) {
+        void getSeedsFromTree(polaris::SearchContainer &sc, ObjectDistances &seeds) {
             DVPTree::SearchContainer tso(sc.object);
             tso.mode = DVPTree::SearchContainer::SearchLeaf;
             tso.radius = 0.0;
@@ -1959,7 +1959,7 @@ namespace NGT {
         }
 
         // GraphAndTreeIndex
-        void search(NGT::SearchContainer &sc) {
+        void search(polaris::SearchContainer &sc) {
             sc.distanceComputationCount = 0;
             sc.visitCount = 0;
             ObjectDistances seeds;
@@ -1969,10 +1969,10 @@ namespace NGT {
         }
 
         // GraphAndTreeIndex
-        void search(NGT::SearchQuery &searchQuery) {
+        void search(polaris::SearchQuery &searchQuery) {
             Object *query = Index::allocateQuery(searchQuery);
             try {
-                NGT::SearchContainer sc(searchQuery, *query);
+                polaris::SearchContainer sc(searchQuery, *query);
 #ifdef NGT_REFINEMENT
                 auto expansion = searchQuery.getRefinementExpansion();
                 if (expansion < 1.0) {
@@ -1991,7 +1991,7 @@ namespace NGT {
                   }
                   auto &ros = getRefinementObjectSpace();
                   auto &rrepo = ros.getRepository();
-                  NGT::Object *robject = 0;
+                  polaris::Object *robject = 0;
                   if (searchQuery.getQueryType() == typeid(float)) {
                     auto &v = *static_cast<std::vector<float>*>(searchQuery.getQuery());
                     robject = ros.allocateNormalizedObject(v);
@@ -2073,51 +2073,51 @@ namespace NGT {
             NeighborhoodGraph::Property::clear();
         }
 
-        void set(NGT::Property &p) {
+        void set(polaris::Property &p) {
             Index::Property::set(p);
             NeighborhoodGraph::Property::set(p);
         }
 
         void load(const std::string &file) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             prop.load(file + "/prf");
             Index::Property::importProperty(prop);
             NeighborhoodGraph::Property::importProperty(prop);
         }
 
         void save(const std::string &file) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             Index::Property::exportProperty(prop);
             NeighborhoodGraph::Property::exportProperty(prop);
             prop.save(file + "/prf");
         }
 
         static void save(GraphIndex &graphIndex, const std::string &file) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             graphIndex.getGraphIndexProperty().exportProperty(prop);
             graphIndex.getGraphProperty().exportProperty(prop);
             prop.save(file + "/prf");
         }
 
         void importProperty(const std::string &file) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             prop.load(file + "/prf");
             Index::Property::importProperty(prop);
             NeighborhoodGraph::Property::importProperty(prop);
         }
 
         static void exportProperty(GraphIndex &graphIndex, const std::string &file) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             graphIndex.getGraphIndexProperty().exportProperty(prop);
             graphIndex.getGraphProperty().exportProperty(prop);
             prop.save(file + "/prf");
         }
     };
 
-} // namespace NGT
+} // namespace polaris
 
 template<typename T>
-size_t NGT::Index::append(const std::vector<T> &object) {
+size_t polaris::Index::append(const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
     if (repo.size() == 0) {
@@ -2132,7 +2132,7 @@ size_t NGT::Index::append(const std::vector<T> &object) {
 
 #ifdef NGT_REFINEMENT
 template<typename T>
-size_t NGT::Index::appendToRefinement(const std::vector<T> &object)
+size_t polaris::Index::appendToRefinement(const std::vector<T> &object)
 {
   auto &os = getRefinementObjectSpace();
   auto &repo = os.getRepository();
@@ -2148,7 +2148,7 @@ size_t NGT::Index::appendToRefinement(const std::vector<T> &object)
 #endif
 
 template<typename T>
-size_t NGT::Index::insert(const std::vector<T> &object) {
+size_t polaris::Index::insert(const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
     if (repo.size() == 0) {
@@ -2161,7 +2161,7 @@ size_t NGT::Index::insert(const std::vector<T> &object) {
 }
 
 template<typename T>
-void NGT::Index::update(ObjectID id, const std::vector<T> &object) {
+void polaris::Index::update(ObjectID id, const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
 
@@ -2179,7 +2179,7 @@ void NGT::Index::update(ObjectID id, const std::vector<T> &object) {
 
 #ifdef NGT_REFINEMENT
 template<typename T>
-  void NGT::Index::updateToRefinement(ObjectID id, const std::vector<T> &object)
+  void polaris::Index::updateToRefinement(ObjectID id, const std::vector<T> &object)
 {
   auto &os = getRefinementObjectSpace();
   auto &repo = os.getRepository();

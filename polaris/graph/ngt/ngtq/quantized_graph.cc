@@ -21,11 +21,11 @@
 #ifdef NGTQ_QBG
 void NGTQG::Index::quantize(const std::string indexPath, size_t dimensionOfSubvector, size_t maxNumOfEdges, bool verbose) {
   {
-    NGT::Index	index(indexPath);
+    polaris::Index	index(indexPath);
     const std::string quantizedIndexPath = indexPath + "/qg";
     struct stat st;
     if (stat(quantizedIndexPath.c_str(), &st) != 0) {
-      NGT::Property ngtProperty;
+      polaris::Property ngtProperty;
       index.getProperty(ngtProperty);
       QBG::BuildParameters buildParameters;
       buildParameters.creation.dimensionOfSubvector = dimensionOfSubvector;

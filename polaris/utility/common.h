@@ -43,7 +43,7 @@
 #endif
 
 #include <polaris/core/defines.h>
-#include <polaris/graph/ngt/shared_memory_allocator.h>
+#include <polaris/utility/shared_memory_allocator.h>
 #include <polaris/utility/half.hpp>
 #include <polaris/utility/bfloat.h>
 #include <polaris/utility/polaris_exception.h>
@@ -51,7 +51,7 @@
 #define ADVANCED_USE_REMOVED_LIST
 #define    SHARED_REMOVED_LIST
 
-namespace NGT {
+namespace polaris {
     typedef unsigned int ObjectID;
     typedef float Distance;
     typedef half_float::half float16;
@@ -345,7 +345,7 @@ namespace NGT {
         template<typename T>
         static void extractVector(const std::string &textLine, const std::string &sep, T &object) {
             std::vector<std::string> tokens;
-            NGT::Common::tokenize(textLine, tokens, sep);
+            polaris::Common::tokenize(textLine, tokens, sep);
             size_t idx;
             for (idx = 0; idx < tokens.size(); idx++) {
                 if (tokens[idx].size() == 0) {
@@ -376,7 +376,7 @@ namespace NGT {
                 std::string line;
                 while (getline(procStatus, line)) {
                     std::vector<std::string> tokens;
-                    NGT::Common::tokenize(line, tokens, ": \t");
+                    polaris::Common::tokenize(line, tokens, ": \t");
                     if (tokens[0] == stat) {
                         for (size_t i = 1; i < tokens.size(); i++) {
                             if (tokens[i].empty()) {
@@ -963,7 +963,7 @@ namespace NGT {
             std::string line;
             while (getline(is, line)) {
                 std::vector<std::string> tokens;
-                NGT::Common::tokenize(line, tokens, "\t");
+                polaris::Common::tokenize(line, tokens, "\t");
                 if (tokens.size() != 2) {
                     std::cerr << "Property file is illegal. " << line << std::endl;
                     continue;
@@ -1307,16 +1307,16 @@ namespace NGT {
         }
 
 
-        void serialize(std::ofstream &os, NGT::ObjectSpace *objspace = 0) {
+        void serialize(std::ofstream &os, polaris::ObjectSpace *objspace = 0) {
             uint32_t sz = size();
-            NGT::Serializer::write(os, sz);
+            polaris::Serializer::write(os, sz);
             os.write(reinterpret_cast<char *>(vector), size() * elementSize);
         }
 
-        void deserialize(std::ifstream &is, NGT::ObjectSpace *objectspace = 0) {
+        void deserialize(std::ifstream &is, polaris::ObjectSpace *objectspace = 0) {
             uint32_t sz;
             try {
-                NGT::Serializer::read(is, sz);
+                polaris::Serializer::read(is, sz);
             } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
                 msg
@@ -1433,14 +1433,14 @@ namespace NGT {
 
         void serialize(std::ofstream &os, ObjectSpace *objectspace = 0) {
             if (!os.is_open()) {
-                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("polaris::Common: Not open the specified stream yet.");
             }
-            NGT::Serializer::write(os, std::vector<TYPE *>::size());
+            polaris::Serializer::write(os, std::vector<TYPE *>::size());
             for (size_t idx = 0; idx < std::vector<TYPE *>::size(); idx++) {
                 if ((*this)[idx] == 0) {
-                    NGT::Serializer::write(os, '-');
+                    polaris::Serializer::write(os, '-');
                 } else {
-                    NGT::Serializer::write(os, '+');
+                    polaris::Serializer::write(os, '+');
                     if (objectspace == 0) {
                         (*this)[idx]->serialize(os);
                     } else {
@@ -1452,15 +1452,15 @@ namespace NGT {
 
         void deserialize(std::ifstream &is, ObjectSpace *objectspace = 0) {
             if (!is.is_open()) {
-                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("polaris::Common: Not open the specified stream yet.");
             }
             deleteAll();
             size_t s;
-            NGT::Serializer::read(is, s);
+            polaris::Serializer::read(is, s);
             std::vector<TYPE *>::reserve(s);
             for (size_t i = 0; i < s; i++) {
                 char type;
-                NGT::Serializer::read(is, type);
+                polaris::Serializer::read(is, type);
                 switch (type) {
                     case '-': {
                         std::vector<TYPE *>::push_back(0);
@@ -1493,7 +1493,7 @@ namespace NGT {
 
         void serializeAsText(std::ofstream &os, ObjectSpace *objectspace = 0) {
             if (!os.is_open()) {
-                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("polaris::Common: Not open the specified stream yet.");
             }
             // The format is almost the same as the default and the best in terms of the string length.
             os.setf(std::ios_base::fmtflags(0), std::ios_base::floatfield);
@@ -1518,21 +1518,21 @@ namespace NGT {
 
         void deserializeAsText(std::ifstream &is, ObjectSpace *objectspace = 0) {
             if (!is.is_open()) {
-                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("polaris::Common: Not open the specified stream yet.");
             }
             deleteAll();
             size_t s;
-            NGT::Serializer::readAsText(is, s);
+            polaris::Serializer::readAsText(is, s);
             std::vector<TYPE *>::reserve(s);
             for (size_t i = 0; i < s; i++) {
                 size_t idx;
-                NGT::Serializer::readAsText(is, idx);
+                polaris::Serializer::readAsText(is, idx);
                 if (i != idx) {
                     std::cerr << "Repository: Error. index of a specified import file is invalid. " << idx << ":" << i
                               << std::endl;
                 }
                 char type;
-                NGT::Serializer::readAsText(is, type);
+                polaris::Serializer::readAsText(is, type);
                 switch (type) {
                     case '-': {
                         std::vector<TYPE *>::push_back(0);
@@ -1626,13 +1626,13 @@ namespace NGT {
         }
 
         void serialize(std::ofstream &os) {
-            NGT::Serializer::write(os, id);
-            NGT::Serializer::write(os, distance);
+            polaris::Serializer::write(os, id);
+            polaris::Serializer::write(os, distance);
         }
 
         void deserialize(std::ifstream &is) {
-            NGT::Serializer::read(is, id);
-            NGT::Serializer::read(is, distance);
+            polaris::Serializer::read(is, id);
+            polaris::Serializer::read(is, distance);
         }
 
         void serializeAsText(std::ofstream &os) {
@@ -1680,7 +1680,7 @@ namespace NGT {
 
     typedef std::priority_queue<ObjectDistance, std::vector<ObjectDistance>, std::less<ObjectDistance> > ResultPriorityQueue;
 
-    class SearchContainer : public NGT::Container {
+    class SearchContainer : public polaris::Container {
     public:
         SearchContainer(Object &f, ObjectID i) : Container(f, i) { initialize(); }
 
@@ -1777,7 +1777,7 @@ namespace NGT {
                 queryType = 0;
                 dimension = 0;
                 std::stringstream msg;
-                msg << "NGT::SearchQuery: Invalid query type!";
+                msg << "polaris::SearchQuery: Invalid query type!";
                 POLARIS_THROW_EX(msg);
             }
             query = new std::vector<QTYPE>(q);
@@ -1835,10 +1835,10 @@ namespace NGT {
 #endif
     };
 
-    class SearchQuery : public NGT::QueryContainer, public NGT::SearchContainer {
+    class SearchQuery : public polaris::QueryContainer, public polaris::SearchContainer {
     public:
         template<typename QTYPE>
-        SearchQuery(const std::vector<QTYPE> &q):NGT::QueryContainer(q) {}
+        SearchQuery(const std::vector<QTYPE> &q):polaris::QueryContainer(q) {}
     };
 
     class InsertContainer : public Container {
@@ -1846,5 +1846,5 @@ namespace NGT {
         InsertContainer(Object &f, ObjectID i) : Container(f, i) {}
     };
 
-} // namespace NGT
+} // namespace polaris
 

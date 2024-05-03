@@ -21,11 +21,11 @@
 
 #define NGT_LOG_BASED_OPTIMIZATION
 
-namespace NGT {
+namespace polaris {
     class Optimizer {
     public:
 
-        Optimizer(NGT::Index &i, size_t n = 10) : index(i), nOfResults(n) {
+        Optimizer(polaris::Index &i, size_t n = 10) : index(i), nOfResults(n) {
         }
 
         ~Optimizer() {}
@@ -98,7 +98,7 @@ namespace NGT {
 
         void disableLog() { redirector.enable(); }
 
-        static void search(NGT::Index &index, std::istream &gtStream, Command::SearchParameters &sp,
+        static void search(polaris::Index &index, std::istream &gtStream, Command::SearchParameters &sp,
                            std::vector<MeasuredValue> &acc) {
             std::ifstream is(sp.query);
             if (!is) {
@@ -111,11 +111,11 @@ namespace NGT {
         }
 
         static void
-        search(NGT::Index &index, std::istream &queries, std::istream &gtStream, Command::SearchParameters &sp,
+        search(polaris::Index &index, std::istream &queries, std::istream &gtStream, Command::SearchParameters &sp,
                std::vector<MeasuredValue> &acc) {
             sp.stepOfEpsilon = 1.0;
             std::stringstream resultStream;
-            NGT::Command::search(index, sp, queries, resultStream);
+            polaris::Command::search(index, sp, queries, resultStream);
             resultStream.clear();
             resultStream.seekg(0, std::ios_base::beg);
             std::string type;
@@ -206,12 +206,12 @@ namespace NGT {
 
             while (getline(gtStream, line)) {
                 std::vector<std::string> tokens;
-                NGT::Common::tokenize(line, tokens, "=");
+                polaris::Common::tokenize(line, tokens, "=");
                 if (tokens.size() == 0) {
                     continue;
                 }
                 if (tokens[0] == "# Query No.") {
-                    if (tokens.size() > 1 && (size_t) NGT::Common::strtol(tokens[1]) == queryNo) {
+                    if (tokens.size() > 1 && (size_t) polaris::Common::strtol(tokens[1]) == queryNo) {
                         std::unordered_set<size_t> gt;
                         double farthestDistance;
                         if (groundTruthSize == 0) {
@@ -241,7 +241,7 @@ namespace NGT {
             while (getline(gtf, line)) {
                 if (line.size() != 0 && line.at(0) == '#') {
                     std::vector<std::string> gtf;
-                    NGT::Common::tokenize(line, gtf, "=");
+                    polaris::Common::tokenize(line, gtf, "=");
                     if (gtf.size() >= 1) {
                         if (gtf[0] == "# End of Search") {
                             searchCount++;
@@ -268,14 +268,14 @@ namespace NGT {
                     continue;
                 }
                 std::vector<std::string> result;
-                NGT::Common::tokenize(line, result, " \t");
+                polaris::Common::tokenize(line, result, " \t");
                 if (result.size() < 3) {
                     std::stringstream msg;
                     msg << "result format is wrong. ";
                     POLARIS_THROW_EX(msg);
                 }
-                size_t id = NGT::Common::strtol(result[1]);
-                distance = NGT::Common::strtod(result[2]);
+                size_t id = polaris::Common::strtol(result[1]);
+                distance = polaris::Common::strtod(result[2]);
                 try {
                     gt.insert(id);
                 } catch (...) {
@@ -296,7 +296,7 @@ namespace NGT {
                 lineCount++;
                 if (line.size() != 0 && line.at(0) == '#') {
                     std::vector<std::string> tf;
-                    NGT::Common::tokenize(line, tf, "=");
+                    polaris::Common::tokenize(line, tf, "=");
                     if (tf.size() >= 1 && tf[0] == "# Query No.") {
                         size_t dataCount = 0;
                         std::string lastDataLine;
@@ -304,7 +304,7 @@ namespace NGT {
                             lineCount++;
                             if (line.size() != 0 && line.at(0) == '#') {
                                 std::vector<std::string> gtf;
-                                NGT::Common::tokenize(line, gtf, "=");
+                                polaris::Common::tokenize(line, gtf, "=");
                                 if (gtf.size() >= 1 && gtf[0] == "# End of Search") {
                                     if (prevDataCount == 0) {
                                         prevDataCount = dataCount;
@@ -327,13 +327,13 @@ namespace NGT {
                             }
                             lastDataLine = line;
                             std::vector<std::string> result;
-                            NGT::Common::tokenize(line, result, " \t");
+                            polaris::Common::tokenize(line, result, " \t");
                             if (result.size() < 3) {
                                 std::stringstream msg;
                                 msg << "result format is wrong. ";
                                 POLARIS_THROW_EX(msg);
                             }
-                            size_t rank = NGT::Common::strtol(result[0]);
+                            size_t rank = polaris::Common::strtol(result[0]);
                             dataCount++;
                             if (rank != dataCount) {
                                 std::stringstream msg;
@@ -369,9 +369,9 @@ namespace NGT {
                 size_t resultNo = 0;
                 if (line.size() != 0 && line.at(0) == '#') {
                     std::vector<std::string> tf;
-                    NGT::Common::tokenize(line, tf, "=");
+                    polaris::Common::tokenize(line, tf, "=");
                     if (tf.size() >= 1 && tf[0] == "# Query No.") {
-                        if (tf.size() >= 2 && (size_t) NGT::Common::strtol(tf[1]) == queryNo) {
+                        if (tf.size() >= 2 && (size_t) polaris::Common::strtol(tf[1]) == queryNo) {
                             size_t relevantCount = 0;
                             size_t dataCount = 0;
                             std::string fluctuation;
@@ -384,15 +384,15 @@ namespace NGT {
                                 lineNo++;
                                 if (line.size() != 0 && line.at(0) == '#') {
                                     std::vector<std::string> gtf;
-                                    NGT::Common::tokenize(line, gtf, "=");
+                                    polaris::Common::tokenize(line, gtf, "=");
                                     if (gtf.size() >= 2 && (gtf[0] == "# Epsilon" || gtf[0] == "# Factor")) {
                                         fluctuation = gtf[1];
                                     } else if (gtf.size() >= 2 && gtf[0] == "# Query Time (msec)") {
-                                        queryTime = NGT::Common::strtod(gtf[1]);
+                                        queryTime = polaris::Common::strtod(gtf[1]);
                                     } else if (gtf.size() >= 2 && gtf[0] == "# Distance Computation") {
-                                        distanceCount = NGT::Common::strtol(gtf[1]);
+                                        distanceCount = polaris::Common::strtol(gtf[1]);
                                     } else if (gtf.size() >= 2 && gtf[0] == "# Visit Count") {
-                                        visitCount = NGT::Common::strtol(gtf[1]);
+                                        visitCount = polaris::Common::strtol(gtf[1]);
                                     } else if (gtf.size() >= 1 && gtf[0] == "# End of Query") {
                                         return;
                                     } else if (gtf.size() >= 1 && gtf[0] == "# End of Search") {
@@ -418,7 +418,7 @@ namespace NGT {
                                         double accuracy = (double) relevantCount / (double) resultDataSize;
                                         double key;
                                         if (fluctuation != "") {
-                                            key = NGT::Common::strtod(fluctuation);
+                                            key = polaris::Common::strtod(fluctuation);
                                             keyValue = "Factor (Epsilon or a fluctuating value)";
                                         } else {
                                             std::stringstream msg;
@@ -500,14 +500,14 @@ namespace NGT {
                                     continue;
                                 }
                                 std::vector<std::string> result;
-                                NGT::Common::tokenize(line, result, " \t");
+                                polaris::Common::tokenize(line, result, " \t");
                                 if (result.size() < 3) {
                                     std::cerr << "result format is wrong. " << std::endl;
                                     abort();
                                 }
-                                size_t rank = NGT::Common::strtol(result[0]);
-                                size_t id = NGT::Common::strtol(result[1]);
-                                double distance = NGT::Common::strtod(result[2]);
+                                size_t rank = polaris::Common::strtol(result[0]);
+                                size_t id = polaris::Common::strtol(result[1]);
+                                double distance = polaris::Common::strtod(result[2]);
                                 totalDistance += distance;
                                 if (gt.count(id) != 0) {
                                     relevantCount++;
@@ -536,7 +536,7 @@ namespace NGT {
             }
         }
 
-        static void exploreEpsilonForAccuracy(NGT::Index &index, std::istream &queries, std::istream &gtStream,
+        static void exploreEpsilonForAccuracy(polaris::Index &index, std::istream &queries, std::istream &gtStream,
                                               Command::SearchParameters &sp, std::pair<float, float> accuracyRange,
                                               double margin) {
             double fromUnder = 0.0;
@@ -684,7 +684,7 @@ namespace NGT {
             std::stringstream resultStream;
             queries.clear();
             queries.seekg(0, std::ios_base::beg);
-            NGT::Command::search(index, searchParameters, queries, resultStream);
+            polaris::Command::search(index, searchParameters, queries, resultStream);
             gtStream.clear();
             gtStream.seekg(0, std::ios_base::beg);
             resultStream.clear();
@@ -740,7 +740,7 @@ namespace NGT {
                                 POLARIS_THROW_EX(msg);
                             }
                             searchParameters.step = 10;
-                            NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
+                            polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
                             NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
                             prop.dynamicEdgeSizeBase = base;
                             double time;
@@ -850,7 +850,7 @@ namespace NGT {
                                 POLARIS_THROW_EX(msg);
                             }
                             searchParameters.step = 10;
-                            NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
+                            polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
                             NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
                             prop.dynamicEdgeSizeRate = rate;
                             double time;
@@ -922,7 +922,7 @@ namespace NGT {
 
             Command::SearchParameters searchParameters;
             searchParameters.edgeSize = -1;
-            NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
+            polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
             NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
             searchParameters.size = nOfResults;
             redirector.begin();
@@ -1008,11 +1008,11 @@ namespace NGT {
             std::string opt = args.getString("A", "");
             if (opt.size() != 0) {
                 std::vector<std::string> tokens;
-                NGT::Common::tokenize(opt, tokens, ":");
-                if (tokens.size() >= 1) { baseAccuracyRange.first = NGT::Common::strtod(tokens[0]); }
-                if (tokens.size() >= 2) { baseAccuracyRange.second = NGT::Common::strtod(tokens[1]); }
-                if (tokens.size() >= 3) { rateAccuracyRange.first = NGT::Common::strtod(tokens[2]); }
-                if (tokens.size() >= 4) { rateAccuracyRange.second = NGT::Common::strtod(tokens[3]); }
+                polaris::Common::tokenize(opt, tokens, ":");
+                if (tokens.size() >= 1) { baseAccuracyRange.first = polaris::Common::strtod(tokens[0]); }
+                if (tokens.size() >= 2) { baseAccuracyRange.second = polaris::Common::strtod(tokens[1]); }
+                if (tokens.size() >= 3) { rateAccuracyRange.first = polaris::Common::strtod(tokens[2]); }
+                if (tokens.size() >= 4) { rateAccuracyRange.second = polaris::Common::strtod(tokens[3]); }
             }
 
             double margin = args.getf("m", 0.2);
@@ -1025,13 +1025,13 @@ namespace NGT {
                       << "," << rateAccuracyRange.first << "-" << rateAccuracyRange.second << std::endl;
             std::cerr << "adjustRateSearchEdgeSize: # of queries=" << querySize << std::endl;
 
-            NGT::Index index(indexName);
+            polaris::Index index(indexName);
 
             Optimizer optimizer(index, nOfResults);
             try {
                 auto v = optimizer.adjustSearchEdgeSize(baseAccuracyRange, rateAccuracyRange, querySize, epsilon,
                                                         margin);
-                NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
+                polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
                 NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
                 if (v.first > 0) {
                     prop.dynamicEdgeSizeBase = v.first;
@@ -1049,9 +1049,9 @@ namespace NGT {
         }
 
 
-        void outputObject(std::ostream &os, std::vector<float> &v, NGT::Property &prop) {
+        void outputObject(std::ostream &os, std::vector<float> &v, polaris::Property &prop) {
             switch (prop.objectType) {
-                case NGT::ObjectSpace::ObjectType::Uint8: {
+                case polaris::ObjectSpace::ObjectType::Uint8: {
                     for (auto i = v.begin(); i != v.end(); ++i) {
                         int d = *i;
                         os << d;
@@ -1063,8 +1063,8 @@ namespace NGT {
                 }
                     break;
                 default:
-                case NGT::ObjectSpace::ObjectType::Float16:
-                case NGT::ObjectSpace::ObjectType::Float: {
+                case polaris::ObjectSpace::ObjectType::Float16:
+                case polaris::ObjectSpace::ObjectType::Float: {
                     for (auto i = v.begin(); i != v.end(); ++i) {
                         os << *i;
                         if (i + 1 != v.end()) {
@@ -1078,7 +1078,7 @@ namespace NGT {
         }
 
         void outputObjects(std::vector<std::vector<float>> &vs, std::ostream &os) {
-            NGT::Property prop;
+            polaris::Property prop;
             index.getProperty(prop);
 
             for (auto i = vs.begin(); i != vs.end(); ++i) {
@@ -1086,10 +1086,10 @@ namespace NGT {
             }
         }
 
-        std::vector<float> extractObject(size_t id, NGT::Property &prop) {
+        std::vector<float> extractObject(size_t id, polaris::Property &prop) {
             std::vector<float> v;
             switch (prop.objectType) {
-                case NGT::ObjectSpace::ObjectType::Uint8: {
+                case polaris::ObjectSpace::ObjectType::Uint8: {
                     auto *obj = static_cast<uint8_t *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
                         int d = *obj++;
@@ -1097,8 +1097,8 @@ namespace NGT {
                     }
                 }
                     break;
-                case NGT::ObjectSpace::ObjectType::Float16: {
-                    auto *obj = static_cast<NGT::float16 *>(index.getObjectSpace().getObject(id));
+                case polaris::ObjectSpace::ObjectType::Float16: {
+                    auto *obj = static_cast<polaris::float16 *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
                         float d = *obj++;
                         v.push_back(d);
@@ -1106,7 +1106,7 @@ namespace NGT {
                 }
                     break;
                 default:
-                case NGT::ObjectSpace::ObjectType::Float: {
+                case polaris::ObjectSpace::ObjectType::Float: {
                     auto *obj = static_cast<float *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
                         float d = *obj++;
@@ -1118,10 +1118,10 @@ namespace NGT {
             return v;
         }
 
-        std::vector<float> meanObject(size_t id1, size_t id2, NGT::Property &prop) {
+        std::vector<float> meanObject(size_t id1, size_t id2, polaris::Property &prop) {
             std::vector<float> v;
             switch (prop.objectType) {
-                case NGT::ObjectSpace::ObjectType::Uint8: {
+                case polaris::ObjectSpace::ObjectType::Uint8: {
                     auto *obj1 = static_cast<uint8_t *>(index.getObjectSpace().getObject(id1));
                     auto *obj2 = static_cast<uint8_t *>(index.getObjectSpace().getObject(id2));
                     for (int i = 0; i < prop.dimension; i++) {
@@ -1130,9 +1130,9 @@ namespace NGT {
                     }
                 }
                     break;
-                case NGT::ObjectSpace::ObjectType::Float16: {
-                    auto *obj1 = static_cast<NGT::float16 *>(index.getObjectSpace().getObject(id1));
-                    auto *obj2 = static_cast<NGT::float16 *>(index.getObjectSpace().getObject(id2));
+                case polaris::ObjectSpace::ObjectType::Float16: {
+                    auto *obj1 = static_cast<polaris::float16 *>(index.getObjectSpace().getObject(id1));
+                    auto *obj2 = static_cast<polaris::float16 *>(index.getObjectSpace().getObject(id2));
                     for (int i = 0; i < prop.dimension; i++) {
                         float d = (*obj1++ + *obj2++) / 2.0F;
                         v.push_back(d);
@@ -1140,7 +1140,7 @@ namespace NGT {
                 }
                     break;
                 default:
-                case NGT::ObjectSpace::ObjectType::Float: {
+                case polaris::ObjectSpace::ObjectType::Float: {
                     auto *obj1 = static_cast<float *>(index.getObjectSpace().getObject(id1));
                     auto *obj2 = static_cast<float *>(index.getObjectSpace().getObject(id2));
                     for (int i = 0; i < prop.dimension; i++) {
@@ -1154,7 +1154,7 @@ namespace NGT {
         }
 
         void extractQueries(std::vector<std::vector<float>> &queries, std::ostream &os) {
-            NGT::Property prop;
+            polaris::Property prop;
             index.getProperty(prop);
 
             for (auto i = queries.begin(); i != queries.end(); ++i) {
@@ -1171,10 +1171,10 @@ namespace NGT {
         }
 
         void extractAndRemoveRandomQueries(size_t nqueries, std::vector<std::vector<float>> &queries) {
-            NGT::Property prop;
+            polaris::Property prop;
             index.getProperty(prop);
             size_t repositorySize = index.getObjectRepositorySize();
-            NGT::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
+            polaris::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
 
             queries.clear();
 
@@ -1198,7 +1198,7 @@ namespace NGT {
 
         void extractQueries(size_t nqueries, std::vector<std::vector<float>> &queries, bool similarObject = false) {
 
-            NGT::Property prop;
+            polaris::Property prop;
             index.getProperty(prop);
 
             size_t osize = index.getObjectRepositorySize();
@@ -1216,9 +1216,9 @@ namespace NGT {
                     }
                 }
                 if (similarObject) {
-                    NGT::Object *query = index.getObjectSpace().getRepository().get(id1 + oft);
-                    NGT::SearchContainer sc(*query);
-                    NGT::ObjectDistances results;
+                    polaris::Object *query = index.getObjectSpace().getRepository().get(id1 + oft);
+                    polaris::SearchContainer sc(*query);
+                    polaris::ObjectDistances results;
                     sc.setResults(&results);
                     sc.setSize(nOfResults);
                     index.search(sc);
@@ -1267,19 +1267,19 @@ namespace NGT {
             }
             size_t nqueries = args.getl("n", 1000);
 
-            NGT::Index index(indexName);
-            NGT::Optimizer optimizer(index);
+            polaris::Index index(indexName);
+            polaris::Optimizer optimizer(index);
             optimizer.extractQueries(nqueries, std::cout);
 
         }
 
-        static void createGroundTruth(NGT::Index &index, double epsilon, Command::SearchParameters &searchParameters,
+        static void createGroundTruth(polaris::Index &index, double epsilon, Command::SearchParameters &searchParameters,
                                       std::stringstream &queries, std::stringstream &gtStream) {
             queries.clear();
             queries.seekg(0, std::ios_base::beg);
             searchParameters.outputMode = 'e';
             searchParameters.beginOfEpsilon = searchParameters.endOfEpsilon = epsilon;
-            NGT::Command::search(index, searchParameters, queries, gtStream);
+            polaris::Command::search(index, searchParameters, queries, gtStream);
         }
 
         static int
@@ -1484,21 +1484,21 @@ namespace NGT {
             size_t nOfQueries = queries.size();
             maxEpsilon = 0.0;
             {
-                std::vector<NGT::Object *> queryObjects;
+                std::vector<polaris::Object *> queryObjects;
                 for (auto i = queries.begin(); i != queries.end(); ++i) {
                     queryObjects.push_back(index.allocateObject(*i));
                 }
                 int identityCount = 0;
-                std::vector<NGT::Distance> lastDistances(nOfQueries);
+                std::vector<polaris::Distance> lastDistances(nOfQueries);
                 double time = 0.0;
                 double step = 0.02;
                 for (float e = 0.0; e < 10.0; e += step) {
                     size_t idx;
                     bool identity = true;
-                    NGT::Timer timer;
+                    polaris::Timer timer;
                     for (idx = 0; idx < queryObjects.size(); idx++) {
-                        NGT::SearchContainer sc(*queryObjects[idx]);
-                        NGT::ObjectDistances results;
+                        polaris::SearchContainer sc(*queryObjects[idx]);
+                        polaris::ObjectDistances results;
                         sc.setResults(&results);
                         sc.setSize(nOfResults);
                         sc.setEpsilon(e);
@@ -1510,7 +1510,7 @@ namespace NGT {
                             msg << "generatePseudoGroundTruth: Cannot get any search result.";
                             POLARIS_THROW_EX(msg);
                         }
-                        NGT::Distance d = results.back().distance;
+                        polaris::Distance d = results.back().distance;
                         if (d != lastDistances[idx]) {
                             identity = false;
                         }
@@ -1543,20 +1543,20 @@ namespace NGT {
 
             {
                 // generate (pseudo) ground truth data
-                NGT::Command::SearchParameters searchParameters;
+                polaris::Command::SearchParameters searchParameters;
                 searchParameters.size = nOfResults;
                 searchParameters.outputMode = 'e';
                 searchParameters.edgeSize = 0;    // get the best accuracy by using all edges
                 //searchParameters.indexType = 's'; // linear search
                 extractQueries(queries, queryStream);
-                NGT::Optimizer::createGroundTruth(index, maxEpsilon, searchParameters, queryStream, gtStream);
+                polaris::Optimizer::createGroundTruth(index, maxEpsilon, searchParameters, queryStream, gtStream);
             }
         }
 
         static std::vector<std::pair<float, double>>
-        generateAccuracyTable(NGT::Index &index, size_t nOfResults = 50, size_t querySize = 100) {
+        generateAccuracyTable(polaris::Index &index, size_t nOfResults = 50, size_t querySize = 100) {
 
-            NGT::Property prop;
+            polaris::Property prop;
             index.getProperty(prop);
             if (prop.edgeSizeForSearch != 0 && prop.edgeSizeForSearch != -2) {
                 std::stringstream msg;
@@ -1566,7 +1566,7 @@ namespace NGT {
                 POLARIS_THROW_EX(msg);
             }
 
-            NGT::Optimizer optimizer(index, nOfResults);
+            polaris::Optimizer optimizer(index, nOfResults);
 
             float maxEpsilon = 0.0;
             std::stringstream queryStream;
@@ -1578,18 +1578,18 @@ namespace NGT {
             {
                 float interval = 0.05;
                 float prev = 0.0;
-                std::vector<NGT::Optimizer::MeasuredValue> acc;
+                std::vector<polaris::Optimizer::MeasuredValue> acc;
                 float epsilon = -0.6;
                 double accuracy;
                 do {
                     auto pair = map.find(epsilon);
                     if (pair == map.end()) {
-                        NGT::Command::SearchParameters searchParameters;
+                        polaris::Command::SearchParameters searchParameters;
                         searchParameters.outputMode = 'e';
                         searchParameters.beginOfEpsilon = searchParameters.endOfEpsilon = epsilon;
                         queryStream.clear();
                         queryStream.seekg(0, std::ios_base::beg);
-                        NGT::Optimizer::search(index, queryStream, gtStream, searchParameters, acc);
+                        polaris::Optimizer::search(index, queryStream, gtStream, searchParameters, acc);
                         if (acc.size() == 0) {
                             POLARIS_THROW_EX("Fatal error! Cannot get any accuracy value.");
                         }
@@ -1635,7 +1635,7 @@ namespace NGT {
             return epsilonAccuracyMap;
         }
 
-        NGT::Index &index;
+        polaris::Index &index;
         size_t nOfResults;
         StdOstreamRedirector redirector;
     };

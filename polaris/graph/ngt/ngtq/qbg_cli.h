@@ -27,47 +27,47 @@ namespace QBG {
     int debugLevel;
 
 #if !defined(NGTQ_QBG) || defined(NGTQ_SHARED_INVERTED_INDEX)
-    void create(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void load(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void append(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void insert(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void remove(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void buildIndex(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void hierarchicalKmeans(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void search(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void assign(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void extract(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void gt(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void gtRange(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void optimize(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void build(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void rebuild(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void createQG(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void buildQG(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void appendQG(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void searchQG(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
-    void info(NGT::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void create(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void load(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void append(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void insert(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void remove(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void buildIndex(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void hierarchicalKmeans(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void search(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void assign(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void extract(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void gt(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void gtRange(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void optimize(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void build(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void rebuild(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void createQG(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void buildQG(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void appendQG(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void searchQG(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
+    void info(polaris::Args &args) { std::cerr << "not implemented." << std::endl; };
 #else
-    void create(NGT::Args &args);
-    void load(NGT::Args &args);
-    void append(NGT::Args &args);
-    void insert(NGT::Args &args);
-    void remove(NGT::Args &args);
-    void buildIndex(NGT::Args &args);
-    void hierarchicalKmeans(NGT::Args &args);
-    void search(NGT::Args &args);
-    void assign(NGT::Args &args);
-    void extract(NGT::Args &args);
-    void gt(NGT::Args &args);
-    void gtRange(NGT::Args &args);
-    void optimize(NGT::Args &args);
-    void build(NGT::Args &args);
-    void rebuild(NGT::Args &args);
-    void createQG(NGT::Args &args);
-    void buildQG(NGT::Args &args);
-    void appendQG(NGT::Args &args);
-    void searchQG(NGT::Args &args);
-    void info(NGT::Args &args);
+    void create(polaris::Args &args);
+    void load(polaris::Args &args);
+    void append(polaris::Args &args);
+    void insert(polaris::Args &args);
+    void remove(polaris::Args &args);
+    void buildIndex(polaris::Args &args);
+    void hierarchicalKmeans(polaris::Args &args);
+    void search(polaris::Args &args);
+    void assign(polaris::Args &args);
+    void extract(polaris::Args &args);
+    void gt(polaris::Args &args);
+    void gtRange(polaris::Args &args);
+    void optimize(polaris::Args &args);
+    void build(polaris::Args &args);
+    void rebuild(polaris::Args &args);
+    void createQG(polaris::Args &args);
+    void buildQG(polaris::Args &args);
+    void appendQG(polaris::Args &args);
+    void searchQG(polaris::Args &args);
+    void info(polaris::Args &args);
 #endif
     
     void setDebugLevel(int level) { debugLevel = level; }
@@ -78,7 +78,7 @@ namespace QBG {
       cerr << "           command : create build quantize search" << endl;
     }
 
-    void execute(NGT::Args args) {
+    void execute(polaris::Args args) {
       string command;
       try {
 	command = args.get("#0");

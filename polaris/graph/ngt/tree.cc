@@ -22,7 +22,7 @@
 #include <vector>
 
 using namespace std;
-using namespace NGT;
+using namespace polaris;
 
 void
 DVPTree::insert(InsertContainer &iobj) {
@@ -48,10 +48,10 @@ DVPTree::insert(InsertContainer &iobj,  LeafNode *leafNode)
   LeafNode &leaf = *leafNode;
   size_t fsize = leaf.getObjectSize();
   if (fsize != 0) {
-    NGT::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
+    polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
     Distance d = comparator(iobj.object, leaf.getPivot());
 
-    NGT::ObjectDistance *objects = leaf.getObjectIDs();
+    polaris::ObjectDistance *objects = leaf.getObjectIDs();
 
     for (size_t i = 0; i < fsize; i++) {
       if (objects[i].distance == d) {
@@ -380,7 +380,7 @@ DVPTree::search(SearchContainer &so, LeafNode &node, UncheckedNode &uncheckedNod
 #endif
 
   ObjectDistance r;
-  NGT::ObjectDistance *objects = node.getObjectIDs();
+  polaris::ObjectDistance *objects = node.getObjectIDs();
 
   for (size_t i = 0; i < node.getObjectSize(); i++) {
     if ((objects[i].distance <= pq + q.radius) &&

@@ -24,12 +24,12 @@ main(int argc, char **argv) {
     string queryFile = "./data/sift-query-3.tsv";
     // index construction
     try {
-        NGT::Property property;
+        polaris::Property property;
         property.dimension = 128;
-        property.objectType = NGT::ObjectSpace::ObjectType::Uint8;
-        property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
-        NGT::Index::create(indexPath, property);
-        NGT::Index index(indexPath);
+        property.objectType = polaris::ObjectSpace::ObjectType::Uint8;
+        property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+        polaris::Index::create(indexPath, property);
+        polaris::Index index(indexPath);
         ifstream is(objectFile);
         string line;
         while (getline(is, line)) {
@@ -63,8 +63,8 @@ main(int argc, char **argv) {
 
     // nearest neighbor search
     try {
-        NGT::Index index(indexPath);
-        NGT::Property property;
+        polaris::Index index(indexPath);
+        polaris::Property property;
         index.getProperty(property);
         ifstream is(queryFile);
         string line;
@@ -85,8 +85,8 @@ main(int argc, char **argv) {
                 cout << "...";
             }
 
-            NGT::SearchQuery sc(query);
-            NGT::ObjectDistances objects;
+            polaris::SearchQuery sc(query);
+            polaris::ObjectDistances objects;
             sc.setResults(&objects);
             sc.setRadius(250.0);
             sc.setSize(10);
@@ -96,7 +96,7 @@ main(int argc, char **argv) {
             cout << endl << "Rank\tID\tDistance" << std::showbase << endl;
             for (size_t i = 0; i < objects.size(); i++) {
                 cout << i + 1 << "\t" << objects[i].id << "\t" << objects[i].distance << "\t: ";
-                NGT::ObjectSpace &objectSpace = index.getObjectSpace();
+                polaris::ObjectSpace &objectSpace = index.getObjectSpace();
                 uint8_t *object = static_cast<uint8_t *>(objectSpace.getObject(objects[i].id));
                 for (size_t idx = 0; idx < 5; idx++) {
                     cout << static_cast<int>(object[idx]) << " ";

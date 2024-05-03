@@ -41,7 +41,7 @@ NGTIndex ngt_open_index(const char *index_path, NGTError error) {
   try{
     std::string index_path_str(index_path);
     auto readOnly = false;
-    NGT::Index *index = new NGT::Index(index_path_str, readOnly);
+    polaris::Index *index = new polaris::Index(index_path_str, readOnly);
     index->disableLog();
     return static_cast<NGTIndex>(index);
   }catch(std::exception &err){
@@ -56,7 +56,7 @@ NGTIndex ngt_open_index_as_read_only(const char *index_path, NGTError error) {
   try{
     std::string index_path_str(index_path);
     auto readOnly = true;
-    NGT::Index *index = new NGT::Index(index_path_str, readOnly);
+    polaris::Index *index = new polaris::Index(index_path_str, readOnly);
     index->disableLog();
     return static_cast<NGTIndex>(index);
   }catch(std::exception &err){
@@ -68,12 +68,12 @@ NGTIndex ngt_open_index_as_read_only(const char *index_path, NGTError error) {
 }
 
 NGTIndex ngt_create_graph_and_tree(const char *database, NGTProperty prop, NGTError error) {
-  NGT::Index *index = NULL;
+  polaris::Index *index = NULL;
   try{
     std::string database_str(database);
-    NGT::Property prop_i = *(static_cast<NGT::Property*>(prop));
-    NGT::Index::createGraphAndTree(database_str, prop_i, true);
-    index = new NGT::Index(database_str);
+    polaris::Property prop_i = *(static_cast<polaris::Property*>(prop));
+    polaris::Index::createGraphAndTree(database_str, prop_i, true);
+    index = new polaris::Index(database_str);
     index->disableLog();
     return static_cast<NGTIndex>(index);
   }catch(std::exception &err){
@@ -87,7 +87,7 @@ NGTIndex ngt_create_graph_and_tree(const char *database, NGTProperty prop, NGTEr
 
 NGTIndex ngt_create_graph_and_tree_in_memory(NGTProperty prop, NGTError error) {
   try{
-    NGT::Index *index = new NGT::Index(*(static_cast<NGT::Property*>(prop)));
+    polaris::Index *index = new polaris::Index(*(static_cast<polaris::Property*>(prop)));
     index->disableLog();
     return static_cast<NGTIndex>(index);
   }catch(std::exception &err){
@@ -100,7 +100,7 @@ NGTIndex ngt_create_graph_and_tree_in_memory(NGTProperty prop, NGTError error) {
 
 NGTProperty ngt_create_property(NGTError error) {
   try{
-    return static_cast<NGTProperty>(new NGT::Property());
+    return static_cast<NGTProperty>(new polaris::Property());
   }catch(std::exception &err){
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -112,7 +112,7 @@ NGTProperty ngt_create_property(NGTError error) {
 bool ngt_save_index(const NGTIndex index, const char *database, NGTError error) {
   try{
     std::string database_str(database);
-    (static_cast<NGT::Index*>(index))->saveIndex(database_str);
+    (static_cast<polaris::Index*>(index))->saveIndex(database_str);
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -131,7 +131,7 @@ bool ngt_get_property(NGTIndex index, NGTProperty prop, NGTError error) {
   }
 
   try{
-    (static_cast<NGT::Index*>(index))->getProperty(*(static_cast<NGT::Property*>(prop)));
+    (static_cast<polaris::Index*>(index))->getProperty(*(static_cast<polaris::Property*>(prop)));
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -148,7 +148,7 @@ int32_t ngt_get_property_dimension(NGTProperty prop, NGTError error) {
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<NGT::Property*>(prop)).dimension;
+  return (*static_cast<polaris::Property*>(prop)).dimension;
 }
 
 bool ngt_set_property_dimension(NGTProperty prop, int32_t value, NGTError error) {
@@ -158,7 +158,7 @@ bool ngt_set_property_dimension(NGTProperty prop, int32_t value, NGTError error)
     operate_error_string_(ss, error);
     return false;
   }
-  (*static_cast<NGT::Property*>(prop)).dimension = value;
+  (*static_cast<polaris::Property*>(prop)).dimension = value;
   return true;
 }
 
@@ -169,7 +169,7 @@ bool ngt_set_property_edge_size_for_creation(NGTProperty prop, int16_t value, NG
     operate_error_string_(ss, error);
     return false;
   }
-  (*static_cast<NGT::Property*>(prop)).edgeSizeForCreation = value;
+  (*static_cast<polaris::Property*>(prop)).edgeSizeForCreation = value;
   return true;
 }
 
@@ -180,7 +180,7 @@ bool ngt_set_property_edge_size_for_search(NGTProperty prop, int16_t value, NGTE
     operate_error_string_(ss, error);
     return false;
   }
-  (*static_cast<NGT::Property*>(prop)).edgeSizeForSearch = value;
+  (*static_cast<polaris::Property*>(prop)).edgeSizeForSearch = value;
   return true;
 }
 
@@ -191,19 +191,19 @@ int32_t ngt_get_property_object_type(NGTProperty prop, NGTError error) {
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<NGT::Property*>(prop)).objectType;
+  return (*static_cast<polaris::Property*>(prop)).objectType;
 }
 
 bool ngt_is_property_object_type_float(int32_t object_type) {
-    return (object_type == NGT::ObjectSpace::ObjectType::Float);
+    return (object_type == polaris::ObjectSpace::ObjectType::Float);
 }
 
 bool ngt_is_property_object_type_float16(int32_t object_type) {
-    return (object_type == NGT::ObjectSpace::ObjectType::Float16);
+    return (object_type == polaris::ObjectSpace::ObjectType::Float16);
 }
 
 bool ngt_is_property_object_type_integer(int32_t object_type) {
-    return (object_type == NGT::ObjectSpace::ObjectType::Uint8);
+    return (object_type == polaris::ObjectSpace::ObjectType::Uint8);
 }
 
 bool ngt_set_property_object_type_float(NGTProperty prop, NGTError error) {
@@ -214,7 +214,7 @@ bool ngt_set_property_object_type_float(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<NGT::Property*>(prop)).objectType = NGT::ObjectSpace::ObjectType::Float;
+  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectSpace::ObjectType::Float;
   return true;
 }
 
@@ -226,7 +226,7 @@ bool ngt_set_property_object_type_float16(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<NGT::Property*>(prop)).objectType = NGT::ObjectSpace::ObjectType::Float16;
+  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectSpace::ObjectType::Float16;
   return true;
 }
 
@@ -238,11 +238,11 @@ bool ngt_set_property_object_type_integer(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<NGT::Property*>(prop)).objectType = NGT::ObjectSpace::ObjectType::Uint8;
+  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectSpace::ObjectType::Uint8;
   return true;
 }
 
-bool ngt_set_property_distance_type(NGTProperty prop, NGT::Index::Property::DistanceType type, NGTError error) {
+bool ngt_set_property_distance_type(NGTProperty prop, polaris::Index::Property::DistanceType type, NGTError error) {
   if(prop == NULL){
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : parametor error: prop = " << prop;
@@ -250,65 +250,65 @@ bool ngt_set_property_distance_type(NGTProperty prop, NGT::Index::Property::Dist
     return false;
   }
 
-  (*static_cast<NGT::Property*>(prop)).distanceType = type;
+  (*static_cast<polaris::Property*>(prop)).distanceType = type;
   return true;
 }
 
 bool ngt_set_property_distance_type_l1(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeL1, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeL1, error);
 }
 
 bool ngt_set_property_distance_type_l2(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeL2, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeL2, error);
 }
 
 bool ngt_set_property_distance_type_angle(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeAngle, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeAngle, error);
 }
 
 bool ngt_set_property_distance_type_hamming(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeHamming, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeHamming, error);
 }
 
 bool ngt_set_property_distance_type_poincare(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypePoincare, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypePoincare, error);
 }
 
 bool ngt_set_property_distance_type_lorentz(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeLorentz, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeLorentz, error);
 }
 
 bool ngt_set_property_distance_type_jaccard(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeJaccard, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeJaccard, error);
 }
 
 bool ngt_set_property_distance_type_sparse_jaccard(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeSparseJaccard, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeSparseJaccard, error);
 }
 
 bool ngt_set_property_distance_type_normalized_l2(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeNormalizedL2, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeNormalizedL2, error);
 }
 
 bool ngt_set_property_distance_type_cosine(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeCosine, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeCosine, error);
 }
 
 bool ngt_set_property_distance_type_normalized_angle(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeNormalizedAngle, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeNormalizedAngle, error);
 }
 
 bool ngt_set_property_distance_type_normalized_cosine(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeNormalizedCosine, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeNormalizedCosine, error);
 }
 
 bool ngt_set_property_distance_type_inner_product(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, NGT::Index::Property::DistanceType::DistanceTypeInnerProduct, error);
+  return ngt_set_property_distance_type(prop, polaris::Index::Property::DistanceType::DistanceTypeInnerProduct, error);
 }
 
 NGTObjectDistances ngt_create_empty_results(NGTError error) {
   try{
-    return static_cast<NGTObjectDistances>(new NGT::ObjectDistances());
+    return static_cast<NGTObjectDistances>(new polaris::ObjectDistances());
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -317,11 +317,11 @@ NGTObjectDistances ngt_create_empty_results(NGTError error) {
   }
 }
 
-static bool ngt_search_index_(NGT::Index* pindex, NGT::Object *ngtquery, size_t size, float epsilon, float radius, NGTObjectDistances results, int edge_size = INT_MIN) {
+static bool ngt_search_index_(polaris::Index* pindex, polaris::Object *ngtquery, size_t size, float epsilon, float radius, NGTObjectDistances results, int edge_size = INT_MIN) {
   // set search parameters.
-  NGT::SearchContainer sc(*ngtquery);      // search parametera container.
+  polaris::SearchContainer sc(*ngtquery);      // search parametera container.
 
-  sc.setResults(static_cast<NGT::ObjectDistances*>(results));          // set the result set.
+  sc.setResults(static_cast<polaris::ObjectDistances*>(results));          // set the result set.
   sc.setSize(size);                        // the number of resultant objects.
   sc.setRadius(radius);                    // search radius.
   sc.setEpsilon(epsilon);                  // set exploration coefficient.
@@ -344,8 +344,8 @@ bool ngt_search_index(NGTIndex index, double *query, int32_t query_dim, size_t s
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
-  NGT::Object *ngtquery = NULL;
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
+  polaris::Object *ngtquery = NULL;
 
   if(radius < 0.0){
     radius = FLT_MAX;
@@ -375,8 +375,8 @@ bool ngt_search_index_as_float(NGTIndex index, float *query, int32_t query_dim, 
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
-  NGT::Object *ngtquery = NULL;
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
+  polaris::Object *ngtquery = NULL;
 
   if(radius < 0.0){
     radius = FLT_MAX;
@@ -406,8 +406,8 @@ bool ngt_search_index_as_uint8(NGTIndex index, uint8_t *query, int32_t query_dim
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
-  NGT::Object *ngtquery = NULL;
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
+  polaris::Object *ngtquery = NULL;
 
   if(radius < 0.0){
     radius = FLT_MAX;
@@ -437,16 +437,16 @@ bool ngt_search_index_as_float16(NGTIndex index, NGTFloat16 *query, int32_t quer
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
-  NGT::Object *ngtquery = NULL;
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
+  polaris::Object *ngtquery = NULL;
 
   if(radius < 0.0){
     radius = FLT_MAX;
   }
 
   try{
-    auto q = static_cast<NGT::float16*>(query);
-    std::vector<NGT::float16> vquery(&q[0], &q[query_dim]);
+    auto q = static_cast<polaris::float16*>(query);
+    std::vector<polaris::float16> vquery(&q[0], &q[query_dim]);
     ngtquery = pindex->allocateObject(vquery);
     ngt_search_index_(pindex, ngtquery, size, epsilon, radius, results);
   }catch(std::exception &err) {
@@ -469,10 +469,10 @@ bool ngt_search_index_with_query(NGTIndex index, NGTQuery query, NGTObjectDistan
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
-  NGT::Object *ngtquery = NULL;
+  polaris::Object *ngtquery = NULL;
 
   if(query.radius < 0.0){
     query.radius = FLT_MAX;
@@ -509,10 +509,10 @@ bool ngt_search_index_with_query_float(NGTIndex index, NGTQueryFloat query, NGTO
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
-  NGT::Object *ngtquery = NULL;
+  polaris::Object *ngtquery = NULL;
 
   if(query.params.radius < 0.0){
     query.params.radius = FLT_MAX;
@@ -542,10 +542,10 @@ bool ngt_search_index_with_query_uint8(NGTIndex index, NGTQueryUint8 query, NGTO
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
-  NGT::Object *ngtquery = NULL;
+  polaris::Object *ngtquery = NULL;
 
   if(query.params.radius < 0.0){
     query.params.radius = FLT_MAX;
@@ -575,18 +575,18 @@ bool ngt_search_index_with_query_float16(NGTIndex index, NGTQueryFloat16 query, 
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
-  NGT::Object *ngtquery = NULL;
+  polaris::Object *ngtquery = NULL;
 
   if(query.params.radius < 0.0){
     query.params.radius = FLT_MAX;
   }
 
   try{
-    auto q = static_cast<NGT::float16*>(query.query);
-    std::vector<NGT::float16> vquery(&q[0], &q[dim]);
+    auto q = static_cast<polaris::float16*>(query.query);
+    std::vector<polaris::float16> vquery(&q[0], &q[dim]);
     ngtquery = pindex->allocateObject(vquery);
     ngt_search_index_(pindex, ngtquery, query.params.size, query.params.epsilon, query.params.radius, results, query.params.edge_size);
   }catch(std::exception &err) {
@@ -601,11 +601,11 @@ bool ngt_search_index_with_query_float16(NGTIndex index, NGTQueryFloat16 query, 
   return true;
 }
 
-static bool ngt_linear_search_index_(NGT::Index* pindex, NGT::Object *ngtquery, size_t size, NGTObjectDistances results, int edge_size = INT_MIN) {
+static bool ngt_linear_search_index_(polaris::Index* pindex, polaris::Object *ngtquery, size_t size, NGTObjectDistances results, int edge_size = INT_MIN) {
   // set search parameters.
-  NGT::SearchContainer sc(*ngtquery);      // search parametera container.
+  polaris::SearchContainer sc(*ngtquery);      // search parametera container.
 
-  sc.setResults(static_cast<NGT::ObjectDistances*>(results));          // set the result set.
+  sc.setResults(static_cast<polaris::ObjectDistances*>(results));          // set the result set.
   sc.setSize(size);                        // the number of resultant objects.
   if (edge_size != INT_MIN) {
     sc.setEdgeSize(edge_size);// set # of edges for each node
@@ -626,8 +626,8 @@ bool ngt_linear_search_index(NGTIndex index, double *query, int32_t query_dim, s
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
-  NGT::Object *ngtquery = NULL;
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
+  polaris::Object *ngtquery = NULL;
 
   try{
     std::vector<double> vquery(&query[0], &query[query_dim]);
@@ -653,8 +653,8 @@ bool ngt_linear_search_index_as_float(NGTIndex index, float *query, int32_t quer
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
-  NGT::Object *ngtquery = NULL;
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
+  polaris::Object *ngtquery = NULL;
 
   try{
     std::vector<float> vquery(&query[0], &query[query_dim]);
@@ -680,10 +680,10 @@ bool ngt_linear_search_index_with_query(NGTIndex index,  NGTQuery query, NGTObje
     return false;
   }
 
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
-  NGT::Object *ngtquery = NULL;
+  polaris::Object *ngtquery = NULL;
 
   try{
     std::vector<float> vquery(&query.query[0], &query.query[dim]);
@@ -711,7 +711,7 @@ int32_t ngt_get_size(NGTObjectDistances results, NGTError error) {
     return -1;
   }
 
-  return (static_cast<NGT::ObjectDistances*>(results))->size();
+  return (static_cast<polaris::ObjectDistances*>(results))->size();
 }
 
 uint32_t ngt_get_result_size(NGTObjectDistances results, NGTError error) {
@@ -722,12 +722,12 @@ uint32_t ngt_get_result_size(NGTObjectDistances results, NGTError error) {
     return 0;
   }
 
-  return (static_cast<NGT::ObjectDistances*>(results))->size();
+  return (static_cast<polaris::ObjectDistances*>(results))->size();
 }
 
 NGTObjectDistance ngt_get_result(const NGTObjectDistances results, const uint32_t i, NGTError error) {
   try{
-    NGT::ObjectDistances objects = *(static_cast<NGT::ObjectDistances*>(results));
+    polaris::ObjectDistances objects = *(static_cast<polaris::ObjectDistances*>(results));
     NGTObjectDistance ret_val = {objects[i].id, objects[i].distance};
     return ret_val;
   }catch(std::exception &err) {
@@ -749,7 +749,7 @@ ObjectID ngt_insert_index(NGTIndex index, double *obj, uint32_t obj_dim, NGTErro
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     std::vector<double> vobj(&obj[0], &obj[obj_dim]);
     return pindex->insert(vobj);
   }catch(std::exception &err) {
@@ -769,7 +769,7 @@ ObjectID ngt_append_index(NGTIndex index, double *obj, uint32_t obj_dim, NGTErro
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     std::vector<double> vobj(&obj[0], &obj[obj_dim]);
     return pindex->append(vobj);
   }catch(std::exception &err) {
@@ -789,7 +789,7 @@ ObjectID ngt_insert_index_as_float(NGTIndex index, float *obj, uint32_t obj_dim,
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     std::vector<float> vobj(&obj[0], &obj[obj_dim]);
     return pindex->insert(vobj);
   }catch(std::exception &err) {
@@ -809,7 +809,7 @@ ObjectID ngt_append_index_as_float(NGTIndex index, float *obj, uint32_t obj_dim,
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     std::vector<float> vobj(&obj[0], &obj[obj_dim]);
     return pindex->append(vobj);
   }catch(std::exception &err) {
@@ -829,7 +829,7 @@ ObjectID ngt_insert_index_as_uint8(NGTIndex index, uint8_t *obj, uint32_t obj_di
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     std::vector<uint8_t> vobj(&obj[0], &obj[obj_dim]);
     return pindex->insert(vobj);
   }catch(std::exception &err) {
@@ -849,7 +849,7 @@ ObjectID ngt_append_index_as_uint8(NGTIndex index, uint8_t *obj, uint32_t obj_di
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     std::vector<uint8_t> vobj(&obj[0], &obj[obj_dim]);
     return pindex->append(vobj);
   }catch(std::exception &err) {
@@ -869,9 +869,9 @@ ObjectID ngt_insert_index_as_float16(NGTIndex index, NGTFloat16 *obj, uint32_t o
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
-    auto o = static_cast<NGT::float16*>(obj);
-    std::vector<NGT::float16> vobj(&o[0], &o[obj_dim]);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
+    auto o = static_cast<polaris::float16*>(obj);
+    std::vector<polaris::float16> vobj(&o[0], &o[obj_dim]);
     return pindex->insert(vobj);
   }catch(std::exception &err) {
     std::stringstream ss;
@@ -890,9 +890,9 @@ ObjectID ngt_append_index_as_float16(NGTIndex index, NGTFloat16 *obj, uint32_t o
   }
 
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
-    auto o = static_cast<NGT::float16*>(obj);
-    std::vector<NGT::float16> vobj(&o[0], &o[obj_dim]);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
+    auto o = static_cast<polaris::float16*>(obj);
+    std::vector<polaris::float16> vobj(&o[0], &o[obj_dim]);
     return pindex->append(vobj);
   }catch(std::exception &err) {
     std::stringstream ss;
@@ -904,7 +904,7 @@ ObjectID ngt_append_index_as_float16(NGTIndex index, NGTFloat16 *obj, uint32_t o
 
 bool ngt_batch_append_index(NGTIndex index, float *obj, uint32_t data_count, NGTError error) {
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     pindex->append(obj, data_count);
     return true;
   }catch(std::exception &err) {
@@ -916,7 +916,7 @@ bool ngt_batch_append_index(NGTIndex index, float *obj, uint32_t data_count, NGT
 }
 
 bool ngt_batch_insert_index(NGTIndex index, float *obj, uint32_t data_count, uint32_t *ids, NGTError error) {
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
   bool status = true;
   float *objptr = obj;
@@ -937,7 +937,7 @@ bool ngt_batch_insert_index(NGTIndex index, float *obj, uint32_t data_count, uin
 
 bool ngt_batch_append_index_as_uint8(NGTIndex index, uint8_t *obj, uint32_t data_count, NGTError error) {
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     pindex->append(obj, data_count);
     return true;
   }catch(std::exception &err) {
@@ -949,7 +949,7 @@ bool ngt_batch_append_index_as_uint8(NGTIndex index, uint8_t *obj, uint32_t data
 }
 
 bool ngt_batch_insert_index_as_uint8(NGTIndex index, uint8_t *obj, uint32_t data_count, uint32_t *ids, NGTError error) {
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
   bool status = true;
@@ -971,8 +971,8 @@ bool ngt_batch_insert_index_as_uint8(NGTIndex index, uint8_t *obj, uint32_t data
 
 bool ngt_batch_append_index_as_float16(NGTIndex index, NGTFloat16 *obj, uint32_t data_count, NGTError error) {
   try{
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
-    auto o = static_cast<NGT::float16*>(obj);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
+    auto o = static_cast<polaris::float16*>(obj);
     pindex->append(o, data_count);
     return true;
   }catch(std::exception &err) {
@@ -984,14 +984,14 @@ bool ngt_batch_append_index_as_float16(NGTIndex index, NGTFloat16 *obj, uint32_t
 }
 
 bool ngt_batch_insert_index_as_float16(NGTIndex index, NGTFloat16 *obj, uint32_t data_count, uint32_t *ids, NGTError error) {
-  NGT::Index* pindex = static_cast<NGT::Index*>(index);
+  polaris::Index* pindex = static_cast<polaris::Index*>(index);
   int32_t dim = pindex->getDimension();
 
   bool status = true;
-  NGT::float16 *objptr = static_cast<NGT::float16*>(obj);
+  polaris::float16 *objptr = static_cast<polaris::float16*>(obj);
   for (size_t idx = 0; idx < data_count; idx++, objptr += dim) {
     try{
-      std::vector<NGT::float16> vobj(objptr, objptr + dim);
+      std::vector<polaris::float16> vobj(objptr, objptr + dim);
       ids[idx] = pindex->insert(vobj);
     }catch(std::exception &err) {
       status = false;
@@ -1013,7 +1013,7 @@ bool ngt_create_index(NGTIndex index, uint32_t pool_size, NGTError error) {
   }
 
   try{
-    (static_cast<NGT::Index*>(index))->createIndex(pool_size);
+    (static_cast<polaris::Index*>(index))->createIndex(pool_size);
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1032,7 +1032,7 @@ bool ngt_remove_index(NGTIndex index, ObjectID id, NGTError error) {
   }
 
   try{
-    (static_cast<NGT::Index*>(index))->remove(id);
+    (static_cast<polaris::Index*>(index))->remove(id);
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1051,7 +1051,7 @@ NGTObjectSpace ngt_get_object_space(NGTIndex index, NGTError error) {
   }
 
   try{
-    return static_cast<NGTObjectSpace>(&(static_cast<NGT::Index*>(index))->getObjectSpace());
+    return static_cast<NGTObjectSpace>(&(static_cast<polaris::Index*>(index))->getObjectSpace());
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1068,7 +1068,7 @@ void* ngt_get_object(NGTObjectSpace object_space, ObjectID id, NGTError error) {
     return NULL;
   }
   try{
-    return (static_cast<NGT::ObjectSpace*>(object_space))->getObject(id);
+    return (static_cast<polaris::ObjectSpace*>(object_space))->getObject(id);
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1078,7 +1078,7 @@ void* ngt_get_object(NGTObjectSpace object_space, ObjectID id, NGTError error) {
 }
 
 float* ngt_get_object_as_float(NGTObjectSpace object_space, ObjectID id, NGTError error) {
-  auto os = static_cast<NGT::ObjectSpace*>(object_space);
+  auto os = static_cast<polaris::ObjectSpace*>(object_space);
   if (os->getObjectType() != typeid(float)) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: Not available for the object type of the index. "
@@ -1090,8 +1090,8 @@ float* ngt_get_object_as_float(NGTObjectSpace object_space, ObjectID id, NGTErro
 }
 
 NGTFloat16* ngt_get_object_as_float16(NGTObjectSpace object_space, ObjectID id, NGTError error) {
-  auto os = static_cast<NGT::ObjectSpace*>(object_space);
-  if (os->getObjectType() != typeid(NGT::float16)) {
+  auto os = static_cast<polaris::ObjectSpace*>(object_space);
+  if (os->getObjectType() != typeid(polaris::float16)) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: Not available for the object type of the index. "
        << os->getObjectType().name();
@@ -1102,7 +1102,7 @@ NGTFloat16* ngt_get_object_as_float16(NGTObjectSpace object_space, ObjectID id, 
 }
 
 uint8_t* ngt_get_object_as_integer(NGTObjectSpace object_space, ObjectID id, NGTError error) {
-  auto os = static_cast<NGT::ObjectSpace*>(object_space);
+  auto os = static_cast<polaris::ObjectSpace*>(object_space);
   if (os->getObjectType() != typeid(uint8_t)) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: Not available for the object type of the index. "
@@ -1114,7 +1114,7 @@ uint8_t* ngt_get_object_as_integer(NGTObjectSpace object_space, ObjectID id, NGT
 }
 
 float* ngt_get_allocated_object_as_float(NGTObjectSpace object_space, ObjectID id, NGTError error) {
-  auto objectSpace = static_cast<NGT::ObjectSpace*>(object_space);
+  auto objectSpace = static_cast<polaris::ObjectSpace*>(object_space);
   std::vector<float> v;
   try {
     objectSpace->getObject(id, v);
@@ -1138,18 +1138,18 @@ float* ngt_get_allocated_object_as_float(NGTObjectSpace object_space, ObjectID i
 
 void ngt_destroy_results(NGTObjectDistances results) {
     if(results == NULL) return;
-    delete static_cast<NGT::ObjectDistances*>(results);
+    delete static_cast<polaris::ObjectDistances*>(results);
 }
 
 void ngt_destroy_property(NGTProperty prop) {
     if(prop == NULL) return;
-    delete static_cast<NGT::Property*>(prop);
+    delete static_cast<polaris::Property*>(prop);
 }
 
 void ngt_close_index(NGTIndex index) {
     if(index == NULL) return;
-    (static_cast<NGT::Index*>(index))->close();
-    delete static_cast<NGT::Index*>(index);
+    (static_cast<polaris::Index*>(index))->close();
+    delete static_cast<polaris::Index*>(index);
 }
 
 int16_t ngt_get_property_edge_size_for_creation(NGTProperty prop, NGTError error) {
@@ -1159,7 +1159,7 @@ int16_t ngt_get_property_edge_size_for_creation(NGTProperty prop, NGTError error
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<NGT::Property*>(prop)).edgeSizeForCreation;
+  return (*static_cast<polaris::Property*>(prop)).edgeSizeForCreation;
 }
 
 int16_t ngt_get_property_edge_size_for_search(NGTProperty prop, NGTError error) {
@@ -1169,7 +1169,7 @@ int16_t ngt_get_property_edge_size_for_search(NGTProperty prop, NGTError error) 
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<NGT::Property*>(prop)).edgeSizeForSearch;
+  return (*static_cast<polaris::Property*>(prop)).edgeSizeForSearch;
 }
 
 int32_t ngt_get_property_distance_type(NGTProperty prop, NGTError error){
@@ -1179,7 +1179,7 @@ int32_t ngt_get_property_distance_type(NGTProperty prop, NGTError error){
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<NGT::Property*>(prop)).distanceType;
+  return (*static_cast<polaris::Property*>(prop)).distanceType;
 }
 
 NGTError ngt_create_error_object()
@@ -1214,7 +1214,7 @@ void ngt_destroy_error_object(NGTError error)
 NGTOptimizer ngt_create_optimizer(bool logDisabled, NGTError error)
 {
   try{
-    return static_cast<NGTOptimizer>(new NGT::GraphOptimizer(logDisabled));
+    return static_cast<NGTOptimizer>(new polaris::GraphOptimizer(logDisabled));
   }catch(std::exception &err){
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1231,7 +1231,7 @@ bool ngt_optimizer_adjust_search_coefficients(NGTOptimizer optimizer, const char
     return false;
   }
   try{
-    (static_cast<NGT::GraphOptimizer*>(optimizer))->adjustSearchCoefficients(std::string(index));
+    (static_cast<polaris::GraphOptimizer*>(optimizer))->adjustSearchCoefficients(std::string(index));
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1249,7 +1249,7 @@ bool ngt_optimizer_execute(NGTOptimizer optimizer, const char *inIndex, const ch
     return false;
   }
   try{
-    (static_cast<NGT::GraphOptimizer*>(optimizer))->execute(std::string(inIndex), std::string(outIndex));
+    (static_cast<polaris::GraphOptimizer*>(optimizer))->execute(std::string(inIndex), std::string(outIndex));
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1271,7 +1271,7 @@ bool ngt_optimizer_set(NGTOptimizer optimizer, int outgoing, int incoming, int n
     return false;
   }
   try{
-    (static_cast<NGT::GraphOptimizer*>(optimizer))->set(outgoing, incoming, nofqs, baseAccuracyFrom, baseAccuracyTo,
+    (static_cast<polaris::GraphOptimizer*>(optimizer))->set(outgoing, incoming, nofqs, baseAccuracyFrom, baseAccuracyTo,
     							rateAccuracyFrom, rateAccuracyTo, gte, m);
   }catch(std::exception &err) {
     std::stringstream ss;
@@ -1291,7 +1291,7 @@ bool ngt_optimizer_set_minimum(NGTOptimizer optimizer, int outgoing, int incomin
     return false;
   }
   try{
-    (static_cast<NGT::GraphOptimizer*>(optimizer))->set(outgoing, incoming, nofqs, nofrs);
+    (static_cast<polaris::GraphOptimizer*>(optimizer))->set(outgoing, incoming, nofqs, nofrs);
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1312,7 +1312,7 @@ bool ngt_optimizer_set_extension(NGTOptimizer optimizer,
     return false;
   }
   try{
-    (static_cast<NGT::GraphOptimizer*>(optimizer))->setExtension(baseAccuracyFrom, baseAccuracyTo,
+    (static_cast<polaris::GraphOptimizer*>(optimizer))->setExtension(baseAccuracyFrom, baseAccuracyTo,
 								  rateAccuracyFrom, rateAccuracyTo, gte, m);
   }catch(std::exception &err) {
     std::stringstream ss;
@@ -1333,7 +1333,7 @@ bool ngt_optimizer_set_processing_modes(NGTOptimizer optimizer, bool searchParam
     return false;
   }
 
-  (static_cast<NGT::GraphOptimizer*>(optimizer))->setProcessingModes(searchParameter, prefetchParameter,
+  (static_cast<polaris::GraphOptimizer*>(optimizer))->setProcessingModes(searchParameter, prefetchParameter,
 								     accuracyTable);
   return true;
 }
@@ -1341,14 +1341,14 @@ bool ngt_optimizer_set_processing_modes(NGTOptimizer optimizer, bool searchParam
 void ngt_destroy_optimizer(NGTOptimizer optimizer)
 {
     if(optimizer == NULL) return;
-    delete static_cast<NGT::GraphOptimizer*>(optimizer);
+    delete static_cast<polaris::GraphOptimizer*>(optimizer);
 }
 
 bool ngt_refine_anng(NGTIndex index, float epsilon, float accuracy, int noOfEdges, int exploreEdgeSize, size_t batchSize, NGTError error)
 {
-    NGT::Index* pindex = static_cast<NGT::Index*>(index);
+    polaris::Index* pindex = static_cast<polaris::Index*>(index);
     try {
-      NGT::GraphReconstructor::refineANNG(*pindex, true, epsilon, accuracy, noOfEdges, exploreEdgeSize, batchSize);
+      polaris::GraphReconstructor::refineANNG(*pindex, true, epsilon, accuracy, noOfEdges, exploreEdgeSize, batchSize);
     } catch(std::exception &err) {
       std::stringstream ss;
       ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -1367,11 +1367,11 @@ bool ngt_get_edges(NGTIndex index, ObjectID id, NGTObjectDistances edges, NGTErr
     return false;
   }
 
-  NGT::Index*		pindex = static_cast<NGT::Index*>(index);
-  NGT::GraphIndex	&graph = static_cast<NGT::GraphIndex&>(pindex->getIndex());
+  polaris::Index*		pindex = static_cast<polaris::Index*>(index);
+  polaris::GraphIndex	&graph = static_cast<polaris::GraphIndex&>(pindex->getIndex());
 
   try {
-    NGT::ObjectDistances &objects = *static_cast<NGT::ObjectDistances*>(edges);
+    polaris::ObjectDistances &objects = *static_cast<polaris::ObjectDistances*>(edges);
     objects = *graph.getNode(id);
   }catch(std::exception &err){
     std::stringstream ss;
@@ -1391,7 +1391,7 @@ uint32_t ngt_get_object_repository_size(NGTIndex index, NGTError error)
     operate_error_string_(ss, error);
     return false;
   }
-  NGT::Index&		pindex = *static_cast<NGT::Index*>(index);
+  polaris::Index&		pindex = *static_cast<polaris::Index*>(index);
   return pindex.getObjectRepositorySize();
 }
 
@@ -1403,7 +1403,7 @@ uint32_t ngt_get_number_of_indexed_objects(NGTIndex index, NGTError error)
     operate_error_string_(ss, error);
     return false;
   }
-  NGT::Index&		pindex = *static_cast<NGT::Index*>(index);
+  polaris::Index&		pindex = *static_cast<polaris::Index*>(index);
   return pindex.getNumberOfIndexedObjects();
 }
 
@@ -1415,13 +1415,13 @@ uint32_t ngt_get_number_of_objects(NGTIndex index, NGTError error)
     operate_error_string_(ss, error);
     return false;
   }
-  NGT::Index&		pindex = *static_cast<NGT::Index*>(index);
+  polaris::Index&		pindex = *static_cast<polaris::Index*>(index);
   return pindex.getNumberOfObjects();
 }
 
 NGTAnngEdgeOptimizationParameter ngt_get_anng_edge_optimization_parameter()
 {
-  NGT::GraphOptimizer::ANNGEdgeOptimizationParameter gp;
+  polaris::GraphOptimizer::ANNGEdgeOptimizationParameter gp;
   NGTAnngEdgeOptimizationParameter parameter;
 
   parameter.no_of_queries		= gp.noOfQueries;
@@ -1439,7 +1439,7 @@ NGTAnngEdgeOptimizationParameter ngt_get_anng_edge_optimization_parameter()
 bool ngt_optimize_number_of_edges(const char *indexPath, NGTAnngEdgeOptimizationParameter parameter, NGTError error)
 {
 
-  NGT::GraphOptimizer::ANNGEdgeOptimizationParameter p;
+  polaris::GraphOptimizer::ANNGEdgeOptimizationParameter p;
 
   p.noOfQueries	= parameter.no_of_queries;
   p.noOfResults	= parameter.no_of_results;
@@ -1450,7 +1450,7 @@ bool ngt_optimize_number_of_edges(const char *indexPath, NGTAnngEdgeOptimization
   p.maxNoOfEdges	= parameter.max_of_no_of_edges;
 
   try {
-    NGT::GraphOptimizer graphOptimizer(!parameter.log); // false=log
+    polaris::GraphOptimizer graphOptimizer(!parameter.log); // false=log
     std::string path(indexPath);
     auto edge = graphOptimizer.optimizeNumberOfEdgesForANNG(path, p);
     if (parameter.log) {

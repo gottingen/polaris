@@ -35,12 +35,12 @@ int main(int argc, char **argv) {
 }
 void run_ann() {
     try {
-        NGT::Property property;
+        polaris::Property property;
         property.dimension = 128;
-        property.objectType = NGT::ObjectSpace::ObjectType::Float;
-        property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeCosine;
-        NGT::Index::create(indexPath, property);
-        NGT::Index index(indexPath);
+        property.objectType = polaris::ObjectSpace::ObjectType::Float;
+        property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeCosine;
+        polaris::Index::create(indexPath, property);
+        polaris::Index index(indexPath);
         ifstream is(objectFile);
         string line;
         while (getline(is, line)) {
@@ -74,8 +74,8 @@ void run_ann() {
 
     // nearest neighbor search
     try {
-        NGT::Index index(indexPath);
-        NGT::Property property;
+        polaris::Index index(indexPath);
+        polaris::Property property;
         index.getProperty(property);
         ifstream is(queryFile);
         string line;
@@ -95,8 +95,8 @@ void run_ann() {
                 }
                 cout << "...";
             }
-            NGT::SearchQuery sc(query);
-            NGT::ObjectDistances objects;
+            polaris::SearchQuery sc(query);
+            polaris::ObjectDistances objects;
             sc.setResults(&objects);
             sc.setSize(10);
             sc.setEpsilon(0.1);
@@ -105,7 +105,7 @@ void run_ann() {
             cout << endl << "Rank\tID\tDistance" << std::showbase << endl;
             for (size_t i = 0; i < objects.size(); i++) {
                 cout << i + 1 << "\t" << objects[i].id << "\t" << objects[i].distance << "\t: ";
-                NGT::ObjectSpace &objectSpace = index.getObjectSpace();
+                polaris::ObjectSpace &objectSpace = index.getObjectSpace();
                 float *object = static_cast<float *>(objectSpace.getObject(objects[i].id));
                 for (size_t idx = 0; idx < 5; idx++) {
                     cout << object[idx] << " ";

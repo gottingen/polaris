@@ -19,7 +19,7 @@
 #include <polaris/core/defines.h>
 #include <immintrin.h>
 
-namespace NGT {
+namespace polaris {
 
   class MemoryCache {
   public:
@@ -1005,5 +1005,5 @@ namespace NGT {
 };
 
 
-} // namespace NGT
+} // namespace polaris
 

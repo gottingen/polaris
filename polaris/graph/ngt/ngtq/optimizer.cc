@@ -68,7 +68,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
   {
     // compute residual vectors by global centroids.
 #ifdef NGT_CLUSTERING
-    vector<NGT::Clustering::Cluster> globalCentroid;
+    vector<polaris::Clustering::Cluster> globalCentroid;
 #else
     vector<Cluster> globalCentroid;
 #endif
@@ -76,7 +76,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
       cerr << "generate residual vectors." << endl;
       try {
 #ifdef NGT_CLUSTERING
-	NGT::Clustering::loadClusters(global, globalCentroid);
+	polaris::Clustering::loadClusters(global, globalCentroid);
 #else
 	loadClusters(global, globalCentroid);
 #endif
@@ -86,7 +86,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
       }
       if (clusteringType == 'k') {
 #ifdef NGT_CLUSTERING
-	NGT::Clustering::assign(vectors, globalCentroid);
+	polaris::Clustering::assign(vectors, globalCentroid);
 #else
 	assign(vectors, globalCentroid);
 #endif
@@ -106,7 +106,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
 	  size_t vid = (*mit).vectorID;
 	  residualVectors[vid] = vectors[vid];
 #ifdef NGT_CLUSTERING
-	  NGT::Clustering::subtract(residualVectors[vid], globalCentroid[cidx].centroid);
+	  polaris::Clustering::subtract(residualVectors[vid], globalCentroid[cidx].centroid);
 #else
 	  subtract(residualVectors[vid], globalCentroid[cidx].centroid);
 #endif
@@ -127,14 +127,14 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
   Matrix<float>::mulSquare(xp, R);
   for (size_t m = 0; m < numberOfSubvectors; m++) {
 #ifdef NGT_CLUSTERING
-    vector<NGT::Clustering::Cluster> subClusters;
+    vector<polaris::Clustering::Cluster> subClusters;
 #else
     vector<Cluster> subClusters;
 #endif
     stringstream str;
     str << ofile << "-" << m;
 #ifdef NGT_CLUSTERING
-    NGT::Clustering::loadClusters(str.str(), subClusters);
+    polaris::Clustering::loadClusters(str.str(), subClusters);
 #else
     loadClusters(str.str(), subClusters);
 #endif
@@ -142,7 +142,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
     extractSubvector(xp, subVectors, m * subvectorSize, subvectorSize);
     if (clusteringType == 'k') {
 #ifdef NGT_CLUSTERING
-      NGT::Clustering::assign(subVectors, subClusters);
+      polaris::Clustering::assign(subVectors, subClusters);
 #else
       assign(subVectors, subClusters);
 #endif
@@ -156,7 +156,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
 #endif
     }
 #ifdef NGT_CLUSTERING
-    double distortion = NGT::Clustering::calculateML2(subVectors, subClusters);
+    double distortion = polaris::Clustering::calculateML2(subVectors, subClusters);
 #else
     double distortion = calculateML2(subVectors, subClusters);
 #endif
@@ -164,13 +164,13 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
     vector<vector<float>> subCentroids(vectors.size());
     for (size_t cidx = 0; cidx < subClusters.size(); ++cidx) {
 #ifdef NGT_CLUSTERING
-      vector<NGT::Clustering::Entry> &members = subClusters[cidx].members;
+      vector<polaris::Clustering::Entry> &members = subClusters[cidx].members;
 #else
       vector<Entry> &members = subClusters[cidx].members;
 #endif
       for (size_t eidx = 0; eidx < members.size(); ++eidx) {
 #ifdef NGT_CLUSTERING
-	NGT::Clustering::Entry &entry = members[eidx];
+	polaris::Clustering::Entry &entry = members[eidx];
 #else
 	Entry &entry = members[eidx];
 #endif
@@ -181,7 +181,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
     catSubvector(qv, subCentroids);
   }
 #ifdef NGT_CLUSTERING
-  double distortion = NGT::Clustering::distanceL2(qv, xp);
+  double distortion = polaris::Clustering::distanceL2(qv, xp);
 #else
   double distortion = distanceL2(qv, xp);
 #endif
@@ -199,22 +199,22 @@ void QBG::Optimizer::evaluate(vector<vector<float>> &vectors, string &ofile, siz
   Matrix<float>::mulSquare(xp, R);
   for (size_t m = 0; m < numberOfSubvectors; m++) {
 #ifdef NGT_CLUSTERING
-    vector<NGT::Clustering::Cluster> subClusters;
+    vector<polaris::Clustering::Cluster> subClusters;
 #else
     vector<Cluster> subClusters;
 #endif
     stringstream str;
     str << ofile << "-" << m;
 #ifdef NGT_CLUSTERING
-    NGT::Clustering::loadClusters(str.str(), subClusters);
+    polaris::Clustering::loadClusters(str.str(), subClusters);
 #else
     loadClusters(str.str(), subClusters);
 #endif
     vector<vector<float>> subVectors;
     extractSubvector(xp, subVectors, m * subvectorSize, subvectorSize);
 #ifdef NGT_CLUSTERING
-    NGT::Clustering::assign(subVectors, subClusters);
-    double distortion = NGT::Clustering::calculateML2(subVectors, subClusters);
+    polaris::Clustering::assign(subVectors, subClusters);
+    double distortion = polaris::Clustering::calculateML2(subVectors, subClusters);
 #else
     assign(subVectors, subClusters);
     double distortion = calculateML2(subVectors, subClusters);
@@ -230,7 +230,7 @@ void QBG::Optimizer::evaluate(vector<vector<float>> &vectors, string &ofile, siz
 
 #ifdef NGTQ_QBG
 void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
-  NGT::StdOstreamRedirector redirector(!verbose);
+  polaris::StdOstreamRedirector redirector(!verbose);
   redirector.begin();
   if (threadSize == 0) {
     threadSize = omp_get_max_threads();
@@ -278,7 +278,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
 
     const std::string ws = indexPath + "/" + QBG::Index::getWorkspaceName();
     try {
-      NGT::Index::mkdir(ws);
+      polaris::Index::mkdir(ws);
     } catch(...) {}
     const std::string object = QBG::Index::getTrainObjectFile(indexPath);
     std::ofstream ofs;
@@ -288,7 +288,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       assert(index.getQuantizer().objectList.pseudoDimension != 0);
       std::vector<std::vector<float>> global(1);
       global[0].resize(index.getQuantizer().property.dimension, 0.0);
-      NGT::Clustering::saveVectors(QBG::Index::getQuantizerCodebookFile(indexPath), global);
+      polaris::Clustering::saveVectors(QBG::Index::getQuantizerCodebookFile(indexPath), global);
       size_t count = 0;
       {
 	ifstream ifs(QBG::Index::getCodebookIndexFile(indexPath));
@@ -315,7 +315,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       std::vector<std::vector<float>> vectors;
       std::string objects = QBG::Index::getTrainObjectFile(indexPath);
 #ifdef NGT_CLUSTERING
-      NGT::Clustering::loadVectors(objects, vectors);
+      polaris::Clustering::loadVectors(objects, vectors);
 #else
       loadVectors(objects, vectors);
 #endif
@@ -332,7 +332,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       for (size_t i = 0; i < global[0].size(); i++) {
 	global[0][i] /= vectors.size();
       }
-      NGT::Clustering::saveVectors(QBG::Index::getQuantizerCodebookFile(indexPath), global);
+      polaris::Clustering::saveVectors(QBG::Index::getQuantizerCodebookFile(indexPath), global);
     }
 
     optimizeWithinIndex(indexPath);
@@ -358,7 +358,7 @@ void QBG::Optimizer::optimizeWithinIndex(std::string indexPath) {
   }
 
   try {
-    NGT::Index::mkdir(pq);
+    polaris::Index::mkdir(pq);
   } catch(...) {}
   pq += "/";
   optimize(object, pq, global);
@@ -368,7 +368,7 @@ void QBG::Optimizer::optimizeWithinIndex(std::string indexPath) {
 
 
 #ifdef NGTQ_QBG
-void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<float>> &globalCentroid, Matrix<float> &r, vector<vector<NGT::Clustering::Cluster>> &localClusters, vector<double> &errors) {
+void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<float>> &globalCentroid, Matrix<float> &r, vector<vector<polaris::Clustering::Cluster>> &localClusters, vector<double> &errors) {
   if (vectors.size() == 0) {
     std::stringstream msg;
     msg << "optimize: error! the specified vetor is empty. the size=" << vectors.size();
@@ -410,7 +410,7 @@ void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<floa
   }
 
 
-  vector<vector<vector<NGT::Clustering::Cluster>>> localClustersSet;
+  vector<vector<vector<polaris::Clustering::Cluster>>> localClustersSet;
 
   numberOfMatrices = numberOfMatrices == 0 ? 1 : numberOfMatrices;
   if (!rotation) {
@@ -441,7 +441,7 @@ void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<floa
     }
   }
 
-  NGT::Timer timer;
+  polaris::Timer timer;
   timer.start();
   for (int step = seedNumberOfSteps - 1; ; step--) {
     size_t vsize = vectors.size() / pow(seedStep, step);
@@ -466,13 +466,13 @@ void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<floa
     if (rs.size() > 1) {
       numberOfMatrices = static_cast<float>(numberOfMatrices) * (1.0 - reject);
       numberOfMatrices = numberOfMatrices == 0 ? 1 : numberOfMatrices;
-      vector<pair<double, pair<Matrix<float>*, vector<vector<NGT::Clustering::Cluster>>*>>> sortedErrors;
+      vector<pair<double, pair<Matrix<float>*, vector<vector<polaris::Clustering::Cluster>>*>>> sortedErrors;
       for (size_t idx = 0; idx < errors.size(); idx++) {
 	sortedErrors.emplace_back(make_pair(errors[idx], make_pair(&rs[idx], &localClustersSet[idx])));
       }
       sort(sortedErrors.begin(), sortedErrors.end());
       vector<Matrix<float>> tmpMatrix;
-      vector<vector<vector<NGT::Clustering::Cluster>>> tmpLocalClusters;
+      vector<vector<vector<polaris::Clustering::Cluster>>> tmpLocalClusters;
       for (size_t idx = 0; idx < numberOfMatrices; idx++) {
 	tmpMatrix.emplace_back(*sortedErrors[idx].second.first);
 	tmpLocalClusters.emplace_back(*sortedErrors[idx].second.second);
@@ -512,16 +512,16 @@ void QBG::Optimizer::optimize(std::string invector, std::string ofile, std::stri
 
   vector<vector<float>> vectors;
 #ifdef NGT_CLUSTERING
-  NGT::Clustering::loadVectors(invector, vectors);
+  polaris::Clustering::loadVectors(invector, vectors);
 #else
   loadVectors(invector, vectors);
 #endif
 
   vector<vector<float>> globalCentroid;
-  NGT::Clustering::loadVectors(global, globalCentroid);
+  polaris::Clustering::loadVectors(global, globalCentroid);
 
   Matrix<float> r;
-  vector<vector<NGT::Clustering::Cluster>> localClusters;
+  vector<vector<polaris::Clustering::Cluster>> localClusters;
   vector<double> errors;
 
   optimize(vectors, globalCentroid, r, localClusters, errors);
@@ -565,7 +565,7 @@ void QBG::Optimizer::optimize(std::string invector, std::string ofile, std::stri
     stringstream str;
     str << ofile << QBG::Index::getSubvectorPrefix() << "-" << m;
 #ifdef NGT_CLUSTERING
-    NGT::Clustering::saveClusters(str.str(), localClusters[m]);
+    polaris::Clustering::saveClusters(str.str(), localClusters[m]);
 #else
     saveClusters(str.str(), localClusters[m]);
 #endif

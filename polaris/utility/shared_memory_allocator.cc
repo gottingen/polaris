@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/ngt/shared_memory_allocator.h>
+#include <polaris/utility/shared_memory_allocator.h>
 
 
 

@@ -22,7 +22,7 @@
 using namespace std;
 
 
-NGT::Command::CreateParameters::CreateParameters(Args &args) {
+polaris::Command::CreateParameters::CreateParameters(Args &args) {
     try {
         index = args.get("#1");
     } catch (...) {
@@ -54,33 +54,33 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
     }
 
     property.objectAlignment =
-            args.getChar("A", 'f') == 't' ? NGT::Property::ObjectAlignmentTrue : NGT::Property::ObjectAlignmentFalse;
+            args.getChar("A", 'f') == 't' ? polaris::Property::ObjectAlignmentTrue : polaris::Property::ObjectAlignmentFalse;
 
     char graphType = args.getChar("g", 'a');
     switch (graphType) {
         case 'a':
-            property.graphType = NGT::Property::GraphType::GraphTypeANNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeANNG;
             break;
         case 'k':
-            property.graphType = NGT::Property::GraphType::GraphTypeKNNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeKNNG;
             break;
         case 'b':
-            property.graphType = NGT::Property::GraphType::GraphTypeBKNNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeBKNNG;
             break;
         case 'd':
-            property.graphType = NGT::Property::GraphType::GraphTypeDNNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeDNNG;
             break;
         case 'o':
-            property.graphType = NGT::Property::GraphType::GraphTypeONNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeONNG;
             break;
         case 'i':
-            property.graphType = NGT::Property::GraphType::GraphTypeIANNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeIANNG;
             break;
         case 'r':
-            property.graphType = NGT::Property::GraphType::GraphTypeRANNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeRANNG;
             break;
         case 'R':
-            property.graphType = NGT::Property::GraphType::GraphTypeRIANNG;
+            property.graphType = polaris::Property::GraphType::GraphTypeRIANNG;
             break;
         default:
             std::stringstream msg;
@@ -88,17 +88,17 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
             POLARIS_THROW_EX(msg);
     }
 
-    if (property.graphType == NGT::Property::GraphType::GraphTypeANNG ||
-        property.graphType == NGT::Property::GraphType::GraphTypeONNG ||
-        property.graphType == NGT::Property::GraphType::GraphTypeIANNG ||
-        property.graphType == NGT::Property::GraphType::GraphTypeRANNG ||
-        property.graphType == NGT::Property::GraphType::GraphTypeRIANNG) {
+    if (property.graphType == polaris::Property::GraphType::GraphTypeANNG ||
+        property.graphType == polaris::Property::GraphType::GraphTypeONNG ||
+        property.graphType == polaris::Property::GraphType::GraphTypeIANNG ||
+        property.graphType == polaris::Property::GraphType::GraphTypeRANNG ||
+        property.graphType == polaris::Property::GraphType::GraphTypeRIANNG) {
         property.outgoingEdge = 10;
         property.incomingEdge = 100;
         string str = args.getString("O", "-");
         if (str != "-") {
             vector<string> tokens;
-            NGT::Common::tokenize(str, tokens, "x");
+            polaris::Common::tokenize(str, tokens, "x");
             if (str != "-" && tokens.size() != 2) {
                 std::stringstream msg;
                 msg
@@ -106,28 +106,28 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
                         << str;
                 POLARIS_THROW_EX(msg);
             }
-            property.outgoingEdge = NGT::Common::strtod(tokens[0]);
-            property.incomingEdge = NGT::Common::strtod(tokens[1]);
+            property.outgoingEdge = polaris::Common::strtod(tokens[0]);
+            property.incomingEdge = polaris::Common::strtod(tokens[1]);
         }
     }
 
     char seedType = args.getChar("s", '-');
     switch (seedType) {
         case 'f':
-            property.seedType = NGT::Property::SeedType::SeedTypeFixedNodes;
+            property.seedType = polaris::Property::SeedType::SeedTypeFixedNodes;
             break;
         case '1':
-            property.seedType = NGT::Property::SeedType::SeedTypeFirstNode;
+            property.seedType = polaris::Property::SeedType::SeedTypeFirstNode;
             break;
         case 'r':
-            property.seedType = NGT::Property::SeedType::SeedTypeRandomNodes;
+            property.seedType = polaris::Property::SeedType::SeedTypeRandomNodes;
             break;
         case 'l':
-            property.seedType = NGT::Property::SeedType::SeedTypeAllLeafNodes;
+            property.seedType = polaris::Property::SeedType::SeedTypeAllLeafNodes;
             break;
         default:
         case '-':
-            property.seedType = NGT::Property::SeedType::SeedTypeNone;
+            property.seedType = polaris::Property::SeedType::SeedTypeNone;
             break;
     }
 
@@ -142,16 +142,16 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (objectType) {
         case 'f':
-            property.objectType = NGT::Index::Property::ObjectType::Float;
+            property.objectType = polaris::Index::Property::ObjectType::Float;
             break;
         case 'c':
-            property.objectType = NGT::Index::Property::ObjectType::Uint8;
+            property.objectType = polaris::Index::Property::ObjectType::Uint8;
             break;
         case 'h':
-            property.objectType = NGT::Index::Property::ObjectType::Float16;
+            property.objectType = polaris::Index::Property::ObjectType::Float16;
             break;
             case 'H':
-              property.objectType = NGT::Index::Property::ObjectType::Bfloat16;
+              property.objectType = polaris::Index::Property::ObjectType::Bfloat16;
               break;
         default:
             std::stringstream msg;
@@ -162,16 +162,16 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
 #ifdef NGT_REFINEMENT
     switch (refinementObjectType) {
     case 'f':
-      property.refinementObjectType = NGT::Index::Property::ObjectType::Float;
+      property.refinementObjectType = polaris::Index::Property::ObjectType::Float;
       break;
     case 'c':
-      property.refinementObjectType = NGT::Index::Property::ObjectType::Uint8;
+      property.refinementObjectType = polaris::Index::Property::ObjectType::Uint8;
       break;
     case 'h':
-      property.refinementObjectType = NGT::Index::Property::ObjectType::Float16;
+      property.refinementObjectType = polaris::Index::Property::ObjectType::Float16;
       break;
     case 'H':
-      property.refinementObjectType = NGT::Index::Property::ObjectType::Bfloat16;
+      property.refinementObjectType = polaris::Index::Property::ObjectType::Bfloat16;
       break;
     default:
       std::stringstream msg;
@@ -182,44 +182,44 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (distanceType) {
         case '1':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL1;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL1;
             break;
         case '2':
         case 'e':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
             break;
         case 'a':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeAngle;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeAngle;
             break;
         case 'A':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedAngle;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedAngle;
             break;
         case 'h':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeHamming;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
             break;
         case 'j':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeJaccard;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeJaccard;
             break;
         case 'J':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeSparseJaccard;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeSparseJaccard;
             break;
         case 'c':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeCosine;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeCosine;
             break;
         case 'C':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedCosine;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedCosine;
             break;
         case 'E':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedL2;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedL2;
             break;
         case 'i':
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeInnerProduct;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeInnerProduct;
             break;
         case 'p':  // added by Nyapicom
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypePoincare;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypePoincare;
             break;
         case 'l':  // added by Nyapicom
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeLorentz;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeLorentz;
             break;
         default:
             std::stringstream msg;
@@ -232,12 +232,12 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         string str = args.getString("l", "-");
         if (str != "-") {
             vector<string> tokens;
-            NGT::Common::tokenize(str, tokens, ":");
+            polaris::Common::tokenize(str, tokens, ":");
             if (tokens.size() == 1) {
-                property.nOfNeighborsForInsertionOrder = NGT::Common::strtol(tokens[0]);
+                property.nOfNeighborsForInsertionOrder = polaris::Common::strtol(tokens[0]);
             } else if (tokens.size() == 2) {
-                property.nOfNeighborsForInsertionOrder = NGT::Common::strtol(tokens[0]);
-                property.epsilonForInsertionOrder = NGT::Common::strtof(tokens[1]);
+                property.nOfNeighborsForInsertionOrder = polaris::Common::strtol(tokens[0]);
+                property.epsilonForInsertionOrder = polaris::Common::strtof(tokens[1]);
             } else {
                 std::stringstream msg;
                 msg << "Command::CreateParameter: Error: Invalid insertion order parameters. " << str << endl;
@@ -248,7 +248,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
 }
 
 void
-NGT::Command::create(Args &args) {
+polaris::Command::create(Args &args) {
     const string usage = "Usage: ngt create "
                          "-d dimension [-p #-of-thread] [-i index-type(t|g)] [-g graph-type(a|k|b|o|i)] "
                          "[-t truncation-edge-limit] [-E edge-size] [-S edge-size-for-search] [-L edge-size-limit] "
@@ -277,11 +277,11 @@ NGT::Command::create(Args &args) {
 
         switch (createParameters.indexType) {
             case 't':
-                NGT::Index::createGraphAndTree(createParameters.index, createParameters.property,
+                polaris::Index::createGraphAndTree(createParameters.index, createParameters.property,
                                                createParameters.objectPath, createParameters.numOfObjects);
                 break;
             case 'g':
-                NGT::Index::createGraph(createParameters.index, createParameters.property, createParameters.objectPath,
+                polaris::Index::createGraph(createParameters.index, createParameters.property, createParameters.objectPath,
                                         createParameters.numOfObjects);
                 break;
         }
@@ -292,13 +292,13 @@ NGT::Command::create(Args &args) {
 }
 
 
-void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSize, char destination) {
-    NGT::Property prop;
+void appendTextVectors(polaris::Index &index, const std::string &data, size_t dataSize, char destination) {
+    polaris::Property prop;
     index.getProperty(prop);
 
     size_t id = index.getObjectRepositorySize();
-    vector<pair<NGT::Object *, size_t>> objects;
-    NGT::Timer timer;
+    vector<pair<polaris::Object *, size_t>> objects;
+    polaris::Timer timer;
     timer.start();
     ifstream is(data);
     if (!is) {
@@ -313,9 +313,9 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
         if (dataSize > 0 && counter > dataSize) break;
         vector<float> object;
         vector<string> tokens;
-        NGT::Common::tokenize(line, tokens, "\t, ");
-        for (auto &v: tokens) object.push_back(NGT::Common::strtod(v));
-        if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
+        polaris::Common::tokenize(line, tokens, "\t, ");
+        for (auto &v: tokens) object.push_back(polaris::Common::strtod(v));
+        if (prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
             double mag = 0.0;
             for (auto &v: object) {
                 mag += v * v;
@@ -343,13 +343,13 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
             if (counter != id) {
                 std::cerr << " # of the total objects=" << static_cast<float>(id) / 1000000.0 << "M";
             }
-            cerr << " peak vm size=" << NGT::Common::getProcessVmPeakStr()
+            cerr << " peak vm size=" << polaris::Common::getProcessVmPeakStr()
                  << " time=" << timer << std::endl;
             timer.restart();
         }
     }
-    if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
-        NGT::ObjectSpace *rep = 0;
+    if (prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
+        polaris::ObjectSpace *rep = 0;
 #ifdef NGT_REFINEMENT
         if (destination == 'r') {
       rep = &index.getRefinementObjectSpace();
@@ -379,14 +379,14 @@ void appendTextVectors(NGT::Index &index, const std::string &data, size_t dataSi
 
 void appendTextVectors(std::string &indexPath, std::string &data, size_t dataSize, char appendMode, char destination,
                        size_t ioSearchSize, float ioEpsilon, float cutRate) {
-    NGT::StdOstreamRedirector redirector(false);
+    polaris::StdOstreamRedirector redirector(false);
     redirector.begin();
-    NGT::Index index(indexPath);
+    polaris::Index index(indexPath);
     index.enableLog();
     appendTextVectors(index, data, dataSize, destination);
     if (appendMode == 't') {
         if (ioSearchSize > 0) {
-            NGT::Index::InsertionOrder insertionOrder;
+            polaris::Index::InsertionOrder insertionOrder;
             insertionOrder.nOfNeighboringNodes = ioSearchSize;
             insertionOrder.epsilon = ioEpsilon;
             std::cerr << "append: insertion order optimization is enabled. "
@@ -404,7 +404,7 @@ void appendTextVectors(std::string &indexPath, std::string &data, size_t dataSiz
 
 
 void
-NGT::Command::append(Args &args) {
+polaris::Command::append(Args &args) {
     const string usage = "Usage: ngt append [-p #-of-thread] [-d dimension] [-n data-size] "
                          "index(output) [data.tsv(input)]";
     args.parse("v");
@@ -441,7 +441,7 @@ NGT::Command::append(Args &args) {
     char destination = args.getChar("D", '-');
     if (appendMode == '-') {
         try {
-            NGT::Index::append(indexPath, data, threadSize, dataSize);
+            polaris::Index::append(indexPath, data, threadSize, dataSize);
         } catch (polaris::PolarisException &err) {
             cerr << "ngt: Error. " << err.what() << endl;
             cerr << usage << endl;
@@ -455,7 +455,7 @@ NGT::Command::append(Args &args) {
 }
 
 void
-NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchParameters, istream &is,
+polaris::Command::search(polaris::Index &index, polaris::Command::SearchParameters &searchParameters, istream &is,
                      ostream &stream) {
 
     if (searchParameters.outputMode[0] == 'e') {
@@ -470,11 +470,11 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
             break;
         }
         std::vector<float> object;
-        NGT::Common::extractVector(line, " \t,", object);
+        polaris::Common::extractVector(line, " \t,", object);
         queryCount++;
         size_t step = searchParameters.step == 0 ? UINT_MAX : searchParameters.step;
         for (size_t n = 0; n <= step; n++) {
-            NGT::SearchQuery sc(object);
+            polaris::SearchQuery sc(object);
             double epsilon;
             if (searchParameters.step != 0) {
                 epsilon = searchParameters.beginOfEpsilon +
@@ -485,7 +485,7 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
                     break;
                 }
             }
-            NGT::ObjectDistances objects;
+            polaris::ObjectDistances objects;
             sc.setResults(&objects);
             sc.setSize(searchParameters.size);
             sc.setRadius(searchParameters.radius);
@@ -498,7 +498,7 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
 #ifdef NGT_REFINEMENT
             sc.setRefinementExpansion(searchParameters.refinementExpansion);
 #endif
-            NGT::Timer timer;
+            polaris::Timer timer;
             try {
                 if (searchParameters.outputMode[0] == 'e') {
                     double time = 0.0;
@@ -590,8 +590,8 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
     if (searchParameters.outputMode[0] == 'e') {
         stream << "# Average Query Time (msec)=" << totalTime * 1000.0 / (double) queryCount << endl;
         stream << "# Number of queries=" << queryCount << endl;
-        stream << "# VM size=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-        stream << "# Peak VM size=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+        stream << "# VM size=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+        stream << "# Peak VM size=" << polaris::Common::getProcessVmPeakStr() << std::endl;
         stream << "# End of Evaluation" << endl;
 
         if (searchParameters.outputMode == "e+") {
@@ -601,9 +601,9 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
             size_t numberOfNodes = 0;
             size_t numberOfEdges = 0;
 
-            NGT::GraphIndex &graph = (NGT::GraphIndex &) index.getIndex();
+            polaris::GraphIndex &graph = (polaris::GraphIndex &) index.getIndex();
             for (size_t id = 1; id < graph.repository.size(); id++) {
-                NGT::GraphNode *node = 0;
+                polaris::GraphNode *node = 0;
                 try {
                     node = graph.getNode(id);
                 } catch (polaris::PolarisException &err) {
@@ -638,7 +638,7 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
 
 
 void
-NGT::Command::search(Args &args) {
+polaris::Command::search(Args &args) {
     const string usage = "Usage: ngt search [-i index-type(g|t|s)] [-n result-size] [-e epsilon] [-E edge-size] "
                          "[-m open-mode(r|w)] [-o output-mode] index(input) query.tsv(input)";
 
@@ -662,10 +662,10 @@ NGT::Command::search(Args &args) {
     }
 
     try {
-        NGT::Index index(database, searchParameters.openMode == 'r');
+        polaris::Index index(database, searchParameters.openMode == 'r');
         search(index, searchParameters, cout);
         if (debugLevel >= 1) {
-            cerr << "Peak VM size=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+            cerr << "Peak VM size=" << polaris::Common::getProcessVmPeakStr() << std::endl;
         }
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
@@ -679,7 +679,7 @@ NGT::Command::search(Args &args) {
 
 
 void
-NGT::Command::remove(Args &args) {
+polaris::Command::remove(Args &args) {
     const string usage = "Usage: ngt remove [-d object-ID-type(f|d)] [-m f] index(input) object-ID(input)";
     string database;
     try {
@@ -707,7 +707,7 @@ NGT::Command::remove(Args &args) {
     }
 
     try {
-        vector<NGT::ObjectID> objects;
+        vector<polaris::ObjectID> objects;
         if (dataType == 'f') {
             string ids;
             try {
@@ -728,7 +728,7 @@ NGT::Command::remove(Args &args) {
             while (getline(is, line)) {
                 count++;
                 vector<string> tokens;
-                NGT::Common::tokenize(line, tokens, "\t, ");
+                polaris::Common::tokenize(line, tokens, "\t, ");
                 if (tokens.size() == 0 || tokens[0].size() == 0) {
                     continue;
                 }
@@ -750,7 +750,7 @@ NGT::Command::remove(Args &args) {
             cerr << "removed ID=" << id << endl;
             objects.push_back(id);
         }
-        NGT::Index::remove(database, objects, force);
+        polaris::Index::remove(database, objects, force);
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
@@ -761,7 +761,7 @@ NGT::Command::remove(Args &args) {
 }
 
 void
-NGT::Command::exportIndex(Args &args) {
+polaris::Command::exportIndex(Args &args) {
     const string usage = "Usage: ngt export index(input) export-file(output)";
     string database;
     try {
@@ -780,7 +780,7 @@ NGT::Command::exportIndex(Args &args) {
         return;
     }
     try {
-        NGT::Index::exportIndex(database, exportFile);
+        polaris::Index::exportIndex(database, exportFile);
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
@@ -791,7 +791,7 @@ NGT::Command::exportIndex(Args &args) {
 }
 
 void
-NGT::Command::importIndex(Args &args) {
+polaris::Command::importIndex(Args &args) {
     const string usage = "Usage: ngt import index(output) import-file(input)";
     string database;
     try {
@@ -811,7 +811,7 @@ NGT::Command::importIndex(Args &args) {
     }
 
     try {
-        NGT::Index::importIndex(database, importFile);
+        polaris::Index::importIndex(database, importFile);
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
@@ -823,7 +823,7 @@ NGT::Command::importIndex(Args &args) {
 }
 
 void
-NGT::Command::prune(Args &args) {
+polaris::Command::prune(Args &args) {
     const string usage = "Usage: ngt prune -e #-of-forcedly-pruned-edges -s #-of-selecively-pruned-edge index(in/out)";
     string indexName;
     try {
@@ -855,14 +855,14 @@ NGT::Command::prune(Args &args) {
         return;
     }
 
-    NGT::Index index(indexName);
+    polaris::Index index(indexName);
     cerr << "loaded the input index." << endl;
 
-    NGT::GraphIndex &graph = (NGT::GraphIndex &) index.getIndex();
+    polaris::GraphIndex &graph = (polaris::GraphIndex &) index.getIndex();
 
     for (size_t id = 1; id < graph.repository.size(); id++) {
         try {
-            NGT::GraphNode &node = *graph.getNode(id);
+            polaris::GraphNode &node = *graph.getNode(id);
             if (id % 1000000 == 0) {
                 cerr << "Processed " << id << endl;
             }
@@ -871,7 +871,7 @@ NGT::Command::prune(Args &args) {
             }
             if (selectivelyPrunedEdgeSize > 0 && node.size() >= selectivelyPrunedEdgeSize) {
                 size_t rank = 0;
-                for (NGT::GraphNode::iterator i = node.begin(); i != node.end(); ++rank) {
+                for (polaris::GraphNode::iterator i = node.begin(); i != node.end(); ++rank) {
                     if (rank >= selectivelyPrunedEdgeSize) {
                         bool found = false;
                         for (size_t t1 = 0; t1 < node.size() && found == false; ++t1) {
@@ -881,7 +881,7 @@ NGT::Command::prune(Args &args) {
                             if (rank == t1) {
                                 continue;
                             }
-                            NGT::GraphNode &node2 = *graph.getNode(node[t1].id);
+                            polaris::GraphNode &node2 = *graph.getNode(node[t1].id);
                             for (size_t t2 = 0; t2 < node2.size(); ++t2) {
                                 if (t2 >= selectivelyPrunedEdgeSize) {
                                     break;
@@ -913,7 +913,7 @@ NGT::Command::prune(Args &args) {
 }
 
 void
-NGT::Command::reconstructGraph(Args &args) {
+polaris::Command::reconstructGraph(Args &args) {
     const string usage = "Usage: ngt reconstruct-graph [-m mode] [-P path-adjustment-mode] -o #-of-outgoing-edges -i #-of-incoming(reversed)-edges [-q #-of-queries] [-n #-of-results] [-E minimum-#-of-edges] index(input) index(output)\n"
                          "\t-m mode\n"
                          "\t\ts: Edge adjustment.\n"
@@ -958,7 +958,7 @@ NGT::Command::reconstructGraph(Args &args) {
     // the number (rank) of reverse edges
     int numOfIncomingEdges = args.getl("i", -1);
 
-    NGT::GraphOptimizer graphOptimizer(false);
+    polaris::GraphOptimizer graphOptimizer(false);
 
     if (mode == 'P') {
         numOfOutgoingEdges = 0;
@@ -991,7 +991,7 @@ NGT::Command::reconstructGraph(Args &args) {
 }
 
 void
-NGT::Command::optimizeSearchParameters(Args &args) {
+polaris::Command::optimizeSearchParameters(Args &args) {
     const string usage = "Usage: ngt optimize-search-parameters [-m optimization-target(s|p|a)] [-q #-of-queries] [-n #-of-results] index\n"
                          "\t-m mode\n"
                          "\t\ts: optimize search parameters (the number of explored edges).\n"
@@ -1014,7 +1014,7 @@ NGT::Command::optimizeSearchParameters(Args &args) {
 
 
     try {
-        NGT::GraphOptimizer graphOptimizer(false);
+        polaris::GraphOptimizer graphOptimizer(false);
 
         graphOptimizer.searchParameterOptimization = (mode == '-' || mode == 's') ? true : false;
         graphOptimizer.prefetchParameterOptimization = (mode == '-' || mode == 'p') ? true : false;
@@ -1034,7 +1034,7 @@ NGT::Command::optimizeSearchParameters(Args &args) {
 }
 
 void
-NGT::Command::refineANNG(Args &args) {
+polaris::Command::refineANNG(Args &args) {
     const string usage = "Usage: ngt refine-anng [-e epsilon] [-a expected-accuracy] anng-index refined-anng-index";
 
     string inIndexPath;
@@ -1055,7 +1055,7 @@ NGT::Command::refineANNG(Args &args) {
         return;
     }
 
-    NGT::Index index(inIndexPath);
+    polaris::Index index(inIndexPath);
 
     float epsilon = args.getf("e", 0.1);
     float expectedAccuracy = args.getf("a", 0.0);
@@ -1073,7 +1073,7 @@ NGT::Command::refineANNG(Args &args) {
 }
 
 void
-NGT::Command::repair(Args &args) {
+polaris::Command::repair(Args &args) {
     const string usage = "Usage: ngt [-m c|r|R] repair index \n"
                          "\t-m mode\n"
                          "\t\tc: Check. (default)\n"
@@ -1107,11 +1107,11 @@ NGT::Command::repair(Args &args) {
         }
     }
 
-    NGT::Index index(path);
+    polaris::Index index(path);
 
-    NGT::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
-    NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
-    NGT::GraphAndTreeIndex &graphAndTreeIndex = static_cast<GraphAndTreeIndex &>(index.getIndex());
+    polaris::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
+    polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
+    polaris::GraphAndTreeIndex &graphAndTreeIndex = static_cast<GraphAndTreeIndex &>(index.getIndex());
     size_t objSize = objectRepository.size();
     std::cerr << "aggregate removed objects from the repository." << std::endl;
     std::set<ObjectID> removedIDs;
@@ -1202,7 +1202,7 @@ NGT::Command::repair(Args &args) {
     //#pragma omp parallel for
     for (size_t id = 1; id < graphIndex.repository.size(); id++) {
         try {
-            NGT::GraphNode &node = *graphIndex.getNode(id);
+            polaris::GraphNode &node = *graphIndex.getNode(id);
             for (auto n = node.begin(); n != node.end();) {
                 if (removedIDs.find((*n).id) != removedIDs.end() || (*n).id >= objSize) {
 
@@ -1248,7 +1248,7 @@ NGT::Command::repair(Args &args) {
 
 
 void
-NGT::Command::optimizeNumberOfEdgesForANNG(Args &args) {
+polaris::Command::optimizeNumberOfEdgesForANNG(Args &args) {
     const string usage = "Usage: ngt optimize-#-of-edges [-q #-of-queries] [-k #-of-retrieved-objects] "
                          "[-p #-of-threads] [-a target-accuracy] [-o target-#-of-objects] [-s #-of-sampe-objects] "
                          "[-e maximum-#-of-edges] anng-index";
@@ -1272,7 +1272,7 @@ NGT::Command::optimizeNumberOfEdgesForANNG(Args &args) {
     parameter.noOfSampleObjects = args.getl("s", 100000);
     parameter.maxNoOfEdges = args.getl("e", 100);
 
-    NGT::GraphOptimizer graphOptimizer(false); // false=log
+    polaris::GraphOptimizer graphOptimizer(false); // false=log
     auto optimizedEdge = graphOptimizer.optimizeNumberOfEdgesForANNG(indexPath, parameter);
     std::cout << "The optimized # of edges=" << optimizedEdge.first << "(" << optimizedEdge.second << ")" << std::endl;
     std::cout << "Successfully completed." << std::endl;
@@ -1280,10 +1280,10 @@ NGT::Command::optimizeNumberOfEdgesForANNG(Args &args) {
 
 
 void
-NGT::Command::info(Args &args) {
+polaris::Command::info(Args &args) {
     const string usage = "Usage: ngt info [-E #-of-edges] [-m h|e] index";
 
-    std::cout << "NGT version: " << NGT::Index::getVersion() << std::endl;
+    std::cout << "NGT version: " << polaris::Index::getVersion() << std::endl;
     std::cout << "CPU SIMD types: ";
     CpuInfo::showSimdTypes();
 
@@ -1300,8 +1300,8 @@ NGT::Command::info(Args &args) {
     char mode = args.getChar("m", '-');
 
     try {
-        NGT::Index index(database);
-        NGT::GraphIndex::showStatisticsOfGraph(static_cast<NGT::GraphIndex &>(index.getIndex()), mode, edgeSize);
+        polaris::Index index(database);
+        polaris::GraphIndex::showStatisticsOfGraph(static_cast<polaris::GraphIndex &>(index.getIndex()), mode, edgeSize);
         if (mode == 'v') {
             vector<uint8_t> status;
             index.verify(status);
@@ -1316,7 +1316,7 @@ NGT::Command::info(Args &args) {
 }
 
 
-void NGT::Command::exportGraph(Args &args) {
+void polaris::Command::exportGraph(Args &args) {
     std::string usage = "ngt export-graph [-k #-of-edges] index";
     string indexPath;
     try {
@@ -1329,13 +1329,13 @@ void NGT::Command::exportGraph(Args &args) {
 
     int k = args.getl("k", 0);
 
-    NGT::Index index(indexPath);
-    NGT::GraphIndex &graph = static_cast<NGT::GraphIndex &>(index.getIndex());
+    polaris::Index index(indexPath);
+    polaris::GraphIndex &graph = static_cast<polaris::GraphIndex &>(index.getIndex());
 
     size_t size = index.getObjectRepositorySize();
 
     for (size_t id = 1; id < size; ++id) {
-        NGT::GraphNode *node = 0;
+        polaris::GraphNode *node = 0;
         try {
             node = graph.getNode(id);
         } catch (...) {
@@ -1355,7 +1355,7 @@ void NGT::Command::exportGraph(Args &args) {
     }
 }
 
-void NGT::Command::exportObjects(Args &args) {
+void polaris::Command::exportObjects(Args &args) {
     std::string usage = "ngt export-objects index";
     string indexPath;
     try {
@@ -1366,7 +1366,7 @@ void NGT::Command::exportObjects(Args &args) {
         return;
     }
 
-    NGT::Index index(indexPath);
+    polaris::Index index(indexPath);
     auto &objectSpace = index.getObjectSpace();
     size_t size = objectSpace.getRepository().size();
 

@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace NGT {
+namespace polaris {
     class ObjectRepository : public Repository<Object> {
     public:
         typedef Repository<Object> Parent;
@@ -33,7 +33,7 @@ namespace NGT {
             std::ofstream objs(ofile);
             if (!objs.is_open()) {
                 std::stringstream msg;
-                msg << "NGT::ObjectSpace: Cannot open the specified file " << ofile << ".";
+                msg << "polaris::ObjectSpace: Cannot open the specified file " << ofile << ".";
                 POLARIS_THROW_EX(msg);
             }
             Parent::serialize(objs, ospace);
@@ -44,7 +44,7 @@ namespace NGT {
             std::ifstream objs(ifile);
             if (!objs.is_open()) {
                 std::stringstream msg;
-                msg << "NGT::ObjectSpace: Cannot open the specified file " << ifile << ".";
+                msg << "polaris::ObjectSpace: Cannot open the specified file " << ifile << ".";
                 POLARIS_THROW_EX(msg);
             }
             Parent::deserialize(objs, ospace);
@@ -54,7 +54,7 @@ namespace NGT {
             std::ofstream objs(ofile);
             if (!objs.is_open()) {
                 std::stringstream msg;
-                msg << "NGT::ObjectSpace: Cannot open the specified file " << ofile << ".";
+                msg << "polaris::ObjectSpace: Cannot open the specified file " << ofile << ".";
                 POLARIS_THROW_EX(msg);
             }
             Parent::serializeAsText(objs, ospace);
@@ -64,7 +64,7 @@ namespace NGT {
             std::ifstream objs(ifile);
             if (!objs.is_open()) {
                 std::stringstream msg;
-                msg << "NGT::ObjectSpace: Cannot open the specified file " << ifile << ".";
+                msg << "polaris::ObjectSpace: Cannot open the specified file " << ifile << ".";
                 POLARIS_THROW_EX(msg);
             }
             Parent::deserializeAsText(objs, ospace);
@@ -200,7 +200,7 @@ namespace NGT {
         void extractObjectFromText(const std::string &textLine, const std::string &sep, std::vector<T> &object) {
             object.resize(dimension);
             std::vector<std::string> tokens;
-            NGT::Common::tokenize(textLine, tokens, sep);
+            polaris::Common::tokenize(textLine, tokens, sep);
             if ((innerProduct && (dimension - 1 > tokens.size())) ||
                 ((!innerProduct) && dimension > tokens.size())) {
                 std::stringstream msg;
@@ -255,7 +255,7 @@ namespace NGT {
         }
 
         template<typename T>
-        void setObject(NGT::Object &obj, T *o, size_t size) {
+        void setObject(polaris::Object &obj, T *o, size_t size) {
             void *object = obj.getPointer();
             setObject(object, o, size);
         }
@@ -288,7 +288,7 @@ namespace NGT {
         }
 
         template<typename T>
-        void setObject(NGT::Object &o, const std::vector<T> &v) {
+        void setObject(polaris::Object &o, const std::vector<T> &v) {
             setObject(o, v.data(), v.size());
         }
 
@@ -367,4 +367,4 @@ namespace NGT {
         bool innerProduct;
     };
 
-} // namespace NGT
+} // namespace polaris

@@ -73,7 +73,7 @@ namespace QBG {
 	  float min = std::numeric_limits<float>::max();
 	  int32_t minid = 0;
 	  for (auto &c : internalNode.children) {
-	    auto d = NGT::PrimitiveComparator::compareL2(reinterpret_cast<float*>(&object[0]),
+	    auto d = polaris::PrimitiveComparator::compareL2(reinterpret_cast<float*>(&object[0]),
 							 c.second.data(), c.second.size());
 	    if (d < min) {
 	      min = d;
@@ -87,7 +87,7 @@ namespace QBG {
     }
 
     static void aggregateObjects(HKLeafNode &leafNode, std::vector<std::vector<float>> &vectors,
-			  NGT::ObjectSpace &objectSpace, QBGObjectList &objectList)
+			  polaris::ObjectSpace &objectSpace, QBGObjectList &objectList)
     {
       vectors.reserve(leafNode.members.size() + 1);
       std::vector<float> obj;
@@ -98,7 +98,7 @@ namespace QBG {
     }
 
     static void aggregateObjects(HKLeafNode &leafNode, std::vector<std::vector<float>> &vectors,
-			  NGT::ObjectSpace &objectSpace, QBGObjectList &objectList,
+			  polaris::ObjectSpace &objectSpace, QBGObjectList &objectList,
 			  std::vector<float> &object)
     {
       aggregateObjects(leafNode, vectors, objectSpace, objectList);
@@ -106,10 +106,10 @@ namespace QBG {
     }
 
     static void split(uint32_t id, std::vector<std::vector<float>> &vectors,
-				 std::vector<HKNode*> &nodes, int32_t leafNodeID, NGT::Clustering &clustering)
+				 std::vector<HKNode*> &nodes, int32_t leafNodeID, polaris::Clustering &clustering)
     {
       HKLeafNode &leafNode = static_cast<HKLeafNode&>(*nodes[leafNodeID]);
-      std::vector<NGT::Clustering::Cluster> clusters;
+      std::vector<polaris::Clustering::Cluster> clusters;
       clustering.kmeans(vectors, clusters);
       auto *newNode = new HKInternalNode;
       for (auto &cluster : clusters) {
@@ -134,7 +134,7 @@ namespace QBG {
       nodes[leafNodeID] = newNode;
     }
 
-    static double computeError(std::vector<HKNode*> &nodes, NGT::ObjectSpace &objectSpace, QBGObjectList &objectList) {
+    static double computeError(std::vector<HKNode*> &nodes, polaris::ObjectSpace &objectSpace, QBGObjectList &objectList) {
       std::cerr << "node size=" << nodes.size() << std::endl;
       double distance = 0.0;
       size_t dcount = 0;
@@ -152,7 +152,7 @@ namespace QBG {
 	      HKLeafNode &leafNode = static_cast<HKLeafNode&>(*nodes[child.first]);
 	      for (auto &m : leafNode.members) {
 		objectList.get(m, obj, &objectSpace);
-		distance += NGT::Clustering::distanceL2(centroid, obj);
+		distance += polaris::Clustering::distanceL2(centroid, obj);
 		dcount++;
 	      }
 	    }
@@ -399,9 +399,9 @@ namespace QBG {
 
 
     static void hierarchicalKmeans(uint32_t id, int32_t rootID, std::vector<float> &object,
-				   QBGObjectList &objectList, NGT::ObjectSpace &objectSpace,
-				   std::vector<HKNode*> &nodes,   NGT::Clustering &clustering, size_t maxSize) {
-      NGT::Timer timer;
+				   QBGObjectList &objectList, polaris::ObjectSpace &objectSpace,
+				   std::vector<HKNode*> &nodes,   polaris::Clustering &clustering, size_t maxSize) {
+      polaris::Timer timer;
       objectList.get(id, object, &objectSpace);
       int32_t nodeID = searchLeaf(nodes, rootID, reinterpret_cast<float*>(&object[0]));
       if (nodeID < 0) {
@@ -411,7 +411,7 @@ namespace QBG {
       auto *node = nodes[nodeID];
       HKLeafNode &leafNode = static_cast<HKLeafNode&>(*node);
       if (leafNode.members.size() >= maxSize) {
-	NGT::Timer subtimer;
+	polaris::Timer subtimer;
 	subtimer.start();
 	std::vector<std::vector<float>> vectors;
 	aggregateObjects(leafNode, vectors, objectSpace, objectList, object);
@@ -428,8 +428,8 @@ namespace QBG {
 
     static void hierarchicalKmeansBatch(std::vector<uint32_t> &batch, std::vector<pair<uint32_t, uint32_t>> &exceededLeaves,
 					int32_t rootID, std::vector<float> &object,
-					QBGObjectList &objectList, NGT::ObjectSpace &objectSpace,
-					std::vector<HKNode*> &nodes, NGT::Clustering &clustering, size_t maxSize, size_t &nleaves,
+					QBGObjectList &objectList, polaris::ObjectSpace &objectSpace,
+					std::vector<HKNode*> &nodes, polaris::Clustering &clustering, size_t maxSize, size_t &nleaves,
 					size_t maxExceededLeaves) {
 
       if (batch.size() == 0) {
@@ -473,7 +473,7 @@ namespace QBG {
 	return;
       }
 	
-      std::vector<std::vector<NGT::Clustering::Cluster>> clusters(exceededLeaves.size());
+      std::vector<std::vector<polaris::Clustering::Cluster>> clusters(exceededLeaves.size());
 #pragma omp parallel for
       for (size_t idx = 0; idx < exceededLeaves.size(); idx++) {
 	HKLeafNode &leafNode = static_cast<HKLeafNode&>(*nodes[exceededLeaves[idx].second]);
@@ -505,8 +505,8 @@ namespace QBG {
     }
 
     static void hierarchicalKmeansWithNumberOfClusters(size_t numOfTotalClusters, size_t numOfObjects, size_t numOfLeaves,
-						       QBGObjectList &objectList, NGT::ObjectSpace &objectSpace,
-						       std::vector<HKNode*> &nodes, NGT::Clustering::InitializationMode initMode){
+						       QBGObjectList &objectList, polaris::ObjectSpace &objectSpace,
+						       std::vector<HKNode*> &nodes, polaris::Clustering::InitializationMode initMode){
       std::cerr << "numOfTotalClusters=" << numOfTotalClusters << std::endl;
       std::cerr << "numOfLeaves=" << numOfLeaves << std::endl;
       if (numOfLeaves > numOfTotalClusters) {
@@ -530,8 +530,8 @@ namespace QBG {
 	  nClusters = nClusters == 0 ? 1 : nClusters;
 	  numOfRemainingVectors -= leafNode.members.size();
 	  numOfRemainingClusters -= nClusters;
-	  NGT::Clustering clustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, 1000, nClusters);
-	  NGT::Timer timer;
+	  polaris::Clustering clustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, 1000, nClusters);
+	  polaris::Timer timer;
 	  timer.start();
 	  split(0, vectors, nodes, nidx, clustering);
 	  timer.stop();
@@ -544,9 +544,9 @@ namespace QBG {
     }
 
     static void hierarchicalKmeansWithNumberOfClustersInParallel(size_t numOfTotalClusters, size_t numOfObjects, size_t numOfLeaves,
-								 QBGObjectList &objectList, NGT::ObjectSpace &objectSpace,
-								 std::vector<HKNode*> &nodes, NGT::Clustering::InitializationMode initMode){
-      NGT::Timer timer;
+								 QBGObjectList &objectList, polaris::ObjectSpace &objectSpace,
+								 std::vector<HKNode*> &nodes, polaris::Clustering::InitializationMode initMode){
+      polaris::Timer timer;
       timer.start();
       auto numOfRemainingClusters = numOfTotalClusters;
       auto numOfRemainingVectors = numOfObjects;
@@ -576,14 +576,14 @@ namespace QBG {
       timer.start();
 
       std::cerr << "start kmeans..." << std::endl;
-      std::vector<std::vector<NGT::Clustering::Cluster>> clusters(leafNodes.size());
+      std::vector<std::vector<polaris::Clustering::Cluster>> clusters(leafNodes.size());
 #pragma omp parallel for
       for (size_t nidx = 0; nidx < leafNodes.size(); nidx++) {
 	HKLeafNode &leafNode = static_cast<HKLeafNode&>(*nodes[leafNodes[nidx].first]);
 	std::vector<std::vector<float>> vectors;
 #pragma omp critical
 	aggregateObjects(leafNode, vectors, objectSpace, objectList);
-	NGT::Clustering clustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, 1000, leafNodes[nidx].second);
+	polaris::Clustering clustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, 1000, leafNodes[nidx].second);
 	clustering.kmeans(vectors, clusters[nidx]);
       }
 
@@ -612,10 +612,10 @@ namespace QBG {
 
     }
 
-    static void flattenClusters(std::vector<NGT::Clustering::Cluster> &upperClusters,
-				std::vector<std::vector<NGT::Clustering::Cluster>> &lowerClusters,
+    static void flattenClusters(std::vector<polaris::Clustering::Cluster> &upperClusters,
+				std::vector<std::vector<polaris::Clustering::Cluster>> &lowerClusters,
 				size_t numOfLowerClusters,
-				std::vector<NGT::Clustering::Cluster> &flatClusters) {
+				std::vector<polaris::Clustering::Cluster> &flatClusters) {
 
 
       flatClusters.clear();
@@ -633,10 +633,10 @@ namespace QBG {
     }
 
 #ifndef MULTIPLE_OBJECT_LISTS
-    void subclustering(std::vector<NGT::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
-		       NGT::ObjectSpace &objectSpace, QBGObjectList &objectList,
-		       NGT::Clustering::InitializationMode initMode,
-		       std::vector<std::vector<NGT::Clustering::Cluster>> &lowerClusters,
+    void subclustering(std::vector<polaris::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
+		       polaris::ObjectSpace &objectSpace, QBGObjectList &objectList,
+		       polaris::Clustering::InitializationMode initMode,
+		       std::vector<std::vector<polaris::Clustering::Cluster>> &lowerClusters,
 		       size_t maximumIteration = 1000) {
       std::vector<uint32_t> nPartialClusters(upperClusters.size());
       auto numOfRemainingClusters = numOfLowerClusters;
@@ -679,7 +679,7 @@ namespace QBG {
 	  std::cerr << "the sizes of members are not consistent" << std::endl;
 	  abort();
 	}
-	NGT::Clustering lowerClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
+	polaris::Clustering lowerClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
 	lowerClustering.kmeans(partialVectors, nPartialClusters[idx], lowerClusters[idx]);
 	if (nPartialClusters[idx] != lowerClusters[idx].size()) {
 	  std::cerr << "the sizes of cluster members are not consistent" << std::endl;
@@ -696,12 +696,12 @@ namespace QBG {
       }
       std::cerr << "# of clusters=" << nc << " # of members=" << mc << std::endl;
     }
-    void subclustering(std::vector<NGT::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
-		       NGT::ObjectSpace &objectSpace, QBGObjectList &objectList,
-		       NGT::Clustering::InitializationMode initMode,
-		       std::vector<NGT::Clustering::Cluster> &flatLowerClusters,
+    void subclustering(std::vector<polaris::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
+		       polaris::ObjectSpace &objectSpace, QBGObjectList &objectList,
+		       polaris::Clustering::InitializationMode initMode,
+		       std::vector<polaris::Clustering::Cluster> &flatLowerClusters,
 		       size_t maximumIteration = 1000) {
-      std::vector<std::vector<NGT::Clustering::Cluster>> lowerClusters;
+      std::vector<std::vector<polaris::Clustering::Cluster>> lowerClusters;
       subclustering(upperClusters, numOfLowerClusters, numOfObjects, objectSpace, objectList, initMode, lowerClusters);
 
       flattenClusters(upperClusters, lowerClusters, numOfLowerClusters, flatLowerClusters);
@@ -709,12 +709,12 @@ namespace QBG {
     }
 
 #else
-    static void subclustering(std::vector<NGT::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
-			      NGT::ObjectSpace &objectSpace, QBGObjectList &objectList,
-			      NGT::Clustering::InitializationMode initMode,
-			      std::vector<std::vector<NGT::Clustering::Cluster>> &lowerClusters,
+    static void subclustering(std::vector<polaris::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
+			      polaris::ObjectSpace &objectSpace, QBGObjectList &objectList,
+			      polaris::Clustering::InitializationMode initMode,
+			      std::vector<std::vector<polaris::Clustering::Cluster>> &lowerClusters,
 			      size_t maximumIteration = 1000) {
-      NGT::Timer timer;
+      polaris::Timer timer;
       timer.start();
       std::vector<uint32_t> nPartialClusters(upperClusters.size());
       int numOfRemainingClusters = numOfLowerClusters;
@@ -789,7 +789,7 @@ namespace QBG {
 	  msg << "inner fatal error. the sizes of members are inconsistent. " << upperClusters[idx].members.size() << ":" << partialVectors.size() << ":" << idx;
 	  POLARIS_THROW_EX(msg);
 	}
-	NGT::Clustering lowerClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
+	polaris::Clustering lowerClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
 	lowerClustering.kmeans(partialVectors, nPartialClusters[idx], lowerClusters[idx]);
 	if (nPartialClusters[idx] != lowerClusters[idx].size()) {
 	  std::cerr << "Warning: the sizes of cluster members are inconsistent. " << nPartialClusters[idx] << ":" << lowerClusters[idx].size() << ":" << idx << std::endl;
@@ -820,12 +820,12 @@ namespace QBG {
       std::cerr << "# of clusters=" << nc << " # of members=" << mc << std::endl;
     }
 
-    static void subclustering(std::vector<NGT::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
-			      NGT::ObjectSpace &objectSpace, QBGObjectList &objectList,
-			      NGT::Clustering::InitializationMode initMode,
-			      std::vector<NGT::Clustering::Cluster> &flatLowerClusters,
+    static void subclustering(std::vector<polaris::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
+			      polaris::ObjectSpace &objectSpace, QBGObjectList &objectList,
+			      polaris::Clustering::InitializationMode initMode,
+			      std::vector<polaris::Clustering::Cluster> &flatLowerClusters,
 			      size_t maximumIteration = 1000) {
-      std::vector<std::vector<NGT::Clustering::Cluster>> lowerClusters;
+      std::vector<std::vector<polaris::Clustering::Cluster>> lowerClusters;
       subclustering(upperClusters, numOfLowerClusters, numOfObjects, objectSpace, objectList, initMode, lowerClusters);
 
       flattenClusters(upperClusters, lowerClusters, numOfLowerClusters, flatLowerClusters);
@@ -834,9 +834,9 @@ namespace QBG {
 
 #endif
 
-    static void subclustering(std::vector<NGT::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
-			      NGT::Clustering::InitializationMode initMode,
-			      std::vector<std::vector<NGT::Clustering::Cluster>> &lowerClusters,
+    static void subclustering(std::vector<polaris::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
+			      polaris::Clustering::InitializationMode initMode,
+			      std::vector<std::vector<polaris::Clustering::Cluster>> &lowerClusters,
 			      std::vector<std::vector<float>> &vectors,
 			      size_t maximumIteration = 1000) {
       std::vector<uint32_t> nPartialClusters(upperClusters.size());
@@ -894,7 +894,7 @@ namespace QBG {
 	  msg << "the sizes of members are inconsistent. " << upperClusters[idx].members.size() << ":" << partialVectors.size() << ":" << idx;
 	  POLARIS_THROW_EX(msg);
 	}
-	NGT::Clustering lowerClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
+	polaris::Clustering lowerClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
 	lowerClustering.kmeans(partialVectors, nPartialClusters[idx], lowerClusters[idx]);
 	if (nPartialClusters[idx] != lowerClusters[idx].size()) {
 	  std::cerr << "Warning: the sizes of cluster members are inconsistent. " << nPartialClusters[idx] << ":" << lowerClusters[idx].size() << ":" << idx << std::endl;
@@ -911,19 +911,19 @@ namespace QBG {
       std::cerr << "# of clusters=" << nc << " # of members=" << mc << std::endl;
     }
 
-    static void subclustering(std::vector<NGT::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
-			      NGT::Clustering::InitializationMode initMode,
-			      std::vector<NGT::Clustering::Cluster> &flatLowerClusters,
+    static void subclustering(std::vector<polaris::Clustering::Cluster> &upperClusters, size_t numOfLowerClusters, size_t numOfObjects,
+			      polaris::Clustering::InitializationMode initMode,
+			      std::vector<polaris::Clustering::Cluster> &flatLowerClusters,
 			      std::vector<std::vector<float>> &vectors,
 			      size_t maximumIteration = 1000) {
-      std::vector<std::vector<NGT::Clustering::Cluster>> lowerClusters;
+      std::vector<std::vector<polaris::Clustering::Cluster>> lowerClusters;
       subclustering(upperClusters, numOfLowerClusters, numOfObjects, initMode, lowerClusters, vectors);
 
       flattenClusters(upperClusters, lowerClusters, numOfLowerClusters, flatLowerClusters);
 
     }
 
-    static void assign(std::vector<NGT::Clustering::Cluster> &clusters, size_t beginID, size_t endID, std::vector<std::vector<float>> &vectors) {
+    static void assign(std::vector<polaris::Clustering::Cluster> &clusters, size_t beginID, size_t endID, std::vector<std::vector<float>> &vectors) {
 
       size_t count = 0;
 #pragma omp parallel for
@@ -932,7 +932,7 @@ namespace QBG {
 	float min = std::numeric_limits<float>::max();
 	int minidx = -1;
 	for (size_t cidx = 0; cidx != clusters.size(); cidx++) {
-	  auto d = NGT::PrimitiveComparator::compareL2(reinterpret_cast<float*>(obj.data()),
+	  auto d = polaris::PrimitiveComparator::compareL2(reinterpret_cast<float*>(obj.data()),
 						       clusters[cidx].centroid.data(), obj.size());
 	  if (d < min) {
 	    min = d;
@@ -945,7 +945,7 @@ namespace QBG {
 	}
 #pragma omp critical
 	{
-	  clusters[minidx].members.push_back(NGT::Clustering::Entry(id, minidx, min));
+	  clusters[minidx].members.push_back(polaris::Clustering::Entry(id, minidx, min));
 	  count++;
 	  if (count % 1000000 == 0) {
 	    std::cerr << "# of assigned objects=" << count << std::endl;
@@ -954,8 +954,8 @@ namespace QBG {
       }
     }
 
-    static void assign(std::vector<NGT::Clustering::Cluster> &clusters, size_t beginID, size_t endID,
-		       NGT::ObjectSpace &objectSpace, QBGObjectList &objectList) {
+    static void assign(std::vector<polaris::Clustering::Cluster> &clusters, size_t beginID, size_t endID,
+		       polaris::ObjectSpace &objectSpace, QBGObjectList &objectList) {
 
 #ifdef MULTIPLE_OBJECT_LISTS
       if (!objectList.openMultipleStreams(omp_get_max_threads())) {
@@ -977,7 +977,7 @@ namespace QBG {
 	float min = std::numeric_limits<float>::max();
 	int minidx = -1;
 	for (size_t cidx = 0; cidx != clusters.size(); cidx++) {
-	  auto d = NGT::PrimitiveComparator::compareL2(reinterpret_cast<float*>(obj.data()),
+	  auto d = polaris::PrimitiveComparator::compareL2(reinterpret_cast<float*>(obj.data()),
 						       clusters[cidx].centroid.data(), obj.size());
 	  if (d < min) {
 	    min = d;
@@ -990,7 +990,7 @@ namespace QBG {
 	}
 #pragma omp critical
 	{
-	  clusters[minidx].members.push_back(NGT::Clustering::Entry(id - 1, minidx, min));
+	  clusters[minidx].members.push_back(polaris::Clustering::Entry(id - 1, minidx, min));
 	  count++;
 	  if (count % 1000000 == 0) {
 	    std::cerr << "# of assigned objects=" << count << std::endl;
@@ -1000,12 +1000,12 @@ namespace QBG {
 
     }
 
-    static float optimizeEpsilon(NGT::Index &index, size_t beginID, size_t endID,
+    static float optimizeEpsilon(polaris::Index &index, size_t beginID, size_t endID,
 				size_t nOfObjects,
 				QBGObjectList &objectList, float expectedRecall,
-				NGT::ObjectSpace &objectSpace) {
+				polaris::ObjectSpace &objectSpace) {
       std::cerr << "optimizeEpsilon: expectedRecall=" << expectedRecall << std::endl;
-      NGT::ObjectDistances groundTruth[endID - beginID];
+      polaris::ObjectDistances groundTruth[endID - beginID];
 #pragma omp parallel for
       for (size_t id = beginID; id < endID; id++) {
 	std::vector<float> obj;
@@ -1014,7 +1014,7 @@ namespace QBG {
 #else
 	objectList.get(id, obj, &objectSpace);
 #endif
-	NGT::SearchQuery	sc(obj);
+	polaris::SearchQuery	sc(obj);
 	sc.setResults(&groundTruth[id - beginID]);
 	sc.setSize(nOfObjects);
 	index.linearSearch(sc);
@@ -1025,7 +1025,7 @@ namespace QBG {
       std::vector<float> recall(endID - beginID, 0.0);
       for (epsilon = startEpsilon; epsilon < 1.0; epsilon += 0.01) {
 	float totalRecall = 0.0;
-	NGT::ObjectDistances results[endID - beginID];
+	polaris::ObjectDistances results[endID - beginID];
 #pragma omp parallel for
 	for (size_t id = beginID; id < endID; id++) {
 	  if (recall[id - beginID] == 1.0) {
@@ -1037,7 +1037,7 @@ namespace QBG {
 #else
 	  objectList.get(id, obj, &objectSpace);
 #endif
-	  NGT::SearchQuery	sc(obj);
+	  polaris::SearchQuery	sc(obj);
 	  sc.setResults(&results[id - beginID]);
 	  sc.setSize(nOfObjects);
 	  sc.setEpsilon(epsilon);
@@ -1051,7 +1051,7 @@ namespace QBG {
 	  }
 	  notExactResultCount++;
 	  size_t count = 0;
-	  NGT::ObjectDistances &gt = groundTruth[id - beginID];
+	  polaris::ObjectDistances &gt = groundTruth[id - beginID];
 	  for (auto &r : results[id - beginID]) {
 	    if (std::find(gt.begin(), gt.end(), r) != gt.end()) {
 	      count++;
@@ -1070,8 +1070,8 @@ namespace QBG {
       return epsilon;
     }
 
-    static void assignWithNGT(std::vector<NGT::Clustering::Cluster> &clusters, size_t beginID, size_t endID,
-			      NGT::ObjectSpace &objectSpace, QBGObjectList &objectList,
+    static void assignWithNGT(std::vector<polaris::Clustering::Cluster> &clusters, size_t beginID, size_t endID,
+			      polaris::ObjectSpace &objectSpace, QBGObjectList &objectList,
 			      size_t epsilonExplorationSize = 100,
 			      float expectedRecall = 0.98) {
       if (beginID > endID) {
@@ -1079,14 +1079,14 @@ namespace QBG {
 	return;
       }
 
-      NGT::Property prop;
+      polaris::Property prop;
       prop.dimension = objectSpace.getDimension();
-      prop.objectType = NGT::Index::Property::ObjectType::Float;
-      prop.distanceType = NGT::Property::DistanceType::DistanceTypeL2;
+      prop.objectType = polaris::Index::Property::ObjectType::Float;
+      prop.distanceType = polaris::Property::DistanceType::DistanceTypeL2;
       prop.edgeSizeForCreation = 10;
       prop.edgeSizeForSearch = 40;
 
-      NGT::Index anngIndex(prop);
+      polaris::Index anngIndex(prop);
       for (size_t cidx = 0; cidx < clusters.size(); cidx++) {
 	if (cidx % 100000 == 0) {
 	  std::cerr << "# of appended cluster objects=" << cidx << std::endl;
@@ -1099,7 +1099,7 @@ namespace QBG {
       std::string onng;
       std::string tmpDir;
       {
-	NGT::Timer timer;
+	polaris::Timer timer;
 	timer.start();
 	const char *ngtDirString = "/tmp/ngt-XXXXXX";
 	char ngtDir[strlen(ngtDirString) + 1];
@@ -1109,7 +1109,7 @@ namespace QBG {
 	onng = tmpDir + "/onng";
 	anngIndex.save(anng);
 	auto unlog = false;
-	NGT::GraphOptimizer graphOptimizer(unlog);
+	polaris::GraphOptimizer graphOptimizer(unlog);
 	graphOptimizer.searchParameterOptimization = false;
 	graphOptimizer.prefetchParameterOptimization = false;
 	graphOptimizer.accuracyTableGeneration = false;
@@ -1120,14 +1120,14 @@ namespace QBG {
 	graphOptimizer.set(numOfOutgoingEdges, numOfIncomingEdges, numOfQueries, numOfResultantObjects);
 	graphOptimizer.execute(anng, onng);
       }
-      NGT::Index onngIndex(onng);
-      NGT::Index &index = onngIndex;
+      polaris::Index onngIndex(onng);
+      polaris::Index &index = onngIndex;
       const string com = "rm -rf " + tmpDir;
       if (system(com.c_str()) == -1) {
 	std::cerr << "Warning. remove is failed. " << com << std::endl;
       }
 #else
-      NGT::Index &index = anngIndex;
+      polaris::Index &index = anngIndex;
 #endif
       std::cerr << "assign with NGT..." << std::endl;
       endID++;
@@ -1142,7 +1142,7 @@ namespace QBG {
       size_t endOfEval = beginID + epsilonExplorationSize;
       endOfEval = endOfEval > endID ? endID : endOfEval;
       size_t nOfObjects = 20;
-      NGT::Timer timer;
+      polaris::Timer timer;
       timer.start();
       auto epsilon = optimizeEpsilon(index, beginID, endOfEval, nOfObjects,
 				     objectList, expectedRecall, objectSpace);
@@ -1159,8 +1159,8 @@ namespace QBG {
 #else
 	objectList.get(id, obj, &objectSpace);
 #endif
-	NGT::SearchQuery	sc(obj);
-	NGT::ObjectDistances	objects;
+	polaris::SearchQuery	sc(obj);
+	polaris::ObjectDistances	objects;
 	sc.setResults(&objects);
 	sc.setSize(nOfObjects);
 	sc.setEpsilon(epsilon);
@@ -1187,7 +1187,7 @@ namespace QBG {
       for (size_t id = beginID; id < endID; id++) {
 	auto cid = clusterIDs[id - beginID].first;
 	auto cdistance = clusterIDs[id - beginID].second;
-	clusters[cid].members.push_back(NGT::Clustering::Entry(id - 1, cid, cdistance));
+	clusters[cid].members.push_back(polaris::Clustering::Entry(id - 1, cid, cdistance));
       }
       {
 	size_t n = 0;
@@ -1206,15 +1206,15 @@ namespace QBG {
     }
 
 #ifdef NGTQ_QBG
-    void treeBasedTopdownClustering(std::string prefix, QBG::Index &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, NGT::Clustering &clustering);
+    void treeBasedTopdownClustering(std::string prefix, QBG::Index &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, polaris::Clustering &clustering);
 
     static void twoLayerClustering(std::vector<std::vector<float>> vectors,
 					size_t numOfClusters,
-					std::vector<NGT::Clustering::Cluster> &clusters,
+					std::vector<polaris::Clustering::Cluster> &clusters,
 					size_t numOfObjectsForEachFirstCluster = 0,
 					size_t numOfObjectsForEachSecondCluster = 0,
 					size_t maximumIteration = 300,
-					NGT::Clustering::InitializationMode initMode = NGT::Clustering::InitializationModeKmeansPlusPlus) {
+					polaris::Clustering::InitializationMode initMode = polaris::Clustering::InitializationModeKmeansPlusPlus) {
       std::cerr << "clustering with two layers... # of clusters=" << numOfClusters << std::endl;
       if (numOfClusters == 0) {
 	POLARIS_THROW_EX("HierachicalKmeans:: # of clusters is zero.");
@@ -1235,11 +1235,11 @@ namespace QBG {
       }
 
 
-      NGT::Clustering firstClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
-      //NGT::Clustering firstClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithNGT, maximumIteration);
+      polaris::Clustering firstClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
+      //polaris::Clustering firstClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithNGT, maximumIteration);
       firstClustering.setClusterSizeConstraintCoefficient(false);
-      std::vector<NGT::Clustering::Cluster> firstClusters;
-      NGT::Timer timer;
+      std::vector<polaris::Clustering::Cluster> firstClusters;
+      polaris::Timer timer;
       {
 	std::vector<std::vector<float>> firstVectors;
 	firstVectors.reserve(numOfFirstObjects);
@@ -1260,7 +1260,7 @@ namespace QBG {
       std::cerr << "assign for the second. time=" << timer << std::endl;
 
       std::cerr << "subclustering for the second..." << std::endl;
-      std::vector<NGT::Clustering::Cluster> &secondClusters = clusters;
+      std::vector<polaris::Clustering::Cluster> &secondClusters = clusters;
       timer.start();
       subclustering(firstClusters, numOfSecondClusters, numOfSecondObjects, initMode, secondClusters, vectors, maximumIteration);
       timer.stop();
@@ -1283,7 +1283,7 @@ namespace QBG {
     size_t	numOfTotalBlobs;
     int32_t	clusterID;
 
-    NGT::Clustering::InitializationMode initMode;
+    polaris::Clustering::InitializationMode initMode;
 
     size_t	numOfRandomObjects;
 

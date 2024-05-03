@@ -19,7 +19,7 @@
 #include <polaris/graph/ngt/graph_reconstructor.h>
 #include <polaris/graph/ngt/optimizer.h>
 
-namespace NGT {
+namespace polaris {
     class GraphOptimizer {
     public:
         class ANNGEdgeOptimizationParameter {
@@ -85,9 +85,9 @@ namespace NGT {
         }
 
         void adjustSearchCoefficients(const std::string indexPath) {
-            NGT::Index index(indexPath);
-            NGT::GraphIndex &graph = static_cast<NGT::GraphIndex &>(index.getIndex());
-            NGT::Optimizer optimizer(index);
+            polaris::Index index(indexPath);
+            polaris::GraphIndex &graph = static_cast<polaris::GraphIndex &>(index.getIndex());
+            polaris::Optimizer optimizer(index);
             if (logDisabled) {
                 optimizer.disableLog();
             } else {
@@ -96,7 +96,7 @@ namespace NGT {
             try {
                 auto coefficients = optimizer.adjustSearchEdgeSize(baseAccuracyRange, rateAccuracyRange, numOfQueries,
                                                                    gtEpsilon, margin);
-                NGT::NeighborhoodGraph::Property &prop = graph.getGraphProperty();
+                polaris::NeighborhoodGraph::Property &prop = graph.getGraphProperty();
                 prop.dynamicEdgeSizeBase = coefficients.first;
                 prop.dynamicEdgeSizeRate = coefficients.second;
                 prop.edgeSizeForSearch = -2;
@@ -108,9 +108,9 @@ namespace NGT {
             graph.saveIndex(indexPath);
         }
 
-        static std::pair<double, float> measureQueryTime(NGT::Index &index, size_t start, float epsilon) {
-            NGT::ObjectSpace &objectSpace = index.getObjectSpace();
-            NGT::ObjectRepository &objectRepository = objectSpace.getRepository();
+        static std::pair<double, float> measureQueryTime(polaris::Index &index, size_t start, float epsilon) {
+            polaris::ObjectSpace &objectSpace = index.getObjectSpace();
+            polaris::ObjectRepository &objectRepository = objectSpace.getRepository();
             size_t nQueries = 200;
             nQueries = objectRepository.size() - 1 < nQueries ? objectRepository.size() - 1 : nQueries;
 
@@ -133,10 +133,10 @@ namespace NGT {
                 return std::pair<double, float>(DBL_MAX, 0.1);
             }
             if (epsilon < 0.0) {
-                NGT::SearchContainer searchContainer(*objectRepository.get(ids[0]));
+                polaris::SearchContainer searchContainer(*objectRepository.get(ids[0]));
                 for (size_t i = 0; i < 100; i++, epsilon /= 2.0) {
                     Timer timer;
-                    NGT::ObjectDistances objects;
+                    polaris::ObjectDistances objects;
                     searchContainer.setResults(&objects);
                     searchContainer.setSize(10);
                     searchContainer.setEpsilon(epsilon);
@@ -152,11 +152,11 @@ namespace NGT {
                 }
             }
 
-            NGT::Timer timer;
+            polaris::Timer timer;
             timer.reset();
             for (auto id = ids.begin(); id != ids.end(); id++) {
-                NGT::SearchContainer searchContainer(*objectRepository.get(*id));
-                NGT::ObjectDistances objects;
+                polaris::SearchContainer searchContainer(*objectRepository.get(*id));
+                polaris::ObjectDistances objects;
                 searchContainer.setResults(&objects);
                 searchContainer.setSize(10);
                 searchContainer.setEpsilon(epsilon);
@@ -167,9 +167,9 @@ namespace NGT {
             return std::pair<double, float>(timer.time * 1000.0, epsilon);
         }
 
-        static std::pair<size_t, double> searchMinimumQueryTime(NGT::Index &index, size_t prefetchOffset,
+        static std::pair<size_t, double> searchMinimumQueryTime(polaris::Index &index, size_t prefetchOffset,
                                                                 int maxPrefetchSize, size_t seedID, float epsilon) {
-            NGT::ObjectSpace &objectSpace = index.getObjectSpace();
+            polaris::ObjectSpace &objectSpace = index.getObjectSpace();
             int step = 256;
             int prevPrefetchSize = 64;
             size_t minPrefetchSize = 0;
@@ -195,7 +195,7 @@ namespace NGT {
             return std::make_pair(minPrefetchSize, minTime);
         }
 
-        static std::pair<size_t, size_t> adjustPrefetchParameters(NGT::Index &index) {
+        static std::pair<size_t, size_t> adjustPrefetchParameters(polaris::Index &index) {
 
             bool gridSearch = false;
             float epsilon = -1.0;
@@ -210,7 +210,7 @@ namespace NGT {
             size_t prefetchOffset = 0;
             size_t prefetchSize = 0;
             std::vector<std::pair<size_t, size_t>> mins;
-            NGT::ObjectSpace &objectSpace = index.getObjectSpace();
+            polaris::ObjectSpace &objectSpace = index.getObjectSpace();
             int maxSize = objectSpace.getByteSizeOfObject() * 4;
             maxSize = maxSize < 64 * 28 ? maxSize : 64 * 28;
             for (int trial = 0; trial < 10; trial++) {
@@ -268,10 +268,10 @@ namespace NGT {
             }
 
             {
-                NGT::StdOstreamRedirector redirector(logDisabled);
-                auto *graphIndex = new NGT::GraphIndex(outIndexPath, false, NGT::Index::OpenTypeObjectDisabled);
-                std::cerr << "GraphOptimizer::execute:  vm size=" << NGT::Common::getProcessVmSizeStr()
-                          << ":" << NGT::Common::getProcessVmPeakStr() << std::endl;
+                polaris::StdOstreamRedirector redirector(logDisabled);
+                auto *graphIndex = new polaris::GraphIndex(outIndexPath, false, polaris::Index::OpenTypeObjectDisabled);
+                std::cerr << "GraphOptimizer::execute:  vm size=" << polaris::Common::getProcessVmSizeStr()
+                          << ":" << polaris::Common::getProcessVmPeakStr() << std::endl;
                 std::cerr << " delete all of objects" << std::endl;
                 try {
                     graphIndex->destructObjectSpace();
@@ -279,8 +279,8 @@ namespace NGT {
                     delete graphIndex;
                     throw (err);
                 }
-                std::cerr << " vm size=" << NGT::Common::getProcessVmSizeStr()
-                          << ":" << NGT::Common::getProcessVmPeakStr() << std::endl;
+                std::cerr << " vm size=" << polaris::Common::getProcessVmSizeStr()
+                          << ":" << polaris::Common::getProcessVmPeakStr() << std::endl;
                 numOfOutgoingEdges = (numOfOutgoingEdges < 0 &&
                                       graphIndex->NeighborhoodGraph::property.outgoingEdge >= 0) ?
                                      graphIndex->NeighborhoodGraph::property.outgoingEdge : numOfOutgoingEdges;
@@ -292,24 +292,24 @@ namespace NGT {
                         std::cerr << "GraphOptimizer: adjusting outgoing and incoming edges..." << std::endl;
                     }
                     redirector.begin();
-                    NGT::Timer timer;
+                    polaris::Timer timer;
                     timer.start();
-                    std::vector<NGT::ObjectDistances> graph;
+                    std::vector<polaris::ObjectDistances> graph;
                     try {
                         std::cerr << "Optimizer::execute: Extract the graph data." << std::endl;
                         // extract only edges from the index to reduce the memory usage.
-                        NGT::GraphReconstructor::extractGraph(graph, *graphIndex);
+                        polaris::GraphReconstructor::extractGraph(graph, *graphIndex);
                         NeighborhoodGraph::Property &prop = graphIndex->getGraphProperty();
-                        if (prop.graphType == NGT::NeighborhoodGraph::GraphTypeONNG) {
-                            NGT::GraphReconstructor::convertToANNG(graph);
+                        if (prop.graphType == polaris::NeighborhoodGraph::GraphTypeONNG) {
+                            polaris::GraphReconstructor::convertToANNG(graph);
                         }
-                        NGT::GraphReconstructor::reconstructGraph(graph, *graphIndex, numOfOutgoingEdges,
+                        polaris::GraphReconstructor::reconstructGraph(graph, *graphIndex, numOfOutgoingEdges,
                                                                   numOfIncomingEdges, maxNumOfEdges);
                         timer.stop();
                         std::cerr << "Optimizer::execute: Graph reconstruction time=" << timer.time << " (sec) "
                                   << std::endl;
                         graphIndex->saveGraph(outIndexPath);
-                        prop.graphType = NGT::NeighborhoodGraph::GraphTypeONNG;
+                        prop.graphType = polaris::NeighborhoodGraph::GraphTypeONNG;
                         graphIndex->saveProperty(outIndexPath);
                     } catch (polaris::PolarisException &err) {
                         delete graphIndex;
@@ -323,14 +323,14 @@ namespace NGT {
                         std::cerr << "GraphOptimizer: redusing shortcut edges..." << std::endl;
                     }
                     try {
-                        NGT::Timer timer;
+                        polaris::Timer timer;
                         timer.start();
                         if (shortcutReductionWithLessMemory) {
-                            NGT::GraphReconstructor::removeShortcutEdges(*graphIndex, outIndexPath,
+                            polaris::GraphReconstructor::removeShortcutEdges(*graphIndex, outIndexPath,
                                                                          shortcutReductionRange,
                                                                          numOfThreads, minNumOfEdges);
                         } else {
-                            NGT::GraphReconstructor::adjustPathsEffectively(*graphIndex, minNumOfEdges);
+                            polaris::GraphReconstructor::adjustPathsEffectively(*graphIndex, minNumOfEdges);
                         }
                         timer.stop();
                         std::cerr << "Optimizer::execute: Path adjustment time=" << timer.time << " (sec) "
@@ -356,9 +356,9 @@ namespace NGT {
                 if (!logDisabled) {
                     std::cerr << "GraphOptimizer: optimizing search parameters..." << std::endl;
                 }
-                NGT::Index outIndex(outIndexPath);
-                NGT::GraphIndex &outGraph = static_cast<NGT::GraphIndex &>(outIndex.getIndex());
-                NGT::Optimizer optimizer(outIndex);
+                polaris::Index outIndex(outIndexPath);
+                polaris::GraphIndex &outGraph = static_cast<polaris::GraphIndex &>(outIndex.getIndex());
+                polaris::Optimizer optimizer(outIndex);
                 if (logDisabled) {
                     optimizer.disableLog();
                 } else {
@@ -367,7 +367,7 @@ namespace NGT {
                 try {
                     auto coefficients = optimizer.adjustSearchEdgeSize(baseAccuracyRange, rateAccuracyRange,
                                                                        numOfQueries, gtEpsilon, margin);
-                    NGT::NeighborhoodGraph::Property &prop = outGraph.getGraphProperty();
+                    polaris::NeighborhoodGraph::Property &prop = outGraph.getGraphProperty();
                     prop.dynamicEdgeSizeBase = coefficients.first;
                     prop.dynamicEdgeSizeRate = coefficients.second;
                     prop.edgeSizeForSearch = -2;
@@ -380,17 +380,17 @@ namespace NGT {
             }
 
             if (searchParameterOptimization || prefetchParameterOptimization || accuracyTableGeneration) {
-                NGT::StdOstreamRedirector redirector(logDisabled);
+                polaris::StdOstreamRedirector redirector(logDisabled);
                 redirector.begin();
-                NGT::Index outIndex(outIndexPath, true);
-                NGT::GraphIndex &outGraph = static_cast<NGT::GraphIndex &>(outIndex.getIndex());
+                polaris::Index outIndex(outIndexPath, true);
+                polaris::GraphIndex &outGraph = static_cast<polaris::GraphIndex &>(outIndex.getIndex());
                 if (prefetchParameterOptimization) {
                     if (!logDisabled) {
                         std::cerr << "GraphOptimizer: optimizing prefetch parameters..." << std::endl;
                     }
                     try {
                         auto prefetch = adjustPrefetchParameters(outIndex);
-                        NGT::Property prop;
+                        polaris::Property prop;
                         outIndex.getProperty(prop);
                         prop.prefetchOffset = prefetch.first;
                         prop.prefetchSize = prefetch.second;
@@ -408,9 +408,9 @@ namespace NGT {
                         std::cerr << "GraphOptimizer: generating the accuracy table..." << std::endl;
                     }
                     try {
-                        auto table = NGT::Optimizer::generateAccuracyTable(outIndex, numOfResults, numOfQueries);
-                        NGT::Index::AccuracyTable accuracyTable(table);
-                        NGT::Property prop;
+                        auto table = polaris::Optimizer::generateAccuracyTable(outIndex, numOfResults, numOfQueries);
+                        polaris::Index::AccuracyTable accuracyTable(table);
+                        polaris::Property prop;
                         outIndex.getProperty(prop);
                         prop.accuracyTable = accuracyTable.getString();
                         outIndex.setProperty(prop);
@@ -435,10 +435,10 @@ namespace NGT {
         }
 
         static std::tuple<size_t, double, double>    // optimized # of edges, accuracy, accuracy gain per edge
-        optimizeNumberOfEdgesForANNG(NGT::Optimizer &optimizer, std::vector<std::vector<float>> &queries,
+        optimizeNumberOfEdgesForANNG(polaris::Optimizer &optimizer, std::vector<std::vector<float>> &queries,
                                      size_t nOfResults, float targetAccuracy, size_t maxNoOfEdges) {
 
-            NGT::Index &index = optimizer.index;
+            polaris::Index &index = optimizer.index;
             std::stringstream queryStream;
             std::stringstream gtStream;
             float maxEpsilon = 0.0;
@@ -451,20 +451,20 @@ namespace NGT {
             double prevAccuracy = 0.0;
             double gain = 0.0;
             {
-                std::vector<NGT::ObjectDistances> graph;
-                NGT::GraphReconstructor::extractGraph(graph, static_cast<NGT::GraphIndex &>(index.getIndex()));
+                std::vector<polaris::ObjectDistances> graph;
+                polaris::GraphReconstructor::extractGraph(graph, static_cast<polaris::GraphIndex &>(index.getIndex()));
                 float epsilon = 0.0;
                 for (size_t edgeSize = 5; edgeSize <= maxNoOfEdges; edgeSize += (edgeSize >= 10 ? 10 : 5)) {
-                    NGT::GraphReconstructor::reconstructANNGFromANNG(graph, index, edgeSize);
-                    NGT::Command::SearchParameters searchParameters;
+                    polaris::GraphReconstructor::reconstructANNGFromANNG(graph, index, edgeSize);
+                    polaris::Command::SearchParameters searchParameters;
                     searchParameters.size = nOfResults;
                     searchParameters.outputMode = 'e';
                     searchParameters.edgeSize = 0;
                     searchParameters.beginOfEpsilon = searchParameters.endOfEpsilon = epsilon;
                     queryStream.clear();
                     queryStream.seekg(0, std::ios_base::beg);
-                    std::vector<NGT::Optimizer::MeasuredValue> acc;
-                    NGT::Optimizer::search(index, queryStream, gtStream, searchParameters, acc);
+                    std::vector<polaris::Optimizer::MeasuredValue> acc;
+                    polaris::Optimizer::search(index, queryStream, gtStream, searchParameters, acc);
                     if (acc.size() == 0) {
                         POLARIS_THROW_EX("Fatal error! Cannot get any accuracy value.");
                     }
@@ -484,17 +484,17 @@ namespace NGT {
         }
 
         static std::pair<size_t, float>
-        optimizeNumberOfEdgesForANNG(NGT::Index &index, ANNGEdgeOptimizationParameter &parameter) {
+        optimizeNumberOfEdgesForANNG(polaris::Index &index, ANNGEdgeOptimizationParameter &parameter) {
             if (parameter.targetNoOfObjects == 0) {
                 parameter.targetNoOfObjects = index.getObjectRepositorySize();
             }
 
-            NGT::Optimizer optimizer(index, parameter.noOfResults);
+            polaris::Optimizer optimizer(index, parameter.noOfResults);
 
-            NGT::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
-            NGT::GraphIndex &graphIndex = static_cast<NGT::GraphIndex &>(index.getIndex());
-            NGT::GraphAndTreeIndex &treeIndex = static_cast<NGT::GraphAndTreeIndex &>(index.getIndex());
-            NGT::GraphRepository &graphRepository = graphIndex.NeighborhoodGraph::repository;
+            polaris::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
+            polaris::GraphIndex &graphIndex = static_cast<polaris::GraphIndex &>(index.getIndex());
+            polaris::GraphAndTreeIndex &treeIndex = static_cast<polaris::GraphAndTreeIndex &>(index.getIndex());
+            polaris::GraphRepository &graphRepository = graphIndex.NeighborhoodGraph::repository;
             //float targetAccuracy = parameter.targetAccuracy + FLT_EPSILON;
 
             std::vector<std::vector<float>> queries;
@@ -505,7 +505,7 @@ namespace NGT {
                 treeIndex.DVPTree::insertNode(treeIndex.DVPTree::leafNodes.allocate());
             }
 
-            NGT::NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
+            polaris::NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
             prop.edgeSizeForCreation = parameter.maxNoOfEdges;
             std::vector<std::pair<size_t, std::tuple<size_t, double, double>>> transition;
             size_t targetNo = 12500;
@@ -523,7 +523,7 @@ namespace NGT {
                 }
                 id++;
                 index.createIndex(parameter.noOfThreads, id);
-                auto edge = NGT::GraphOptimizer::optimizeNumberOfEdgesForANNG(optimizer, queries, parameter.noOfResults,
+                auto edge = polaris::GraphOptimizer::optimizeNumberOfEdgesForANNG(optimizer, queries, parameter.noOfResults,
                                                                               parameter.targetAccuracy,
                                                                               parameter.maxNoOfEdges);
                 transition.push_back(make_pair(noOfObjects, edge));
@@ -567,24 +567,24 @@ namespace NGT {
                                      GraphOptimizer::ANNGEdgeOptimizationParameter &parameter) {
 
 
-            NGT::StdOstreamRedirector redirector(logDisabled);
+            polaris::StdOstreamRedirector redirector(logDisabled);
             redirector.begin();
 
             try {
-                NGT::Index index(indexPath, false);
+                polaris::Index index(indexPath, false);
 
-                auto optimizedEdge = NGT::GraphOptimizer::optimizeNumberOfEdgesForANNG(index, parameter);
+                auto optimizedEdge = polaris::GraphOptimizer::optimizeNumberOfEdgesForANNG(index, parameter);
 
 
-                NGT::GraphIndex &graph = static_cast<NGT::GraphIndex &>(index.getIndex());
+                polaris::GraphIndex &graph = static_cast<polaris::GraphIndex &>(index.getIndex());
                 size_t noOfEdges = (optimizedEdge.first + 10) / 5 * 5;
                 if (noOfEdges > parameter.maxNoOfEdges) {
                     noOfEdges = parameter.maxNoOfEdges;
                 }
 
-                NGT::NeighborhoodGraph::Property &prop = graph.getGraphProperty();
+                polaris::NeighborhoodGraph::Property &prop = graph.getGraphProperty();
                 prop.edgeSizeForCreation = noOfEdges;
-                static_cast<NGT::GraphIndex &>(index.getIndex()).saveProperty(indexPath);
+                static_cast<polaris::GraphIndex &>(index.getIndex()).saveProperty(indexPath);
                 optimizedEdge.first = noOfEdges;
                 redirector.end();
                 return optimizedEdge;

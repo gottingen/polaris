@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <polaris/graph/ngt/common.h>
+#include <polaris/utility/common.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -26,7 +26,7 @@
 #include <iostream>
 #include <deque>
 
-namespace NGT {
+namespace polaris {
     void *evaluate_responce(void *);
 
     class ThreadInfo;

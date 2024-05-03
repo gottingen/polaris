@@ -25,7 +25,7 @@ namespace polaris {
     class PolarisException : public std::exception {
     public:
         PolarisException() = default;
-
+        PolarisException(const PolarisException &e) : msg(e.msg), _errorCode(e._errorCode) {}
         explicit PolarisException(const std::string &msg);
 
         POLARIS_API PolarisException(const std::string &message, int errorCode);

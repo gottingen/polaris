@@ -15,13 +15,13 @@
 //
 
 #include <polaris/core/defines.h>
-#include <polaris/graph/ngt/common.h>
+#include <polaris/utility/common.h>
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
 
-NGT::Distance NGT::ObjectSpace::compareWithL1(NGT::Object &o1, NGT::Object &o2) {
+polaris::Distance polaris::ObjectSpace::compareWithL1(polaris::Object &o1, polaris::Object &o2) {
   auto dim = getPaddedDimension();
-  NGT::Distance d;
+  polaris::Distance d;
   if (getObjectType() == typeid(uint8_t)) {
     d = PrimitiveComparator::compareL1(reinterpret_cast<uint8_t*>(o1.getPointer()), 
 				       reinterpret_cast<uint8_t*>(o2.getPointer()), dim);

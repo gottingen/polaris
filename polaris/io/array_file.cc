@@ -20,11 +20,11 @@
 
 class ItemID {
 public:
-    void serialize(std::ostream &os, NGT::ObjectSpace *ospace = 0) {
+    void serialize(std::ostream &os, polaris::ObjectSpace *ospace = 0) {
         os.write((char *) &value, sizeof(value));
     }
 
-    void deserialize(std::istream &is, NGT::ObjectSpace *ospace = 0) {
+    void deserialize(std::istream &is, polaris::ObjectSpace *ospace = 0) {
         is.read((char *) &value, sizeof(value));
     }
 

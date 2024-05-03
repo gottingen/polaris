@@ -18,9 +18,9 @@
 #include <polaris/graph/ngt/thread.h>
 
 using namespace std;
-using namespace NGT;
+using namespace polaris;
 
-namespace NGT {
+namespace polaris {
     class ThreadInfo {
     public:
         pthread_t threadid;

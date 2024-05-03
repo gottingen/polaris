@@ -83,7 +83,7 @@ namespace QBG {
 
     static void
 #ifdef NGT_CLUSTERING
-      extractQuantizedVector(vector<vector<float>> &qvectors, vector<NGT::Clustering::Cluster> &clusters)
+      extractQuantizedVector(vector<vector<float>> &qvectors, vector<polaris::Clustering::Cluster> &clusters)
 #else
       extractQuantizedVector(vector<vector<float>> &qvectors, vector<Cluster> &clusters)
 #endif
@@ -128,14 +128,14 @@ namespace QBG {
     {
       vector<vector<float>> residualVectors;
 
-      NGT::Property property;
-      property.objectType = NGT::Index::Property::ObjectType::Float;
-      property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+      polaris::Property property;
+      property.objectType = polaris::Index::Property::ObjectType::Float;
+      property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
       if (globalCentroid[0].size() != vectors[0].size()) {
 	std::cerr << "optimizer: Warning. The dimension is inconsistency. " << globalCentroid[0].size() << ":" << vectors[0].size() << std::endl;
       }
       property.dimension = vectors[0].size();
-      NGT::Index index(property);
+      polaris::Index index(property);
       for (auto &c : globalCentroid) {
 	if (static_cast<int>(c.size()) != property.dimension) {
 	  c.resize(property.dimension);
@@ -148,8 +148,8 @@ namespace QBG {
 	auto &v = vectors[idx];
 	if ((idx + 1) % 10000 == 0) {
 	}
-	NGT::ObjectDistances gc;
-	NGT::SearchQuery query(v);
+	polaris::ObjectDistances gc;
+	polaris::SearchQuery query(v);
 	query.setResults(&gc);
 	query.setSize(10);
 	query.setEpsilon(0.1);
@@ -164,7 +164,7 @@ namespace QBG {
 	}
 	auto gcidx = gc[0].id - 1;
 	try {
-	  NGT::Clustering::subtract(v, globalCentroid[gcidx]);
+	  polaris::Clustering::subtract(v, globalCentroid[gcidx]);
 	} catch (polaris::PolarisException &err) {
 	  std::cerr << err.what() << ":" << v.size() << "x" << globalCentroid[gcidx].size() << std::endl;
 	  abort();
@@ -180,7 +180,7 @@ namespace QBG {
       }
       vector<vector<float>> globalCentroid;
       try {
-	NGT::Clustering::loadVectors(global, globalCentroid);
+	polaris::Clustering::loadVectors(global, globalCentroid);
       } catch (...) {
 	std::stringstream msg;
 	msg << "Optimizer::generateResidualObjects: Cannot load global vectors. " << global;
@@ -195,9 +195,9 @@ namespace QBG {
 				 Matrix<float> &xt,
 				 Matrix<float> &R,
 				 Matrix<float> &minR,
-				 vector<vector<NGT::Clustering::Cluster>> &minLocalClusters,
-				 NGT::Clustering::ClusteringType clusteringType,
-				 NGT::Clustering::InitializationMode initMode,
+				 vector<vector<polaris::Clustering::Cluster>> &minLocalClusters,
+				 polaris::Clustering::ClusteringType clusteringType,
+				 polaris::Clustering::InitializationMode initMode,
 				 size_t numberOfClusters,
 				 size_t numberOfSubvectors,
 				 size_t subvectorSize,
@@ -206,7 +206,7 @@ namespace QBG {
 				 float clusterSizeConstraintCoefficient,
 				 size_t convergenceLimitTimes,
 				 double &minDistortion,
-				 NGT::Timer &timelimitTimer, float timelimit,
+				 polaris::Timer &timelimitTimer, float timelimit,
 				 bool rotation
 				 ) {
 
@@ -222,7 +222,7 @@ namespace QBG {
 	Matrix<float>::mulSquare(xp, R);
 	float distance = 0.0;
 #ifdef NGT_CLUSTERING
-	vector<vector<NGT::Clustering::Cluster>> localClusters(numberOfSubvectors);
+	vector<vector<polaris::Clustering::Cluster>> localClusters(numberOfSubvectors);
 #else
 	vector<vector<Cluster>> localClusters(numberOfSubvectors);
 #endif
@@ -236,12 +236,12 @@ namespace QBG {
 	  vector<vector<float>> subVectors;
 	  extractSubvector(xp, subVectors, m * subvectorSize, subvectorSize);
 #ifdef NGT_CLUSTERING
-	  vector<NGT::Clustering::Cluster> &clusters = localClusters[m];
+	  vector<polaris::Clustering::Cluster> &clusters = localClusters[m];
 #else
 	  vector<Cluster> &clusters = localClusters[m];
 #endif
 #ifdef NGT_CLUSTERING
-	  NGT::Clustering clustering(initMode, clusteringType, clusterIteration);
+	  polaris::Clustering clustering(initMode, clusteringType, clusterIteration);
 	  clustering.setClusterSizeConstraintCoefficient(clusterSizeConstraintCoefficient);
 	  clustering.clusterSizeConstraint = clusterSizeConstraint;
 	  clustering.kmeans(subVectors, numberOfClusters, clusters);
@@ -308,7 +308,7 @@ namespace QBG {
     void optimize(vector<vector<float>> &vectors,
 		  Matrix<float> &reposition,
 		  vector<Matrix<float>> &rs,
-		  vector<vector<vector<NGT::Clustering::Cluster>>> &localClusters,
+		  vector<vector<vector<polaris::Clustering::Cluster>>> &localClusters,
 		  vector<double> &errors
 		  ) {
       if (vectors.size() == 0) {
@@ -323,11 +323,11 @@ namespace QBG {
 #endif
       localClusters.resize(rs.size());
       errors.resize(rs.size());
-      NGT::Timer timer;
+      polaris::Timer timer;
       for (size_t ri = 0; ri < rs.size(); ri++) {
 	auto imode = initMode;
-	if (imode == NGT::Clustering::InitializationModeBest) {
-	  imode = ri % 2 == 0 ? NGT::Clustering::InitializationModeRandom : NGT::Clustering::InitializationModeKmeansPlusPlus;
+	if (imode == polaris::Clustering::InitializationModeBest) {
+	  imode = ri % 2 == 0 ? polaris::Clustering::InitializationModeRandom : polaris::Clustering::InitializationModeKmeansPlusPlus;
 	}
 	timer.start();
 	Matrix<float> optr;
@@ -360,13 +360,13 @@ namespace QBG {
     void optimize(const std::string indexPath, size_t threadSize = 0);
     void optimizeWithinIndex(std::string indexPath);
     void optimize(std::string invector, std::string ofile, std::string global);
-    void optimize(vector<vector<float>> &vectors, vector<vector<float>> &globalCentroid, Matrix<float> &r, vector<vector<NGT::Clustering::Cluster>> &localClusters, vector<double> &errors);
+    void optimize(vector<vector<float>> &vectors, vector<vector<float>> &globalCentroid, Matrix<float> &r, vector<vector<polaris::Clustering::Cluster>> &localClusters, vector<double> &errors);
 #endif
-    NGT::Timer		timelimitTimer;
+    polaris::Timer		timelimitTimer;
     size_t		subvectorSize;
 
-    NGT::Clustering::ClusteringType	clusteringType;
-    NGT::Clustering::InitializationMode	initMode;
+    polaris::Clustering::ClusteringType	clusteringType;
+    polaris::Clustering::InitializationMode	initMode;
     size_t		iteration;
     size_t		clusterIteration;		
     bool		clusterSizeConstraint;

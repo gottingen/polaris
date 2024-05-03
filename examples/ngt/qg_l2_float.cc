@@ -23,13 +23,13 @@ int main(int argc, char **argv) {
 
     // index construction
     try {
-        NGT::Property property;
+        polaris::Property property;
         property.dimension = 128;
-        property.objectType = NGT::ObjectSpace::ObjectType::Uint8;
-        property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+        property.objectType = polaris::ObjectSpace::ObjectType::Uint8;
+        property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
         std::cout << "creating the index framework..." << std::endl;
-        NGT::Index::create(indexPath, property);
-        NGT::Index index(indexPath);
+        polaris::Index::create(indexPath, property);
+        polaris::Index index(indexPath);
         ifstream is(objectFile);
         string line;
         std::cout << "appending the objects..." << std::endl;
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
     // nearest neighbor search
     try {
         NGTQG::Index index(indexPath);
-        NGT::Property property;
+        polaris::Property property;
         index.getProperty(property);
         ifstream is(queryFile);
         string line;
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
             }
 
             NGTQG::SearchQuery sc(query);
-            NGT::ObjectDistances objects;
+            polaris::ObjectDistances objects;
             sc.setResults(&objects);
             sc.setSize(10);
             sc.setEpsilon(0.1);
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
             cout << endl << "Rank\tID\tDistance: Object" << std::showbase << endl;
             for (size_t i = 0; i < objects.size(); i++) {
                 cout << i + 1 << "\t" << objects[i].id << "\t" << objects[i].distance << "\t: ";
-                NGT::ObjectSpace &objectSpace = index.getObjectSpace();
+                polaris::ObjectSpace &objectSpace = index.getObjectSpace();
                 uint8_t *object = static_cast<uint8_t *>(objectSpace.getObject(objects[i].id));
                 for (size_t idx = 0; idx < 5; idx++) {
                     cout << static_cast<int>(object[idx]) << " ";

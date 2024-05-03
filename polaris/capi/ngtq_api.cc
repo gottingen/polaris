@@ -79,7 +79,7 @@ void ngtqg_close_index(NGTQGIndex index) {
 }
 
 static bool ngtqg_search_index_(NGTQG::Index* pindex, NGTQG::SearchQuery* sq, NGTQGQueryParameters &params, NGTObjectDistances results) {
-  sq->setResults(static_cast<NGT::ObjectDistances*>(results));          // set the result set.
+  sq->setResults(static_cast<polaris::ObjectDistances*>(results));          // set the result set.
   sq->setSize(params.size);                        // the number of resultant objects.
   sq->setRadius(params.radius);                    // search radius.
   sq->setEpsilon(params.epsilon);                  // exploration coefficient.
@@ -102,7 +102,7 @@ static bool ngtqg_search_index_(NGTQGIndex index, T *query, NGTQGQueryParameters
   NGTQG::Index* pindex = static_cast<NGTQG::Index*>(index);
   int32_t dim = pindex->getObjectSpace().getDimension();
 
-  NGT::Object *ngtquery = NULL;
+  polaris::Object *ngtquery = NULL;
 
   if(params.radius < 0.0){
     params.radius = FLT_MAX;
@@ -143,7 +143,7 @@ bool ngtqg_search_index_uint8(NGTQGIndex index, NGTQGQueryUint8 query, NGTObject
 }
 
 bool ngtqg_search_index_float16(NGTQGIndex index, NGTQGQueryFloat16 query, NGTObjectDistances results, NGTError error) {
-  return ngtqg_search_index_(index, static_cast<NGT::float16*>(query.query), query.params, results, error);
+  return ngtqg_search_index_(index, static_cast<polaris::float16*>(query.query), query.params, results, error);
 }
 
 void ngtqg_initialize_quantization_parameters(NGTQGQuantizationParameters *parameters) {
@@ -195,8 +195,8 @@ bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NG
   try {
     std::vector<float> r;
     NGTQ::Property property;
-    NGT::Property globalProperty;
-    NGT::Property localProperty;
+    polaris::Property globalProperty;
+    polaris::Property localProperty;
     property.dimension = parameters->extended_dimension;
     if (property.dimension == 0) {
       property.dimension = parameters->dimension;
@@ -217,7 +217,7 @@ bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NG
 
     globalProperty.edgeSizeForCreation = 10;
     globalProperty.edgeSizeForSearch = 40;
-    globalProperty.indexType = NGT::Property::GraphAndTree;
+    globalProperty.indexType = polaris::Property::GraphAndTree;
     globalProperty.insertionRadiusCoefficient = 1.1;
 
     localProperty.indexType = globalProperty.indexType;
@@ -299,7 +299,7 @@ ObjectID qbg_append_object_as_uint8(QBGIndex index, uint8_t *obj, uint32_t obj_d
 }
 
 ObjectID qbg_append_object_as_float16(QBGIndex index, NGTFloat16 *obj, uint32_t obj_dim, QBGError error) {
-  return qbg_append_object_(index, static_cast<NGT::float16*>(obj), obj_dim, error);
+  return qbg_append_object_(index, static_cast<polaris::float16*>(obj), obj_dim, error);
 }
 
 template<typename T>
@@ -332,7 +332,7 @@ ObjectID qbg_insert_object_as_uint8(QBGIndex index, uint8_t *obj, uint32_t obj_d
 }
 
 ObjectID qbg_insert_object_as_float16(QBGIndex index, NGTFloat16 *obj, uint32_t obj_dim, QBGError error) {
-  return qbg_insert_object_(index, static_cast<NGT::float16*>(obj), obj_dim, error);
+  return qbg_insert_object_(index, static_cast<polaris::float16*>(obj), obj_dim, error);
 }
 
 template<typename T>
@@ -378,7 +378,7 @@ uint32_t qbg_insert_objects_as_uint8(QBGIndex index, uint8_t *objects, uint32_t 
 }
 
 uint32_t qbg_insert_objects_as_float16(QBGIndex index, NGTFloat16 *objects, uint32_t n_of_objects, ObjectID *ids, NGTError error) {
-  return qbg_insert_objects_(index, static_cast<NGT::float16*>(objects), n_of_objects, ids, error);
+  return qbg_insert_objects_(index, static_cast<polaris::float16*>(objects), n_of_objects, ids, error);
 }
 
 bool qbg_remove_objects(QBGIndex index, ObjectID *ids, uint32_t n_of_ids, QBGError error) {
@@ -423,7 +423,7 @@ bool qbg_remove_object(QBGIndex index, ObjectID id, QBGError error) {
 }
 
 void qbg_initialize_build_parameters(QBGBuildParameters *parameters) {
-  parameters->hierarchical_clustering_init_mode = static_cast<int>(NGT::Clustering::InitializationModeKmeansPlusPlus);
+  parameters->hierarchical_clustering_init_mode = static_cast<int>(polaris::Clustering::InitializationModeKmeansPlusPlus);
   parameters->number_of_first_objects = 0;
   parameters->number_of_first_clusters = 0;
   parameters->number_of_second_objects = 0;
@@ -432,7 +432,7 @@ void qbg_initialize_build_parameters(QBGBuildParameters *parameters) {
 
   parameters->number_of_objects = 1000;
   parameters->number_of_subvectors = 1;
-  parameters->optimization_clustering_init_mode = static_cast<int>(NGT::Clustering::InitializationModeKmeansPlusPlus);
+  parameters->optimization_clustering_init_mode = static_cast<int>(polaris::Clustering::InitializationModeKmeansPlusPlus);
   parameters->rotation_iteration = 2000;
   parameters->subvector_iteration = 400;
   parameters->number_of_matrices = 3;
@@ -449,7 +449,7 @@ bool qbg_build_index(const char *index_path, QBGBuildParameters *parameters, QBG
   hierarchicalKmeans.numOfTotalClusters = 0;
   hierarchicalKmeans.numOfTotalBlobs = 0;
   hierarchicalKmeans.clusterID = -1;
-  hierarchicalKmeans.initMode = static_cast<NGT::Clustering::InitializationMode>(parameters->hierarchical_clustering_init_mode);
+  hierarchicalKmeans.initMode = static_cast<polaris::Clustering::InitializationMode>(parameters->hierarchical_clustering_init_mode);
   hierarchicalKmeans.numOfRandomObjects = 0;
   hierarchicalKmeans.extractCentroid = false;
   hierarchicalKmeans.numOfFirstObjects = parameters->number_of_first_objects;
@@ -476,8 +476,8 @@ bool qbg_build_index(const char *index_path, QBGBuildParameters *parameters, QBG
   optimizer.numberOfObjects = parameters->number_of_objects;
   optimizer.numberOfClusters = 16;
   optimizer.numberOfSubvectors = 0;
-  optimizer.clusteringType = NGT::Clustering::ClusteringTypeKmeansWithNGT;
-  optimizer.initMode = static_cast<NGT::Clustering::InitializationMode>(parameters->optimization_clustering_init_mode);
+  optimizer.clusteringType = polaris::Clustering::ClusteringTypeKmeansWithNGT;
+  optimizer.initMode = static_cast<polaris::Clustering::InitializationMode>(parameters->optimization_clustering_init_mode);
   optimizer.convergenceLimitTimes = 5;
   optimizer.iteration = parameters->rotation_iteration;
   optimizer.clusterIteration = parameters->subvector_iteration;
@@ -544,7 +544,7 @@ static bool qbg_search_index_(QBG::Index* pindex, std::vector<float> &query, QBG
 
   QBG::SearchContainer sc;
   sc.setObjectVector(query);
-  sc.setResults(static_cast<NGT::ObjectDistances*>(results));
+  sc.setResults(static_cast<polaris::ObjectDistances*>(results));
   if (param.result_expansion >= 1.0) {
     sc.setSize(static_cast<float>(param.number_of_results) * param.result_expansion);
     sc.setExactResultSize(param.number_of_results);
@@ -610,7 +610,7 @@ bool qbg_search_index_uint8(QBGIndex index, QBGQueryUint8 query, NGTObjectDistan
 }
 
 bool qbg_search_index_float16(QBGIndex index, QBGQueryFloat16 query, NGTObjectDistances results, QBGError error) {
-  return qbg_search_index_(index, static_cast<NGT::float16*>(query.query), query.params, results, error);
+  return qbg_search_index_(index, static_cast<polaris::float16*>(query.query), query.params, results, error);
 }
 
 template<typename T>
@@ -668,7 +668,7 @@ uint8_t* qbg_get_object_as_uint8(QBGIndex index, ObjectID id, QBGError error) {
 }
 
 NGTFloat16* qbg_get_object_as_float16(QBGIndex index, ObjectID id, QBGError error) {
-  return qbg_get_object_<NGT::float16>(index, id, error);
+  return qbg_get_object_<polaris::float16>(index, id, error);
 }
 
 size_t qbg_get_dimension(QBGIndex index, QBGError error) {

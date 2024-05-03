@@ -101,7 +101,7 @@ namespace NGTQ {
             delete[] y;
         }
 
-        void mulBlas(NGT::float16 *a) {
+        void mulBlas(polaris::float16 *a) {
             float *floatv = new float[dim];
             for (size_t d = 0; d < dim; d++) {
                 floatv[d] = a[d];
@@ -156,14 +156,14 @@ namespace NGTQ {
 
         void serialize(std::ofstream &os) {
             uint32_t v = PARENT::size();
-            NGT::Serializer::write(os, v);
+            polaris::Serializer::write(os, v);
             os.write(reinterpret_cast<const char *>(PARENT::data()),
                      static_cast<uint64_t>(PARENT::size()) * sizeof(float));
         }
 
         void deserialize(std::ifstream &is) {
             uint32_t v;
-            NGT::Serializer::read(is, v);
+            polaris::Serializer::read(is, v);
             PARENT::resize(v);
             dim = sqrt(v);
             if (dim * dim != v) {
@@ -265,15 +265,15 @@ namespace NGTQ {
                 std::cerr << "Quantization codebook: something wrong?" << std::endl;
                 delete index;
             }
-            NGT::Property property;
+            polaris::Property property;
             property.dimension = dimension;
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-                                                                                                                                    index = new NGT::Index("dummy", property);
+                                                                                                                                    index = new polaris::Index("dummy", property);
     std::cerr << "Not implemented" << std::endl;
     abort();
 #else
-            index = new NGT::Index(property);
+            index = new polaris::Index(property);
 #endif
             size_t noOfCentroids = PARENT::size() / paddedDimension;
             std::cerr << "QuantizationCodebook::buildIndex # of the centroids=" << noOfCentroids << std::endl;
@@ -302,14 +302,14 @@ namespace NGTQ {
             return id;
         }
 
-        size_t search(NGT::Object &object, float epsilon = 0.1) {
+        size_t search(polaris::Object &object, float epsilon = 0.1) {
             if (index == 0) {
                 std::stringstream msg;
                 msg << "QuantizeationCodebook: Fatal Error! The index is not available.";
                 POLARIS_THROW_EX(msg);
             }
-            NGT::ObjectDistances result;
-            NGT::SearchContainer sc(object);
+            polaris::ObjectDistances result;
+            polaris::SearchContainer sc(object);
             sc.setResults(&result);
             sc.setSize(10);
             sc.radius = FLT_MAX;
@@ -327,12 +327,12 @@ namespace NGTQ {
             }
         }
 
-        size_t find(NGT::Object &object) {
+        size_t find(polaris::Object &object) {
             size_t noOfCentroids = PARENT::size() / paddedDimension;
             auto mind = std::numeric_limits<float>::max();
             size_t minidx = 0;
             for (size_t idx = 0; idx < noOfCentroids; idx++) {
-                auto d = NGT::PrimitiveComparator::compareL2(static_cast<float *>(object.getPointer()), data(idx),
+                auto d = polaris::PrimitiveComparator::compareL2(static_cast<float *>(object.getPointer()), data(idx),
                                                              paddedDimension);
                 if (mind > d) {
                     mind = d;
@@ -351,21 +351,21 @@ namespace NGTQ {
 
         void serialize(std::ofstream &os) const {
             uint32_t v = PARENT::size();
-            NGT::Serializer::write(os, v);
+            polaris::Serializer::write(os, v);
             v = dimension;
-            NGT::Serializer::write(os, v);
+            polaris::Serializer::write(os, v);
             v = paddedDimension;
-            NGT::Serializer::write(os, v);
+            polaris::Serializer::write(os, v);
             os.write(reinterpret_cast<const char *>(PARENT::data()), static_cast<uint64_t>(PARENT::size()) * sizeof(T));
         }
 
         void deserialize(std::ifstream &is, bool readOnly) {
             uint32_t v;
-            NGT::Serializer::read(is, v);
+            polaris::Serializer::read(is, v);
             PARENT::resize(v);
-            NGT::Serializer::read(is, v);
+            polaris::Serializer::read(is, v);
             dimension = v;
-            NGT::Serializer::read(is, v);
+            polaris::Serializer::read(is, v);
             paddedDimension = v;
             is.read(reinterpret_cast<char *>(PARENT::data()), PARENT::size() * sizeof(T));
             if (!readOnly) {
@@ -375,7 +375,7 @@ namespace NGTQ {
 
         uint32_t dimension;
         uint32_t paddedDimension;
-        NGT::Index *index;
+        polaris::Index *index;
     };
 
 #ifdef NGTQBG_COARSE_BLOB
@@ -387,13 +387,13 @@ namespace NGTQ {
 
   void serialize(std::ofstream &os) {
     uint32_t v = PARENT::size();
-    NGT::Serializer::write(os, v);
+    polaris::Serializer::write(os, v);
     os.write(reinterpret_cast<const char*>(PARENT::data()), static_cast<uint64_t>(v) * sizeof(uint32_t));
   }
 
   void deserialize(std::ifstream &is) {
     uint32_t v;
-    NGT::Serializer::read(is, v);
+    polaris::Serializer::read(is, v);
     PARENT::resize(v);
     is.read(reinterpret_cast<char*>(PARENT::data()), static_cast<uint64_t>(v) * sizeof(uint32_t));
   }
@@ -505,18 +505,18 @@ namespace NGTQ {
     };
 
     template<typename T>
-    class InvertedIndexEntry : public NGT::DynamicLengthVector<InvertedIndexObject<T>> {
+    class InvertedIndexEntry : public polaris::DynamicLengthVector<InvertedIndexObject<T>> {
     public:
-        typedef NGT::DynamicLengthVector<InvertedIndexObject<T>> PARENT;
+        typedef polaris::DynamicLengthVector<InvertedIndexObject<T>> PARENT;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-                                                                                                                                InvertedIndexEntry(size_t n, NGT::ObjectSpace *os = 0):numOfSubvectors(n)
+                                                                                                                                InvertedIndexEntry(size_t n, polaris::ObjectSpace *os = 0):numOfSubvectors(n)
 #ifdef NGTQ_QBG
     , subspaceID(std::numeric_limits<uint32_t>::max())
 #endif
   {
     PARENT::elementSize = getSizeOfElement();
   }
-  InvertedIndexEntry(size_t n, SharedMemoryAllocator &allocator, NGT::ObjectSpace *os = 0):numOfSubvectors(n)
+  InvertedIndexEntry(size_t n, SharedMemoryAllocator &allocator, polaris::ObjectSpace *os = 0):numOfSubvectors(n)
 #ifdef NGTQ_QBG
     , subspaceID(std::numeric_limits<uint32_t>::max())
 #endif
@@ -533,13 +533,13 @@ namespace NGTQ {
   }
 #else // NGTQ_SHARED_INVERTED_INDEX
 
-        InvertedIndexEntry(NGT::ObjectSpace *os = 0) : numOfSubvectors(0)
+        InvertedIndexEntry(polaris::ObjectSpace *os = 0) : numOfSubvectors(0)
 #ifdef NGTQ_QBG
                 , subspaceID(std::numeric_limits<uint32_t>::max())
 #endif
         {}
 
-        InvertedIndexEntry(size_t n, NGT::ObjectSpace *os = 0) : numOfSubvectors(n)
+        InvertedIndexEntry(size_t n, polaris::ObjectSpace *os = 0) : numOfSubvectors(n)
 #ifdef NGTQ_QBG
                 , subspaceID(std::numeric_limits<uint32_t>::max())
 #endif
@@ -569,34 +569,34 @@ namespace NGTQ {
             }
         }
 
-        void serialize(std::ofstream &os, NGT::ObjectSpace *objspace = 0) {
+        void serialize(std::ofstream &os, polaris::ObjectSpace *objspace = 0) {
             uint32_t sz = PARENT::size();
-            NGT::Serializer::write(os, sz);
+            polaris::Serializer::write(os, sz);
             if (numOfSubvectors > 0xFFFF) {
                 std::stringstream msg;
                 msg << "# of subvectors is too large. " << numOfSubvectors;
                 POLARIS_THROW_EX(msg);
             }
             uint16_t nids = numOfSubvectors;
-            NGT::Serializer::write(os, nids);
+            polaris::Serializer::write(os, nids);
 #ifdef NGTQ_QBG
             int32_t ssid = subspaceID;
-            NGT::Serializer::write(os, ssid);
+            polaris::Serializer::write(os, ssid);
 #endif
             os.write(reinterpret_cast<char *>(PARENT::vector), PARENT::size() * PARENT::elementSize);
         }
 
-        void deserialize(std::ifstream &is, NGT::ObjectSpace *objectspace = 0) {
+        void deserialize(std::ifstream &is, polaris::ObjectSpace *objectspace = 0) {
             uint32_t sz;
             uint16_t nids;
 #ifdef NGTQ_QBG
             int32_t ssid;
 #endif
             try {
-                NGT::Serializer::read(is, sz);
-                NGT::Serializer::read(is, nids);
+                polaris::Serializer::read(is, sz);
+                polaris::Serializer::read(is, nids);
 #ifdef NGTQ_QBG
-                NGT::Serializer::read(is, ssid);
+                polaris::Serializer::read(is, ssid);
 #endif
             } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
@@ -724,7 +724,7 @@ namespace NGTQ {
     };
 
     template<typename TYPE, int SIZE>
-    class SerializableObject : public NGT::Object {
+    class SerializableObject : public polaris::Object {
     public:
         static size_t getSerializedDataSize() { return SIZE; }
     };
@@ -735,7 +735,7 @@ namespace NGTQ {
         DataTypeFloat16 = 2
     };
 
-    typedef NGT::ObjectSpace::DistanceType DistanceType;
+    typedef polaris::ObjectSpace::DistanceType DistanceType;
 
     enum CentroidCreationMode {
         CentroidCreationModeDynamic = 0,
@@ -791,7 +791,7 @@ namespace NGTQ {
         }
 
         void save(const string &path) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             prop.set("ThreadSize", (long) threadSize);
             prop.set("GlobalRange", globalRange);
             prop.set("LocalRange", localRange);
@@ -844,7 +844,7 @@ namespace NGTQ {
         }
 
         void load(const string &path) {
-            NGT::PropertySet prop;
+            polaris::PropertySet prop;
             prop.load(path + "/prf");
             threadSize = prop.getl("ThreadSize", threadSize);
             globalRange = prop.getf("GlobalRange", globalRange);
@@ -898,9 +898,9 @@ namespace NGTQ {
                     break;
                 case DataTypeFloat16:
 #ifdef NGTQ_QBG
-                    dataSize = sizeof(NGT::float16) * genuineDimension;
+                    dataSize = sizeof(polaris::float16) * genuineDimension;
 #else
-                    dataSize = sizeof(NGT::float16) * dimension;
+                    dataSize = sizeof(polaris::float16) * dimension;
 #endif
                     break;
                 default:
@@ -1053,7 +1053,7 @@ namespace NGTQ {
             delete[] localCentroidsForSIMD;
         }
 
-        virtual double operator()(NGT::Object &object, size_t objectID, void *localID) = 0;
+        virtual double operator()(polaris::Object &object, size_t objectID, void *localID) = 0;
 
         virtual double operator()(void *localID, DistanceLookupTable &distanceLUT) = 0;
 
@@ -1066,22 +1066,22 @@ namespace NGTQ {
 #endif
 
         virtual double
-        operator()(NGT::Object &object, size_t objectID, void *localID, DistanceLookupTable &distanceLUT) = 0;
+        operator()(polaris::Object &object, size_t objectID, void *localID, DistanceLookupTable &distanceLUT) = 0;
 
         template<typename T>
-        inline double getAngleDistanceUint8(NGT::Object &object, size_t objectID, T localID[]) {
+        inline double getAngleDistanceUint8(polaris::Object &object, size_t objectID, T localID[]) {
             assert(globalCodebookIndex != 0);
-            NGT::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+            polaris::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
             size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
             size_t localDataSize = sizeOfObject / localDivisionNo / sizeof(uint8_t);
             unsigned char *gcptr = &gcentroid[0];
-            unsigned char *optr = &((NGT::Object &) object)[0];
+            unsigned char *optr = &((polaris::Object &) object)[0];
             double normA = 0.0F;
             double normB = 0.0F;
             double sum = 0.0F;
             for (size_t li = 0; li < localDivisionNo; li++) {
                 size_t idx = localCodebookNo == 1 ? 0 : li;
-                NGT::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
+                polaris::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
                         localID[li]);
                 float *lcptr = (float *) &lcentroid[0];
                 float *lcendptr = lcptr + localDataSize;
@@ -1103,17 +1103,17 @@ namespace NGTQ {
         }
 
         template<typename T>
-        inline double getL2DistanceUint8(NGT::Object &object, size_t objectID, T localID[]) {
+        inline double getL2DistanceUint8(polaris::Object &object, size_t objectID, T localID[]) {
             assert(globalCodebookIndex != 0);
-            NGT::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+            polaris::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
             size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
             size_t localDataSize = sizeOfObject / localDivisionNo / sizeof(uint8_t);
             unsigned char *gcptr = &gcentroid[0];
-            unsigned char *optr = &((NGT::Object &) object)[0];
+            unsigned char *optr = &((polaris::Object &) object)[0];
             double distance = 0.0;
             for (size_t li = 0; li < localDivisionNo; li++) {
                 size_t idx = localCodebookNo == 1 ? 0 : li;
-                NGT::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
+                polaris::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
                         localID[li]);
                 float *lcptr = (float *) &lcentroid[0];
 
@@ -1144,19 +1144,19 @@ namespace NGTQ {
 
 
         template<typename T>
-        inline double getAngleDistanceFloat(NGT::Object &object, size_t objectID, T localID[]) {
+        inline double getAngleDistanceFloat(polaris::Object &object, size_t objectID, T localID[]) {
             assert(globalCodebookIndex != 0);
-            NGT::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+            polaris::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
             size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
             size_t localDataSize = sizeOfObject / localDivisionNo / sizeof(float);
             float *gcptr = (float *) &gcentroid[0];
-            float *optr = (float *) &((NGT::Object &) object)[0];
+            float *optr = (float *) &((polaris::Object &) object)[0];
             double normA = 0.0F;
             double normB = 0.0F;
             double sum = 0.0F;
             for (size_t li = 0; li < localDivisionNo; li++) {
                 size_t idx = localCodebookNo == 1 ? 0 : li;
-                NGT::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
+                polaris::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
                         localID[li]);
                 float *lcptr = (float *) &lcentroid[0];
                 float *lcendptr = lcptr + localDataSize;
@@ -1178,17 +1178,17 @@ namespace NGTQ {
         }
 
         template<typename T>
-        inline double getL2DistanceFloat(NGT::Object &object, size_t objectID, T localID[]) {
+        inline double getL2DistanceFloat(polaris::Object &object, size_t objectID, T localID[]) {
             assert(globalCodebookIndex != 0);
-            NGT::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+            polaris::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
             size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
             size_t localDataSize = sizeOfObject / localDivisionNo / sizeof(float);
             float *gcptr = (float *) &gcentroid[0];
-            float *optr = (float *) &((NGT::Object &) object)[0];
+            float *optr = (float *) &((polaris::Object &) object)[0];
             double distance = 0.0;
             for (size_t li = 0; li < localDivisionNo; li++) {
                 size_t idx = localCodebookNo == 1 ? 0 : li;
-                NGT::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
+                polaris::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
                         localID[li]);
                 float *lcptr = (float *) &lcentroid[0];
                 float *lcendptr = lcptr + localDataSize;
@@ -1204,19 +1204,19 @@ namespace NGTQ {
         }
 
 #ifdef NGTQ_DISTANCE_ANGLE
-                                                                                                                                inline void createDistanceLookup(NGT::Object &object, size_t objectID, DistanceLookupTable &distanceLUT) {
+                                                                                                                                inline void createDistanceLookup(polaris::Object &object, size_t objectID, DistanceLookupTable &distanceLUT) {
     assert(globalCodebookIndex != 0);
-    NGT::Object &gcentroid = (NGT::Object &)*globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+    polaris::Object &gcentroid = (polaris::Object &)*globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
     size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
     size_t localDataSize = sizeOfObject  / localDivisionNo / sizeof(float);
-    float *optr = (float*)&((NGT::Object&)object)[0];
+    float *optr = (float*)&((polaris::Object&)object)[0];
     float *gcptr = (float*)&gcentroid[0];
     LocalDistanceLookup *dlu = distanceLUT.localDistanceLookup;
     size_t oft = 0;
     for (size_t li = 0; li < localCodebookNo; li++, oft += localDataSize) {
       dlu++;
       for (size_t k = 1; k < localCodebookCentroidNo; k++) {
-	NGT::Object &lcentroid = (NGT::Object&)*localCodebookIndexes[li].getObjectSpace().getRepository().get(k);
+	polaris::Object &lcentroid = (polaris::Object&)*localCodebookIndexes[li].getObjectSpace().getRepository().get(k);
 	float *lcptr = (float*)&lcentroid[0];
 	float *lcendptr = lcptr + localDataSize;
 	float *toptr = optr + oft;
@@ -1238,8 +1238,8 @@ namespace NGTQ {
   }
 #else
 
-        inline void createDistanceLookup(NGT::Object &object, size_t objectID, DistanceLookupTable &distanceLUT) {
-            void *objectPtr = &((NGT::Object &) object)[0];
+        inline void createDistanceLookup(polaris::Object &object, size_t objectID, DistanceLookupTable &distanceLUT) {
+            void *objectPtr = &((polaris::Object &) object)[0];
             createDistanceLookup(objectPtr, objectID, distanceLUT);
         }
 
@@ -1249,7 +1249,7 @@ namespace NGTQ {
             void *globalCentroid = quantizationCodebook->data(objectID);
             size_t sizeOfObject = dimension * sizeOfType;
 #else
-                                                                                                                                    NGT::Object &gcentroid = (NGT::Object &)*globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+                                                                                                                                    polaris::Object &gcentroid = (polaris::Object &)*globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
     void *globalCentroid = &gcentroid[0];
     size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
 #endif
@@ -1567,8 +1567,8 @@ namespace NGTQ {
 
         }
 
-        inline void createDistanceLookup(NGT::Object &object, size_t objectID, DistanceLookupTableUint8 &distanceLUT) {
-            void *objectPtr = &((NGT::Object &) object)[0];
+        inline void createDistanceLookup(polaris::Object &object, size_t objectID, DistanceLookupTableUint8 &distanceLUT) {
+            void *objectPtr = &((polaris::Object &) object)[0];
             createDistanceLookup(objectPtr, objectID, distanceLUT);
         }
 
@@ -1584,7 +1584,7 @@ namespace NGTQ {
 #endif
         }
 
-        void set(NGT::Index *gcb, NGT::Index lcb[], QuantizationCodebook<float> *qcodebook, size_t dn, size_t lcn,
+        void set(polaris::Index *gcb, polaris::Index lcb[], QuantizationCodebook<float> *qcodebook, size_t dn, size_t lcn,
                  size_t sizeoftype, size_t dim, Rotation *r) {
             globalCodebookIndex = gcb;
             localCodebookIndexes = lcb;
@@ -1595,7 +1595,7 @@ namespace NGTQ {
             sizeOfType = sizeoftype;
             set(lcb, lcn);
             if (globalCodebookIndex->getObjectSpace().getRepository().size() == 2) {
-                NGT::ObjectID id = 1;
+                polaris::ObjectID id = 1;
                 try {
                     globalCodebookIndex->getObjectSpace().getObject(id, globalCentroid);
                 } catch (polaris::PolarisException &err) {
@@ -1608,7 +1608,7 @@ namespace NGTQ {
             float *lc = new float[localCodebookNo * localCodebookCentroidNo * localDataSize];
             for (size_t li = 0; li < localCodebookNo; li++) {
                 for (size_t k = 1; k < localCodebookCentroidNo; k++) {
-                    NGT::Object &lcentroid = *static_cast<NGT::Object *>(localCodebookIndexes[li].getObjectSpace().getRepository().get(
+                    polaris::Object &lcentroid = *static_cast<polaris::Object *>(localCodebookIndexes[li].getObjectSpace().getRepository().get(
                             k));
                     memcpy(&lc[li * localCodebookCentroidNo * localDataSize + k * localDataSize], &lcentroid[0],
                            localDataSize * sizeof(float));
@@ -1623,7 +1623,7 @@ namespace NGTQ {
             lc = new float[dimension * localCodebookCentroidNoSIMD];
             for (size_t li = 0; li < localCodebookNo; li++) {
                 for (size_t k = 1; k < localCodebookCentroidNo; k++) {
-                    NGT::Object &lcentroid = *static_cast<NGT::Object *>(localCodebookIndexes[li].getObjectSpace().getRepository().get(
+                    polaris::Object &lcentroid = *static_cast<polaris::Object *>(localCodebookIndexes[li].getObjectSpace().getRepository().get(
                             k));
                     float *subVector = reinterpret_cast<float *>(&lcentroid[0]);
                     for (size_t d = 0; d < localDataSize; d++) {
@@ -1637,7 +1637,7 @@ namespace NGTQ {
 
         }
 
-        void set(NGT::Index lcb[], size_t lcn) {
+        void set(polaris::Index lcb[], size_t lcn) {
             localCodebookNo = lcn;
             localCodebookCentroidNo = lcb[0].getObjectRepositorySize();
         }
@@ -1650,8 +1650,8 @@ namespace NGTQ {
             c.initialize(localCodebookNo, localCodebookCentroidNo);
         }
 
-        NGT::Index *globalCodebookIndex;
-        NGT::Index *localCodebookIndexes;
+        polaris::Index *globalCodebookIndex;
+        polaris::Index *localCodebookIndexes;
         size_t localDivisionNo;
         size_t localCodebookNo;
         size_t localCodebookCentroidNo;
@@ -1694,10 +1694,10 @@ namespace NGTQ {
     }
     return acos(cosine);
   }
-  inline double operator()(NGT::Object &object, size_t objectID, void *l) {
+  inline double operator()(polaris::Object &object, size_t objectID, void *l) {
     return getAngleDistanceUint8(object, objectID, static_cast<T*>(l));
   }
-  inline double operator()(NGT::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
+  inline double operator()(polaris::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
     cerr << "operator() is not implemented" << endl;
     abort();
     return 0.0;
@@ -1713,17 +1713,17 @@ namespace NGTQ {
             return sqrt(distance);
         }
 
-        inline double operator()(NGT::Object &object, size_t objectID, void *l) {
+        inline double operator()(polaris::Object &object, size_t objectID, void *l) {
             return getL2DistanceUint8(object, objectID, static_cast<T *>(l));
         }
 
-        inline double operator()(NGT::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
+        inline double operator()(polaris::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
             T *localID = static_cast<T *>(l);
-            NGT::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+            polaris::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
             size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
             size_t localDataSize = sizeOfObject / localDivisionNo / sizeof(uint8_t);
             unsigned char *gcptr = &gcentroid[0];
-            unsigned char *optr = &((NGT::Object &) object)[0];
+            unsigned char *optr = &((polaris::Object &) object)[0];
             double distance = 0.0;
             for (size_t li = 0; li < localDivisionNo; li++) {
                 if (distanceLUT.isValid(li * localCodebookCentroidNo + localID[li])) {
@@ -1732,7 +1732,7 @@ namespace NGTQ {
                     gcptr += localDataSize;
                 } else {
                     size_t idx = localCodebookNo == 1 ? 0 : li;
-                    NGT::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
+                    polaris::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
                             localID[li]);
                     float *lcptr = (float *) &lcentroid[0];
                     double d = 0.0;
@@ -1786,10 +1786,10 @@ namespace NGTQ {
     }
     return acos(cosine);
   }
-  inline double operator()(NGT::Object &object, size_t objectID, void *l) {
+  inline double operator()(polaris::Object &object, size_t objectID, void *l) {
     return getAngleDistanceFloat(object, objectID, static_cast<T*>(l));
   }
-  inline double operator()(NGT::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
+  inline double operator()(polaris::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
     cerr << "operator() is not implemented." << endl;
     abort();
     return 0.0;
@@ -2175,15 +2175,15 @@ namespace NGTQ {
 #endif
 
 
-        inline double operator()(NGT::Object &object, size_t objectID, void *l) {
+        inline double operator()(polaris::Object &object, size_t objectID, void *l) {
             return getL2DistanceFloat(object, objectID, static_cast<T *>(l));
         }
 
-        inline double operator()(NGT::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
+        inline double operator()(polaris::Object &object, size_t objectID, void *l, DistanceLookupTable &distanceLUT) {
             T *localID = static_cast<T *>(l);
-            NGT::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
+            polaris::PersistentObject &gcentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(objectID);
             float *gcptr = (float *) &gcentroid[0];
-            float *optr = (float *) &((NGT::Object &) object)[0];
+            float *optr = (float *) &((polaris::Object &) object)[0];
             double distance = 0.0;
             for (size_t li = 0; li < localDivisionNo; li++) {
                 size_t distanceLUTidx = li * localCodebookCentroidNo + localID[li];
@@ -2193,7 +2193,7 @@ namespace NGTQ {
                     gcptr += localDataSize;
                 } else {
                     size_t idx = li;
-                    NGT::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
+                    polaris::PersistentObject &lcentroid = *localCodebookIndexes[idx].getObjectSpace().getRepository().get(
                             localID[li]);
                     float *lcptr = (float *) &lcentroid[0];
 #if defined(NGTQG_AVX512) || defined(NGTQG_AVX2)
@@ -2234,7 +2234,7 @@ namespace NGTQ {
     class Quantizer {
     public:
 #ifdef NGTQ_STATIC_OBJECT_FILE
-        typedef StaticObjectFile<NGT::Object>	ObjectList;
+        typedef StaticObjectFile<polaris::Object>	ObjectList;
 #else
         typedef ObjectFile ObjectList;
 #endif
@@ -2243,14 +2243,14 @@ namespace NGTQ {
         virtual ~Quantizer() {}
 
         virtual void create(const string &index,
-                            NGT::Property &globalPropertySet,
+                            polaris::Property &globalPropertySet,
 #ifdef NGTQ_QBG
-                            NGT::Property &localPropertySet,
+                            polaris::Property &localPropertySet,
                             std::vector<float> *rotation = 0,
                             const string &objectFile = "") = 0;
 
 #else
-        NGT::Property &localPropertySet) = 0;
+        polaris::Property &localPropertySet) = 0;
 #endif
 #ifdef NGTQ_QBG
 
@@ -2263,8 +2263,8 @@ namespace NGTQ {
         virtual void decode(QuantizedObject &qobj, Object &object) = 0;
 
 #else
-                                                                                                                                virtual void insert(vector<pair<NGT::Object*, size_t>> &objects) = 0;
-  virtual void insert(vector<float> &object, vector<pair<NGT::Object*, size_t>> &objects, size_t id) = 0;
+                                                                                                                                virtual void insert(vector<pair<polaris::Object*, size_t>> &objects) = 0;
+  virtual void insert(vector<float> &object, vector<pair<polaris::Object*, size_t>> &objects, size_t id) = 0;
 #endif
 
         virtual void insertIntoObjectRepository(vector<float> &object, size_t id) = 0;
@@ -2288,7 +2288,7 @@ namespace NGTQ {
         virtual void loadQuantizationCodebookAndRotation(const std::vector<std::vector<float>> &quantizationCodebook,
                                                          const std::vector<float> &rotation) = 0;
 
-        virtual void open(const string &index, NGT::Property &globalProperty, bool readOnly) = 0;
+        virtual void open(const string &index, polaris::Property &globalProperty, bool readOnly) = 0;
 
         virtual void open(const string &index, bool readOnly) = 0;
 
@@ -2316,23 +2316,23 @@ namespace NGTQ {
 
         virtual void eraseInvertedIndexObject() = 0;
 
-        virtual NGT::Distance getApproximateDistance(NGT::Object &query, uint32_t globalID, uint16_t *localID,
+        virtual polaris::Distance getApproximateDistance(polaris::Object &query, uint32_t globalID, uint16_t *localID,
                                                      QuantizedObjectDistance::DistanceLookupTable &distanceLUT) {
             std::cerr << "getApproximateDistance() is not implemented." << std::endl;
             abort();
         }
 
-        virtual void search(NGT::Object *object, NGT::ObjectDistances &objs, size_t size,
+        virtual void search(polaris::Object *object, polaris::ObjectDistances &objs, size_t size,
                             size_t approximateSearchSize,
                             size_t codebookSearchSize, bool resultRefinement, bool lookUpTable,
                             double epsilon) = 0;
 
-        virtual void search(NGT::Object *object, NGT::ObjectDistances &objs, size_t size,
+        virtual void search(polaris::Object *object, polaris::ObjectDistances &objs, size_t size,
                             size_t approximateSearchSize,
                             size_t codebookSearchSize, AggregationMode aggregationMode,
                             double epsilon) = 0;
 
-        virtual void search(NGT::Object *object, NGT::ObjectDistances &objs, size_t size,
+        virtual void search(polaris::Object *object, polaris::ObjectDistances &objs, size_t size,
                             float expansion,
                             AggregationMode aggregationMode,
                             double epsilon) = 0;
@@ -2344,19 +2344,19 @@ namespace NGTQ {
         virtual size_t getInstanceSharedMemorySize(ostream &os,
                                                    SharedMemoryAllocator::GetMemorySizeType t = SharedMemoryAllocator::GetTotalMemorySize) = 0;
 
-        NGT::Object *allocateObject(string &line, const string &sep) {
+        polaris::Object *allocateObject(string &line, const string &sep) {
             return globalCodebookIndex.allocateObject(line, " \t");
         }
 
-        NGT::Object *allocateObject(vector<double> &obj) {
+        polaris::Object *allocateObject(vector<double> &obj) {
             return globalCodebookIndex.allocateObject(obj);
         }
 
-        NGT::Object *allocateObject(vector<float> &obj) {
+        polaris::Object *allocateObject(vector<float> &obj) {
             return globalCodebookIndex.allocateObject(obj);
         }
 
-        void deleteObject(NGT::Object *object) { globalCodebookIndex.deleteObject(object); }
+        void deleteObject(polaris::Object *object) { globalCodebookIndex.deleteObject(object); }
 
         void setThreadSize(size_t size) { property.threadSize = size; }
 
@@ -2374,7 +2374,7 @@ namespace NGTQ {
 
         size_t getNumOfLocalClusters() { return property.localCentroidLimit; }
 
-        NGT::Index &getLocalCodebook(size_t idx) { return localCodebookIndexes[idx]; }
+        polaris::Index &getLocalCodebook(size_t idx) { return localCodebookIndexes[idx]; }
 
         size_t getLocalCodebookSize(size_t size) { return localCodebookIndexes[size].getObjectRepositorySize(); }
 
@@ -2394,14 +2394,14 @@ namespace NGTQ {
 
         virtual size_t getInvertedIndexSize() = 0;
 
-        //void searchIndex(NGT::GraphAndTreeIndex &codebook,
-        static void searchIndex(NGT::GraphAndTreeIndex &globalCodebookIndex,
+        //void searchIndex(polaris::GraphAndTreeIndex &codebook,
+        static void searchIndex(polaris::GraphAndTreeIndex &globalCodebookIndex,
 #ifdef NGTQ_VECTOR_OBJECT
                                 const vector<pair<std::vector<float>, size_t>> &objects,
 #else
-                const vector<pair<NGT::Object*, size_t>> &objects,
+                const vector<pair<polaris::Object*, size_t>> &objects,
 #endif
-                                vector<NGT::Index::InsertionResult> &ids) {
+                                vector<polaris::Index::InsertionResult> &ids) {
             ids.clear();
             ids.resize(objects.size());
 #pragma omp parallel for
@@ -2411,14 +2411,14 @@ namespace NGTQ {
                 globalCodebookIndex.deleteObject(object);
 #else
 #endif
-                NGT::ObjectDistances result;
+                polaris::ObjectDistances result;
 #define QID_WEIGHT    100
                 {
 #ifdef NGTQ_VECTOR_OBJECT
                     auto *object = globalCodebookIndex.allocateObject(objects[idx].first);
-                    NGT::SearchContainer sc(*object);
+                    polaris::SearchContainer sc(*object);
 #else
-                    NGT::SearchContainer sc(*objects[idx].first);
+                    polaris::SearchContainer sc(*objects[idx].first);
 #endif
                     sc.setResults(&result);
                     sc.setSize(10);
@@ -2452,22 +2452,22 @@ namespace NGTQ {
 
         Property property;
 
-        NGT::Index globalCodebookIndex;
+        polaris::Index globalCodebookIndex;
 
         size_t distanceComputationCount;
 
         size_t localIDByteSize;
-        NGT::ObjectSpace::ObjectType objectType;
+        polaris::ObjectSpace::ObjectType objectType;
         size_t divisionNo;
 
-        std::vector<NGT::Index> localCodebookIndexes;
+        std::vector<polaris::Index> localCodebookIndexes;
 
         QuantizationCodebook<float> quantizationCodebook;
         std::vector<uint32_t> objectToBlobIndex;
         Rotation rotation;
 
 #ifdef NGTQ_OBJECT_IN_MEMORY
-        NGT::Repository<NGT::Object> objectListOnMemory;
+        polaris::Repository<polaris::Object> objectListOnMemory;
 #endif
     };
 
@@ -2624,36 +2624,36 @@ namespace NGTQ {
         virtual void operator()(std::vector<float> &object, size_t centroidID, float *subspaceObject) = 0;
 
 #else
-        virtual void operator()(NGT::Object &object, size_t centroidID, float *subspaceObject) = 0;
+        virtual void operator()(polaris::Object &object, size_t centroidID, float *subspaceObject) = 0;
 #endif
 
-        virtual void operator()(NGT::Object &object, size_t centroidID,
-                                vector<vector<pair<NGT::Object *, size_t>>> &localObjs) = 0;
+        virtual void operator()(polaris::Object &object, size_t centroidID,
+                                vector<vector<pair<polaris::Object *, size_t>>> &localObjs) = 0;
 
 #else
                                                                                                                                 virtual void operator()(size_t objectID, size_t centroidID,
-			  vector<vector<pair<NGT::Object*, size_t>>> &localObjs) = 0;
+			  vector<vector<pair<polaris::Object*, size_t>>> &localObjs) = 0;
 #endif
 
-        void set(NGT::Index &gc, NGT::Index lc[], size_t dn, size_t lcn,
+        void set(polaris::Index &gc, polaris::Index lc[], size_t dn, size_t lcn,
                  Quantizer::ObjectList *ol, QuantizationCodebook<float> *qc) {
-            globalCodebookIndex = &(NGT::GraphAndTreeIndex &) gc.getIndex();
+            globalCodebookIndex = &(polaris::GraphAndTreeIndex &) gc.getIndex();
             divisionNo = dn;
             objectList = ol;
             set(lc, lcn);
             quantizationCodebook = qc;
         }
 
-        void set(NGT::Index lc[], size_t lcn) {
+        void set(polaris::Index lc[], size_t lcn) {
             localCodebookIndexes.clear();
             localCodebookNo = lcn;
             for (size_t i = 0; i < localCodebookNo; ++i) {
-                localCodebookIndexes.push_back(&(NGT::GraphAndTreeIndex &) lc[i].getIndex());
+                localCodebookIndexes.push_back(&(polaris::GraphAndTreeIndex &) lc[i].getIndex());
             }
         }
 
-        NGT::GraphAndTreeIndex *globalCodebookIndex;
-        vector<NGT::GraphAndTreeIndex *> localCodebookIndexes;
+        polaris::GraphAndTreeIndex *globalCodebookIndex;
+        vector<polaris::GraphAndTreeIndex *> localCodebookIndexes;
         size_t divisionNo;
         size_t localCodebookNo;
         Quantizer::ObjectList *objectList;
@@ -2668,17 +2668,17 @@ namespace NGTQ {
         void operator()(std::vector<float> &object, size_t centroidID, float *subspaceObject) { abort(); }
 
 #else
-        void operator()(NGT::Object &object, size_t centroidID, float *subspaceObject) { abort(); }
+        void operator()(polaris::Object &object, size_t centroidID, float *subspaceObject) { abort(); }
 #endif
 
-        void operator()(NGT::Object &xobject, size_t centroidID,
-                        vector<vector<pair<NGT::Object *, size_t>>> &localObjs) { abort(); }
+        void operator()(polaris::Object &xobject, size_t centroidID,
+                        vector<vector<pair<polaris::Object *, size_t>>> &localObjs) { abort(); }
 
 #else
                                                                                                                                 void operator()(size_t objectID, size_t centroidID,
-		  vector<vector<pair<NGT::Object*, size_t>>> &localObjs) {
-    NGT::PersistentObject &globalCentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(centroidID);
-    NGT::Object object(&globalCodebookIndex->getObjectSpace());
+		  vector<vector<pair<polaris::Object*, size_t>>> &localObjs) {
+    polaris::PersistentObject &globalCentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(centroidID);
+    polaris::Object object(&globalCodebookIndex->getObjectSpace());
     objectList->get(objectID, object, &globalCodebookIndex->getObjectSpace());
     size_t sizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
     size_t lsize = sizeOfObject / divisionNo;
@@ -2689,8 +2689,8 @@ namespace NGTQ {
 	subObject[d] = (double)object[di * lsize + d] - (double)globalCentroid[di * lsize + d];
       }
       size_t idx = localCodebookNo == 1 ? 0 : di;
-      NGT::Object *localObj = localCodebookIndexes[idx]->allocateObject(subObject);
-      localObjs[idx].push_back(pair<NGT::Object*, size_t>(localObj, 0));
+      polaris::Object *localObj = localCodebookIndexes[idx]->allocateObject(subObject);
+      localObjs[idx].push_back(pair<polaris::Object*, size_t>(localObj, 0));
     }
   }
 #endif
@@ -2705,7 +2705,7 @@ namespace NGTQ {
 
         void operator()(std::vector<float> &object, size_t centroidID, float *subspaceObject) {
 #else
-            void operator()(NGT::Object &object, size_t centroidID, float *subspaceObject) {
+            void operator()(polaris::Object &object, size_t centroidID, float *subspaceObject) {
 #endif
             size_t dimension = globalCodebookIndex->getObjectSpace().getPaddedDimension();
             if (object.size() != dimension) {
@@ -2731,8 +2731,8 @@ namespace NGTQ {
             }
         }
 
-        void operator()(NGT::Object &object, size_t centroidID,
-                        vector<vector<pair<NGT::Object *, size_t>>> &localObjs) {
+        void operator()(polaris::Object &object, size_t centroidID,
+                        vector<vector<pair<polaris::Object *, size_t>>> &localObjs) {
             size_t byteSizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
             size_t localByteSize = byteSizeOfObject / divisionNo;
             size_t localDimension = localByteSize / sizeof(float);
@@ -2750,8 +2750,8 @@ namespace NGTQ {
                 }
 #endif /// /////////////////////
                 size_t idx = localCodebookNo == 1 ? 0 : di;
-                NGT::Object *localObj = localCodebookIndexes[idx]->allocateObject(subVector, localDimension);
-                localObjs[idx].push_back(pair<NGT::Object *, size_t>(localObj, 0));
+                polaris::Object *localObj = localCodebookIndexes[idx]->allocateObject(subVector, localDimension);
+                localObjs[idx].push_back(pair<polaris::Object *, size_t>(localObj, 0));
             }
         }
     };
@@ -2760,9 +2760,9 @@ namespace NGTQ {
                                                                                                                             class GenerateResidualObjectFloat : public GenerateResidualObject {
 public:
   void operator()(size_t objectID, size_t centroidID,
-		  vector<vector<pair<NGT::Object*, size_t>>> &localObjs) {
-    NGT::PersistentObject &globalCentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(centroidID);
-    NGT::Object object(&globalCodebookIndex->getObjectSpace());
+		  vector<vector<pair<polaris::Object*, size_t>>> &localObjs) {
+    polaris::PersistentObject &globalCentroid = *globalCodebookIndex->getObjectSpace().getRepository().get(centroidID);
+    polaris::Object object(&globalCodebookIndex->getObjectSpace());
     objectList->get(objectID, object, &globalCodebookIndex->getObjectSpace());
     size_t byteSizeOfObject = globalCodebookIndex->getObjectSpace().getByteSizeOfObject();
     size_t localByteSize = byteSizeOfObject / divisionNo;
@@ -2776,8 +2776,8 @@ public:
 	subObject[d] = (double)subVector[d] - (double)globalCentroidSubVector[d];
       }
       size_t idx = localCodebookNo == 1 ? 0 : di;
-      NGT::Object *localObj = localCodebookIndexes[idx]->allocateObject(subObject);
-      localObjs[idx].push_back(pair<NGT::Object*, size_t>(localObj, 0));
+      polaris::Object *localObj = localCodebookIndexes[idx]->allocateObject(subObject);
+      localObjs[idx].push_back(pair<polaris::Object*, size_t>(localObj, 0));
     }
   }
 };
@@ -2787,8 +2787,8 @@ public:
     class QuantizerInstance : public Quantizer {
     public:
 
-        typedef void (QuantizerInstance::*AggregateObjectsFunction)(NGT::ObjectDistance &, NGT::Object *, size_t size,
-                                                                    NGT::ObjectSpace::ResultSet &, size_t);
+        typedef void (QuantizerInstance::*AggregateObjectsFunction)(polaris::ObjectDistance &, polaris::Object *, size_t size,
+                                                                    polaris::ObjectSpace::ResultSet &, size_t);
 
         typedef InvertedIndexEntry<LOCAL_ID_TYPE> IIEntry;
 
@@ -2802,30 +2802,30 @@ public:
         virtual ~QuantizerInstance() { close(); }
 
         void createEmptyIndex(const string &index,
-                              NGT::Property &globalProperty,
+                              polaris::Property &globalProperty,
 #ifdef NGTQ_QBG
-                              NGT::Property &localProperty,
+                              polaris::Property &localProperty,
                               std::vector<float> *rotation,
                               const string &objectFile)
 #else
-        NGT::Property &localProperty)
+        polaris::Property &localProperty)
 #endif
         {
             rootDirectory = index;
-            NGT::Index::mkdir(rootDirectory);
+            polaris::Index::mkdir(rootDirectory);
             string global = rootDirectory + "/" + getGlobalFile();
-            NGT::Index::mkdir(global);
+            polaris::Index::mkdir(global);
 
-            NGT::GraphAndTreeIndex globalCodebook(globalProperty);
+            polaris::GraphAndTreeIndex globalCodebook(globalProperty);
             globalCodebook.saveIndex(global);
             globalCodebook.close();
 
-            NGT::GraphAndTreeIndex localCodebook(localProperty);
+            polaris::GraphAndTreeIndex localCodebook(localProperty);
             size_t localCodebookNo = property.getLocalCodebookNo();
             for (size_t i = 0; i < localCodebookNo; ++i) {
                 stringstream local;
                 local << rootDirectory << "/" + getLocalPrefix() << i;
-                NGT::Index::mkdir(local.str());
+                polaris::Index::mkdir(local.str());
                 localCodebook.saveIndex(local.str());
             }
             localCodebook.close();
@@ -2901,13 +2901,13 @@ public:
             saveQuantizationCodebook(qc);
         }
 
-        void open(const string &index, NGT::Property &globalProperty, bool readOnly) {
+        void open(const string &index, polaris::Property &globalProperty, bool readOnly) {
             open(index, readOnly);
             globalCodebookIndex.setProperty(globalProperty);
         }
 
         void open(const string &index, bool readOnly) {
-            NGT::StdOstreamRedirector redirector(!verbose);
+            polaris::StdOstreamRedirector redirector(!verbose);
             redirector.begin();
             rootDirectory = index;
             property.load(rootDirectory);
@@ -2970,16 +2970,16 @@ public:
                 for (size_t id = 1; id < objectList.size(); id++) {
                     std::vector<float> object;
                     objectList.get(id, object, &globalCodebookIndex.getObjectSpace());
-                    NGT::Object *ngtObject = globalCodebookIndex.allocateObject(object);
+                    polaris::Object *ngtObject = globalCodebookIndex.allocateObject(object);
                     objectListOnMemory.put(id, ngtObject);
                 }
             }
 #endif
-            NGT::Property globalProperty;
+            polaris::Property globalProperty;
             globalCodebookIndex.getProperty(globalProperty);
             size_t sizeoftype = 0;
-            if (globalProperty.objectType == NGT::Property::ObjectType::Float ||
-                globalProperty.objectType == NGT::Property::ObjectType::Float16) {
+            if (globalProperty.objectType == polaris::Property::ObjectType::Float ||
+                globalProperty.objectType == polaris::Property::ObjectType::Float16) {
                 if (property.localIDByteSize == 4) {
                     quantizedObjectDistance = new QuantizedObjectDistanceFloat<uint32_t>;
                 } else if (property.localIDByteSize == 2) {
@@ -2994,7 +2994,7 @@ public:
                 }
                 generateResidualObject = new GenerateResidualObjectFloat;
                 sizeoftype = sizeof(float);
-            } else if (globalProperty.objectType == NGT::Property::ObjectType::Uint8) {
+            } else if (globalProperty.objectType == polaris::Property::ObjectType::Uint8) {
                 if (property.localIDByteSize == 4) {
                     quantizedObjectDistance = new QuantizedObjectDistanceUint8<uint32_t>;
                 } else if (property.localIDByteSize == 2) {
@@ -3074,7 +3074,7 @@ public:
                 stringstream local;
                 local << rootDirectory << "/" + getLocalPrefix() << i;
                 try {
-                    NGT::Index::mkdir(local.str());
+                    polaris::Index::mkdir(local.str());
                 } catch (...) {}
                 localCodebookIndexes[i].saveIndex(local.str());
             }
@@ -3134,7 +3134,7 @@ public:
     return;
 #endif
     cerr << "reconstructing to reduce shared memory..." << endl;
-    NGT::PersistentRepository<IIEntry>	tmpInvertedIndex;
+    polaris::PersistentRepository<IIEntry>	tmpInvertedIndex;
     tmpInvertedIndex.open(invertedFile, 0);
     tmpInvertedIndex.reserve(size);
     for (size_t id = 0; id < size; ++id) {
@@ -3187,10 +3187,10 @@ public:
   }
 #endif
 
-        void createIndex(NGT::GraphAndTreeIndex &codebook,
+        void createIndex(polaris::GraphAndTreeIndex &codebook,
                          size_t centroidLimit,
-                         const vector<pair<NGT::Object *, size_t>> &objects,
-                         vector<NGT::Index::InsertionResult> &ids,
+                         const vector<pair<polaris::Object *, size_t>> &objects,
+                         vector<polaris::Index::InsertionResult> &ids,
                          float &range) {
             if (centroidLimit > 0) {
                 if (getNumberOfObjects(codebook) >= centroidLimit) {
@@ -3206,8 +3206,8 @@ public:
                         } else {
                             end += s;
                         }
-                        vector<NGT::Index::InsertionResult> idstmp;
-                        vector<pair<NGT::Object *, size_t>> objtmp;
+                        vector<polaris::Index::InsertionResult> idstmp;
+                        vector<pair<polaris::Object *, size_t>> objtmp;
                         std::copy(start, end, std::back_inserter(objtmp));
                         codebook.createIndex(objtmp, idstmp, range, property.threadSize);
                         assert(idstmp.size() == objtmp.size());
@@ -3215,8 +3215,8 @@ public:
                         start = end;
                     } while (start != objects.end() && centroidLimit - getNumberOfObjects(codebook) > 0);
                     range = FLT_MAX;
-                    vector<NGT::Index::InsertionResult> idstmp;
-                    vector<pair<NGT::Object *, size_t>> objtmp;
+                    vector<polaris::Index::InsertionResult> idstmp;
+                    vector<pair<polaris::Object *, size_t>> objtmp;
                     std::copy(start, objects.end(), std::back_inserter(objtmp));
                     codebook.createIndex(objtmp, idstmp, range, property.threadSize);
                     std::copy(idstmp.begin(), idstmp.end(), std::back_inserter(ids));
@@ -3231,10 +3231,10 @@ public:
 
 #ifdef NGTQ_VECTOR_OBJECT
 
-        void setGlobalCodeToInvertedEntry(NGT::Index::InsertionResult &id, pair<std::vector<float>, size_t> &object,
+        void setGlobalCodeToInvertedEntry(polaris::Index::InsertionResult &id, pair<std::vector<float>, size_t> &object,
                                           vector<LocalDatam> &localData) {
 #else
-            void setGlobalCodeToInvertedEntry(NGT::Index::InsertionResult &id, pair<NGT::Object*, size_t> &object, vector<LocalDatam> &localData) {
+            void setGlobalCodeToInvertedEntry(polaris::Index::InsertionResult &id, pair<polaris::Object*, size_t> &object, vector<LocalDatam> &localData) {
 #endif
             size_t globalCentroidID = id.id;
             if (invertedIndex.isEmpty(globalCentroidID)) {
@@ -3299,16 +3299,16 @@ public:
             }
         }
 
-        void setSingleLocalCodeToInvertedIndexEntry(vector<NGT::GraphAndTreeIndex *> &lcodebook,
+        void setSingleLocalCodeToInvertedIndexEntry(vector<polaris::GraphAndTreeIndex *> &lcodebook,
                                                     vector<LocalDatam> &localData,
-                                                    vector<vector<pair<NGT::Object *, size_t>>> &localObjs) {
+                                                    vector<vector<pair<polaris::Object *, size_t>>> &localObjs) {
             float lr = property.localRange;
             size_t localCentroidLimit = property.localCentroidLimit;
             if (property.localCodebookState) {
                 lr = FLT_MAX;
                 localCentroidLimit = 0;
             }
-            vector<NGT::Index::InsertionResult> lids;
+            vector<polaris::Index::InsertionResult> lids;
             createIndex(*lcodebook[0], localCentroidLimit, localObjs[0], lids, lr);
             size_t divisionNo = property.localDivisionNo;
             for (size_t i = 0; i < localData.size(); i++) {
@@ -3328,7 +3328,7 @@ public:
         }
 
 #ifndef NGTQ_QBG
-                                                                                                                                bool setMultipleLocalCodeToInvertedIndexEntry(vector<NGT::GraphAndTreeIndex*> &lcodebook, vector<LocalDatam> &localData, vector<vector<pair<NGT::Object*, size_t>>> &localObjs) {
+                                                                                                                                bool setMultipleLocalCodeToInvertedIndexEntry(vector<polaris::GraphAndTreeIndex*> &lcodebook, vector<LocalDatam> &localData, vector<vector<pair<polaris::Object*, size_t>>> &localObjs) {
     size_t localCodebookNo = property.getLocalCodebookNo();
     bool localCodebookFull = true;
 #pragma omp parallel for
@@ -3346,7 +3346,7 @@ public:
 	  lr = -1.0;
 	}
       }
-      vector<NGT::Index::InsertionResult> lids;
+      vector<polaris::Index::InsertionResult> lids;
       createIndex(*lcodebook[li], localCentroidLimit, localObjs[li], lids, lr);
       if (lr != FLT_MAX) {
 	localCodebookFull = false;
@@ -3371,7 +3371,7 @@ public:
 
 #ifdef NGTQ_QBG
 
-        bool setMultipleLocalCodeToInvertedIndexEntry(vector<NGT::GraphAndTreeIndex *> &lcodebook,
+        bool setMultipleLocalCodeToInvertedIndexEntry(vector<polaris::GraphAndTreeIndex *> &lcodebook,
                                                       vector<LocalDatam> &localData,
                                                       float *subspaceObjects) {
             size_t paddedDimension = globalCodebookIndex.getObjectSpace().getPaddedDimension();
@@ -3391,9 +3391,9 @@ public:
                         lr = -1.0;
                     }
                 }
-                vector<NGT::Index::InsertionResult> lids;
+                vector<polaris::Index::InsertionResult> lids;
                 size_t localDimension = lcodebook[li]->getObjectSpace().getDimension();
-                vector<pair<NGT::Object *, size_t>> localObjects(localData.size());
+                vector<pair<polaris::Object *, size_t>> localObjects(localData.size());
                 for (size_t i = 0; i < localData.size(); i++) {
                     localObjects[i].first = lcodebook[li]->allocateObject(
                             &subspaceObjects[i * paddedDimension + (li * localDimension)], localDimension);
@@ -3528,8 +3528,8 @@ public:
 
 #endif
 
-        void buildMultipleLocalCodebooks(NGT::Index *localCodebook, size_t localCodebookNo, size_t numberOfCentroids) {
-            NGT::Clustering clustering;
+        void buildMultipleLocalCodebooks(polaris::Index *localCodebook, size_t localCodebookNo, size_t numberOfCentroids) {
+            polaris::Clustering clustering;
             clustering.epsilonFrom = 0.10;
             clustering.epsilonTo = 0.50;
             clustering.epsilonStep = 0.05;
@@ -3576,7 +3576,7 @@ public:
       std::cerr << "not implemented" << std::endl;
       abort();
 #else
-      NGT::Object object(&globalCodebookIndex.getObjectSpace());
+      polaris::Object object(&globalCodebookIndex.getObjectSpace());
       objectList.get(invertedIndexEntry[localData[i].iiLocalIdx].id, object, &globalCodebookIndex.getObjectSpace());
       (*generateResidualObject)(object, // object
 				invertedIndexEntry.subspaceID,
@@ -3588,7 +3588,7 @@ public:
                 objectList.get(invertedIndexEntry[localData[i].iiLocalIdx].id, object,
                                &globalCodebookIndex.getObjectSpace());
 #else
-                NGT::Object object(&globalCodebookIndex.getObjectSpace());
+                polaris::Object object(&globalCodebookIndex.getObjectSpace());
 #endif
                 (*generateResidualObject)(object, // object
                                           invertedIndexEntry.subspaceID,
@@ -3601,7 +3601,7 @@ public:
 #endif
 
 #ifndef NGTQ_QBG
-                                                                                                                                void insert(vector<pair<NGT::Object*, size_t>> &objects) {
+                                                                                                                                void insert(vector<pair<polaris::Object*, size_t>> &objects) {
     std::cerr << "insert() is not implemented." << std::endl;
     abort();
   }
@@ -3611,10 +3611,10 @@ public:
 #ifdef NGTQ_VECTOR_OBJECT
 
         void getBlobIDFromObjectToBlobIndex(const vector<pair<std::vector<float>, size_t>> &objects,
-                                            vector<NGT::Index::InsertionResult> &ids)
+                                            vector<polaris::Index::InsertionResult> &ids)
 #else
-                                                                                                                                void getBlobIDFromObjectToBlobIndex(const vector<pair<NGT::Object*, size_t>> &objects,
-				      vector<NGT::Index::InsertionResult> &ids)
+                                                                                                                                void getBlobIDFromObjectToBlobIndex(const vector<pair<polaris::Object*, size_t>> &objects,
+				      vector<polaris::Index::InsertionResult> &ids)
 #endif
         {
             ids.clear();
@@ -3635,8 +3635,8 @@ public:
                 ids[idx].identical = true;
 #ifdef GET_BLOB_EVAL
                                                                                                                                         {
-	NGT::ObjectDistances result;
-	NGT::SearchContainer sc(*objects[idx].first);
+	polaris::ObjectDistances result;
+	polaris::SearchContainer sc(*objects[idx].first);
 	sc.setResults(&result);
 	sc.setSize(50);
 	sc.radius = FLT_MAX;
@@ -3658,17 +3658,17 @@ public:
 
 #ifdef NGTQ_QBG
 
-        NGT::Index *buildGlobalCodebookWithQIDIndex() {
-            NGT::Property property;
+        polaris::Index *buildGlobalCodebookWithQIDIndex() {
+            polaris::Property property;
 
             property.dimension = globalCodebookIndex.getObjectSpace().getDimension() + 1;
-            property.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-                                                                                                                                    NGT::Index *index = new NGT::Index("dummy", property);
+                                                                                                                                    polaris::Index *index = new polaris::Index("dummy", property);
     std::cerr << "Not implemented" << std::endl;
     abort();
 #else
-            NGT::Index *index = new NGT::Index(property);
+            polaris::Index *index = new polaris::Index(property);
 #endif
             if (globalCodebookIndex.getObjectRepositorySize() > invertedIndex.size()) {
                 std::cerr << "warning: the inverted index size is too small. Cannot build a global codebook with qid. "
@@ -3679,8 +3679,8 @@ public:
                 std::vector<float> object;
                 if (id % 100000 == 0) {
                     std::cerr << "# of processed objects=" << id << ", vm size="
-                              << NGT::Common::getProcessVmSizeStr() << "/"
-                              << NGT::Common::getProcessVmPeakStr() << std::endl;
+                              << polaris::Common::getProcessVmSizeStr() << "/"
+                              << polaris::Common::getProcessVmPeakStr() << std::endl;
 
                 }
                 try {
@@ -3840,20 +3840,20 @@ public:
 
         void insert(vector<pair<std::vector<float>, size_t>> &objects) {
 #else
-            void insert(vector<pair<NGT::Object*, size_t>> &objects) {
+            void insert(vector<pair<polaris::Object*, size_t>> &objects) {
 #endif
 #ifdef NGTQ_SHARED_INVERTED_INDEX
                                                                                                                                     std::cerr << "insert: Not implemented." << std::endl;
     abort();
 #else
-            NGT::GraphAndTreeIndex &gcodebook = (NGT::GraphAndTreeIndex &) globalCodebookIndex.getIndex();
+            polaris::GraphAndTreeIndex &gcodebook = (polaris::GraphAndTreeIndex &) globalCodebookIndex.getIndex();
             size_t localCodebookNo = property.getLocalCodebookNo();
-            vector<NGT::GraphAndTreeIndex *> lcodebook;
+            vector<polaris::GraphAndTreeIndex *> lcodebook;
             lcodebook.reserve(localCodebookNo);
             for (size_t i = 0; i < localCodebookNo; i++) {
-                lcodebook.push_back(&static_cast<NGT::GraphAndTreeIndex &>(localCodebookIndexes[i].getIndex()));
+                lcodebook.push_back(&static_cast<polaris::GraphAndTreeIndex &>(localCodebookIndexes[i].getIndex()));
             }
-            vector<NGT::Index::InsertionResult> ids;
+            vector<polaris::Index::InsertionResult> ids;
             if (property.centroidCreationMode == CentroidCreationModeStaticLayer ||
                 property.centroidCreationMode == CentroidCreationModeStatic) {
                 if (objectToBlobIndex.empty()) {
@@ -3980,17 +3980,17 @@ public:
 
 
 #ifndef NGTQ_QBG
-                                                                                                                                void insert(vector<float> &objvector, vector<pair<NGT::Object*, size_t>> &objects, size_t count) {
+                                                                                                                                void insert(vector<float> &objvector, vector<pair<polaris::Object*, size_t>> &objects, size_t count) {
     size_t id = count;
     if (count == 0) {
       id = objectList.size();
       id = id == 0 ? 1 : id;
     }
 
-    NGT::Object *object = globalCodebookIndex.allocateObject(objvector);
+    polaris::Object *object = globalCodebookIndex.allocateObject(objvector);
     objectList.put(id, *object, &globalCodebookIndex.getObjectSpace());
 
-    objects.push_back(pair<NGT::Object*, size_t>(object, id));
+    objects.push_back(pair<polaris::Object*, size_t>(object, id));
 
     if (objects.size() >= property.batchSize) {
       insert(objects);   // batch insert
@@ -4004,7 +4004,7 @@ public:
                 id = objectList.size();
                 id = id == 0 ? 1 : id;
             }
-            NGT::Object *object = globalCodebookIndex.allocateObject(objvector);
+            polaris::Object *object = globalCodebookIndex.allocateObject(objvector);
             std::vector<float> vs = globalCodebookIndex.getObjectSpace().getObject(*object);
             objectList.put(id, *object, &globalCodebookIndex.getObjectSpace());
             globalCodebookIndex.deleteObject(object);
@@ -4019,20 +4019,20 @@ public:
 #ifdef NGTQ_VECTOR_OBJECT
             vector<pair<std::vector<float>, size_t>> objects;
 #else
-            vector<pair<NGT::Object*, size_t>> objects;
+            vector<pair<polaris::Object*, size_t>> objects;
 #endif
             objects.reserve(property.batchSize);
             if (endID == 0) {
                 endID = objectList.size() - 1;
             }
-            NGT::Timer timer;
+            polaris::Timer timer;
             timer.start();
             for (size_t id = beginID; id <= endID; id++) {
                 if (id % 1000000 == 0) {
                     timer.stop();
                     std::cerr << "# of processed objects=" << id << ", time=" << timer << ", vm size="
-                              << NGT::Common::getProcessVmSizeStr() << "/"
-                              << NGT::Common::getProcessVmPeakStr() << std::endl;
+                              << polaris::Common::getProcessVmSizeStr() << "/"
+                              << polaris::Common::getProcessVmPeakStr() << std::endl;
                     timer.restart();
                 }
 #ifdef NGTQ_VECTOR_OBJECT
@@ -4042,13 +4042,13 @@ public:
                     continue;
                 }
 #else
-                                                                                                                                        NGT::Object *object = globalCodebookIndex.getObjectSpace().allocateObject();
+                                                                                                                                        polaris::Object *object = globalCodebookIndex.getObjectSpace().allocateObject();
       objectList.get(id, *object, &globalCodebookIndex.getObjectSpace());
 #endif
 #ifdef NGTQ_VECTOR_OBJECT
                 objects.push_back(pair<std::vector<float>, size_t>(object, id));
 #else
-                objects.push_back(pair<NGT::Object*, size_t>(object, id));
+                objects.push_back(pair<polaris::Object*, size_t>(object, id));
 #endif
                 if (objects.size() >= property.batchSize) {
                     insert(objects);   // batch insert
@@ -4123,13 +4123,13 @@ public:
 #endif
 
         void create(const string &index,
-                    NGT::Property &globalProperty,
+                    polaris::Property &globalProperty,
 #ifdef NGTQ_QBG
-                    NGT::Property &localProperty,
+                    polaris::Property &localProperty,
                     std::vector<float> *rotation = 0,
                     const string &objectFile = ""
 #else
-                NGT::Property &localProperty
+                polaris::Property &localProperty
 #endif
         ) {
             if (property.localCentroidLimit > ((1UL << (sizeof(LOCAL_ID_TYPE) * 8)) - 1)) {
@@ -4139,8 +4139,8 @@ public:
                 POLARIS_THROW_EX(msg);
             }
 
-            NGT::Property gp;
-            NGT::Property lp;
+            polaris::Property gp;
+            polaris::Property lp;
 
             gp.setDefault();
             lp.setDefault();
@@ -4148,13 +4148,13 @@ public:
             gp.batchSizeForCreation = 500;
             gp.edgeSizeLimitForCreation = 0;
             gp.edgeSizeForCreation = 100;
-            gp.graphType = NGT::Index::Property::GraphType::GraphTypeANNG;
+            gp.graphType = polaris::Index::Property::GraphType::GraphTypeANNG;
             gp.insertionRadiusCoefficient = 1.1;
 
             lp.batchSizeForCreation = 500;
             lp.edgeSizeLimitForCreation = 0;
             lp.edgeSizeForCreation = 10;
-            lp.graphType = NGT::Index::Property::GraphType::GraphTypeANNG;
+            lp.graphType = polaris::Index::Property::GraphType::GraphTypeANNG;
             lp.insertionRadiusCoefficient = 1.1;
             gp.set(globalProperty);
             lp.set(localProperty);
@@ -4162,7 +4162,7 @@ public:
             gp.edgeSizeForSearch = 40;
             lp.edgeSizeForSearch = 40;
 
-            lp.objectType = NGT::Index::Property::ObjectType::Float;
+            lp.objectType = polaris::Index::Property::ObjectType::Float;
 #ifdef NGTQ_QBG
             if (property.genuineDimension > property.dimension) {
                 stringstream msg;
@@ -4191,13 +4191,13 @@ public:
 
             switch (property.dataType) {
                 case DataTypeFloat:
-                    gp.objectType = NGT::Index::Property::ObjectType::Float;
+                    gp.objectType = polaris::Index::Property::ObjectType::Float;
                     break;
                 case DataTypeFloat16:
-                    gp.objectType = NGT::Index::Property::ObjectType::Float16;
+                    gp.objectType = polaris::Index::Property::ObjectType::Float16;
                     break;
                 case DataTypeUint8:
-                    gp.objectType = NGT::Index::Property::ObjectType::Uint8;
+                    gp.objectType = polaris::Index::Property::ObjectType::Uint8;
                     break;
                 default: {
                     stringstream msg;
@@ -4208,8 +4208,8 @@ public:
 
             switch (property.distanceType) {
                 case DistanceType::DistanceTypeL1:
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL1;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL1;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL1;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL1;
                     break;
                 case DistanceType::DistanceTypeL2:
 #ifdef NGTQ_DISTANCE_ANGLE
@@ -4219,12 +4219,12 @@ public:
 	POLARIS_THROW_EX(msg);
       }
 #endif
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeHamming:
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeHamming;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeHamming;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
                     break;
                 case DistanceType::DistanceTypeAngle:
 #ifndef NGTQ_DISTANCE_ANGLE
@@ -4234,24 +4234,24 @@ public:
                     POLARIS_THROW_EX(msg);
                 }
 #endif
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeAngle;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeAngle;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeAngle;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeAngle;
                     break;
                 case DistanceType::DistanceTypeNormalizedCosine:
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedCosine;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedCosine;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeCosine:
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeCosine;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeCosine;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeNormalizedL2:
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeNormalizedL2;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedL2;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeInnerProduct:
-                    gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
-                    lp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
                     break;
                 default: {
                     stringstream msg;
@@ -4280,7 +4280,7 @@ public:
 	continue;
       }
 
-      NGT::PersistentObject &gcentroid = *globalCodebookIndex.getObjectSpace().getRepository().get(gidx);
+      polaris::PersistentObject &gcentroid = *globalCodebookIndex.getObjectSpace().getRepository().get(gidx);
       vector<double> gco;
       globalCodebookIndex.getObjectSpace().getRepository().extractObject(&gcentroid, gco);
       {
@@ -4294,7 +4294,7 @@ public:
 	  exit(1);
         }
       }
-      NGT::Object *gcentroidFromList = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
+      polaris::Object *gcentroidFromList = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
       vector<double> gcolist;
       globalCodebookIndex.getObjectSpace().getRepository().extractObject(gcentroidFromList, gcolist);
       if (gco != gcolist) {
@@ -4311,9 +4311,9 @@ public:
         elements.push_back(invertedIndexEntry.id);
 	cerr << "  object ID=" << invertedIndexEntry.id;
 	{
-	  NGT::Object *o = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
+	  polaris::Object *o = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
 	  objectList.get(invertedIndexEntry.id, *o, &globalCodebookIndex.getObjectSpace());
-	  NGT::Distance distance = globalCodebookIndex.getObjectSpace().getComparator()(*gcentroidFromList, *o);
+	  polaris::Distance distance = globalCodebookIndex.getObjectSpace().getComparator()(*gcentroidFromList, *o);
 	  cerr << ":distance=" << distance;
 	}
 	cerr << ":local codebook IDs=";
@@ -4341,7 +4341,7 @@ public:
 	bool refine = true;
 	bool lookuptable = false;
 	double epsilon = 0.1;
-	NGT::ObjectDistances objects;
+	polaris::ObjectDistances objects;
 	search(gcentroidFromList, objects, resultSize, approximateSearchSize, codebookSearchSize,
 	       refine, lookuptable, epsilon);
 	for (size_t resulti = 0; resulti < objects.size(); resulti++) {
@@ -4350,10 +4350,10 @@ public:
 	  } else {
 	    cerr << "x ";
 	    ngid.push_back(objects[resulti].id);
-	    NGT::ObjectDistances result;
-	    NGT::Object *o = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
+	    polaris::ObjectDistances result;
+	    polaris::Object *o = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
 	    objectList.get(ngid.back(), *o, &globalCodebookIndex.getObjectSpace());
-	    NGT::GraphAndTreeIndex &graphIndex = (NGT::GraphAndTreeIndex &)globalCodebookIndex.getIndex();
+	    polaris::GraphAndTreeIndex &graphIndex = (polaris::GraphAndTreeIndex &)globalCodebookIndex.getIndex();
 	    graphIndex.searchForNNGInsertion(*o, result);
 	    if (result[0].distance > objects[resulti].distance) {
 	      cerr << " Strange! ";
@@ -4368,14 +4368,14 @@ public:
 #endif  // NGTQ_QBG
         }
 
-        void searchGlobalCodebook(NGT::Object *query, size_t size, NGT::ObjectDistances &objects,
+        void searchGlobalCodebook(polaris::Object *query, size_t size, polaris::ObjectDistances &objects,
                                   size_t &approximateSearchSize,
                                   size_t codebookSearchSize,
                                   double epsilon) {
 #ifdef    NGTQ_TRACE
             std::cerr << "searchGlobalCodebook codebookSearchSize=" << codebookSearchSize << std::endl;
 #endif
-            NGT::SearchContainer sc(*query);
+            polaris::SearchContainer sc(*query);
             sc.setResults(&objects);
             sc.size = codebookSearchSize;
             sc.radius = FLT_MAX;
@@ -4389,14 +4389,14 @@ public:
         }
 
         inline void
-        aggregateObjectsWithExactDistance(NGT::ObjectDistance &globalCentroid, NGT::Object *query, size_t size,
-                                          NGT::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
+        aggregateObjectsWithExactDistance(polaris::ObjectDistance &globalCentroid, polaris::Object *query, size_t size,
+                                          polaris::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
             abort();
         }
 
         inline void
-        aggregateObjectsWithLookupTable(NGT::ObjectDistance &globalCentroid, NGT::Object *query, size_t size,
-                                        NGT::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
+        aggregateObjectsWithLookupTable(polaris::ObjectDistance &globalCentroid, polaris::Object *query, size_t size,
+                                        polaris::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
             QuantizedObjectDistance::DistanceLookupTable distanceLUT;
             (*quantizedObjectDistance).initialize(distanceLUT);
             (*quantizedObjectDistance).createDistanceLookup(*query, globalCentroid.id, distanceLUT);
@@ -4415,7 +4415,7 @@ public:
                 }
 
 
-                NGT::ObjectDistance obj;
+                polaris::ObjectDistance obj;
                 obj.id = invertedIndexEntry.id;
                 obj.distance = distance;
                 assert(obj.id > 0);
@@ -4556,7 +4556,7 @@ public:
             }
         }
 
-        inline NGT::Distance getApproximateDistance(NGT::Object &query, uint32_t globalID, LOCAL_ID_TYPE *localID,
+        inline polaris::Distance getApproximateDistance(polaris::Object &query, uint32_t globalID, LOCAL_ID_TYPE *localID,
                                                     QuantizedObjectDistance::DistanceLookupTable &distanceLUT) {
             double distance;
             distance = (*quantizedObjectDistance)(query, globalID, localID, distanceLUT);
@@ -4565,8 +4565,8 @@ public:
         }
 
 
-        inline void aggregateObjectsWithCache(NGT::ObjectDistance &globalCentroid, NGT::Object *query, size_t size,
-                                              NGT::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
+        inline void aggregateObjectsWithCache(polaris::ObjectDistance &globalCentroid, polaris::Object *query, size_t size,
+                                              polaris::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
 
             QuantizedObjectDistance::DistanceLookupTable distanceLUT;
             (*quantizedObjectDistance).initialize(distanceLUT);
@@ -4586,7 +4586,7 @@ public:
                                                       distanceLUT);
                 }
 
-                NGT::ObjectDistance obj;
+                polaris::ObjectDistance obj;
                 obj.id = invertedIndexEntry.id;
                 obj.distance = distance;
                 assert(obj.id > 0);
@@ -4596,8 +4596,8 @@ public:
         }
 
 
-        inline void aggregateObjects(NGT::ObjectDistance &globalCentroid, NGT::Object *query, size_t size,
-                                     NGT::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
+        inline void aggregateObjects(polaris::ObjectDistance &globalCentroid, polaris::Object *query, size_t size,
+                                     polaris::ObjectSpace::ResultSet &results, size_t approximateSearchSize) {
             for (size_t j = 0;
                  j < invertedIndex[globalCentroid.id]->size() && results.size() < approximateSearchSize; j++) {
 #ifdef NGTQ_SHARED_INVERTED_INDEX
@@ -4613,7 +4613,7 @@ public:
                 }
 
 
-                NGT::ObjectDistance obj;
+                polaris::ObjectDistance obj;
                 obj.id = invertedIndexEntry.id;
                 obj.distance = distance;
                 assert(obj.id > 0);
@@ -4626,8 +4626,8 @@ public:
         }
 
 
-        inline void aggregateObjects(NGT::Object *query, size_t size, NGT::ObjectDistances &objects,
-                                     NGT::ObjectSpace::ResultSet &results, size_t approximateSearchSize,
+        inline void aggregateObjects(polaris::Object *query, size_t size, polaris::ObjectDistances &objects,
+                                     polaris::ObjectSpace::ResultSet &results, size_t approximateSearchSize,
                                      AggregateObjectsFunction aggregateObjectsFunction) {
             for (size_t i = 0; i < objects.size(); i++) {
                 if (invertedIndex[objects[i].id] == 0) {
@@ -4644,21 +4644,21 @@ public:
             }
         }
 
-        void refineDistance(NGT::Object *query, NGT::ObjectDistances &results) {
+        void refineDistance(polaris::Object *query, polaris::ObjectDistances &results) {
 #ifndef NGTQ_QBG
-                                                                                                                                    NGT::ObjectSpace &objectSpace = globalCodebookIndex.getObjectSpace();
+                                                                                                                                    polaris::ObjectSpace &objectSpace = globalCodebookIndex.getObjectSpace();
      for (auto i = results.begin(); i != results.end(); ++i) {
-       NGT::ObjectDistance &result = *i;
-       NGT::Object o(&objectSpace);
-       objectList.get(result.id, (NGT::Object&)o, &objectSpace);
-       double distance = objectSpace.getComparator()(*query, (NGT::Object&)o);
+       polaris::ObjectDistance &result = *i;
+       polaris::Object o(&objectSpace);
+       objectList.get(result.id, (polaris::Object&)o, &objectSpace);
+       double distance = objectSpace.getComparator()(*query, (polaris::Object&)o);
        result.distance = distance;
      }
      std::sort(results.begin(), results.end());
 #endif
         }
 
-        void search(NGT::Object *query, NGT::ObjectDistances &objs,
+        void search(polaris::Object *query, polaris::ObjectDistances &objs,
                     size_t size,
                     float expansion,
                     AggregationMode aggregationMode,
@@ -4669,7 +4669,7 @@ public:
             search(query, objs, size, approximateSearchSize, codebookSearchSize, aggregationMode, epsilon);
         }
 
-        void search(NGT::Object *query, NGT::ObjectDistances &objs,
+        void search(polaris::Object *query, polaris::ObjectDistances &objs,
                     size_t size, size_t approximateSearchSize,
                     size_t codebookSearchSize, bool resultRefinement,
                     bool lookUpTable = false,
@@ -4687,7 +4687,7 @@ public:
             search(query, objs, size, approximateSearchSize, codebookSearchSize, aggregationMode, epsilon);
         }
 
-        void search(NGT::Object *query, NGT::ObjectDistances &objs,
+        void search(polaris::Object *query, polaris::ObjectDistances &objs,
                     size_t size, size_t approximateSearchSize,
                     size_t codebookSearchSize,
                     AggregationMode aggregationMode,
@@ -4697,11 +4697,11 @@ public:
                     POLARIS_THROW_EX("NGTQ: Fatal inner error. the lookup table is only for dataType float!");
                 }
             }
-            NGT::ObjectDistances objects;
+            polaris::ObjectDistances objects;
             searchGlobalCodebook(query, size, objects, approximateSearchSize, codebookSearchSize, epsilon);
 
             objs.clear();
-            NGT::ObjectSpace::ResultSet results;
+            polaris::ObjectSpace::ResultSet results;
             distanceComputationCount = 0;
 
             AggregateObjectsFunction aggregateObjectsFunction = &QuantizerInstance::aggregateObjectsWithCache;
@@ -4745,21 +4745,21 @@ public:
             std::cerr << "calculateQuantizationError: Not implemented." << std::endl;
             return 0.0;
 #else
-                                                                                                                                    NGT::ObjectSpace &objectSpace = globalCodebookIndex.getObjectSpace();
+                                                                                                                                    polaris::ObjectSpace &objectSpace = globalCodebookIndex.getObjectSpace();
     double distance = 0.0;
     double globalDistance = 0.0;
     size_t count = 0;
     for (size_t gi = 0; gi < invertedIndex.size(); gi++) {
       if (invertedIndex[gi] != 0) {
-	NGT::PersistentObject &gcentroid = *globalCodebookIndex.getObjectSpace().getRepository().get(gi);
+	polaris::PersistentObject &gcentroid = *globalCodebookIndex.getObjectSpace().getRepository().get(gi);
 	for (size_t li = 0; li < invertedIndex[gi]->size(); li++) {
 #ifdef NGTQ_SHARED_INVERTED_INDEX
           size_t id = invertedIndex[gi]->at(li, invertedIndex.allocator).id;
 #else
 	  size_t id = invertedIndex[gi]->at(li).id;
 #endif
-	  NGT::Object object(&objectSpace);
-	  objectList.get(id, (NGT::Object&)object, &objectSpace);
+	  polaris::Object object(&objectSpace);
+	  objectList.get(id, (polaris::Object&)object, &objectSpace);
 #ifdef NGTQ_SHARED_INVERTED_INDEX
 	  double d = (*quantizedObjectDistance)(object, gi, invertedIndex[gi]->at(li, invertedIndex.allocator).localID);
 #else
@@ -4767,7 +4767,7 @@ public:
 #endif
 	  distance += d;
 	  count++;
-	  NGT::Distance gd = globalCodebookIndex.getObjectSpace().getComparator()(object, gcentroid);
+	  polaris::Distance gd = globalCodebookIndex.getObjectSpace().getComparator()(object, gcentroid);
 	  globalDistance += gd;
 	}
       }
@@ -4881,7 +4881,7 @@ public:
             return size;
         }
 
-        size_t getNumberOfObjects(NGT::GraphAndTreeIndex &index) {
+        size_t getNumberOfObjects(polaris::GraphAndTreeIndex &index) {
             return index.getObjectRepositorySize() == 0 ? 0 : static_cast<int>(index.getObjectRepositorySize()) - 1;
         }
 
@@ -4894,9 +4894,9 @@ public:
         size_t getInvertedIndexSize() { return invertedIndex.size(); }
 
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-        NGT::PersistentRepository<IIEntry>	invertedIndex;
+        polaris::PersistentRepository<IIEntry>	invertedIndex;
 #else
-        NGT::Repository<IIEntry> invertedIndex;
+        polaris::Repository<IIEntry> invertedIndex;
 #endif
         QuantizedObjectDistance *quantizedObjectDistance;
         GenerateResidualObject *generateResidualObject;
@@ -4946,13 +4946,13 @@ public:
 
 
         static void create(const string &index, Property &property,
-                           NGT::Property &globalProperty,
+                           polaris::Property &globalProperty,
 #ifdef NGTQ_QBG
-                           NGT::Property &localProperty,
+                           polaris::Property &localProperty,
                            std::vector<float> *rotation = 0,
                            const std::string &objectFile = "") {
 #else
-            NGT::Property &localProperty) {
+            polaris::Property &localProperty) {
 #endif
             if (property.dimension == 0) {
                 POLARIS_THROW_EX("NGTQ::create: Error. The dimension is zero.");
@@ -5031,7 +5031,7 @@ public:
 
         void open(const string &index, bool readOnly = false) {
             close();
-            NGT::Property globalProperty;
+            polaris::Property globalProperty;
             globalProperty.clear();
             globalProperty.edgeSizeForSearch = 40;
             quantizer = getQuantizer(index, globalProperty, readOnly);
@@ -5053,7 +5053,7 @@ public:
         }
 
 #ifndef NGTQ_QBG
-                                                                                                                                void insert(vector<pair<NGT::Object*, size_t>> &objects) {
+                                                                                                                                void insert(vector<pair<polaris::Object*, size_t>> &objects) {
      std::cerr << "Not implemented." << std::endl;
      abort();
    }
@@ -5092,21 +5092,21 @@ public:
    }
 #endif
 
-        NGT::Object *allocateObject(string &line, const string &sep, size_t dimension) {
+        polaris::Object *allocateObject(string &line, const string &sep, size_t dimension) {
             return getQuantizer().allocateObject(line, sep);
         }
 
-        NGT::Object *allocateObject(vector<double> &obj) {
+        polaris::Object *allocateObject(vector<double> &obj) {
             return getQuantizer().allocateObject(obj);
         }
 
-        NGT::Object *allocateObject(vector<float> &obj) {
+        polaris::Object *allocateObject(vector<float> &obj) {
             return getQuantizer().allocateObject(obj);
         }
 
-        void deleteObject(NGT::Object *object) { getQuantizer().deleteObject(object); }
+        void deleteObject(polaris::Object *object) { getQuantizer().deleteObject(object); }
 
-        void search(NGT::Object *object, NGT::ObjectDistances &objs,
+        void search(polaris::Object *object, polaris::ObjectDistances &objs,
                     size_t size, size_t approximateSearchSize,
                     size_t codebookSearchSize, bool resultRefinement,
                     bool lookUpTable, double epsilon) {
@@ -5114,7 +5114,7 @@ public:
                                   resultRefinement, lookUpTable, epsilon);
         }
 
-        void search(NGT::Object *object, NGT::ObjectDistances &objs,
+        void search(polaris::Object *object, polaris::ObjectDistances &objs,
                     size_t size, float expansion,
                     AggregationMode aggregationMode,
                     double epsilon) {
@@ -5156,7 +5156,7 @@ public:
         }
 
     protected:
-        static NGTQ::Quantizer *getQuantizer(const string &index, NGT::Property &globalProperty, bool readOnly) {
+        static NGTQ::Quantizer *getQuantizer(const string &index, polaris::Property &globalProperty, bool readOnly) {
             NGTQ::Property property;
             try {
                 property.load(index);

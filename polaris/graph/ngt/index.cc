@@ -15,7 +15,7 @@
 //
 
 #include <polaris/core/defines.h>
-#include <polaris/graph/ngt/common.h>
+#include <polaris/utility/common.h>
 #include <polaris/graph/ngt/object_space_repository.h>
 #include <polaris/graph/ngt/index.h>
 #include <polaris/graph/ngt/thread.h>
@@ -23,7 +23,7 @@
 #include <polaris/graph/ngt/version.h>
 
 using namespace std;
-using namespace NGT;
+using namespace polaris;
 
 
 void
@@ -38,18 +38,18 @@ Index::getVersion() {
 }
 
 size_t Index::getDimension() {
-    return static_cast<NGT::GraphIndex &>(getIndex()).getProperty().dimension;
+    return static_cast<polaris::GraphIndex &>(getIndex()).getProperty().dimension;
 }
 
-NGT::Index::Index(NGT::Property &prop) : redirect(false) {
+polaris::Index::Index(polaris::Property &prop) : redirect(false) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("Index::Index. Dimension is not specified.");
     }
     Index *idx = 0;
-    if (prop.indexType == NGT::Index::Property::GraphAndTree) {
-        idx = new NGT::GraphAndTreeIndex(prop);
-    } else if (prop.indexType == NGT::Index::Property::Graph) {
-        idx = new NGT::GraphIndex(prop);
+    if (prop.indexType == polaris::Index::Property::GraphAndTree) {
+        idx = new polaris::GraphAndTreeIndex(prop);
+    } else if (prop.indexType == polaris::Index::Property::Graph) {
+        idx = new polaris::GraphIndex(prop);
     } else {
         POLARIS_THROW_EX("Index::Index: Not found IndexType in property file.");
     }
@@ -63,21 +63,21 @@ NGT::Index::Index(NGT::Property &prop) : redirect(false) {
 }
 
 float
-NGT::Index::getEpsilonFromExpectedAccuracy(double accuracy) {
-    return static_cast<NGT::GraphIndex &>(getIndex()).getEpsilonFromExpectedAccuracy(accuracy);
+polaris::Index::getEpsilonFromExpectedAccuracy(double accuracy) {
+    return static_cast<polaris::GraphIndex &>(getIndex()).getEpsilonFromExpectedAccuracy(accuracy);
 }
 
 void
-NGT::Index::open(const string &database, bool rdOnly, NGT::Index::OpenType openType) {
-    NGT::Property prop;
+polaris::Index::open(const string &database, bool rdOnly, polaris::Index::OpenType openType) {
+    polaris::Property prop;
     prop.load(database);
     Index *idx = 0;
-    if ((prop.indexType == NGT::Index::Property::GraphAndTree) &&
-        ((openType & NGT::Index::OpenTypeGraphDisabled) == 0)) {
-        idx = new NGT::GraphAndTreeIndex(database, rdOnly);
-    } else if ((prop.indexType == NGT::Index::Property::Graph) ||
-               ((openType & NGT::Index::OpenTypeGraphDisabled) != 0)) {
-        idx = new NGT::GraphIndex(database, rdOnly, openType);
+    if ((prop.indexType == polaris::Index::Property::GraphAndTree) &&
+        ((openType & polaris::Index::OpenTypeGraphDisabled) == 0)) {
+        idx = new polaris::GraphAndTreeIndex(database, rdOnly);
+    } else if ((prop.indexType == polaris::Index::Property::Graph) ||
+               ((openType & polaris::Index::OpenTypeGraphDisabled) != 0)) {
+        idx = new polaris::GraphIndex(database, rdOnly, openType);
     } else {
         POLARIS_THROW_EX("Index::Open: Not found IndexType in property file.");
     }
@@ -91,14 +91,14 @@ NGT::Index::open(const string &database, bool rdOnly, NGT::Index::OpenType openT
 }
 
 void
-NGT::Index::createGraphAndTree(const string &database, NGT::Property &prop, const string &dataFile,
+polaris::Index::createGraphAndTree(const string &database, polaris::Property &prop, const string &dataFile,
                                size_t dataSize, bool redirect) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("Index::createGraphAndTree. Dimension is not specified.");
     }
-    prop.indexType = NGT::Index::Property::IndexType::GraphAndTree;
+    prop.indexType = polaris::Index::Property::IndexType::GraphAndTree;
     Index *idx = 0;
-    idx = new NGT::GraphAndTreeIndex(prop);
+    idx = new polaris::GraphAndTreeIndex(prop);
     assert(idx != 0);
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
@@ -114,14 +114,14 @@ NGT::Index::createGraphAndTree(const string &database, NGT::Property &prop, cons
 }
 
 void
-NGT::Index::createGraph(const string &database, NGT::Property &prop, const string &dataFile, size_t dataSize,
+polaris::Index::createGraph(const string &database, polaris::Property &prop, const string &dataFile, size_t dataSize,
                         bool redirect) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("Index::createGraphAndTree. Dimension is not specified.");
     }
-    prop.indexType = NGT::Index::Property::IndexType::Graph;
+    prop.indexType = polaris::Index::Property::IndexType::Graph;
     Index *idx = 0;
-    idx = new NGT::GraphIndex(prop);
+    idx = new polaris::GraphIndex(prop);
     assert(idx != 0);
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
@@ -137,9 +137,9 @@ NGT::Index::createGraph(const string &database, NGT::Property &prop, const strin
 }
 
 void
-NGT::Index::loadAndCreateIndex(Index &index, const string &database, const string &dataFile, size_t threadSize,
+polaris::Index::loadAndCreateIndex(Index &index, const string &database, const string &dataFile, size_t threadSize,
                                size_t dataSize) {
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
     if (dataFile.size() != 0) {
         index.load(dataFile, dataSize);
@@ -163,9 +163,9 @@ NGT::Index::loadAndCreateIndex(Index &index, const string &database, const strin
 }
 
 void
-NGT::Index::append(const string &database, const string &dataFile, size_t threadSize, size_t dataSize) {
-    NGT::Index index(database);
-    NGT::Timer timer;
+polaris::Index::append(const string &database, const string &dataFile, size_t threadSize, size_t dataSize) {
+    polaris::Index index(database);
+    polaris::Timer timer;
     timer.start();
     if (dataFile.size() != 0) {
         index.append(dataFile, dataSize);
@@ -185,9 +185,9 @@ NGT::Index::append(const string &database, const string &dataFile, size_t thread
 }
 
 void
-NGT::Index::append(const string &database, const float *data, size_t dataSize, size_t threadSize) {
-    NGT::Index index(database);
-    NGT::Timer timer;
+polaris::Index::append(const string &database, const float *data, size_t dataSize, size_t threadSize) {
+    polaris::Index index(database);
+    polaris::Timer timer;
     timer.start();
     if (data != 0 && dataSize != 0) {
         index.append(data, dataSize);
@@ -207,9 +207,9 @@ NGT::Index::append(const string &database, const float *data, size_t dataSize, s
 }
 
 void
-NGT::Index::remove(const string &database, vector<ObjectID> &objects, bool force) {
-    NGT::Index index(database);
-    NGT::Timer timer;
+polaris::Index::remove(const string &database, vector<ObjectID> &objects, bool force) {
+    polaris::Index index(database);
+    polaris::Timer timer;
     timer.start();
     for (vector<ObjectID>::iterator i = objects.begin(); i != objects.end(); i++) {
         try {
@@ -227,18 +227,18 @@ NGT::Index::remove(const string &database, vector<ObjectID> &objects, bool force
 }
 
 void
-NGT::Index::importIndex(const string &database, const string &file) {
+polaris::Index::importIndex(const string &database, const string &file) {
     Index *idx = 0;
-    NGT::Property property;
+    polaris::Property property;
     property.importProperty(file);
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
-    property.databaseType = NGT::Index::Property::DatabaseType::Memory;
-    if (property.indexType == NGT::Index::Property::IndexType::GraphAndTree) {
-        idx = new NGT::GraphAndTreeIndex(property);
+    property.databaseType = polaris::Index::Property::DatabaseType::Memory;
+    if (property.indexType == polaris::Index::Property::IndexType::GraphAndTree) {
+        idx = new polaris::GraphAndTreeIndex(property);
         assert(idx != 0);
-    } else if (property.indexType == NGT::Index::Property::IndexType::Graph) {
-        idx = new NGT::GraphIndex(property);
+    } else if (property.indexType == polaris::Index::Property::IndexType::Graph) {
+        idx = new polaris::GraphIndex(property);
         assert(idx != 0);
     } else {
         POLARIS_THROW_EX("Index::Open: Not found IndexType in property file.");
@@ -252,9 +252,9 @@ NGT::Index::importIndex(const string &database, const string &file) {
 }
 
 void
-NGT::Index::exportIndex(const string &database, const string &file) {
-    NGT::Index idx(database);
-    NGT::Timer timer;
+polaris::Index::exportIndex(const string &database, const string &file) {
+    polaris::Index idx(database);
+    polaris::Timer timer;
     timer.start();
     idx.exportIndex(file);
     timer.stop();
@@ -263,20 +263,20 @@ NGT::Index::exportIndex(const string &database, const string &file) {
 }
 
 void
-NGT::Index::searchUsingOnlyGraph(NGT::SearchContainer &sc) {
+polaris::Index::searchUsingOnlyGraph(polaris::SearchContainer &sc) {
     static_cast<GraphIndex &>(getIndex()).search(sc);
 }
 
 void
-NGT::Index::searchUsingOnlyGraph(NGT::SearchQuery &searchQuery) {
+polaris::Index::searchUsingOnlyGraph(polaris::SearchQuery &searchQuery) {
     static_cast<GraphIndex &>(getIndex()).GraphIndex::search(searchQuery);
 }
 
 std::vector<float>
-NGT::Index::makeSparseObject(std::vector<uint32_t> &object) {
-    if (static_cast<NGT::GraphIndex &>(getIndex()).getProperty().distanceType !=
-        NGT::ObjectSpace::DistanceType::DistanceTypeSparseJaccard) {
-        POLARIS_THROW_EX("NGT::Index::makeSparseObject: Not sparse jaccard.");
+polaris::Index::makeSparseObject(std::vector<uint32_t> &object) {
+    if (static_cast<polaris::GraphIndex &>(getIndex()).getProperty().distanceType !=
+        polaris::ObjectSpace::DistanceType::DistanceTypeSparseJaccard) {
+        POLARIS_THROW_EX("polaris::Index::makeSparseObject: Not sparse jaccard.");
     }
     size_t dimension = getObjectSpace().getDimension();
     if (object.size() + 1 > dimension) {
@@ -293,28 +293,28 @@ NGT::Index::makeSparseObject(std::vector<uint32_t> &object) {
 
 
 void
-NGT::Index::extractInsertionOrder(InsertionOrder &insertionOrder) {
-    static_cast<NGT::GraphIndex &>(getIndex()).extractInsertionOrder(insertionOrder);
+polaris::Index::extractInsertionOrder(InsertionOrder &insertionOrder) {
+    static_cast<polaris::GraphIndex &>(getIndex()).extractInsertionOrder(insertionOrder);
 }
 
 void
-NGT::Index::createIndex(size_t threadNumber, size_t sizeOfRepository) {
+polaris::Index::createIndex(size_t threadNumber, size_t sizeOfRepository) {
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
     try {
         InsertionOrder insertionOrder;
-        NGT::Property prop;
+        polaris::Property prop;
         getProperty(prop);
         if (prop.distanceType == ObjectSpace::DistanceTypeInnerProduct) {
             size_t beginId = 1;
-            NGT::GraphRepository &graphRepository = static_cast<NGT::GraphIndex &>(getIndex()).repository;
+            polaris::GraphRepository &graphRepository = static_cast<polaris::GraphIndex &>(getIndex()).repository;
             auto &graphNodes = static_cast<Repository<GraphNode> &>(graphRepository);
             auto &graphNodeVector = reinterpret_cast<Repository<void> &>(graphNodes);
             if (prop.maxMagnitude != 0.0) {
                 getObjectSpace().setMagnitude(prop.maxMagnitude, graphNodeVector, beginId);
             } else {
                 auto maxMag = getObjectSpace().computeMaxMagnitude(beginId);
-                static_cast<NGT::GraphIndex &>(getIndex()).property.maxMagnitude = maxMag;
+                static_cast<polaris::GraphIndex &>(getIndex()).property.maxMagnitude = maxMag;
                 getObjectSpace().setMagnitude(maxMag, graphNodeVector, beginId);
             }
         }
@@ -332,7 +332,7 @@ NGT::Index::createIndex(size_t threadNumber, size_t sizeOfRepository) {
 }
 
 void
-NGT::Index::Property::set(NGT::Property &prop) {
+polaris::Index::Property::set(polaris::Property &prop) {
     if (prop.dimension != -1) dimension = prop.dimension;
     if (prop.threadPoolSize != -1) threadPoolSize = prop.threadPoolSize;
     if (prop.objectType != ObjectSpace::ObjectTypeNone) objectType = prop.objectType;
@@ -353,7 +353,7 @@ NGT::Index::Property::set(NGT::Property &prop) {
 }
 
 void
-NGT::Index::Property::get(NGT::Property &prop) {
+polaris::Index::Property::get(polaris::Property &prop) {
     prop.dimension = dimension;
     prop.threadPoolSize = threadPoolSize;
     prop.objectType = objectType;
@@ -386,20 +386,20 @@ public:
 
     friend bool operator<(const CreateIndexJob &ja, const CreateIndexJob &jb) { return ja.batchIdx < jb.batchIdx; }
 
-    NGT::ObjectID id;
-    NGT::Object *object;    // this will be a node of the graph later.
-    NGT::ObjectDistances *results;
+    polaris::ObjectID id;
+    polaris::Object *object;    // this will be a node of the graph later.
+    polaris::ObjectDistances *results;
     size_t batchIdx;
 };
 
 class CreateIndexSharedData {
 public:
-    CreateIndexSharedData(NGT::GraphIndex &nngt) : graphIndex(nngt) {}
+    CreateIndexSharedData(polaris::GraphIndex &nngt) : graphIndex(nngt) {}
 
-    NGT::GraphIndex &graphIndex;
+    polaris::GraphIndex &graphIndex;
 };
 
-class CreateIndexThread : public NGT::Thread {
+class CreateIndexThread : public polaris::Thread {
 public:
     CreateIndexThread() {}
 
@@ -409,16 +409,16 @@ public:
 
 };
 
-typedef NGT::ThreadPool<CreateIndexJob, CreateIndexSharedData *, CreateIndexThread> CreateIndexThreadPool;
+typedef polaris::ThreadPool<CreateIndexJob, CreateIndexSharedData *, CreateIndexThread> CreateIndexThreadPool;
 
 int
 CreateIndexThread::run() {
 
-    NGT::ThreadPool<CreateIndexJob, CreateIndexSharedData *, CreateIndexThread>::Thread &poolThread =
-            (NGT::ThreadPool<CreateIndexJob, CreateIndexSharedData *, CreateIndexThread>::Thread &) *this;
+    polaris::ThreadPool<CreateIndexJob, CreateIndexSharedData *, CreateIndexThread>::Thread &poolThread =
+            (polaris::ThreadPool<CreateIndexJob, CreateIndexSharedData *, CreateIndexThread>::Thread &) *this;
 
     CreateIndexSharedData &sd = *poolThread.getSharedData();
-    NGT::GraphIndex &graphIndex = sd.graphIndex;
+    polaris::GraphIndex &graphIndex = sd.graphIndex;
 
     for (;;) {
         CreateIndexJob job;
@@ -505,22 +505,22 @@ public:
 };
 
 void
-NGT::GraphIndex::constructObjectSpace(NGT::Property &prop) {
+polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
     assert(prop.dimension != 0);
     size_t dimension = prop.dimension;
-    if (prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeSparseJaccard ||
-        prop.distanceType == NGT::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
+    if (prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeSparseJaccard ||
+        prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
         dimension++;
     }
 
     switch (prop.objectType) {
-        case NGT::ObjectSpace::ObjectType::Float :
+        case polaris::ObjectSpace::ObjectType::Float :
             objectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
             break;
-        case NGT::ObjectSpace::ObjectType::Uint8 :
+        case polaris::ObjectSpace::ObjectType::Uint8 :
             objectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
             break;
-        case NGT::ObjectSpace::ObjectType::Float16 :
+        case polaris::ObjectSpace::ObjectType::Float16 :
             objectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
             break;
         default:
@@ -530,16 +530,16 @@ NGT::GraphIndex::constructObjectSpace(NGT::Property &prop) {
     }
 #ifdef NGT_REFINEMENT
     switch (prop.refinementObjectType) {
-    case NGT::ObjectSpace::ObjectType::Float :
+    case polaris::ObjectSpace::ObjectType::Float :
       refinementObjectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
       break;
-    case NGT::ObjectSpace::ObjectType::Uint8 :
+    case polaris::ObjectSpace::ObjectType::Uint8 :
       refinementObjectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
       break;
-    case NGT::ObjectSpace::ObjectType::Float16 :
+    case polaris::ObjectSpace::ObjectType::Float16 :
       refinementObjectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
       break;
-    case NGT::ObjectSpace::ObjectType::Bfloat16 :
+    case polaris::ObjectSpace::ObjectType::Bfloat16 :
       refinementObjectSpace = new ObjectSpaceRepository<bfloat16, float>(dimension, typeid(bfloat16), prop.distanceType);
       break;
     default:
@@ -551,14 +551,14 @@ NGT::GraphIndex::constructObjectSpace(NGT::Property &prop) {
 }
 
 void
-NGT::GraphIndex::loadGraph(const string &ifile, NGT::GraphRepository &graph) {
+polaris::GraphIndex::loadGraph(const string &ifile, polaris::GraphRepository &graph) {
     ifstream isg(ifile + "/grp");
     graph.deserialize(isg);
 }
 
 void
-NGT::GraphIndex::loadIndex(const string &ifile, bool readOnly, NGT::Index::OpenType openType) {
-    if ((openType & NGT::Index::OpenTypeObjectDisabled) == 0) {
+polaris::GraphIndex::loadIndex(const string &ifile, bool readOnly, polaris::Index::OpenType openType) {
+    if ((openType & polaris::Index::OpenTypeObjectDisabled) == 0) {
         objectSpace->deserialize(ifile + "/obj");
     }
 #ifdef NGT_REFINEMENT
@@ -568,7 +568,7 @@ NGT::GraphIndex::loadIndex(const string &ifile, bool readOnly, NGT::Index::OpenT
       std::cerr << "Warning. Cannot open the refinment objects. " << err.what() << std::endl;
     }
 #endif
-    if ((openType & NGT::Index::OpenTypeGraphDisabled) == 0) {
+    if ((openType & polaris::Index::OpenTypeGraphDisabled) == 0) {
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
         if (readOnly) {
             GraphIndex::NeighborhoodGraph::loadSearchGraph(ifile);
@@ -582,20 +582,20 @@ NGT::GraphIndex::loadIndex(const string &ifile, bool readOnly, NGT::Index::OpenT
 }
 
 void
-NGT::GraphIndex::saveProperty(const std::string &file) {
-    NGT::Property::save(*this, file);
+polaris::GraphIndex::saveProperty(const std::string &file) {
+    polaris::Property::save(*this, file);
 }
 
 void
-NGT::GraphIndex::exportProperty(const std::string &file) {
-    NGT::Property::exportProperty(*this, file);
+polaris::GraphIndex::exportProperty(const std::string &file) {
+    polaris::Property::exportProperty(*this, file);
 }
 
 
-NGT::GraphIndex::GraphIndex(const string &database, bool rdOnly, NGT::Index::OpenType openType) : readOnly(rdOnly) {
-    NGT::Property prop;
+polaris::GraphIndex::GraphIndex(const string &database, bool rdOnly, polaris::Index::OpenType openType) : readOnly(rdOnly) {
+    polaris::Property prop;
     prop.load(database);
-    if (prop.databaseType != NGT::Index::Property::DatabaseType::Memory) {
+    if (prop.databaseType != polaris::Index::Property::DatabaseType::Memory) {
         POLARIS_THROW_EX("GraphIndex: Cannot open. Not memory type.");
     }
     assert(prop.dimension != 0);
@@ -619,11 +619,11 @@ void GraphIndex::extractSparseness(InsertionOrder &insertionOrder) {
         POLARIS_THROW_EX("extractInsertionOrder: No indexed objects.");
     }
     auto nOfThreads = insertionOrder.nOfThreads == 0 ? std::thread::hardware_concurrency() : insertionOrder.nOfThreads;
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
     std::cerr << "extractInsertionOrder" << std::endl;
-    std::cerr << "VM size=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-    std::cerr << "Peak VM size=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "VM size=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+    std::cerr << "Peak VM size=" << polaris::Common::getProcessVmPeakStr() << std::endl;
     std::cerr << "searching..." << std::endl;
 
     if (getObjectRepositorySize() != getGraphRepositorySize()) {
@@ -644,7 +644,7 @@ void GraphIndex::extractSparseness(InsertionOrder &insertionOrder) {
     std::vector<std::pair<float, uint32_t>> length;
     length.resize(getObjectRepositorySize());
 #pragma omp parallel for
-    for (NGT::ObjectID query = 1; query < getObjectRepositorySize(); query++) {
+    for (polaris::ObjectID query = 1; query < getObjectRepositorySize(); query++) {
         auto thdID = omp_get_thread_num();
         counter[thdID]++;
         if (query % 100000 == 0) {
@@ -652,20 +652,20 @@ void GraphIndex::extractSparseness(InsertionOrder &insertionOrder) {
             for (auto &c: counter) n += c;
             timer.stop();
             std::cerr << "# of the processed objects=" << n
-                      << " VM size=" << NGT::Common::getProcessVmSizeStr()
-                      << " Peak VM size=" << NGT::Common::getProcessVmPeakStr()
+                      << " VM size=" << polaris::Common::getProcessVmSizeStr()
+                      << " Peak VM size=" << polaris::Common::getProcessVmPeakStr()
                       << " Time=" << timer << std::endl;
             timer.restart();
         }
-        NGT::Object *object = getObjectSpace().getRepository().get(query);
+        polaris::Object *object = getObjectSpace().getRepository().get(query);
         {
-            NGT::SearchContainer sc(*object);
-            NGT::ObjectDistances objects;
+            polaris::SearchContainer sc(*object);
+            polaris::ObjectDistances objects;
             sc.setResults(&objects);
             sc.setSize(insertionOrder.nOfNeighboringNodes);
             sc.setEpsilon(insertionOrder.epsilon);
             sc.setEdgeSize(-2);
-            NGT::Timer timer;
+            polaris::Timer timer;
             try {
                 timer.start();
                 search(sc);
@@ -699,7 +699,7 @@ void GraphIndex::extractSparseness(InsertionOrder &insertionOrder) {
     std::sort(length.begin(), length.end());
 
     size_t max = 0;
-    for (NGT::ObjectID id = 1; id < getObjectRepositorySize(); id++) {
+    for (polaris::ObjectID id = 1; id < getObjectRepositorySize(); id++) {
         for (size_t tidx = 1; tidx < nOfThreads; tidx++) {
             indegrees[0][id] += indegrees[tidx][id];
         }
@@ -729,7 +729,7 @@ void GraphIndex::extractSparseness(InsertionOrder &insertionOrder) {
         }
     } else {
         insertionOrder.reserve(getObjectRepositorySize());
-        for (NGT::ObjectID id = getObjectRepositorySize() - 1; id != 0; id--) {
+        for (polaris::ObjectID id = getObjectRepositorySize() - 1; id != 0; id--) {
             insertionOrder.push_back(length[id].second);
         }
     }
@@ -764,7 +764,7 @@ GraphIndex::createIndexWithSingleThread() {
     GraphRepository &anngRepo = repository;
     ObjectRepository &fr = objectSpace->getRepository();
     size_t pathAdjustCount = property.pathAdjustmentInterval;
-    NGT::ObjectID id = 1;
+    polaris::ObjectID id = 1;
     size_t count = 0;
     BuildTimeController buildTimeController(*this, NeighborhoodGraph::property);
     for (; id < fr.size(); id++) {
@@ -782,7 +782,7 @@ GraphIndex::createIndexWithSingleThread() {
 
 static size_t
 searchMultipleQueryForCreation(GraphIndex &neighborhoodGraph,
-                               NGT::ObjectID &id,
+                               polaris::ObjectID &id,
                                CreateIndexJob &job,
                                CreateIndexThreadPool &threads,
                                size_t sizeOfRepository,
@@ -928,7 +928,7 @@ GraphIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder, size_t
 
         try {
             CreateIndexJob job;
-            NGT::ObjectID id = 1;
+            polaris::ObjectID id = 1;
             for (;;) {
                 // search for the nearest neighbors
                 size_t cnt = searchMultipleQueryForCreation(*this, id, job, threads, sizeOfRepository, insertionOrder);
@@ -971,14 +971,14 @@ GraphIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder, size_t
 
 }
 
-void GraphIndex::setupPrefetch(NGT::Property &prop) {
+void GraphIndex::setupPrefetch(polaris::Property &prop) {
     assert(GraphIndex::objectSpace != 0);
     prop.prefetchOffset = GraphIndex::objectSpace->setPrefetchOffset(prop.prefetchOffset);
     prop.prefetchSize = GraphIndex::objectSpace->setPrefetchSize(prop.prefetchSize);
 }
 
 bool
-NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, size_t edgeSize) {
+polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char mode, size_t edgeSize) {
     long double distance = 0.0;
     size_t numberOfNodes = 0;
     size_t numberOfOutdegree = 0;
@@ -989,8 +989,8 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
     std::vector<size_t> outdegreeHistogram;
     std::vector<size_t> indegreeHistogram;
     std::vector<std::vector<float> > indegree;
-    NGT::GraphRepository &graph = outGraph.repository;
-    NGT::ObjectRepository &repo = outGraph.objectSpace->getRepository();
+    polaris::GraphRepository &graph = outGraph.repository;
+    polaris::ObjectRepository &repo = outGraph.objectSpace->getRepository();
 #ifdef NGT_REFINEMENT
     auto &rrepo = outGraph.refinementObjectSpace->getRepository();
 #endif
@@ -1003,7 +1003,7 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
             removedObjectCount++;
             continue;
         }
-        NGT::GraphNode *node = 0;
+        polaris::GraphNode *node = 0;
         try {
             node = outGraph.getNode(id);
         } catch (polaris::PolarisException &err) {
@@ -1033,7 +1033,7 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
             std::cout << id << "," << esize << ": ";
         }
         for (size_t i = 0; i < esize; i++) {
-            NGT::ObjectDistance &n = (*node)[i];
+            polaris::ObjectDistance &n = (*node)[i];
             if (std::isnan(n.distance)) {
                 stringstream msg;
                 msg << "Index::showStatisticsOfGraph: Fatal inner error! The graph has a node with nan distance. " << id
@@ -1064,15 +1064,15 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
             if (repo[id] == 0) {
                 continue;
             }
-            NGT::GraphNode *n = 0;
+            polaris::GraphNode *n = 0;
             try {
                 n = outGraph.getNode(id);
             } catch (polaris::PolarisException &err) {
                 continue;
             }
-            NGT::GraphNode &node = *n;
+            polaris::GraphNode &node = *n;
             for (size_t i = 0; i < node.size(); i++) {
-                NGT::GraphNode *nn = 0;
+                polaris::GraphNode *nn = 0;
                 try {
                     nn = outGraph.getNode(node[i].id);
                 } catch (polaris::PolarisException &err) {
@@ -1081,7 +1081,7 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
                               << std::endl;
                     continue;
                 }
-                NGT::GraphNode &nnode = *nn;
+                polaris::GraphNode &nnode = *nn;
                 bool found = false;
                 for (size_t i = 0; i < nnode.size(); i++) {
                     if (nnode[i].id == id) {
@@ -1108,14 +1108,14 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
         if (repo[id] == 0) {
             continue;
         }
-        NGT::GraphNode *n = 0;
+        polaris::GraphNode *n = 0;
         try {
             n = outGraph.getNode(id);
         } catch (polaris::PolarisException &err) {
             std::cerr << "ngt info: Warning. Cannot get the node. ID=" << id << ":" << err.what() << std::endl;
             continue;
         }
-        NGT::GraphNode &node = *n;
+        polaris::GraphNode &node = *n;
         if (node.size() < dcsize) {
             d10SkipCount++;
             continue;
@@ -1163,7 +1163,7 @@ NGT::GraphIndex::showStatisticsOfGraph(NGT::GraphIndex &outGraph, char mode, siz
         if (repo[id] == 0) {
             continue;
         }
-        NGT::GraphNode *node = 0;
+        polaris::GraphNode *node = 0;
         try {
             node = outGraph.getNode(id);
         } catch (polaris::PolarisException &err) {
@@ -1362,7 +1362,7 @@ GraphAndTreeIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder,
 
     try {
         CreateIndexJob job;
-        NGT::ObjectID id = 1;
+        polaris::ObjectID id = 1;
         for (;;) {
             size_t cnt = searchMultipleQueryForCreation(*this, id, job, threads, sizeOfRepository, insertionOrder);
             if (cnt == 0) {
@@ -1391,7 +1391,7 @@ GraphAndTreeIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder,
                     try {
                         DVPTree::insert(tiobj);
                     } catch (polaris::PolarisException &err) {
-                        cerr << "NGT::createIndex: Fatal error. ID=" << job.id << ":";
+                        cerr << "polaris::createIndex: Fatal error. ID=" << job.id << ":";
                         if (NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeKNNG) {
                             cerr << err.what() << " continue.." << endl;
                         } else {
@@ -1410,8 +1410,8 @@ GraphAndTreeIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder,
             if (timerCount <= count) {
                 timer.stop();
                 cerr << "Processed " << timerCount << " objects. time= " << timer
-                     << " vm size=" << NGT::Common::getProcessVmSizeStr()
-                     << ":" << NGT::Common::getProcessVmPeakStr() << endl;
+                     << " vm size=" << polaris::Common::getProcessVmSizeStr()
+                     << ":" << polaris::Common::getProcessVmPeakStr() << endl;
                 timerCount += timerInterval;
                 timer.restart();
             }
@@ -1430,7 +1430,7 @@ GraphAndTreeIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder,
 
 
 void
-GraphAndTreeIndex::createIndex(const vector<pair<NGT::Object *, size_t> > &objects,
+GraphAndTreeIndex::createIndex(const vector<pair<polaris::Object *, size_t> > &objects,
                                vector<InsertionResult> &ids,
                                float range, size_t threadPoolSize) {
     Timer timer;
@@ -1522,12 +1522,12 @@ GraphAndTreeIndex::createIndex(const vector<pair<NGT::Object *, size_t> > &objec
                 for (size_t i = 0; i < cnt; i++) {
                     CreateIndexJob &job = output.front();
                     if (job.id != 0) {
-                        if (property.indexType == NGT::Property::GraphAndTree) {
+                        if (property.indexType == polaris::Property::GraphAndTree) {
                             DVPTree::InsertContainer tiobj(*job.object, job.id);
                             try {
                                 DVPTree::insert(tiobj);
                             } catch (polaris::PolarisException &err) {
-                                cerr << "NGT::createIndex: Fatal error. ID=" << job.id << ":" << err.what();
+                                cerr << "polaris::createIndex: Fatal error. ID=" << job.id << ":" << err.what();
                                 if (NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeKNNG) {
                                     cerr << err.what() << " continue.." << endl;
                                 } else {
@@ -1614,8 +1614,8 @@ GraphAndTreeIndex::verify(vector<uint8_t> &status, bool info, char mode) {
         }
         if (status[id] != 0x00 && status[id] != 0x07) {
             if (status[id] == 0x03) {
-                NGT::SearchContainer sc(*GraphIndex::getObjectRepository().get(id));
-                NGT::ObjectDistances objects;
+                polaris::SearchContainer sc(*GraphIndex::getObjectRepository().get(id));
+                polaris::ObjectDistances objects;
                 sc.setResults(&objects);
                 sc.id = 0;
                 sc.radius = 0.0;

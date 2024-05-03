@@ -21,10 +21,10 @@
 
 
 using namespace std;
-using namespace NGT;
+using namespace polaris;
 
 void
-NeighborhoodGraph::Property::set(NGT::Property &prop) {
+NeighborhoodGraph::Property::set(polaris::Property &prop) {
     if (prop.truncationThreshold != -1) truncationThreshold = prop.truncationThreshold;
     if (prop.edgeSizeForCreation != -1) edgeSizeForCreation = prop.edgeSizeForCreation;
     if (prop.edgeSizeForSearch != -1) edgeSizeForSearch = prop.edgeSizeForSearch;
@@ -43,7 +43,7 @@ NeighborhoodGraph::Property::set(NGT::Property &prop) {
 }
 
 void
-NeighborhoodGraph::Property::get(NGT::Property &prop) {
+NeighborhoodGraph::Property::get(polaris::Property &prop) {
     prop.truncationThreshold = truncationThreshold;
     prop.edgeSizeForCreation = edgeSizeForCreation;
     prop.edgeSizeForSearch = edgeSizeForSearch;
@@ -65,223 +65,223 @@ NeighborhoodGraph::Property::get(NGT::Property &prop) {
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
 
 void
-NeighborhoodGraph::Search::normalizedCosineSimilarityFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedCosineSimilarityFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                            ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedCosineSimilarityFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::cosineSimilarityFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::cosineSimilarityFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                  ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::CosineSimilarityFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedAngleFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedAngleFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                 ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedAngleFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::angleFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::angleFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::AngleFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l1Float(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::l1Float(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L1Float, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l2Float(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::l2Float(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L2Float, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedL2Float(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedL2Float(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                              ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedL2Float, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::sparseJaccardFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::sparseJaccardFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                               ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::SparseJaccardFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 // added by Nyapicom
 void
-NeighborhoodGraph::Search::poincareFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::poincareFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::PoincareFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 // added by Nyapicom
 void
-NeighborhoodGraph::Search::lorentzFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::lorentzFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::LorentzFloat, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l1Uint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::l1Uint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L1Uint8, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l2Uint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::l2Uint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L2Uint8, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::hammingUint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::hammingUint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::HammingUint8, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::jaccardUint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::jaccardUint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::JaccardUint8, DistanceCheckedSet>(sc, seeds);
 }
 
 
 void
-NeighborhoodGraph::Search::normalizedCosineSimilarityFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedCosineSimilarityFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                              ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedCosineSimilarityFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::cosineSimilarityFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::cosineSimilarityFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                    ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::CosineSimilarityFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedAngleFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedAngleFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                   ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedAngleFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::angleFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::angleFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::AngleFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l1Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::l1Float16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L1Float16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l2Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::l2Float16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L2Float16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedL2Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedL2Float16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedL2Float16, DistanceCheckedSet>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::sparseJaccardFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::sparseJaccardFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                 ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::SparseJaccardFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 // added by Nyapicom
 void
-NeighborhoodGraph::Search::poincareFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::poincareFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::PoincareFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 // added by Nyapicom
 void
-NeighborhoodGraph::Search::lorentzFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::Search::lorentzFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::LorentzFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
 
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph,
-                                                                          NGT::SearchContainer &sc,
+                                                                          polaris::SearchContainer &sc,
                                                                           ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedCosineSimilarityFloat, DistanceCheckedSetForLargeDataset>(
             sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::cosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::cosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                                 ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::CosineSimilarityFloat, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedAngleFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedAngleFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                                ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedAngleFloat, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::angleFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::angleFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                      ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::AngleFloat, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l1FloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::l1FloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                   ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L1Float, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l2FloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::l2FloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                   ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L2Float, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedL2FloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedL2FloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                             ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedL2Float, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::sparseJaccardFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::sparseJaccardFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                              ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::SparseJaccardFloat, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::poincareFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::poincareFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                         ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::PoincareFloat, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::lorentzFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::lorentzFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                        ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::LorentzFloat, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l1Uint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::l1Uint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                   ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L1Uint8, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l2Uint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::l2Uint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                   ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L2Uint8, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::hammingUint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::hammingUint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                        ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::HammingUint8, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::jaccardUint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::jaccardUint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                        ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::JaccardUint8, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
@@ -289,64 +289,64 @@ NeighborhoodGraph::Search::jaccardUint8ForLargeDataset(NeighborhoodGraph &graph,
 
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph,
-                                                                            NGT::SearchContainer &sc,
+                                                                            polaris::SearchContainer &sc,
                                                                             ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedCosineSimilarityFloat16, DistanceCheckedSetForLargeDataset>(
             sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::cosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::cosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                                   ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::CosineSimilarityFloat16, DistanceCheckedSetForLargeDataset>(sc,
                                                                                                                seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedAngleFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedAngleFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                                  ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedAngleFloat16, DistanceCheckedSetForLargeDataset>(sc,
                                                                                                               seeds);
 }
 
 void
-NeighborhoodGraph::Search::angleFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::angleFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                        ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::AngleFloat16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l1Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::l1Float16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                     ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L1Float16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::l2Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::l2Float16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                     ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::L2Float16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::normalizedL2Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::normalizedL2Float16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                               ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::NormalizedL2Float16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::sparseJaccardFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::sparseJaccardFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                                ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::SparseJaccardFloat16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::poincareFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::poincareFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                           ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::PoincareFloat16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
 void
-NeighborhoodGraph::Search::lorentzFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+NeighborhoodGraph::Search::lorentzFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                          ObjectDistances &seeds) {
     graph.searchReadOnlyGraph<PrimitiveComparator::LorentzFloat16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
@@ -355,13 +355,12 @@ NeighborhoodGraph::Search::lorentzFloat16ForLargeDataset(NeighborhoodGraph &grap
 #endif
 
 void
-NeighborhoodGraph::setupDistances(NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::setupDistances(polaris::SearchContainer &sc, ObjectDistances &seeds) {
     ObjectRepository &objectRepository = getObjectRepository();
-    NGT::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
+    polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
     ObjectDistances tmp;
     tmp.reserve(seeds.size());
     size_t seedSize = seeds.size();
-#ifndef NGT_PREFETCH_DISABLED
     const size_t prefetchSize = objectSpace->getPrefetchSize();
     const size_t prefetchOffset = objectSpace->getPrefetchOffset();
     PersistentObject **objects = objectRepository.getPtr();
@@ -369,14 +368,11 @@ NeighborhoodGraph::setupDistances(NGT::SearchContainer &sc, ObjectDistances &see
     for (size_t i = 0; i < poft; i++) {
         MemoryCache::prefetch(reinterpret_cast<unsigned char *>(objects[seeds[i].id]), prefetchSize);
     }
-#endif
     for (size_t i = 0; i < seedSize; i++) {
-#ifndef NGT_PREFETCH_DISABLED
         if (i + prefetchOffset < seedSize) {
             MemoryCache::prefetch(reinterpret_cast<unsigned char *>(objects[seeds[i + prefetchOffset].id]),
                                   prefetchSize);
         }
-#endif
         if (objectRepository.isEmpty(seeds[i].id)) {
             cerr << "setupseeds:warning! unavailable object:" << seeds[i].id << "." << endl;
             continue;
@@ -391,12 +387,11 @@ NeighborhoodGraph::setupDistances(NGT::SearchContainer &sc, ObjectDistances &see
 }
 
 void
-NeighborhoodGraph::setupDistances(NGT::SearchContainer &sc, ObjectDistances &seeds,
+NeighborhoodGraph::setupDistances(polaris::SearchContainer &sc, ObjectDistances &seeds,
                                   double (&comparator)(const void *, const void *, size_t)) {
     ObjectRepository &objectRepository = getObjectRepository();
     const size_t dimension = objectSpace->getPaddedDimension();
     size_t seedSize = seeds.size();
-#ifndef NGT_PREFETCH_DISABLED
     const size_t prefetchSize = objectSpace->getPrefetchSize();
     const size_t prefetchOffset = objectSpace->getPrefetchOffset();
     PersistentObject **objects = objectRepository.getPtr();
@@ -404,14 +399,11 @@ NeighborhoodGraph::setupDistances(NGT::SearchContainer &sc, ObjectDistances &see
     for (size_t i = 0; i < poft; i++) {
         MemoryCache::prefetch(reinterpret_cast<unsigned char *>(objects[seeds[i].id]), prefetchSize);
     }
-#endif
     for (size_t i = 0; i < seedSize; i++) {
-#ifndef NGT_PREFETCH_DISABLED
         if (i + prefetchOffset < seedSize) {
             MemoryCache::prefetch(reinterpret_cast<unsigned char *>(objects[seeds[i + prefetchOffset].id]),
                                   prefetchSize);
         }
-#endif
         if (objectRepository.isEmpty(seeds[i].id)) {
             cerr << "setupseeds:warning! unavailable object:" << seeds[i].id << "." << endl;
             continue;
@@ -427,7 +419,7 @@ NeighborhoodGraph::setupDistances(NGT::SearchContainer &sc, ObjectDistances &see
 
 
 void
-NeighborhoodGraph::setupSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, ResultSet &results,
+NeighborhoodGraph::setupSeeds(polaris::SearchContainer &sc, ObjectDistances &seeds, ResultSet &results,
                               UncheckedSet &unchecked, DistanceCheckedSet &distanceChecked) {
     std::sort(seeds.begin(), seeds.end());
 
@@ -456,7 +448,7 @@ NeighborhoodGraph::setupSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, 
 #if !defined(NGT_GRAPH_CHECK_HASH_BASED_BOOLEAN_SET)
 
 void
-NeighborhoodGraph::setupSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, ResultSet &results,
+NeighborhoodGraph::setupSeeds(polaris::SearchContainer &sc, ObjectDistances &seeds, ResultSet &results,
                               UncheckedSet &unchecked, DistanceCheckedSetForLargeDataset &distanceChecked) {
     std::sort(seeds.begin(), seeds.end());
 
@@ -485,7 +477,7 @@ NeighborhoodGraph::setupSeeds(NGT::SearchContainer &sc, ObjectDistances &seeds, 
 
 template<typename COMPARATOR, typename CHECK_LIST>
 void
-NeighborhoodGraph::searchReadOnlyGraph(NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::searchReadOnlyGraph(polaris::SearchContainer &sc, ObjectDistances &seeds) {
 
     if (sc.explorationCoefficient == 0.0) {
         sc.explorationCoefficient = NGT_EXPLORATION_COEFFICIENT;
@@ -575,7 +567,7 @@ NeighborhoodGraph::searchReadOnlyGraph(NGT::SearchContainer &sc, ObjectDistances
 #endif
 
 void
-NeighborhoodGraph::search(NGT::SearchContainer &sc, ObjectDistances &seeds) {
+NeighborhoodGraph::search(polaris::SearchContainer &sc, ObjectDistances &seeds) {
     if (sc.explorationCoefficient == 0.0) {
         sc.explorationCoefficient = NGT_EXPLORATION_COEFFICIENT;
     }
@@ -600,7 +592,7 @@ NeighborhoodGraph::search(NGT::SearchContainer &sc, ObjectDistances &seeds) {
     setupDistances(sc, seeds);
     setupSeeds(sc, seeds, results, unchecked, distanceChecked);
     Distance explorationRadius = sc.explorationCoefficient * sc.radius;
-    NGT::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
+    polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
     ObjectRepository &objectRepository = getObjectRepository();
     const size_t prefetchSize = objectSpace->getPrefetchSize();
     ObjectDistance result;
@@ -886,29 +878,29 @@ public:
     PersistentObject *object;
     ObjectDistance nearest;
     ObjectDistance start;
-    NGT::Distance radius;
+    polaris::Distance radius;
 };
 
 class TruncationSearchSharedData {
 public:
-    TruncationSearchSharedData(NGT::NeighborhoodGraph &g, NGT::ObjectID id, size_t size, NGT::Distance lr) :
+    TruncationSearchSharedData(polaris::NeighborhoodGraph &g, polaris::ObjectID id, size_t size, polaris::Distance lr) :
             graphIndex(g), targetID(id), resultSize(size), explorationCoefficient(lr) {}
 
-    NGT::NeighborhoodGraph &graphIndex;
-    NGT::ObjectID targetID;
+    polaris::NeighborhoodGraph &graphIndex;
+    polaris::ObjectID targetID;
     size_t resultSize;
-    NGT::Distance explorationCoefficient;
+    polaris::Distance explorationCoefficient;
 };
 
-class TruncationSearchThread : public NGT::Thread {
+class TruncationSearchThread : public polaris::Thread {
 public:
     TruncationSearchThread() {}
 
     virtual ~TruncationSearchThread() {}
 
     virtual int run() {
-        NGT::ThreadPool<TruncationSearchJob, TruncationSearchSharedData *, TruncationSearchThread>::Thread &poolThread =
-                (NGT::ThreadPool<TruncationSearchJob, TruncationSearchSharedData *, TruncationSearchThread>::Thread &) *this;
+        polaris::ThreadPool<TruncationSearchJob, TruncationSearchSharedData *, TruncationSearchThread>::Thread &poolThread =
+                (polaris::ThreadPool<TruncationSearchJob, TruncationSearchSharedData *, TruncationSearchThread>::Thread &) *this;
         TruncationSearchSharedData &sd = *poolThread.getSharedData();
         for (;;) {
             TruncationSearchJob job;
@@ -919,9 +911,9 @@ public:
             } catch (polaris::PolarisException &err) {
                 cerr << "TruncationSearchThread::run()::Inner error. continue..." << endl;
             }
-            NGT::SearchContainer ssc(*job.object);
+            polaris::SearchContainer ssc(*job.object);
 
-            NGT::ObjectDistances srs, results;
+            polaris::ObjectDistances srs, results;
 
             srs.push_back(job.start);
             ssc.setResults(&results);
@@ -942,7 +934,7 @@ public:
 
 };
 
-typedef NGT::ThreadPool<TruncationSearchJob, TruncationSearchSharedData *, TruncationSearchThread> TruncationSearchThreadPool;
+typedef polaris::ThreadPool<TruncationSearchJob, TruncationSearchSharedData *, TruncationSearchThread> TruncationSearchThreadPool;
 
 int
 NeighborhoodGraph::truncateEdgesOptimally(

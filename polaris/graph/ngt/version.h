@@ -36,7 +36,7 @@
 #define NGT_GIT_TAG		"-"
 #endif
 
-namespace NGT {
+namespace polaris {
   class Version {
   public:
     static void get(std::ostream &os);

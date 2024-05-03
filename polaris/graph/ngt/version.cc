@@ -17,41 +17,41 @@
 #include <polaris/graph/ngt/version.h>
 
 void
-NGT::Version::get(std::ostream &os)
+polaris::Version::get(std::ostream &os)
 {
-  os << "  Version:" << NGT::Version::getVersion() << std::endl;
-  os << "  Built date:" << NGT::Version::getBuildDate() << std::endl;
+  os << "  Version:" << polaris::Version::getVersion() << std::endl;
+  os << "  Built date:" << polaris::Version::getBuildDate() << std::endl;
   os << "  The last git tag:" << Version::getGitTag() << std::endl;
   os << "  The last git commit hash:" << Version::getGitHash() << std::endl;
   os << "  The last git commit date:" << Version::getGitDate() << std::endl;
 }
 
 const std::string
-NGT::Version::getVersion()
+polaris::Version::getVersion()
 {
   return NGT_VERSION;
 }
 
 const std::string
-NGT::Version::getBuildDate()
+polaris::Version::getBuildDate()
 {
   return NGT_BUILD_DATE;
 }
 
 const std::string
-NGT::Version::getGitHash()
+polaris::Version::getGitHash()
 {
   return NGT_GIT_HASH;
 }
 
 const std::string
-NGT::Version::getGitDate()
+polaris::Version::getGitDate()
 {
   return NGT_GIT_DATE;
 }
 
 const std::string
-NGT::Version::getGitTag()
+polaris::Version::getGitTag()
 {
   return NGT_GIT_TAG;
 }

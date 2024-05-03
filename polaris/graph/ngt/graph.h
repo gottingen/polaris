@@ -19,7 +19,7 @@
 #include <bitset>
 
 #include <polaris/core/defines.h>
-#include <polaris/graph/ngt/common.h>
+#include <polaris/utility/common.h>
 #include <polaris/graph/ngt/object_space_repository.h>
 #include <polaris/utility/hash_based_boolean_set.h>
 
@@ -51,7 +51,7 @@
 #define NGT_CREATION_EDGE_SIZE			10
 #endif
 
-namespace NGT {
+namespace polaris {
     class Property;
 
     typedef GraphNode GRAPH_NODE;
@@ -179,15 +179,15 @@ namespace NGT {
 
         void deserialize(std::ifstream &is, ObjectRepository &objectRepository) {
             if (!is.is_open()) {
-                POLARIS_THROW_EX("NGT::SearchGraph: Not open the specified stream yet.");
+                POLARIS_THROW_EX("polaris::SearchGraph: Not open the specified stream yet.");
             }
             clear();
             size_t s;
-            NGT::Serializer::read(is, s);
+            polaris::Serializer::read(is, s);
             resize(s);
             for (size_t id = 0; id < s; id++) {
                 char type;
-                NGT::Serializer::read(is, type);
+                polaris::Serializer::read(is, type);
                 switch (type) {
                     case '-':
                         break;
@@ -241,286 +241,286 @@ namespace NGT {
         class Search {
         public:
             static void
-            (*getMethod(NGT::ObjectSpace::DistanceType dtype, NGT::ObjectSpace::ObjectType otype, size_t size))(
-                    NGT::NeighborhoodGraph &, NGT::SearchContainer &, NGT::ObjectDistances &) {
+            (*getMethod(polaris::ObjectSpace::DistanceType dtype, polaris::ObjectSpace::ObjectType otype, size_t size))(
+                    polaris::NeighborhoodGraph &, polaris::SearchContainer &, polaris::ObjectDistances &) {
                 if (size < 5000000) {
                     switch (otype) {
-                        case NGT::ObjectSpace::Float:
+                        case polaris::ObjectSpace::Float:
                             switch (dtype) {
-                                case NGT::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
                                     return normalizedCosineSimilarityFloat;
-                                case NGT::ObjectSpace::DistanceTypeCosine :
+                                case polaris::ObjectSpace::DistanceTypeCosine :
                                     return cosineSimilarityFloat;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
                                     return normalizedAngleFloat;
-                                case NGT::ObjectSpace::DistanceTypeAngle :
+                                case polaris::ObjectSpace::DistanceTypeAngle :
                                     return angleFloat;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
                                     return normalizedL2Float;
-                                case NGT::ObjectSpace::DistanceTypeL2 :
+                                case polaris::ObjectSpace::DistanceTypeL2 :
                                     return l2Float;
-                                case NGT::ObjectSpace::DistanceTypeL1 :
+                                case polaris::ObjectSpace::DistanceTypeL1 :
                                     return l1Float;
-                                case NGT::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
                                     return sparseJaccardFloat;
-                                case NGT::ObjectSpace::DistanceTypePoincare :
+                                case polaris::ObjectSpace::DistanceTypePoincare :
                                     return poincareFloat;  // added by Nyapicom
-                                case NGT::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::ObjectSpace::DistanceTypeLorentz :
                                     return lorentzFloat;  // added by Nyapicom
                                 default:
                                     return l2Float;
                             }
                             break;
-                        case NGT::ObjectSpace::Uint8:
+                        case polaris::ObjectSpace::Uint8:
                             switch (dtype) {
-                                case NGT::ObjectSpace::DistanceTypeHamming :
+                                case polaris::ObjectSpace::DistanceTypeHamming :
                                     return hammingUint8;
-                                case NGT::ObjectSpace::DistanceTypeJaccard :
+                                case polaris::ObjectSpace::DistanceTypeJaccard :
                                     return jaccardUint8;
-                                case NGT::ObjectSpace::DistanceTypeL2 :
+                                case polaris::ObjectSpace::DistanceTypeL2 :
                                     return l2Uint8;
-                                case NGT::ObjectSpace::DistanceTypeL1 :
+                                case polaris::ObjectSpace::DistanceTypeL1 :
                                     return l1Uint8;
                                 default :
                                     return l2Uint8;
                             }
                             break;
-                        case NGT::ObjectSpace::Float16:
+                        case polaris::ObjectSpace::Float16:
                             switch (dtype) {
-                                case NGT::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
                                     return normalizedCosineSimilarityFloat16;
-                                case NGT::ObjectSpace::DistanceTypeCosine :
+                                case polaris::ObjectSpace::DistanceTypeCosine :
                                     return cosineSimilarityFloat16;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
                                     return normalizedAngleFloat16;
-                                case NGT::ObjectSpace::DistanceTypeAngle :
+                                case polaris::ObjectSpace::DistanceTypeAngle :
                                     return angleFloat16;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
                                     return normalizedL2Float16;
-                                case NGT::ObjectSpace::DistanceTypeL2 :
+                                case polaris::ObjectSpace::DistanceTypeL2 :
                                     return l2Float16;
-                                case NGT::ObjectSpace::DistanceTypeL1 :
+                                case polaris::ObjectSpace::DistanceTypeL1 :
                                     return l1Float16;
-                                case NGT::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
                                     return sparseJaccardFloat16;
-                                case NGT::ObjectSpace::DistanceTypePoincare :
+                                case polaris::ObjectSpace::DistanceTypePoincare :
                                     return poincareFloat16;  // added by Nyapicom
-                                case NGT::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::ObjectSpace::DistanceTypeLorentz :
                                     return lorentzFloat16;  // added by Nyapicom
                                 default:
                                     return l2Float16;
                             }
                             break;
                         default:
-                            POLARIS_THROW_EX("NGT::Graph::Search: Not supported object type.");
+                            POLARIS_THROW_EX("polaris::Graph::Search: Not supported object type.");
                             break;
                     }
                     return l1Uint8;
                 } else {
                     switch (otype) {
-                        case NGT::ObjectSpace::Float:
+                        case polaris::ObjectSpace::Float:
                             switch (dtype) {
-                                case NGT::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
                                     return normalizedCosineSimilarityFloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeCosine :
+                                case polaris::ObjectSpace::DistanceTypeCosine :
                                     return cosineSimilarityFloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
                                     return normalizedAngleFloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeAngle :
+                                case polaris::ObjectSpace::DistanceTypeAngle :
                                     return angleFloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
                                     return normalizedL2FloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeL2 :
+                                case polaris::ObjectSpace::DistanceTypeL2 :
                                     return l2FloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeL1 :
+                                case polaris::ObjectSpace::DistanceTypeL1 :
                                     return l1FloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
                                     return sparseJaccardFloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypePoincare :
+                                case polaris::ObjectSpace::DistanceTypePoincare :
                                     return poincareFloatForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::ObjectSpace::DistanceTypeLorentz :
                                     return lorentzFloatForLargeDataset;
                                 default:
                                     return l2FloatForLargeDataset;
                             }
                             break;
-                        case NGT::ObjectSpace::Uint8:
+                        case polaris::ObjectSpace::Uint8:
                             switch (dtype) {
-                                case NGT::ObjectSpace::DistanceTypeHamming :
+                                case polaris::ObjectSpace::DistanceTypeHamming :
                                     return hammingUint8ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeJaccard :
+                                case polaris::ObjectSpace::DistanceTypeJaccard :
                                     return jaccardUint8ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeL2 :
+                                case polaris::ObjectSpace::DistanceTypeL2 :
                                     return l2Uint8ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeL1 :
+                                case polaris::ObjectSpace::DistanceTypeL1 :
                                     return l1Uint8ForLargeDataset;
                                 default :
                                     return l2Uint8ForLargeDataset;
                             }
                             break;
-                        case NGT::ObjectSpace::Float16:
+                        case polaris::ObjectSpace::Float16:
                             switch (dtype) {
-                                case NGT::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
                                     return normalizedCosineSimilarityFloat16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeCosine :
+                                case polaris::ObjectSpace::DistanceTypeCosine :
                                     return cosineSimilarityFloat16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
                                     return normalizedAngleFloat16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeAngle :
+                                case polaris::ObjectSpace::DistanceTypeAngle :
                                     return angleFloat16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
                                     return normalizedL2Float16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeL2 :
+                                case polaris::ObjectSpace::DistanceTypeL2 :
                                     return l2Float16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeL1 :
+                                case polaris::ObjectSpace::DistanceTypeL1 :
                                     return l1Float16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
                                     return sparseJaccardFloat16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypePoincare :
+                                case polaris::ObjectSpace::DistanceTypePoincare :
                                     return poincareFloat16ForLargeDataset;
-                                case NGT::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::ObjectSpace::DistanceTypeLorentz :
                                     return lorentzFloat16ForLargeDataset;
                                 default:
                                     return l2Float16ForLargeDataset;
                             }
                         default:
-                            POLARIS_THROW_EX("NGT::Graph::Search: Not supported object type.");
+                            POLARIS_THROW_EX("polaris::Graph::Search: Not supported object type.");
                             break;
                     }
                     return l1Uint8ForLargeDataset;
                 }
             }
 
-            static void l1Uint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void l1Uint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void l2Uint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void l2Uint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void l1Float(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void l1Float(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void l2Float(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void l2Float(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void hammingUint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void hammingUint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void jaccardUint8(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void jaccardUint8(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void sparseJaccardFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
-
-            static void
-            cosineSimilarityFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
-
-            static void angleFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void sparseJaccardFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            normalizedCosineSimilarityFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            cosineSimilarityFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
+
+            static void angleFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            normalizedAngleFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            normalizedCosineSimilarityFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void normalizedL2Float(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void
+            normalizedAngleFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void poincareFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void normalizedL2Float(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
+
+            static void poincareFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                       ObjectDistances &seeds);  // added by Nyapicom
-            static void lorentzFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void lorentzFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                      ObjectDistances &seeds);  // added by Nyapicom
 
-            static void l1Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void l1Float16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void l2Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
-
-            static void
-            sparseJaccardFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void l2Float16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            cosineSimilarityFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            sparseJaccardFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void angleFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void
+            cosineSimilarityFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void normalizedCosineSimilarityFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void angleFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
+
+            static void normalizedCosineSimilarityFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                           ObjectDistances &seeds);
 
             static void
-            normalizedAngleFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            normalizedAngleFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void normalizedL2Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            static void normalizedL2Float16(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void poincareFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void poincareFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                         ObjectDistances &seeds);  // added by Nyapicom
-            static void lorentzFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void lorentzFloat16(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                        ObjectDistances &seeds);  // added by Nyapicom
 
             static void
-            l1Uint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            l1Uint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            l2Uint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            l2Uint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            l1FloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            l1FloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            l2FloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            l2FloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            hammingUint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            hammingUint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            jaccardUint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            jaccardUint8ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void sparseJaccardFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void sparseJaccardFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                           ObjectDistances &seeds);
 
-            static void cosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void cosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                              ObjectDistances &seeds);
 
             static void
-            angleFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            angleFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            normalizedCosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            normalizedCosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                            ObjectDistances &seeds);
 
-            static void normalizedAngleFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void normalizedAngleFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                             ObjectDistances &seeds);
 
-            static void normalizedL2FloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void normalizedL2FloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                          ObjectDistances &seeds);
 
             static void
-            poincareFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            poincareFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            lorentzFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            lorentzFloatForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            l1Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            l1Float16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            l2Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            l2Float16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-            static void sparseJaccardFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void sparseJaccardFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                             ObjectDistances &seeds);
 
-            static void cosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void cosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                                ObjectDistances &seeds);
 
             static void
-            angleFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            angleFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            normalizedCosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            normalizedCosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                              ObjectDistances &seeds);
 
-            static void normalizedAngleFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void normalizedAngleFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                               ObjectDistances &seeds);
 
-            static void normalizedL2Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
+            static void normalizedL2Float16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                            ObjectDistances &seeds);
 
             static void
-            poincareFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            poincareFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
             static void
-            lorentzFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
+            lorentzFloat16ForLargeDataset(NeighborhoodGraph &graph, polaris::SearchContainer &sc, ObjectDistances &seeds);
 
         };
 
@@ -566,11 +566,11 @@ namespace NGT {
                 incomingEdge = -1;
             }
 
-            void set(NGT::Property &prop);
+            void set(polaris::Property &prop);
 
-            void get(NGT::Property &prop);
+            void get(polaris::Property &prop);
 
-            void exportProperty(NGT::PropertySet &p) {
+            void exportProperty(polaris::PropertySet &p) {
                 p.set("IncrimentalEdgeSizeLimitForTruncation", truncationThreshold);
                 p.set("EdgeSizeForCreation", edgeSizeForCreation);
                 p.set("EdgeSizeForSearch", edgeSizeForSearch);
@@ -634,7 +634,7 @@ namespace NGT {
                 }
             }
 
-            void importProperty(NGT::PropertySet &p) {
+            void importProperty(polaris::PropertySet &p) {
                 setDefault();
                 truncationThreshold = p.getl("IncrimentalEdgeSizeLimitForTruncation", truncationThreshold);
                 edgeSizeForCreation = p.getl("EdgeSizeForCreation", edgeSizeForCreation);
@@ -750,10 +750,10 @@ namespace NGT {
                     insertBKNNGNode(id, objects);
                     break;
                 case GraphTypeNone:
-                    POLARIS_THROW_EX("NGT::insertNode: GraphType is not specified.");
+                    POLARIS_THROW_EX("polaris::insertNode: GraphType is not specified.");
                     break;
                 default:
-                    POLARIS_THROW_EX("NGT::insertNode: GraphType is invalid.");
+                    POLARIS_THROW_EX("polaris::insertNode: GraphType is invalid.");
                     break;
             }
         }
@@ -834,7 +834,7 @@ namespace NGT {
 #else
                     if (srcNode[sni].distance >= dstNodeDistance) continue;
 #endif
-                    NGT::GraphNode &pathNode = *getNode(pathNodeID);
+                    polaris::GraphNode &pathNode = *getNode(pathNodeID);
                     for (size_t pni = 0; pni < pathNode.size(); pni++) {
                         auto nodeID = pathNode[pni].id;
                         if (nodeID != dstNodeID) continue;
@@ -875,7 +875,7 @@ namespace NGT {
         void insertONNGNode(ObjectID id, ObjectDistances &results) {
             if (property.truncationThreshold != 0) {
                 std::stringstream msg;
-                msg << "NGT::insertONNGNode: truncation should be disabled!" << std::endl;
+                msg << "polaris::insertONNGNode: truncation should be disabled!" << std::endl;
                 POLARIS_THROW_EX(msg);
             }
             int count = 0;
@@ -910,7 +910,7 @@ namespace NGT {
         }
 
         // setup edgeSize
-        inline size_t getEdgeSize(NGT::SearchContainer &sc) {
+        inline size_t getEdgeSize(polaris::SearchContainer &sc) {
             int64_t esize = sc.edgeSize == -1 ? property.edgeSizeForSearch : sc.edgeSize;
             size_t edgeSize = INT_MAX;
 
@@ -924,19 +924,19 @@ namespace NGT {
                 edgeSize = add >= static_cast<double>(INT_MAX) ? INT_MAX : property.dynamicEdgeSizeBase + add;
             } else {
                 std::stringstream msg;
-                msg << "NGT::getEdgeSize: Invalid edge size parameters " << sc.edgeSize << ":"
+                msg << "polaris::getEdgeSize: Invalid edge size parameters " << sc.edgeSize << ":"
                     << property.edgeSizeForSearch;
                 POLARIS_THROW_EX(msg);
             }
             return edgeSize;
         }
 
-        void search(NGT::SearchContainer &sc, ObjectDistances &seeds);
+        void search(polaris::SearchContainer &sc, ObjectDistances &seeds);
 
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
 
         template<typename COMPARATOR, typename CHECK_LIST>
-        void searchReadOnlyGraph(NGT::SearchContainer &sc, ObjectDistances &seeds);
+        void searchReadOnlyGraph(polaris::SearchContainer &sc, ObjectDistances &seeds);
 
 #endif
 
@@ -958,11 +958,11 @@ namespace NGT {
             }
             if (ni == node.end()) {
                 std::stringstream msg;
-                msg << "NGT::removeEdge: Cannot found " << edge.id;
+                msg << "polaris::removeEdge: Cannot found " << edge.id;
                 POLARIS_THROW_EX(msg);
             } else {
                 std::stringstream msg;
-                msg << "NGT::removeEdge: Cannot found " << (*ni).id << ":" << edge.id;
+                msg << "polaris::removeEdge: Cannot found " << (*ni).id << ":" << edge.id;
                 POLARIS_THROW_EX(msg);
             }
         }
@@ -1026,9 +1026,9 @@ namespace NGT {
 #endif
 #endif
 
-        void setupDistances(NGT::SearchContainer &sc, ObjectDistances &seeds);
+        void setupDistances(polaris::SearchContainer &sc, ObjectDistances &seeds);
 
-        void setupDistances(NGT::SearchContainer &sc, ObjectDistances &seeds,
+        void setupDistances(polaris::SearchContainer &sc, ObjectDistances &seeds,
                             double (&comparator)(const void *, const void *, size_t));
 
         void setupSeeds(SearchContainer &sc, ObjectDistances &seeds, ResultSet &results,
@@ -1053,7 +1053,7 @@ namespace NGT {
 #endif
 
         void deleteInMemory() {
-            for (std::vector<NGT::GraphNode *>::iterator i = repository.begin(); i != repository.end(); i++) {
+            for (std::vector<polaris::GraphNode *>::iterator i = repository.begin(); i != repository.end(); i++) {
                 if ((*i) != 0) {
                     delete (*i);
                 }
@@ -1081,7 +1081,7 @@ namespace NGT {
             if ((ni != node.end()) && ((*ni).id == addID)) {
                 if (identityCheck) {
                     std::stringstream msg;
-                    msg << "NGT::addEdge: already existed! " << (*ni).id << ":" << addID;
+                    msg << "polaris::addEdge: already existed! " << (*ni).id << ":" << addID;
                     POLARIS_THROW_EX(msg);
                 }
                 return;

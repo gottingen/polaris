@@ -63,11 +63,11 @@ void QBG::HierarchicalKmeans::initialize() {
 }
 
 #ifdef NGTQ_QBG
-void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG::Index &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, NGT::Clustering &clustering) {
+void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG::Index &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, polaris::Clustering &clustering) {
   auto &quantizer = static_cast<NGTQ::QuantizerInstance<uint8_t>&>(index.getQuantizer());
   auto &objectSpace = quantizer.globalCodebookIndex.getObjectSpace();
   QBGObjectList &objectList = quantizer.objectList;
-  NGT::Timer timer;
+  polaris::Timer timer;
   timer.start();
   std::vector<uint32_t> batch;
   std::vector<pair<uint32_t, uint32_t>> exceededLeaves;
@@ -91,7 +91,7 @@ void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG
 			  clustering, maxSize, nleaves, 0);
 
   if (numOfTotalClusters != 0) {
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
     size_t numOfLeaves = 0;
     for (auto node : nodes) {
@@ -105,7 +105,7 @@ void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG
     hierarchicalKmeansWithNumberOfClustersInParallel(numOfTotalClusters, numOfObjects, numOfLeaves,
 						     objectList, objectSpace, nodes, initMode);
     if (numOfTotalBlobs != 0) {
-      NGT::Timer timer;
+      polaris::Timer timer;
       timer.start();
       size_t numOfLeaves = 0;
       for (auto node : nodes) {
@@ -203,14 +203,14 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
       POLARIS_THROW_EX(msg);
     }
 
-    NGT::Clustering firstClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, 300);
+    polaris::Clustering firstClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, 300);
     float clusterSizeConstraint = 5.0;
     firstClustering.setClusterSizeConstraintCoefficient(clusterSizeConstraint);
     std::cerr << "size constraint=" << clusterSizeConstraint << std::endl;
     std::vector<std::vector<float>> vectors;
     vectors.reserve(numOfFirstObjects);
     std::cerr << "loading objects..." << std::endl;
-    NGT::Timer timer;
+    polaris::Timer timer;
     std::vector<float> obj;
     for (size_t id = 1; id <= numOfFirstObjects; id++) {
       if (id % 1000000 == 0) {
@@ -225,7 +225,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
     }
     std::cerr << "loading objects time=" << timer << std::endl;
     std::cerr << "clustering for the first... (" << vectors.size() << "->" << numOfFirstClusters << ") " << std::endl;
-    std::vector<NGT::Clustering::Cluster> firstClusters;
+    std::vector<polaris::Clustering::Cluster> firstClusters;
 
     timer.start();
     firstClustering.kmeans(vectors, numOfFirstClusters, firstClusters);
@@ -237,42 +237,42 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
     std::cerr << "assign for the second. (" << numOfFirstObjects << "->" << numOfSecondObjects << ")..." << std::endl;
     assign(firstClusters, numOfFirstObjects + 1, numOfSecondObjects, objectSpace, objectList);
     timer.stop();
-    std::cerr << "end of assign for the second. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "end of assign for the second. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
 
     std::cerr << "subclustering for the second (" << numOfSecondClusters << ")..." << std::endl;
-    std::vector<NGT::Clustering::Cluster> secondClusters;
+    std::vector<polaris::Clustering::Cluster> secondClusters;
     timer.start();
     subclustering(firstClusters, numOfSecondClusters, numOfSecondObjects, objectSpace, objectList, initMode, secondClusters);
     timer.stop();
-    std::cerr << "end of subclustering for the second. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "end of subclustering for the second. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
     timer.start();
-    NGT::Clustering::clearMembers(secondClusters);
+    polaris::Clustering::clearMembers(secondClusters);
     std::cerr << "assign for the third. (" << 1 << "->" << numOfThirdObjects << ")..." << std::endl;
     assignWithNGT(secondClusters, 1, numOfThirdObjects, objectSpace, objectList, epsilonExplorationSize, expectedRecall);
     {
-      size_t noOfRemovedClusters = NGT::Clustering::removeEmptyClusters(secondClusters);
+      size_t noOfRemovedClusters = polaris::Clustering::removeEmptyClusters(secondClusters);
       if (noOfRemovedClusters != 0) {
 	std::cerr << "Clustering: Warning. # of removed clusters=" << noOfRemovedClusters << std::endl;
       }
     }
     timer.stop();
-    std::cerr << "end of assign for the third. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "end of assign for the third. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
     std::cerr << "subclustering for the third (" << numOfThirdClusters << ")..." << std::endl;
-    std::vector<std::vector<NGT::Clustering::Cluster>> thirdClusters;
+    std::vector<std::vector<polaris::Clustering::Cluster>> thirdClusters;
     timer.start();
     subclustering(secondClusters, numOfThirdClusters, numOfThirdObjects, objectSpace, objectList, initMode, thirdClusters);
     timer.stop();
-    std::cerr << "end of subclustering for the third. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "end of subclustering for the third. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
 
-    std::vector<NGT::Clustering::Cluster> thirdFlatClusters;
+    std::vector<polaris::Clustering::Cluster> thirdFlatClusters;
     flattenClusters(secondClusters, thirdClusters, numOfThirdClusters, thirdFlatClusters);
 
     timer.start();
-    NGT::Clustering::clearMembers(thirdFlatClusters);
+    polaris::Clustering::clearMembers(thirdFlatClusters);
     std::cerr << "assign all for the third (" << 1 << "-" << numOfObjects << ")..." << std::endl;
     assignWithNGT(thirdFlatClusters, 1, numOfObjects, objectSpace, objectList, epsilonExplorationSize, expectedRecall);
     timer.stop();
-    std::cerr << "end of assign all for the third. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "end of assign all for the third. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
 
     {
       std::vector<size_t> bqindex;
@@ -292,15 +292,15 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
 	}
       }
       std::cerr << "save the 3rd to the 2nd index..." << std::endl;
-      NGT::Clustering::saveVector(prefix + QBG::Index::get3rdTo2ndSuffix(), bqindex);
+      polaris::Clustering::saveVector(prefix + QBG::Index::get3rdTo2ndSuffix(), bqindex);
     }
 
     std::cerr << "save quantization centroid" << std::endl;
-    NGT::Clustering::saveClusters(prefix + QBG::Index::getSecondCentroidSuffix(), secondClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::Index::getSecondCentroidSuffix(), secondClusters);
 
     std::cerr << "save the third centroid..." << std::endl;
     auto skipEmptyClusters = true;
-    NGT::Clustering::saveClusters(prefix + QBG::Index::getThirdCentroidSuffix(), thirdFlatClusters, skipEmptyClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::Index::getThirdCentroidSuffix(), thirdFlatClusters, skipEmptyClusters);
     {
       std::vector<size_t> cindex(numOfObjects);
       size_t idx = 0;
@@ -315,7 +315,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
 	idx++;
       }
       std::cerr << "save index... " << cindex.size() << std::endl;
-      NGT::Clustering::saveVector(prefix + QBG::Index::getObjTo3rdSuffix(), cindex);
+      polaris::Clustering::saveVector(prefix + QBG::Index::getObjTo3rdSuffix(), cindex);
     }
     std::cerr << "end of clustering" << std::endl;
     return;
@@ -387,7 +387,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
 
     std::cerr << "Two layer clustering. " << numOfFirstClusters << ":" << numOfFirstObjects << "," << numOfSecondClusters << ":" << numOfSecondObjects << "," << numOfThirdClusters << ":" << numOfThirdObjects << " " << numOfObjects << std::endl;
 
-    NGT::Clustering firstClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, 300);
+    polaris::Clustering firstClustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, 300);
     float clusterSizeConstraint = 5.0;
     firstClustering.setClusterSizeConstraintCoefficient(clusterSizeConstraint);
     std::cerr << "size constraint=" << clusterSizeConstraint << std::endl;
@@ -395,7 +395,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
     size_t reserveSize = numOfThirdClusters > numOfFirstObjects ? numOfThirdClusters : numOfFirstObjects;
     vectors.reserve(reserveSize);
     std::cerr << "loading objects..." << std::endl;
-    NGT::Timer timer;
+    polaris::Timer timer;
     std::vector<float> obj;
     for (size_t id = 1; id <= numOfFirstObjects; id++) {
       if (id % 1000000 == 0) {
@@ -408,34 +408,34 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       }
       vectors.push_back(obj);
     }
-    std::cerr << "loading objects time=" << timer << " vmsize=" << NGT::Common::getProcessVmSize() << std::endl;
+    std::cerr << "loading objects time=" << timer << " vmsize=" << polaris::Common::getProcessVmSize() << std::endl;
     std::cerr << "kmeans clustering... " << vectors.size() << " to " << numOfFirstClusters << std::endl;
-    std::vector<NGT::Clustering::Cluster> firstClusters;
+    std::vector<polaris::Clustering::Cluster> firstClusters;
 
     timer.start();
     firstClustering.kmeans(vectors, numOfFirstClusters, firstClusters);
     timer.stop();
-    std::cerr << "kmeans clustering. # of clusters=" << firstClusters.size() << " time=" << timer << " vmsize=" << NGT::Common::getProcessVmSize() << std::endl;
+    std::cerr << "kmeans clustering. # of clusters=" << firstClusters.size() << " time=" << timer << " vmsize=" << polaris::Common::getProcessVmSize() << std::endl;
     timer.start();
     std::cerr << "assign for the third (" << numOfFirstObjects << "-" << numOfThirdObjects << ")..." << std::endl;
     assign(firstClusters, numOfFirstObjects + 1, numOfThirdObjects, objectSpace, objectList);
     timer.stop();
-    std::cerr << "assign for the third. time=" << timer << " vmsize=" << NGT::Common::getProcessVmSize() << std::endl;
+    std::cerr << "assign for the third. time=" << timer << " vmsize=" << polaris::Common::getProcessVmSize() << std::endl;
 
     std::cerr << "subclustering for the third (" << numOfThirdClusters << ", " << numOfThirdObjects << ")..." << std::endl;
-    std::vector<NGT::Clustering::Cluster> thirdFlatClusters;
+    std::vector<polaris::Clustering::Cluster> thirdFlatClusters;
     timer.start();
     subclustering(firstClusters, numOfThirdClusters, numOfThirdObjects, objectSpace, objectList, initMode, thirdFlatClusters);
     timer.stop();
-    std::cerr << "subclustering for the third. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "subclustering for the third. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
 
     std::cerr << "assign all for the third (" << numOfThirdObjects << "-" << numOfObjects << ")..." << std::endl;
     timer.start();
     assignWithNGT(thirdFlatClusters, numOfThirdObjects + 1, numOfObjects, objectSpace, objectList);
     timer.stop();
-    std::cerr << "assign all for the third. time=" << timer << ", vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "assign all for the third. time=" << timer << ", vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
 
-    std::vector<NGT::Clustering::Cluster> secondClusters;
+    std::vector<polaris::Clustering::Cluster> secondClusters;
 
     std::cerr << "clustering for the second. # of objects=" << thirdFlatClusters.size() << " # of clusters=" << numOfSecondClusters << std::endl;
     timer.start();
@@ -447,12 +447,12 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
     }
     if (clusteringType == QBG::HierarchicalKmeans::ClusteringTypeTwoPlusOneLayer) {
       std::cerr << "two + one layer clustering..." << std::endl;
-      NGT::Clustering clustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, 1000);
+      polaris::Clustering clustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithoutNGT, 1000);
       clustering.kmeans(vectors, numOfSecondClusters, secondClusters);
     } else if (clusteringType == QBG::HierarchicalKmeans::ClusteringTypeTwoPlusOneLayer) {
       auto n = numOfSecondObjects / numOfSecondClusters;
       std::cerr << "two + one layer clustering with NGT... " << n << std::endl;
-      NGT::Clustering clustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithNGT, n);
+      polaris::Clustering clustering(initMode, polaris::Clustering::ClusteringTypeKmeansWithNGT, n);
       clustering.kmeans(vectors, numOfSecondClusters, secondClusters);
     } else if (clusteringType == QBG::HierarchicalKmeans::ClusteringTypeTwoPlusTwoLayer) {
       std::cerr << "two + two layer clustering..." << std::endl;
@@ -463,11 +463,11 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       POLARIS_THROW_EX(msg);
     }
     timer.stop();
-    std::cerr << "clustering for the second. time=" << timer << " vmsize=" << NGT::Common::getProcessVmSize() << std::endl;
-    NGT::Clustering::saveClusters(prefix + QBG::Index::getSecondCentroidSuffix(), secondClusters);
+    std::cerr << "clustering for the second. time=" << timer << " vmsize=" << polaris::Common::getProcessVmSize() << std::endl;
+    polaris::Clustering::saveClusters(prefix + QBG::Index::getSecondCentroidSuffix(), secondClusters);
 
     timer.start();
-    std::vector<NGT::Clustering::Cluster> thirdPermutedClusters;
+    std::vector<polaris::Clustering::Cluster> thirdPermutedClusters;
     thirdPermutedClusters.reserve(thirdFlatClusters.size());
     for (size_t sidx = 0; sidx < secondClusters.size(); sidx++) {
       for (auto mit = secondClusters[sidx].members.begin(); mit != secondClusters[sidx].members.end(); ++mit) {
@@ -476,7 +476,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       }
     }
     timer.stop();
-    std::cerr << "permuting cluster time=" << timer << " vmsize=" << NGT::Common::getProcessVmSize() << std::endl;
+    std::cerr << "permuting cluster time=" << timer << " vmsize=" << polaris::Common::getProcessVmSize() << std::endl;
 
     std::vector<size_t> cindex(numOfObjects);
     for (size_t cidx = 0; cidx < thirdPermutedClusters.size(); cidx++) {
@@ -486,7 +486,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       }
     }
     std::cerr << "save index... " << cindex.size() << std::endl;
-    NGT::Clustering::saveVector(prefix + QBG::Index::getObjTo3rdSuffix(), cindex);
+    polaris::Clustering::saveVector(prefix + QBG::Index::getObjTo3rdSuffix(), cindex);
 
     std::vector<size_t> bqindex(thirdPermutedClusters.size());
     for (size_t idx1 = 0; idx1 < secondClusters.size(); idx1++) {
@@ -495,9 +495,9 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       }
     }
     std::cerr << "save bqindex..." << std::endl;
-    NGT::Clustering::saveVector(prefix + QBG::Index::get3rdTo2ndSuffix(), bqindex);
+    polaris::Clustering::saveVector(prefix + QBG::Index::get3rdTo2ndSuffix(), bqindex);
     std::cerr << "save the third  centroid" << std::endl;
-    NGT::Clustering::saveClusters(prefix + QBG::Index::getThirdCentroidSuffix(), thirdPermutedClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::Index::getThirdCentroidSuffix(), thirdPermutedClusters);
 
   }
 
@@ -506,7 +506,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
 }
 
 void QBG::HierarchicalKmeans::multiLayerClustering(QBG::Index &index, std::string prefix, std::string objectIDsFile) {
-  NGT::Clustering::ClusteringType clusteringType = NGT::Clustering::ClusteringTypeKmeansWithoutNGT;
+  polaris::Clustering::ClusteringType clusteringType = polaris::Clustering::ClusteringTypeKmeansWithoutNGT;
 
   uint32_t rootID = 0;
   std::vector<HKNode*> nodes;
@@ -514,7 +514,7 @@ void QBG::HierarchicalKmeans::multiLayerClustering(QBG::Index &index, std::strin
 
   std::vector<float> object;
   size_t iteration = 1000;
-  NGT::Clustering clustering(initMode, clusteringType, iteration, numOfClusters);
+  polaris::Clustering clustering(initMode, clusteringType, iteration, numOfClusters);
   auto &quantizer = static_cast<NGTQ::QuantizerInstance<uint8_t>&>(index.getQuantizer());
   QBGObjectList &objectList = quantizer.objectList;
   if (objectIDsFile.empty()) {
@@ -583,7 +583,7 @@ void QBG::HierarchicalKmeans::multiLayerClustering(QBG::Index &index, std::strin
 }
 
 void QBG::HierarchicalKmeans::clustering(std::string indexPath, std::string prefix, std::string objectIDsFile) {
-  NGT::StdOstreamRedirector redirector(!verbose);
+  polaris::StdOstreamRedirector redirector(!verbose);
   redirector.begin();
 
   std::cerr << "The specified params=FC:" << numOfFirstClusters << ":FO:" << numOfFirstObjects
@@ -612,7 +612,7 @@ void QBG::HierarchicalKmeans::clustering(std::string indexPath, std::string pref
 	std::cerr << "Prefix is not specified." << std::endl;
 	prefix = indexPath + "/" + QBG::Index::getWorkspaceName();
 	try {
-	  NGT::Index::mkdir(prefix);
+	  polaris::Index::mkdir(prefix);
 	} catch(...) {}
 	prefix +="/" + QBG::Index::getHierarchicalClusteringPrefix();
 	std::cerr << prefix << " is used" << std::endl;

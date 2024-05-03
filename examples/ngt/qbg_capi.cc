@@ -126,14 +126,14 @@ int main(int argc, char **argv) {
         std::vector<double> queryObject;
         {
             std::vector<std::string> tokens;
-            NGT::Common::tokenize(line, tokens, " \t");
+            polaris::Common::tokenize(line, tokens, " \t");
             if (tokens.size() != dimension) {
                 std::cerr << "dimension of the query is invalid. dimesion=" << tokens.size() << ":" << dimension
                           << std::endl;
                 return 1;
             }
             for (std::vector<std::string>::iterator ti = tokens.begin(); ti != tokens.end(); ++ti) {
-                queryVector[distance(tokens.begin(), ti)] = NGT::Common::strtod(*ti);
+                queryVector[distance(tokens.begin(), ti)] = polaris::Common::strtod(*ti);
             }
         }
         QBGObjectDistances result = ngt_create_empty_results(err);

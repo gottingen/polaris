@@ -137,7 +137,6 @@ set(POLARIS_SRC
         graph/ngt/index.cc
         graph/ngt/node.cc
         graph/ngt/object_space.cc
-        graph/ngt/shared_memory_allocator.cc
         graph/ngt/thread.cc
         graph/ngt/tree.cc
         graph/ngt/version.cc
@@ -164,6 +163,7 @@ set(POLARIS_SRC
         utility/natural_number_map.cc
         utility/natural_number_set.cc
         utility/mmap_manager.cc
+        utility/shared_memory_allocator.cc
         unified_index.cc
 )
 
@@ -195,7 +195,6 @@ set(POLARIS_HEADERS
         datasets/random.h
         datasets/recall.h
         graph/ngt/command.h
-        graph/ngt/common.h
         graph/ngt/clustering.h
         graph/ngt/graph_optimizer.h
         graph/ngt/graph_reconstructor.h
@@ -205,7 +204,6 @@ set(POLARIS_HEADERS
         graph/ngt/object_space.h
         graph/ngt/object_space_repository.h
         graph/ngt/optimizer.h
-        graph/ngt/shared_memory_allocator.h
         graph/ngt/thread.h
         graph/ngt/tree.h
         graph/ngt/version.h
@@ -359,6 +357,8 @@ set(POLARIS_HEADERS
         storage/in_mem_graph_store.h
         storage/in_mem_data_store.h
         utility/any_wrappers.h
+        utility/bfloat.h
+        utility/common.h
         utility/concurrent_queue.h
         utility/doubly_buffered_data.h
         utility/half.hpp
@@ -375,6 +375,7 @@ set(POLARIS_HEADERS
         utility/mmap_manager_defs.h
         utility/mmap_manager_exception.h
         utility/mmap_manager_impl.h
+        utility/shared_memory_allocator.h
         unified_index.h
 )
 

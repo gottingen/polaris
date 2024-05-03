@@ -27,7 +27,7 @@ typedef NGTQ::Quantizer::ObjectList QBGObjectList;
 
 class QbgCliBuildParameters : public QBG::BuildParameters {
 public:
-  QbgCliBuildParameters(NGT::Args &a):args(a){
+  QbgCliBuildParameters(polaris::Args &a):args(a){
     args.parse("Zv");
   }
 
@@ -87,7 +87,7 @@ public:
     creation.globalEdgeSizeForSearch = args.getl("S", 40);
     {
       char indexType = args.getChar("i", 't');
-      creation.globalIndexType = indexType == 't' ? NGT::Property::GraphAndTree : NGT::Property::Graph;
+      creation.globalIndexType = indexType == 't' ? polaris::Property::GraphAndTree : polaris::Property::Graph;
       creation.localIndexType = creation.globalIndexType;
     }
     creation.globalInsertionRadiusCoefficient = args.getf("e", 0.1) + 1.0;
@@ -154,16 +154,16 @@ public:
     hierarchicalClustering.verbose = args.getBool("v");
   
     char iMode = args.getChar("i", '-');
-    hierarchicalClustering.initMode = NGT::Clustering::InitializationModeKmeansPlusPlus;
+    hierarchicalClustering.initMode = polaris::Clustering::InitializationModeKmeansPlusPlus;
     switch (iMode) {
     case 'l':
-    case 'h': hierarchicalClustering.initMode = NGT::Clustering::InitializationModeHead; break;
-    case 'r': hierarchicalClustering.initMode = NGT::Clustering::InitializationModeRandom; break;
-    case 'R': hierarchicalClustering.initMode = NGT::Clustering::InitializationModeRandomFixedSeed; break;
-    case 'P': hierarchicalClustering.initMode = NGT::Clustering::InitializationModeKmeansPlusPlusFixedSeed; break;
+    case 'h': hierarchicalClustering.initMode = polaris::Clustering::InitializationModeHead; break;
+    case 'r': hierarchicalClustering.initMode = polaris::Clustering::InitializationModeRandom; break;
+    case 'R': hierarchicalClustering.initMode = polaris::Clustering::InitializationModeRandomFixedSeed; break;
+    case 'P': hierarchicalClustering.initMode = polaris::Clustering::InitializationModeKmeansPlusPlusFixedSeed; break;
     default:
     case '-':
-    case 'p': hierarchicalClustering.initMode = NGT::Clustering::InitializationModeKmeansPlusPlus; break;
+    case 'p': hierarchicalClustering.initMode = polaris::Clustering::InitializationModeKmeansPlusPlus; break;
     }
 
     hierarchicalClustering.numOfRandomObjects = args.getl("r", 0);
@@ -187,7 +187,7 @@ public:
 
     if (blob != "-") {
       std::vector<std::string> tokens;
-      NGT::Common::tokenize(blob, tokens, ",");
+      polaris::Common::tokenize(blob, tokens, ",");
       size_t idx = 0;
       if (tokens.size() > 3) {
 	if (tokens[idx] == "3") {
@@ -209,38 +209,38 @@ public:
       }
       if (tokens.size() > idx) {
 	std::vector<std::string> ftokens;
-	NGT::Common::tokenize(tokens[idx], ftokens, ":");
+	polaris::Common::tokenize(tokens[idx], ftokens, ":");
 	if (ftokens.size() >= 1) {
-	  hierarchicalClustering.numOfFirstObjects = NGT::Common::strtof(ftokens[0]);
+	  hierarchicalClustering.numOfFirstObjects = polaris::Common::strtof(ftokens[0]);
 	}
 	if (ftokens.size() >= 2) {
-	  hierarchicalClustering.numOfFirstClusters = NGT::Common::strtof(ftokens[1]);
+	  hierarchicalClustering.numOfFirstClusters = polaris::Common::strtof(ftokens[1]);
 	}
 	idx++;
       }
       if (tokens.size() > idx) {
 	std::vector<std::string> ftokens;
-	NGT::Common::tokenize(tokens[idx], ftokens, ":");
+	polaris::Common::tokenize(tokens[idx], ftokens, ":");
 	if (ftokens.size() >= 1) {
-	  hierarchicalClustering.numOfSecondObjects = NGT::Common::strtof(ftokens[0]);
+	  hierarchicalClustering.numOfSecondObjects = polaris::Common::strtof(ftokens[0]);
 	}
 	if (ftokens.size() >= 2) {
-	  hierarchicalClustering.numOfSecondClusters = NGT::Common::strtof(ftokens[1]);
+	  hierarchicalClustering.numOfSecondClusters = polaris::Common::strtof(ftokens[1]);
 	}
 	idx++;
       }
       if (tokens.size() > idx) {
 	std::vector<std::string> ftokens;
-	NGT::Common::tokenize(tokens[idx], ftokens, ":");
+	polaris::Common::tokenize(tokens[idx], ftokens, ":");
 	if (ftokens.size() >= 1) {
 	  if (ftokens[0] == "" || ftokens[0] == "-") {
 	    hierarchicalClustering.numOfThirdObjects = 0;
 	  } else {
-	    hierarchicalClustering.numOfThirdObjects = NGT::Common::strtof(ftokens[0]);
+	    hierarchicalClustering.numOfThirdObjects = polaris::Common::strtof(ftokens[0]);
 	  }
 	}
 	if (ftokens.size() >= 2) {
-	  hierarchicalClustering.numOfThirdClusters = NGT::Common::strtof(ftokens[1]);
+	  hierarchicalClustering.numOfThirdClusters = polaris::Common::strtof(ftokens[1]);
 	}
       }
     }
@@ -259,13 +259,13 @@ public:
       cType = args.getString("C", "k");
     } catch(...) {}
 
-    optimization.clusteringType = NGT::Clustering::ClusteringTypeKmeansWithNGT;
+    optimization.clusteringType = polaris::Clustering::ClusteringTypeKmeansWithNGT;
     if (cType == "k") {
-      optimization.clusteringType = NGT::Clustering::ClusteringTypeKmeansWithoutNGT;
+      optimization.clusteringType = polaris::Clustering::ClusteringTypeKmeansWithoutNGT;
     } else if (cType == "KS") {
-      optimization.clusteringType = NGT::Clustering::ClusteringTypeKmeansWithNGT;
+      optimization.clusteringType = polaris::Clustering::ClusteringTypeKmeansWithNGT;
     } else if (cType == "i") {
-      optimization.clusteringType = NGT::Clustering::ClusteringTypeKmeansWithIteration;
+      optimization.clusteringType = polaris::Clustering::ClusteringTypeKmeansWithIteration;
     } else {
       std::stringstream msg;
       msg << "invalid clustering type. " << cType;
@@ -280,16 +280,16 @@ public:
   
 #ifdef NGT_CLUSTERING
     char iMode = args.getChar("i", '-');
-    optimization.initMode = NGT::Clustering::InitializationModeKmeansPlusPlus;
+    optimization.initMode = polaris::Clustering::InitializationModeKmeansPlusPlus;
     switch (iMode) {
-    case 'h': optimization.initMode = NGT::Clustering::InitializationModeHead; break;
-    case 'r': optimization.initMode = NGT::Clustering::InitializationModeRandom; break;
-    case 'p': optimization.initMode = NGT::Clustering::InitializationModeKmeansPlusPlus; break;
-    case 'R': optimization.initMode = NGT::Clustering::InitializationModeRandomFixedSeed; break;
-    case 'P': optimization.initMode = NGT::Clustering::InitializationModeKmeansPlusPlusFixedSeed; break;
+    case 'h': optimization.initMode = polaris::Clustering::InitializationModeHead; break;
+    case 'r': optimization.initMode = polaris::Clustering::InitializationModeRandom; break;
+    case 'p': optimization.initMode = polaris::Clustering::InitializationModeKmeansPlusPlus; break;
+    case 'R': optimization.initMode = polaris::Clustering::InitializationModeRandomFixedSeed; break;
+    case 'P': optimization.initMode = polaris::Clustering::InitializationModeKmeansPlusPlusFixedSeed; break;
     default:
     case '-':
-    case 'b': optimization.initMode = NGT::Clustering::InitializationModeBest; break;
+    case 'b': optimization.initMode = polaris::Clustering::InitializationModeBest; break;
     }
 #else
     optimization.initMode = args.getChar("i", '-');
@@ -355,20 +355,20 @@ public:
     }
   }
 protected:
-  NGT::Args &args;
+  polaris::Args &args;
 };
 
 
-class SearchParameters : public NGT::Command::SearchParameters {
+class SearchParameters : public polaris::Command::SearchParameters {
 public:
-  SearchParameters(NGT::Args &args): NGT::Command::SearchParameters(args, "0.02") {
+  SearchParameters(polaris::Args &args): polaris::Command::SearchParameters(args, "0.02") {
     stepOfResultExpansion = 2;
     std::string resultExpansion = args.getString("p", "3.0");
     std::vector<std::string> tokens;
-    NGT::Common::tokenize(resultExpansion, tokens, ":");
-    if (tokens.size() >= 1) { beginOfResultExpansion = endOfResultExpansion = NGT::Common::strtod(tokens[0]); }
-    if (tokens.size() >= 2) { endOfResultExpansion = NGT::Common::strtod(tokens[1]); }
-    if (tokens.size() >= 3) { stepOfResultExpansion = NGT::Common::strtod(tokens[2]); }
+    polaris::Common::tokenize(resultExpansion, tokens, ":");
+    if (tokens.size() >= 1) { beginOfResultExpansion = endOfResultExpansion = polaris::Common::strtod(tokens[0]); }
+    if (tokens.size() >= 2) { endOfResultExpansion = polaris::Common::strtod(tokens[1]); }
+    if (tokens.size() >= 3) { stepOfResultExpansion = polaris::Common::strtod(tokens[2]); }
   }
   float	beginOfResultExpansion;
   float	endOfResultExpansion;
@@ -377,7 +377,7 @@ public:
 
 
 void
-QBG::CLI::buildQG(NGT::Args &args)
+QBG::CLI::buildQG(polaris::Args &args)
 {
   const std::string usage = "Usage: qbg build-qg [-Q dimension-of-subvector] [-E max-number-of-edges] index";
 
@@ -474,7 +474,7 @@ searchQG(NGTQG::Index &index, SearchParameters &searchParameters, ostream &strea
     }
     for (float param = beginOfParam; param <= endOfParam; param += stepOfParam) {
       NGTQG::SearchQuery	searchQuery(query);
-      NGT::ObjectDistances	objects;
+      polaris::ObjectDistances	objects;
       searchQuery.setResults(&objects);
       searchQuery.setSize(searchParameters.size);
       searchQuery.setRadius(searchParameters.radius);
@@ -492,7 +492,7 @@ searchQG(NGTQG::Index &index, SearchParameters &searchParameters, ostream &strea
       searchQuery.setResultExpansion(resultExpansion);
       searchQuery.setEpsilon(epsilon);
       searchQuery.setEdgeSize(searchParameters.edgeSize);
-      NGT::Timer timer;
+      polaris::Timer timer;
       switch (searchParameters.indexType) {
       case 't': timer.start(); index.NGTQG::Index::search(searchQuery); timer.stop(); break;
       case 's': timer.start(); index.linearSearch(searchQuery); timer.stop(); break;
@@ -509,7 +509,7 @@ searchQG(NGTQG::Index &index, SearchParameters &searchParameters, ostream &strea
 	stream << "# Factor=" << param << endl;
 	stream << "# Query Time (msec)=" << timer.time * 1000.0 << endl;
 	stream << "# Distance Computation=" << searchQuery.distanceComputationCount << endl;
-	stream << "# VM Peak=" << NGT::Common::getProcessVmPeakStr() << endl;
+	stream << "# VM Peak=" << polaris::Common::getProcessVmPeakStr() << endl;
 	stream << "# Visit Count=" << searchQuery.visitCount << endl;
       } else {
 	stream << "Query No." << queryCount << endl;
@@ -541,7 +541,7 @@ searchQG(NGTQG::Index &index, SearchParameters &searchParameters, ostream &strea
 }
 
 void
-QBG::CLI::searchQG(NGT::Args &args) {
+QBG::CLI::searchQG(polaris::Args &args) {
   const string usage = "Usage: ngtqg search-qg [-i index-type(g|t|s)] [-n result-size] [-e epsilon] [-E edge-size] "
     "[-o output-mode] [-p result-expansion] index(input) query.tsv(input)";
 
@@ -567,8 +567,8 @@ QBG::CLI::searchQG(NGT::Args &args) {
     std::cerr << "edgeSize=" << searchParameters.edgeSize << std::endl;
     std::cerr << "epsilon=" << searchParameters.beginOfEpsilon << "<->" << searchParameters.endOfEpsilon << ","
 	      << searchParameters.stepOfEpsilon << std::endl;
-    std::cerr << "VM size=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-    std::cerr << "VM peak=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "VM size=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+    std::cerr << "VM peak=" << polaris::Common::getProcessVmPeakStr() << std::endl;
   }
 
   try {
@@ -588,7 +588,7 @@ QBG::CLI::searchQG(NGT::Args &args) {
 
 
 void
-QBG::CLI::createQG(NGT::Args &args)
+QBG::CLI::createQG(polaris::Args &args)
 {
   const std::string usage = "Usage: qbg create-qg [-Q dimension-of-subvector] index";
 
@@ -609,7 +609,7 @@ QBG::CLI::createQG(NGT::Args &args)
 }
 
 void
-QBG::CLI::appendQG(NGT::Args &args)
+QBG::CLI::appendQG(polaris::Args &args)
 {
   const std::string usage = "Usage: qbg append-qbg ngt-index";
   string indexPath;
@@ -625,7 +625,7 @@ QBG::CLI::appendQG(NGT::Args &args)
 
 
 void
-QBG::CLI::info(NGT::Args &args)
+QBG::CLI::info(polaris::Args &args)
 {
   const string usage = "Usage: qbg index";
 
@@ -665,7 +665,7 @@ QBG::CLI::info(NGT::Args &args)
 }
 
 void
-QBG::CLI::create(NGT::Args &args)
+QBG::CLI::create(polaris::Args &args)
 {
   const string usage = "Usage: qbg create "
     " -d dimension [-o object-type (f:float|c:unsigned char)] [-D distance-function] [-n data-size] "
@@ -696,9 +696,9 @@ QBG::CLI::create(NGT::Args &args)
 	std::string line;
 	while (getline(stream, line)) {
 	  std::vector<std::string> tokens;
-	  NGT::Common::tokenize(line, tokens, " \t");
+	  polaris::Common::tokenize(line, tokens, " \t");
 	  for (auto &token : tokens) {
-	    r.push_back(NGT::Common::strtof(token));
+	    r.push_back(polaris::Common::strtof(token));
 	  }
 	}
       } catch (...) {
@@ -721,7 +721,7 @@ QBG::CLI::create(NGT::Args &args)
 
 
 void
-QBG::CLI::load(NGT::Args &args)
+QBG::CLI::load(polaris::Args &args)
 {
   const string usage = "Usage: qbg load ";
 
@@ -762,7 +762,7 @@ QBG::CLI::load(NGT::Args &args)
 }
 
 void
-QBG::CLI::search(NGT::Args &args)
+QBG::CLI::search(polaris::Args &args)
 {
   
   const string usage = "Usage: qbg search [-i g|t|s] [-n result-size] [-e epsilon] [-m mode(r|l|c|a)] "
@@ -826,25 +826,25 @@ QBG::CLI::search(NGT::Args &args)
     }
     if (resultExpansion < 0 && nOfProbes == 0) {
       std::cerr << "Cannot specify both -p and -P as a fluctuating value. -P is prioritized." << std::endl;
-      NGT::Common::tokenize(args.getString("p", "-"), tokens, ":");
-      resultExpansion = NGT::Common::strtod(tokens[0]);
+      polaris::Common::tokenize(args.getString("p", "-"), tokens, ":");
+      resultExpansion = polaris::Common::strtod(tokens[0]);
       tokens.clear();
     }
     if (resultExpansion < 0) {
-      NGT::Common::tokenize(args.getString("p", "-"), tokens, ":");
+      polaris::Common::tokenize(args.getString("p", "-"), tokens, ":");
     } else if (nOfProbes == 0) {
-      NGT::Common::tokenize(args.getString("P", "-"), tokens, ":");
+      polaris::Common::tokenize(args.getString("P", "-"), tokens, ":");
     }
     if (tokens.size() >= 2) {
-      beginOfParameter = NGT::Common::strtod(tokens[0]);
+      beginOfParameter = polaris::Common::strtod(tokens[0]);
       endOfParameter = beginOfParameter;
-      if (tokens.size() >= 2) { endOfParameter = NGT::Common::strtod(tokens[1]); }
+      if (tokens.size() >= 2) { endOfParameter = polaris::Common::strtod(tokens[1]); }
       if (tokens.size() >= 3) {
 	if (tokens[2][0] == 'x') {
 	  mulStep = true;
-	  stepOfParameter = NGT::Common::strtod(tokens[2].substr(1));
+	  stepOfParameter = polaris::Common::strtod(tokens[2].substr(1));
 	} else {
-	  stepOfParameter = NGT::Common::strtod(tokens[2]);
+	  stepOfParameter = polaris::Common::strtod(tokens[2]);
 	}
       }
     }
@@ -856,8 +856,8 @@ QBG::CLI::search(NGT::Args &args)
 
   QBG::Index index(indexPath, true, verbose);
   std::cerr << "qbg::The index is open." << std::endl;
-  std::cerr << "  vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-  std::cerr << "  peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+  std::cerr << "  vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+  std::cerr << "  peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
   auto dimension = index.getQuantizer().globalCodebookIndex.getObjectSpace().getDimension();
   try {
     for (size_t trial = 0; trial < nOfTrials; trial++) {
@@ -884,7 +884,7 @@ QBG::CLI::search(NGT::Args &args)
 	     parameter <= endOfParameter;
 	     parameter = mulStep ? parameter * stepOfParameter :
 	       parameter + stepOfParameter) {
-	  NGT::ObjectDistances objects;
+	  polaris::ObjectDistances objects;
 	  QBG::SearchContainer searchContainer;
 	  auto query = queryVector;
 	  searchContainer.setObjectVector(query);
@@ -906,7 +906,7 @@ QBG::CLI::search(NGT::Args &args)
 	  searchContainer.setEdgeSize(edgeSize);
 	  searchContainer.setCutback(cutback);
 	  searchContainer.setGraphExplorationSize(explorationSize);
-	  NGT::Timer timer;
+	  polaris::Timer timer;
 	  timer.start();
 	  switch (searchMode) {
 	  case 'n':
@@ -981,15 +981,15 @@ QBG::CLI::search(NGT::Args &args)
 		<< "/" << nOfTrials << " (msec)" << std::endl;
     }
     std::cout << "# qbg: the end of search" << std::endl;
-    std::cout << "#   vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-    std::cout << "#   peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cout << "#   vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+    std::cout << "#   peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
   }
   index.close();
 }
 
 
 void
-QBG::CLI::append(NGT::Args &args)
+QBG::CLI::append(polaris::Args &args)
 {
   const string usage = "Usage: qbg append [-n data-size] [-m b|e] [-v] index(output) data.tsv(input)";
   args.parse("v");
@@ -1026,7 +1026,7 @@ QBG::CLI::append(NGT::Args &args)
   }
 
   std::cerr << "qbg: appending..." << std::endl;
-  NGT::Timer timer;
+  polaris::Timer timer;
   timer.start();
   if (mode.find_first_of('b') != std::string::npos) {
     QBG::Index::appendBinary(indexPath, data, dataSize, verbose);
@@ -1039,7 +1039,7 @@ QBG::CLI::append(NGT::Args &args)
 }
 
 void
-QBG::CLI::insert(NGT::Args &args)
+QBG::CLI::insert(polaris::Args &args)
 {
   const string usage = "Usage: qbg append [-n data-size] [-m b|e] [-v] index(output) data.tsv(input)";
   args.parse("v");
@@ -1081,7 +1081,7 @@ QBG::CLI::insert(NGT::Args &args)
     }
     objects.emplace_back(object);
   }
-  std::vector<NGT::ObjectID> ids;
+  std::vector<polaris::ObjectID> ids;
   qbg.insert(objects, ids);
   if (verbose) {
     for (auto &id : ids) {
@@ -1094,7 +1094,7 @@ QBG::CLI::insert(NGT::Args &args)
 }
 
 void
-QBG::CLI::remove(NGT::Args &args)
+QBG::CLI::remove(polaris::Args &args)
 {
   const string usage = "Usage: qbg remove index removed-id";
   args.parse("v");
@@ -1129,7 +1129,7 @@ QBG::CLI::remove(NGT::Args &args)
 
 
 void
-QBG::CLI::buildIndex(NGT::Args &args)
+QBG::CLI::buildIndex(polaris::Args &args)
 {
   const std::string usage = "Usage: qbg build-index  [-Q dimension-of-subvector] [-E max-number-of-edges] index";
   string indexPath;
@@ -1168,10 +1168,10 @@ QBG::CLI::buildIndex(NGT::Args &args)
 	std::string line;
 	while (getline(stream, line)) {
 	  std::vector<std::string> tokens;
-	  NGT::Common::tokenize(line, tokens, " \t");
+	  polaris::Common::tokenize(line, tokens, " \t");
 	  std::vector<float> object;
 	  for (auto &token : tokens) {
-	    object.push_back(NGT::Common::strtof(token));
+	    object.push_back(polaris::Common::strtof(token));
 	  }
 	  if (!quantizerCodebook.empty() && quantizerCodebook[0].size() != object.size()) {
 	    cerr << "The specified quantizer codebook is invalid. " << quantizerCodebook[0].size()
@@ -1205,13 +1205,13 @@ QBG::CLI::buildIndex(NGT::Args &args)
 	std::string line;
 	while (getline(stream, line)) {
 	  std::vector<std::string> tokens;
-	  NGT::Common::tokenize(line, tokens, " \t");
+	  polaris::Common::tokenize(line, tokens, " \t");
 	  if (tokens.size() != 1) {
 	    cerr << "The specified codebook index is invalid. " << line << std::endl;
 	    cerr << usage << endl;
 	    return;
 	  }
-	  codebookIndex.push_back(NGT::Common::strtol(tokens[0]));
+	  codebookIndex.push_back(polaris::Common::strtol(tokens[0]));
 	}
 
       } catch (...) {}
@@ -1234,14 +1234,14 @@ QBG::CLI::buildIndex(NGT::Args &args)
 	std::string line;
 	while (getline(stream, line)) {
 	  std::vector<std::string> tokens;
-	  NGT::Common::tokenize(line, tokens, " \t");
+	  polaris::Common::tokenize(line, tokens, " \t");
 	  std::vector<float> object;
 	  if (tokens.size() != 1) {
 	    cerr << "The specified codebook index is invalid. " << line << std::endl;
 	    cerr << usage << endl;
 	    return;
 	  }
-	  objectIndex.push_back(NGT::Common::strtol(tokens[0]));
+	  objectIndex.push_back(polaris::Common::strtol(tokens[0]));
 	}
 
       } catch (...) {}
@@ -1267,7 +1267,7 @@ QBG::CLI::buildIndex(NGT::Args &args)
 }
 
 void
-QBG::CLI::build(NGT::Args &args)
+QBG::CLI::build(polaris::Args &args)
 {
   const std::string usage = "Usage: qbg build [-Q dimension-of-subvector] [-E max-number-of-edges] index";
 
@@ -1290,16 +1290,16 @@ QBG::CLI::build(NGT::Args &args)
     phase[0] = phase[1] = phase[2] = true;
   } else {
     vector<string> tokens;
-    NGT::Common::tokenize(phaseString, tokens, "-");
+    polaris::Common::tokenize(phaseString, tokens, "-");
     int beginOfPhase, endOfPhase;
     if (tokens.size() >= 1) {
       if (tokens[0].empty()) {
 	beginOfPhase = endOfPhase = 0;
       } else {
-	beginOfPhase = endOfPhase = NGT::Common::strtod(tokens[0]) - 1;
+	beginOfPhase = endOfPhase = polaris::Common::strtod(tokens[0]) - 1;
       }
     }
-    if (tokens.size() >= 2) { endOfPhase = NGT::Common::strtod(tokens[1]) - 1;}
+    if (tokens.size() >= 2) { endOfPhase = polaris::Common::strtod(tokens[1]) - 1;}
     if (tokens.size() >= 3 || tokens.size() == 0) {
       cerr << "The specified phases are invalid! " << phaseString << endl;
       cerr << usage << endl;
@@ -1315,15 +1315,15 @@ QBG::CLI::build(NGT::Args &args)
 
   if (phase[0]) {
     std::cerr << "qbg: hierarchical clustering..." << std::endl;
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
     hierarchicalKmeans.clustering(indexPath);
     timer.stop();
     if (buildParameters.verbose) {
       std::cerr << "qbg: hierarchical clustering successfully completed." << std::endl;;
       std::cerr << "  ph0 time=" << timer << std::endl;
-      std::cerr << "  ph0 vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-      std::cerr << "  ph0 peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+      std::cerr << "  ph0 vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+      std::cerr << "  ph0 peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
     }
   }
 
@@ -1331,35 +1331,35 @@ QBG::CLI::build(NGT::Args &args)
 
   if (phase[1]) {
     std::cerr << "qbg: optimizing..." << std::endl;
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
     optimizer.optimize(indexPath);
     timer.stop();
     if (buildParameters.verbose) {
       std::cerr << "qbg: optimization successfully completed." << std::endl;;
       std::cerr << "  ph1 time=" << timer << std::endl;
-      std::cerr << "  ph1 vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-      std::cerr << "  ph1 peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+      std::cerr << "  ph1 vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+      std::cerr << "  ph1 peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
     }
   }
 
   if (phase[2]) {
     std::cerr << "qbg: building..." << std::endl;
-    NGT::Timer timer;
+    polaris::Timer timer;
     timer.start();
     QBG::Index::build(indexPath, optimizer.verbose);
     timer.stop();
     if (buildParameters.verbose) {
       std::cerr << "qbg: index build successfully completed." << std::endl;;
       std::cerr << "  ph2 time=" << timer << std::endl;
-      std::cerr << "  ph2 vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-      std::cerr << "  ph2 peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+      std::cerr << "  ph2 vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+      std::cerr << "  ph2 peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
     }
   }
 }
 
 void
-QBG::CLI::rebuild(NGT::Args &args)
+QBG::CLI::rebuild(polaris::Args &args)
 {
   const std::string usage = "Usage: qbg rebuild index";
   args.parse("v");
@@ -1381,7 +1381,7 @@ QBG::CLI::rebuild(NGT::Args &args)
     std::cerr << usage << std::endl;
   }
 
-  NGT::Timer timer;
+  polaris::Timer timer;
   timer.start();
   NGTQ::Index ngtq(indexPath);
   ngtq.createIndex(start);
@@ -1391,8 +1391,8 @@ QBG::CLI::rebuild(NGT::Args &args)
   if (verbose) {
     std::cerr << "qbg: index build successfully completed." << std::endl;;
     std::cerr << "  ph2 time=" << timer << std::endl;
-    std::cerr << "  ph2 vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-    std::cerr << "  ph2 peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "  ph2 vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+    std::cerr << "  ph2 peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
   }
 
 }
@@ -1400,7 +1400,7 @@ QBG::CLI::rebuild(NGT::Args &args)
 
 
 void
-QBG::CLI::hierarchicalKmeans(NGT::Args &args)
+QBG::CLI::hierarchicalKmeans(polaris::Args &args)
 {
   const std::string usage = "qbg kmeans -O #-of-objects -B x1:y1,x2,y2,x3 index [prefix] [object-ID-file]";
   std::string indexPath;
@@ -1438,14 +1438,14 @@ QBG::CLI::hierarchicalKmeans(NGT::Args &args)
 
   if (buildParameters.verbose) {
     std::cerr << "qbg: the end of clustering" << std::endl;
-    std::cerr << "  vmsize=" << NGT::Common::getProcessVmSizeStr() << std::endl;
-    std::cerr << "  peak vmsize=" << NGT::Common::getProcessVmPeakStr() << std::endl;
+    std::cerr << "  vmsize=" << polaris::Common::getProcessVmSizeStr() << std::endl;
+    std::cerr << "  peak vmsize=" << polaris::Common::getProcessVmPeakStr() << std::endl;
   }
 
 }
 
 void
-QBG::CLI::assign(NGT::Args &args)
+QBG::CLI::assign(polaris::Args &args)
 {
   const std::string usage = "qbg assign";
   std::string indexPath;
@@ -1473,8 +1473,8 @@ QBG::CLI::assign(NGT::Args &args)
   auto mode = args.getChar("m", '-');
 
   try {
-    NGT::Index		index(indexPath);
-    NGT::Property	property;
+    polaris::Index		index(indexPath);
+    polaris::Property	property;
     index.getProperty(property);
     ifstream		is(queryPath);
     if (!is) {
@@ -1496,8 +1496,8 @@ QBG::CLI::assign(NGT::Args &args)
 	  return;
 	}
       }
-      NGT::SearchQuery		sc(query);
-      NGT::ObjectDistances	objects;
+      polaris::SearchQuery		sc(query);
+      polaris::ObjectDistances	objects;
       sc.setResults(&objects);
       sc.setSize(numOfObjects);
       sc.setEpsilon(epsilon);
@@ -1523,7 +1523,7 @@ QBG::CLI::assign(NGT::Args &args)
 }
 
 void
-QBG::CLI::extract(NGT::Args &args)
+QBG::CLI::extract(polaris::Args &args)
 {
 
   const string usage = "Usage: qbg extract binary-file|index [output-file]";
@@ -1630,7 +1630,7 @@ QBG::CLI::extract(NGT::Args &args)
 }
 
 void
-QBG::CLI::gt(NGT::Args &args)
+QBG::CLI::gt(polaris::Args &args)
 {
   string	path;
 
@@ -1692,7 +1692,7 @@ QBG::CLI::gt(NGT::Args &args)
 }
 
 void
-QBG::CLI::gtRange(NGT::Args &args)
+QBG::CLI::gtRange(polaris::Args &args)
 {
   string	path;
 
@@ -1758,7 +1758,7 @@ QBG::CLI::gtRange(NGT::Args &args)
 
 
 void
-QBG::CLI::optimize(NGT::Args &args)
+QBG::CLI::optimize(polaris::Args &args)
 {
 
   string usage = "Usage: qbg optimize -n number-of-clusters -m number-of subspaces [-O t|f] [-s t|f] [-I cluster-iteration] [-t R-max-iteration] [-c convergence-limit-times] vector-file [output-file-prefix]\n"

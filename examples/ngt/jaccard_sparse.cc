@@ -29,7 +29,7 @@ void help() {
 }
 
 void
-append(NGT::Args &args) {
+append(polaris::Args &args) {
     const string usage = "Usage: jaccard-sparse append [-p #-of-thread] [-n data-size] "
                          "index(output) [data.tsv(input)]";
     string database;
@@ -55,7 +55,7 @@ append(NGT::Args &args) {
     std::ifstream *ifs = 0;
 
     try {
-        NGT::Index index(database);
+        polaris::Index index(database);
         if (data == "-") {
             is = &std::cin;
         } else {
@@ -107,7 +107,7 @@ append(NGT::Args &args) {
 
 
 void
-search(NGT::Index &index, NGT::Command::SearchParameters &searchParameters, ostream &stream) {
+search(polaris::Index &index, polaris::Command::SearchParameters &searchParameters, ostream &stream) {
 
     std::ifstream is(searchParameters.query);
     if (!is) {
@@ -137,8 +137,8 @@ search(NGT::Index &index, NGT::Command::SearchParameters &searchParameters, ostr
         }
         auto sparseQuery = index.makeSparseObject(query);
         queryCount++;
-        NGT::SearchQuery sc(sparseQuery);
-        NGT::ObjectDistances objects;
+        polaris::SearchQuery sc(sparseQuery);
+        polaris::ObjectDistances objects;
         sc.setResults(&objects);
         sc.setSize(searchParameters.size);
         sc.setRadius(searchParameters.radius);
@@ -148,7 +148,7 @@ search(NGT::Index &index, NGT::Command::SearchParameters &searchParameters, ostr
             sc.setEpsilon(epsilon);
         }
         sc.setEdgeSize(searchParameters.edgeSize);
-        NGT::Timer timer;
+        polaris::Timer timer;
         switch (searchParameters.indexType) {
             case 't':
                 timer.start();
@@ -206,7 +206,7 @@ search(NGT::Index &index, NGT::Command::SearchParameters &searchParameters, ostr
 }
 
 void
-search(NGT::Args &args) {
+search(polaris::Args &args) {
     const string usage = "Usage: ngt search [-i index-type(g|t|s)] [-n result-size] [-e epsilon] [-E edge-size] "
                          "[-m open-mode(r|w)] [-o output-mode] index(input) query.tsv(input)";
 
@@ -219,10 +219,10 @@ search(NGT::Args &args) {
         return;
     }
 
-    NGT::Command::SearchParameters searchParameters(args);
+    polaris::Command::SearchParameters searchParameters(args);
 
     try {
-        NGT::Index index(database, searchParameters.openMode == 'r');
+        polaris::Index index(database, searchParameters.openMode == 'r');
         search(index, searchParameters, cout);
     } catch (polaris::PolarisException &err) {
         cerr << "jaccard-sparse: Error " << err.what() << endl;
@@ -237,9 +237,9 @@ search(NGT::Args &args) {
 int
 main(int argc, char **argv) {
 
-    NGT::Args args(argc, argv);
+    polaris::Args args(argc, argv);
 
-    NGT::Command ngt;
+    polaris::Command ngt;
 
     string command;
     try {

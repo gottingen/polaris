@@ -25,14 +25,14 @@
 #warning "*** OMP is *NOT* available! ***"
 #endif
 
-#include <polaris/graph/ngt/common.h>
+#include <polaris/utility/common.h>
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
 #include <polaris/distance/primitive_comparator.h>
 
 class ObjectSpace;
 
-namespace NGT {
+namespace polaris {
 
     template<typename OBJECT_TYPE, typename COMPARE_TYPE>
     class ObjectSpaceRepository : public ObjectSpace, public ObjectRepository {
@@ -255,7 +255,7 @@ namespace NGT {
                     break;
                 default:
                     std::stringstream msg;
-                    msg << "NGT::ObjectSpaceRepository: The distance type is invalid. " << distanceType;
+                    msg << "polaris::ObjectSpaceRepository: The distance type is invalid. " << distanceType;
                     POLARIS_THROW_EX(msg);
             }
         }
@@ -291,25 +291,21 @@ namespace NGT {
             if (!results.empty()) {
                 POLARIS_THROW_EX("lenearSearch: results is not empty");
             }
-#ifndef NGT_PREFETCH_DISABLED
             size_t byteSizeOfObject = getByteSizeOfObject();
             const size_t prefetchOffset = getPrefetchOffset();
-#endif
             ObjectRepository &rep = *this;
             for (size_t idx = 0; idx < rep.size(); idx++) {
-#ifndef NGT_PREFETCH_DISABLED
                 if (idx + prefetchOffset < rep.size() && rep[idx + prefetchOffset] != 0) {
                     MemoryCache::prefetch(
                             (unsigned char *) &(*static_cast<PersistentObject *>(rep[idx + prefetchOffset]))[0],
                             byteSizeOfObject);
                 }
-#endif
                 if (rep[idx] == 0) {
                     continue;
                 }
                 Distance d = (*comparator)((Object &) query, (Object &) *rep[idx]);
                 if (radius < 0.0 || d <= radius) {
-                    NGT::ObjectDistance obj(idx, d);
+                    polaris::ObjectDistance obj(idx, d);
                     results.push(obj);
                     if (results.size() > size) {
                         results.pop();
@@ -319,7 +315,7 @@ namespace NGT {
             return;
         }
 
-        float computeMaxMagnitude(NGT::ObjectID beginID = 1) {
+        float computeMaxMagnitude(polaris::ObjectID beginID = 1) {
             float maxMag = 0.0;
             ObjectRepository &rep = *this;
             auto nOfThreads = omp_get_max_threads();
@@ -347,7 +343,7 @@ namespace NGT {
             return maxMag;
         }
 
-        void setMagnitude(float maxMag, NGT::Repository<void> &graphNodes, NGT::ObjectID beginID = 1) {
+        void setMagnitude(float maxMag, polaris::Repository<void> &graphNodes, polaris::ObjectID beginID = 1) {
             ObjectRepository &rep = *this;
 #pragma omp parallel for
             for (size_t idx = beginID; idx < rep.size(); idx++) {
@@ -380,7 +376,7 @@ namespace NGT {
             if (isEmpty(idx)) {
                 std::stringstream msg;
                 msg
-                        << "NGT::ObjectSpaceRepository: The specified ID is out of the range. The object ID should be greater than zero. "
+                        << "polaris::ObjectSpaceRepository: The specified ID is out of the range. The object ID should be greater than zero. "
                         << idx << ":" << ObjectRepository::size() << ".";
                 POLARIS_THROW_EX(msg);
             }
@@ -542,5 +538,5 @@ namespace NGT {
 
     };
 
-} // namespace NGT
+} // namespace polaris
 

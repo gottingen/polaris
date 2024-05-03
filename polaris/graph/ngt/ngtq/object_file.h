@@ -25,11 +25,11 @@
 #include <cerrno>
 #include <cstring>
 
-namespace NGT {
+namespace polaris {
   class ObjectSpace;
 };
 
-class ObjectFile : public ArrayFile<NGT::Object> {
+class ObjectFile : public ArrayFile<polaris::Object> {
  public:
   enum DataType {
     DataTypeUint8   = 0,
@@ -51,21 +51,21 @@ class ObjectFile : public ArrayFile<NGT::Object> {
   }
 
   bool open() {
-    if (!ArrayFile<NGT::Object>::open(fileName)) {
+    if (!ArrayFile<polaris::Object>::open(fileName)) {
       return false;
     }
     switch (dataType) {
     case DataTypeFloat:
-      genuineDimension = ArrayFile<NGT::Object>::_fileHead.recordSize / sizeof(float);
-      objectSpace = new NGT::ObjectSpaceRepository<float, double>(genuineDimension, typeid(float), distanceType);
+      genuineDimension = ArrayFile<polaris::Object>::_fileHead.recordSize / sizeof(float);
+      objectSpace = new polaris::ObjectSpaceRepository<float, double>(genuineDimension, typeid(float), distanceType);
       break;
     case DataTypeUint8:
-      genuineDimension = ArrayFile<NGT::Object>::_fileHead.recordSize / sizeof(uint8_t);
-      objectSpace = new NGT::ObjectSpaceRepository<unsigned char, int>(genuineDimension, typeid(uint8_t), distanceType);
+      genuineDimension = ArrayFile<polaris::Object>::_fileHead.recordSize / sizeof(uint8_t);
+      objectSpace = new polaris::ObjectSpaceRepository<unsigned char, int>(genuineDimension, typeid(uint8_t), distanceType);
       break;
     case DataTypeFloat16:
-      genuineDimension = ArrayFile<NGT::Object>::_fileHead.recordSize / sizeof(NGT::float16);
-      objectSpace = new NGT::ObjectSpaceRepository<NGT::float16, float>(genuineDimension, typeid(NGT::float16), distanceType);
+      genuineDimension = ArrayFile<polaris::Object>::_fileHead.recordSize / sizeof(polaris::float16);
+      objectSpace = new polaris::ObjectSpaceRepository<polaris::float16, float>(genuineDimension, typeid(polaris::float16), distanceType);
       break;
     default:
       stringstream msg;
@@ -76,7 +76,7 @@ class ObjectFile : public ArrayFile<NGT::Object> {
     return true;
   }
 
-  bool open(const std::string &file, DataType datat, NGT::Index::Property::DistanceType distt, size_t pseudoDim) {
+  bool open(const std::string &file, DataType datat, polaris::Index::Property::DistanceType distt, size_t pseudoDim) {
     dataType = datat;
     fileName = file;
     distanceType = distt;
@@ -113,7 +113,7 @@ class ObjectFile : public ArrayFile<NGT::Object> {
   }
 
   template<typename T>
-  bool get(const size_t streamID, size_t id, std::vector<T> &data, NGT::ObjectSpace *objectSpace = 0) {
+  bool get(const size_t streamID, size_t id, std::vector<T> &data, polaris::ObjectSpace *objectSpace = 0) {
     if (streamID >= objectFiles.size()) {
       std::cerr << "ObjectFile::streamID is invalid. " << streamID << ":" << objectFiles.size() << std::endl;
       return false;
@@ -125,14 +125,14 @@ class ObjectFile : public ArrayFile<NGT::Object> {
   }
 
   template<typename T>
-  bool get(const size_t id, std::vector<T> &data, NGT::ObjectSpace *os = 0) {
+  bool get(const size_t id, std::vector<T> &data, polaris::ObjectSpace *os = 0) {
     if (objectSpace == 0) {
       stringstream msg;
       msg << "ObjectFile::Fatal Error. objectSpace is not set." << std::endl;
       POLARIS_THROW_EX(msg);
     }
-    NGT::Object *object = objectSpace->allocateObject();
-    if (!ArrayFile<NGT::Object>::get(id, *object, objectSpace)) {
+    polaris::Object *object = objectSpace->allocateObject();
+    if (!ArrayFile<polaris::Object>::get(id, *object, objectSpace)) {
       objectSpace->deleteObject(object);
       return false;
     }
@@ -147,8 +147,8 @@ class ObjectFile : public ArrayFile<NGT::Object> {
       for (size_t i = 0; i < dim; i++) {
 	data[i] = v[i];
       }
-    } else if (otype == typeid(NGT::float16)) {
-      auto *v = static_cast<NGT::float16*>(object->getPointer());
+    } else if (otype == typeid(polaris::float16)) {
+      auto *v = static_cast<polaris::float16*>(object->getPointer());
       for (size_t i = 0; i < dim; i++) {
 	data[i] = v[i];
       }
@@ -165,7 +165,7 @@ class ObjectFile : public ArrayFile<NGT::Object> {
     return true;
   }
 
-  void put(const size_t id, std::vector<float> &data, NGT::ObjectSpace *os = 0) {
+  void put(const size_t id, std::vector<float> &data, polaris::ObjectSpace *os = 0) {
     if (objectSpace == 0) {
       stringstream msg;
       msg << "ObjectFile::Fatal Error. objectSpace is not set." << std::endl;
@@ -176,15 +176,15 @@ class ObjectFile : public ArrayFile<NGT::Object> {
       msg << "ObjectFile::Dimensions are inconsistency. " << objectSpace->getDimension() << ":" << data.size();
       POLARIS_THROW_EX(msg);
     }
-    NGT::Object *object = objectSpace->allocateObject();
+    polaris::Object *object = objectSpace->allocateObject();
     const std::type_info &otype = objectSpace->getObjectType();
     if (otype == typeid(uint8_t)) {
       auto *v = static_cast<uint8_t*>(object->getPointer());
       for (size_t i = 0; i < data.size(); i++) {
 	v[i] = data[i];
       }
-    } else if (otype == typeid(NGT::float16)) {
-      auto *v = static_cast<NGT::float16*>(object->getPointer());
+    } else if (otype == typeid(polaris::float16)) {
+      auto *v = static_cast<polaris::float16*>(object->getPointer());
       for (size_t i = 0; i < data.size(); i++) {
 	v[i] = data[i];
       }
@@ -192,17 +192,17 @@ class ObjectFile : public ArrayFile<NGT::Object> {
       auto *v = static_cast<float*>(object->getPointer());
       memcpy(v, data.data(), sizeof(float) * data.size());
     }
-    ArrayFile<NGT::Object>::put(id, *object, objectSpace);
+    ArrayFile<polaris::Object>::put(id, *object, objectSpace);
     objectSpace->deleteObject(object);
     return;
   }
 
-  void put(const size_t id, NGT::Object &data, NGT::ObjectSpace *os = 0) {
-    return ArrayFile<NGT::Object>::put(id, data, objectSpace);
+  void put(const size_t id, polaris::Object &data, polaris::ObjectSpace *os = 0) {
+    return ArrayFile<polaris::Object>::put(id, data, objectSpace);
   }
 
-  bool get(size_t id, NGT::Object &data, NGT::ObjectSpace *os = 0) {
-    return ArrayFile<NGT::Object>::get(id, data, objectSpace);
+  bool get(size_t id, polaris::Object &data, polaris::ObjectSpace *os = 0) {
+    return ArrayFile<polaris::Object>::get(id, data, objectSpace);
   }
 
   public:
@@ -210,8 +210,8 @@ class ObjectFile : public ArrayFile<NGT::Object> {
   size_t			pseudoDimension;
   size_t			genuineDimension;
   DataType			dataType;
-  NGT::ObjectSpace::DistanceType			distanceType;
-  NGT::ObjectSpace		*objectSpace;
+  polaris::ObjectSpace::DistanceType			distanceType;
+  polaris::ObjectSpace		*objectSpace;
   std::vector<ObjectFile*>	objectFiles;
 };
 
@@ -250,12 +250,12 @@ class StaticObjectFile {
   bool create(const std::string &file, const std::string &objectPath);
   bool open(const std::string &file, const size_t pseudoDimension = 0);
   void close();
-  size_t insert(TYPE &data, NGT::ObjectSpace *objectSpace = 0) {std::cerr << "insert: not implemented."; abort();}
-  void put(const size_t id, TYPE &data, NGT::ObjectSpace *objectSpace = 0) {std::cerr << "put: not implemented."; abort();}
-  bool get(size_t id, std::vector<float> &data, NGT::ObjectSpace *objectSpace = 0);
-  bool get(const size_t streamID, size_t id, std::vector<float> &data, NGT::ObjectSpace *objectSpace = 0);
-  bool get(size_t id, TYPE &data, NGT::ObjectSpace *objectSpace = 0);
-  bool get(const size_t streamID, size_t id, TYPE &data, NGT::ObjectSpace *objectSpace = 0);
+  size_t insert(TYPE &data, polaris::ObjectSpace *objectSpace = 0) {std::cerr << "insert: not implemented."; abort();}
+  void put(const size_t id, TYPE &data, polaris::ObjectSpace *objectSpace = 0) {std::cerr << "put: not implemented."; abort();}
+  bool get(size_t id, std::vector<float> &data, polaris::ObjectSpace *objectSpace = 0);
+  bool get(const size_t streamID, size_t id, std::vector<float> &data, polaris::ObjectSpace *objectSpace = 0);
+  bool get(size_t id, TYPE &data, polaris::ObjectSpace *objectSpace = 0);
+  bool get(const size_t streamID, size_t id, TYPE &data, polaris::ObjectSpace *objectSpace = 0);
   void remove(const size_t id) {std::cerr << "remove: not implemented."; abort();}
   bool isOpen() const;
   size_t size();
@@ -391,7 +391,7 @@ bool StaticObjectFile<TYPE>::create(const std::string &file, const std::string &
     std::ofstream tmpstream;
     tmpstream.open(file);
     std::vector<std::string> tokens;
-    NGT::Common::tokenize(objectPath, tokens, ".");
+    polaris::Common::tokenize(objectPath, tokens, ".");
     tmpstream << _fileHead.noOfObjects << std::endl;
     tmpstream << _fileHead.noOfDimensions << std::endl;
     if (tokens.size() <= 1) {
@@ -479,7 +479,7 @@ bool StaticObjectFile<TYPE>::openMultipleStreams(const size_t nOfStreams) {
 }
 
 template <class TYPE>
-bool StaticObjectFile<TYPE>::get(const size_t streamID, size_t id, std::vector<float> &data, NGT::ObjectSpace *objectSpace) {
+bool StaticObjectFile<TYPE>::get(const size_t streamID, size_t id, std::vector<float> &data, polaris::ObjectSpace *objectSpace) {
   if (streamID >= _objectFiles.size()) {
     std::cerr << "streamID is invalid. " << streamID << ":" << _objectFiles.size() << std::endl;
     return false;
@@ -491,7 +491,7 @@ bool StaticObjectFile<TYPE>::get(const size_t streamID, size_t id, std::vector<f
 }
 
 template <class TYPE>
-bool StaticObjectFile<TYPE>::get(const size_t streamID, size_t id, TYPE &data, NGT::ObjectSpace *objectSpace) {
+bool StaticObjectFile<TYPE>::get(const size_t streamID, size_t id, TYPE &data, polaris::ObjectSpace *objectSpace) {
   if (streamID >= _objectFiles.size()) {
     std::cerr << "streamID is invalid. " << streamID << ":" << _objectFiles.size() << std::endl;
     return false;
@@ -521,7 +521,7 @@ void StaticObjectFile<TYPE>::closeMultipleStreams() {
 
 
 template <class TYPE>
-bool StaticObjectFile<TYPE>::get(size_t id, TYPE &data, NGT::ObjectSpace *objectSpace) {
+bool StaticObjectFile<TYPE>::get(size_t id, TYPE &data, polaris::ObjectSpace *objectSpace) {
   std::vector<float> record;
   bool stat = get(id, record, objectSpace);
   std::stringstream object;
@@ -531,7 +531,7 @@ bool StaticObjectFile<TYPE>::get(size_t id, TYPE &data, NGT::ObjectSpace *object
 }
 
 template <class TYPE>
-bool StaticObjectFile<TYPE>::get(size_t id, std::vector<float> &data, NGT::ObjectSpace *objectSpace) {
+bool StaticObjectFile<TYPE>::get(size_t id, std::vector<float> &data, polaris::ObjectSpace *objectSpace) {
   id--;
   if( size() <= id ){
     return false;
