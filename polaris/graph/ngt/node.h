@@ -166,7 +166,7 @@ namespace NGT {
     void serialize(std::ofstream &os, ObjectSpace *objectspace = 0) {
       Node::serialize(os);
       if (pivot == 0) {
-        NGTThrowException("Node::write: pivot is null!");
+        POLARIS_THROW_EX("Node::write: pivot is null!");
       }
       assert(objectspace != 0);
       getPivot().serialize(os, objectspace);
@@ -199,7 +199,7 @@ namespace NGT {
     void serializeAsText(std::ofstream &os, ObjectSpace *objectspace = 0) {
       Node::serializeAsText(os);
       if (pivot == 0) {
-        NGTThrowException("Node::write: pivot is null!");
+        POLARIS_THROW_EX("Node::write: pivot is null!");
       }
       os << " ";
       assert(objectspace != 0);
@@ -301,7 +301,7 @@ namespace NGT {
       if (pivot == 0) {
 	// Before insertion, parent ID == 0 and object size == 0, that indicates an empty index
 	if (parent.getID() != 0 || objectSize != 0) {
-	  NGTThrowException("Node::write: pivot is null!");
+	  POLARIS_THROW_EX("Node::write: pivot is null!");
 	}
       } else {
 	assert(objectspace != 0);
@@ -337,7 +337,7 @@ namespace NGT {
       Node::serializeAsText(os);
       os << " ";
       if (pivot == 0) {
-        NGTThrowException("Node::write: pivot is null!");
+        POLARIS_THROW_EX("Node::write: pivot is null!");
       }
       assert(pivot != 0);
       assert(objectspace != 0);

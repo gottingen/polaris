@@ -28,7 +28,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
     } catch (...) {
         std::stringstream msg;
         msg << "Command::CreateParameter: Error: An index is not specified.";
-        NGTThrowException(msg);
+        POLARIS_THROW_EX(msg);
     }
 
     try {
@@ -50,7 +50,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         std::stringstream msg;
         msg
                 << "Command::CreateParameter: Error: Specify greater than 0 for # of your data dimension by a parameter -d.";
-        NGTThrowException(msg);
+        POLARIS_THROW_EX(msg);
     }
 
     property.objectAlignment =
@@ -85,7 +85,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         default:
             std::stringstream msg;
             msg << "Command::CreateParameter: Error: Invalid graph type. " << graphType;
-            NGTThrowException(msg);
+            POLARIS_THROW_EX(msg);
     }
 
     if (property.graphType == NGT::Property::GraphType::GraphTypeANNG ||
@@ -104,7 +104,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
                 msg
                         << "Command::CreateParameter: Error: outgoing/incoming edge size specification is invalid. (out)x(in) "
                         << str;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             property.outgoingEdge = NGT::Common::strtod(tokens[0]);
             property.incomingEdge = NGT::Common::strtod(tokens[1]);
@@ -156,7 +156,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         default:
             std::stringstream msg;
             msg << "Command::CreateParameter: Error: Invalid object type. " << objectType;
-            NGTThrowException(msg);
+            POLARIS_THROW_EX(msg);
     }
 
 #ifdef NGT_REFINEMENT
@@ -176,7 +176,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
     default:
       std::stringstream msg;
       msg << "Command::CreateParameter: Error: Invalid refinement object type. " << objectType;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 #endif
 
@@ -224,7 +224,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         default:
             std::stringstream msg;
             msg << "Command::CreateParameter: Error: Invalid distance type. " << distanceType;
-            NGTThrowException(msg);
+            POLARIS_THROW_EX(msg);
     }
 
 
@@ -241,7 +241,7 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
             } else {
                 std::stringstream msg;
                 msg << "Command::CreateParameter: Error: Invalid insertion order parameters. " << str << endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
         }
     }
@@ -285,7 +285,7 @@ NGT::Command::create(Args &args) {
                                         createParameters.numOfObjects);
                 break;
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         std::cerr << err.what() << std::endl;
         cerr << usage << endl;
     }
@@ -442,7 +442,7 @@ NGT::Command::append(Args &args) {
     if (appendMode == '-') {
         try {
             NGT::Index::append(indexPath, data, threadSize, dataSize);
-        } catch (NGT::Exception &err) {
+        } catch (polaris::PolarisException &err) {
             cerr << "ngt: Error. " << err.what() << endl;
             cerr << usage << endl;
         } catch (...) {
@@ -552,7 +552,7 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
                             break;
                     }
                 }
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 if (searchParameters.outputMode != "ei") {
                     // not ignore exceptions
                     throw err;
@@ -606,7 +606,7 @@ NGT::Command::search(NGT::Index &index, NGT::Command::SearchParameters &searchPa
                 NGT::GraphNode *node = 0;
                 try {
                     node = graph.getNode(id);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     cerr << "Graph::search: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                          << " If the node was removed, no problem." << endl;
                     continue;
@@ -667,7 +667,7 @@ NGT::Command::search(Args &args) {
         if (debugLevel >= 1) {
             cerr << "Peak VM size=" << NGT::Common::getProcessVmPeakStr() << std::endl;
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
     } catch (...) {
@@ -751,7 +751,7 @@ NGT::Command::remove(Args &args) {
             objects.push_back(id);
         }
         NGT::Index::remove(database, objects, force);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
     } catch (...) {
@@ -781,7 +781,7 @@ NGT::Command::exportIndex(Args &args) {
     }
     try {
         NGT::Index::exportIndex(database, exportFile);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
     } catch (...) {
@@ -812,7 +812,7 @@ NGT::Command::importIndex(Args &args) {
 
     try {
         NGT::Index::importIndex(database, importFile);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
     } catch (...) {
@@ -902,7 +902,7 @@ NGT::Command::prune(Args &args) {
                 } // for
             }
 
-        } catch (NGT::Exception &err) {
+        } catch (polaris::PolarisException &err) {
             cerr << "Graph::search: Warning. Cannot get the node. ID=" << id << ":" << err.what() << endl;
             continue;
         }
@@ -1026,7 +1026,7 @@ NGT::Command::optimizeSearchParameters(Args &args) {
         graphOptimizer.optimizeSearchParameters(indexPath);
 
         std::cout << "Successfully completed." << std::endl;
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
     }
@@ -1065,7 +1065,7 @@ NGT::Command::refineANNG(Args &args) {
 
     try {
         GraphReconstructor::refineANNG(index, epsilon, expectedAccuracy, noOfEdges, exploreEdgeSize, batchSize);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         std::cerr << "Error!! Cannot refine the index. " << err.what() << std::endl;
         return;
     }
@@ -1182,7 +1182,7 @@ NGT::Command::repair(Args &args) {
                 }
                 invalidGraphObjectCount++;
             }
-        } catch (NGT::Exception &err) {
+        } catch (polaris::PolarisException &err) {
             if (removedIDs.find(id) == removedIDs.end() && id < objSize) {
                 std::cerr << "Not found an object in the graph. It should be inserted into the graph. " << err.what()
                           << " ID=" << id << std::endl;
@@ -1238,7 +1238,7 @@ NGT::Command::repair(Args &args) {
             }
             std::cerr << "Saving index." << std::endl;
             index.saveIndex(path);
-        } catch (NGT::Exception &err) {
+        } catch (polaris::PolarisException &err) {
             cerr << "ngt: Error. " << err.what() << endl;
             cerr << usage << endl;
             return;
@@ -1306,7 +1306,7 @@ NGT::Command::info(Args &args) {
             vector<uint8_t> status;
             index.verify(status);
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "ngt: NGT Error. " << err.what() << endl;
         cerr << usage << endl;
     } catch (...) {

@@ -95,7 +95,7 @@ append(NGT::Args &args) {
         }
         index.createIndex(threadSize);
         index.saveIndex(database);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         if (data != "-") {
             delete ifs;
         }
@@ -224,7 +224,7 @@ search(NGT::Args &args) {
     try {
         NGT::Index index(database, searchParameters.openMode == 'r');
         search(index, searchParameters, cout);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "jaccard-sparse: Error " << err.what() << endl;
         cerr << usage << endl;
     } catch (...) {
@@ -260,7 +260,7 @@ main(int argc, char **argv) {
             cerr << "jaccard-sparse: Error: Illegal command. " << command << endl;
             help();
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "jaccard-sparse: Error: " << err.what() << endl;
         help();
         return 0;

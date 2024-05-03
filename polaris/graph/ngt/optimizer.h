@@ -104,7 +104,7 @@ namespace NGT {
             if (!is) {
                 std::stringstream msg;
                 msg << "Cannot open the specified file. " << sp.query;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             search(index, is, gtStream, sp, acc);
@@ -145,7 +145,7 @@ namespace NGT {
                 if (specifiedResultSize == 0) {
                     std::stringstream msg;
                     msg << "For calculating recalls, the result size should be specified.";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 resultDataSize = specifiedResultSize;
             } else {
@@ -190,7 +190,7 @@ namespace NGT {
                 if (specifiedResultSize == 0) {
                     std::stringstream msg;
                     msg << "For calculating recalls, the result size should be specified.";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 resultDataSize = specifiedResultSize;
             } else {
@@ -250,13 +250,13 @@ namespace NGT {
                             if (searchCount != 1) {
                                 std::stringstream msg;
                                 msg << "Error: gt has not just one search result.";
-                                NGTThrowException(msg);
+                                POLARIS_THROW_EX(msg);
                             }
                             if (dataCount < resultDataSize) {
                                 std::stringstream msg;
                                 msg << "Error: gt data is less than result size! " << dataCount << ":"
                                     << resultDataSize;
-                                NGTThrowException(msg);
+                                POLARIS_THROW_EX(msg);
                             }
                             return;
                         }
@@ -272,7 +272,7 @@ namespace NGT {
                 if (result.size() < 3) {
                     std::stringstream msg;
                     msg << "result format is wrong. ";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 size_t id = NGT::Common::strtol(result[1]);
                 distance = NGT::Common::strtod(result[2]);
@@ -281,7 +281,7 @@ namespace NGT {
                 } catch (...) {
                     std::stringstream msg;
                     msg << "Cannot insert id into the gt. " << id;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
         }
@@ -331,14 +331,14 @@ namespace NGT {
                             if (result.size() < 3) {
                                 std::stringstream msg;
                                 msg << "result format is wrong. ";
-                                NGTThrowException(msg);
+                                POLARIS_THROW_EX(msg);
                             }
                             size_t rank = NGT::Common::strtol(result[0]);
                             dataCount++;
                             if (rank != dataCount) {
                                 std::stringstream msg;
                                 msg << "check: inner error! " << rank << ":" << dataCount;
-                                NGTThrowException(msg);
+                                POLARIS_THROW_EX(msg);
                             }
                         }
                     }
@@ -424,7 +424,7 @@ namespace NGT {
                                             std::stringstream msg;
                                             msg << "check: inner error! " << fluctuation;
                                             std::cerr << "Cannot find epsilon.";
-                                            NGTThrowException(msg);
+                                            POLARIS_THROW_EX(msg);
                                         }
                                         {
                                             auto di = sumupValues.totalAccuracy.find(key);
@@ -566,7 +566,7 @@ namespace NGT {
                         msg << "exploreEpsilonForAccuracy:" << std::endl;
                         msg << "Error!! Epsilon (lower bound) is too large. " << epsilon << "," << startEpsilon << ","
                             << epsilonStep << "," << count;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     acc.clear();
                     sp.beginOfEpsilon = sp.endOfEpsilon = fromOverEpsilon = epsilon;
@@ -581,7 +581,7 @@ namespace NGT {
                     std::stringstream msg;
                     msg << "exploreEpsilonForAccuracy:" << std::endl;
                     msg << "Error! startEpsilon should be reduced for the specified range.";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 fromOver = acc[0].meanAccuracy;
 
@@ -595,7 +595,7 @@ namespace NGT {
                             msg << "exploreEpsilonForAccuracy:" << std::endl;
                             msg << "Error!! Epsilon (upper bound) is too large. " << epsilon << "," << startEpsilon
                                 << "," << epsilonStep << "," << count;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         acc.clear();
                         queries.clear();
@@ -643,7 +643,7 @@ namespace NGT {
                         msg << "Error!! Not found proper under epsilon for margin=" << margin
                             << " and the number of queries." << std::endl;
                         msg << "        Should increase margin or the number of queries to get the proper epsilon. ";
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     } else {
                         sp.beginOfEpsilon = sp.endOfEpsilon = (fromUnderEpsilon + fromOverEpsilon) / 2.0;
                     }
@@ -654,7 +654,7 @@ namespace NGT {
                         msg << "Error!! Not found proper over epsilon for margin=" << margin
                             << " and the number of queries." << std::endl;
                         msg << "        Should increase margin or the number of queries to get the proper epsilon. ";
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     } else {
                         sp.beginOfEpsilon = sp.endOfEpsilon = (toUnderEpsilon + toOverEpsilon) / 2.0;
                     }
@@ -663,7 +663,7 @@ namespace NGT {
                         std::stringstream msg;
                         msg << "exploreEpsilonForAccuracy:" << std::endl;
                         msg << "Error!! From and to epsilons are the same. Cannot continue.";
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     sp.beginOfEpsilon = fromUnderEpsilon;
                     sp.endOfEpsilon = toOverEpsilon;
@@ -672,7 +672,7 @@ namespace NGT {
             }
             std::stringstream msg;
             msg << "Something wrong!";
-            NGTThrowException(msg);
+            POLARIS_THROW_EX(msg);
         }
 
         MeasuredValue
@@ -699,7 +699,7 @@ namespace NGT {
             if (distanceCount == 0) {
                 std::stringstream msg;
                 msg << "measureDistance: Error! Distance count is zero.";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             MeasuredValue v;
             v.meanVisitCount = visitCount;
@@ -737,7 +737,7 @@ namespace NGT {
                             if (base > 1000) {
                                 std::stringstream msg;
                                 msg << "base is too large! " << base;
-                                NGTThrowException(msg);
+                                POLARIS_THROW_EX(msg);
                             }
                             searchParameters.step = 10;
                             NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
@@ -751,18 +751,18 @@ namespace NGT {
                                                               margin);
                                         time = values.meanTime;
                                         break;
-                                    } catch (NGT::Exception &err) {
-                                        if (err.getMessage().find("Error!! Epsilon") != std::string::npos &&
-                                            err.getMessage().find("is too large") != std::string::npos) {
+                                    } catch (polaris::PolarisException &err) {
+                                        if (err.get_message().find("Error!! Epsilon") != std::string::npos &&
+                                            err.get_message().find("is too large") != std::string::npos) {
                                             std::cerr << "Warning: Cannot adjust the base edge size." << err.what()
                                                       << std::endl;
                                             std::cerr << "Try again with the next base" << std::endl;
-                                            NGTThrowException("**Retry**");
+                                            POLARIS_THROW_EX("**Retry**");
                                         }
                                         if (margin > 0.4) {
                                             std::cerr << "Warning: Cannot adjust the base even for the widest margin "
                                                       << margin << ". " << err.what();
-                                            NGTThrowException("**Retry**");
+                                            POLARIS_THROW_EX("**Retry**");
                                         } else {
                                             std::cerr << "Warning: Cannot adjust the base edge size for margin "
                                                       << margin << ". " << err.what() << std::endl;
@@ -791,8 +791,8 @@ namespace NGT {
                             }
                         }
                     }
-                } catch (NGT::Exception &err) {
-                    if (err.getMessage().find("**Retry**") != std::string::npos) {
+                } catch (polaris::PolarisException &err) {
+                    if (err.get_message().find("**Retry**") != std::string::npos) {
                         baseStartInit += minimumStep;
                     } else {
                         throw err;
@@ -847,7 +847,7 @@ namespace NGT {
                             if (rate > 1000) {
                                 std::stringstream msg;
                                 msg << "rate is too large! " << rate;
-                                NGTThrowException(msg);
+                                POLARIS_THROW_EX(msg);
                             }
                             searchParameters.step = 10;
                             NGT::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
@@ -861,18 +861,18 @@ namespace NGT {
                                                               margin);
                                         time = values.meanTime;
                                         break;
-                                    } catch (NGT::Exception &err) {
-                                        if (err.getMessage().find("Error!! Epsilon") != std::string::npos &&
-                                            err.getMessage().find("is too large") != std::string::npos) {
+                                    } catch (polaris::PolarisException &err) {
+                                        if (err.get_message().find("Error!! Epsilon") != std::string::npos &&
+                                            err.get_message().find("is too large") != std::string::npos) {
                                             std::cerr << "Warning: Cannot adjust the rate of edge size." << err.what()
                                                       << std::endl;
                                             std::cerr << "Try again with the next rate" << std::endl;
-                                            NGTThrowException("**Retry**");
+                                            POLARIS_THROW_EX("**Retry**");
                                         }
                                         if (margin > 0.4) {
                                             std::cerr << "Error: Cannot adjust the rate even for the widest margin "
                                                       << margin << ". " << err.what();
-                                            NGTThrowException("**Retry**");
+                                            POLARIS_THROW_EX("**Retry**");
                                         } else {
                                             std::cerr << "Warning: Cannot adjust the rate of edge size for margin "
                                                       << margin << ". " << err.what() << std::endl;
@@ -901,8 +901,8 @@ namespace NGT {
                             }
                         }
                     }
-                } catch (NGT::Exception &err) {
-                    if (err.getMessage().find("**Retry**") != std::string::npos) {
+                } catch (polaris::PolarisException &err) {
+                    if (err.get_message().find("**Retry**") != std::string::npos) {
                         rateStartInit += minimumStep;
                     } else {
                         throw err;
@@ -931,7 +931,7 @@ namespace NGT {
                 extractQueries(querySize, queries);
                 std::cerr << "adjustSearchEdgeSize: create GT..." << std::endl;
                 createGroundTruth(index, epsilon, searchParameters, queries, gtStream);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::cerr << "adjustSearchEdgeSize: Error!! Cannot adjust. " << err.what() << std::endl;
                 redirector.end();
                 return std::pair<size_t, size_t>(0, 0);
@@ -980,7 +980,7 @@ namespace NGT {
                     }
                     // store parameters here to prioritize high accuracy
                     history.insert(std::make_pair(std::make_pair(base.first, rate.first), rate.second));
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "adjustRateSearchEdgeSize: Error!! Cannot adjust. " << err.what() << std::endl;
                     redirector.end();
                     return std::pair<size_t, size_t>(0, 0);
@@ -1042,7 +1042,7 @@ namespace NGT {
                 if (prop.dynamicEdgeSizeRate > 0 && prop.dynamicEdgeSizeBase > 0) {
                     graphIndex.saveProperty(indexName);
                 }
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::cerr << "adjustRateSearchEdgeSize: Error!! Cannot adjust. " << err.what() << std::endl;
                 return;
             }
@@ -1187,7 +1187,7 @@ namespace NGT {
                     if (emptyCount >= 1000) {
                         std::stringstream msg;
                         msg << "Too small amount of objects. " << repositorySize << ":" << nqueries;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     continue;
                 }
@@ -1212,7 +1212,7 @@ namespace NGT {
                         std::stringstream msg;
                         msg << "Too many empty entries to extract. Object repository size=" << osize << " " << id1
                             << ":" << oft;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                 }
                 if (similarObject) {
@@ -1225,7 +1225,7 @@ namespace NGT {
                     if (results.size() < 2) {
                         std::stringstream msg;
                         msg << "Cannot get even two results for queries.";
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     size_t id2 = 1;
                     for (size_t i = 1; i < results.size(); i++) {
@@ -1242,7 +1242,7 @@ namespace NGT {
                         if (id2 >= osize) {
                             std::stringstream msg;
                             msg << "Too many empty entries to extract.";
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                     }
                     queries.push_back(meanObject(id1 + oft, id2, prop));
@@ -1508,7 +1508,7 @@ namespace NGT {
                         if (results.size() == 0) {
                             std::stringstream msg;
                             msg << "generatePseudoGroundTruth: Cannot get any search result.";
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         NGT::Distance d = results.back().distance;
                         if (d != lastDistances[idx]) {
@@ -1563,7 +1563,7 @@ namespace NGT {
                 msg
                         << "Optimizer::generateAccuracyTable: edgeSizeForSearch is invalid to call generateAccuracyTable, because accuracy 1.0 cannot be achieved with the setting. edgeSizeForSearch="
                         << prop.edgeSizeForSearch << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             NGT::Optimizer optimizer(index, nOfResults);
@@ -1591,7 +1591,7 @@ namespace NGT {
                         queryStream.seekg(0, std::ios_base::beg);
                         NGT::Optimizer::search(index, queryStream, gtStream, searchParameters, acc);
                         if (acc.size() == 0) {
-                            NGTThrowException("Fatal error! Cannot get any accuracy value.");
+                            POLARIS_THROW_EX("Fatal error! Cannot get any accuracy value.");
                         }
                         accuracy = acc[0].meanAccuracy;
                         map.insert(std::make_pair(epsilon, accuracy));

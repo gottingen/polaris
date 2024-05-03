@@ -66,7 +66,7 @@ void NGTQG::Index::create(const std::string indexPath, QBG::BuildParameters &bui
     if (dimension % buildParameters.creation.numOfSubvectors != 0) {
       std::stringstream msg;
       msg << "NGTQBG:Index::create: Invalid dimension and local division No. " << dimension << ":" << buildParameters.creation.numOfSubvectors;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     dimensionOfSubvector = dimension / buildParameters.creation.numOfSubvectors;
   }

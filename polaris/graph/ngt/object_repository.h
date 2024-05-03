@@ -34,7 +34,7 @@ namespace NGT {
             if (!objs.is_open()) {
                 std::stringstream msg;
                 msg << "NGT::ObjectSpace: Cannot open the specified file " << ofile << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             Parent::serialize(objs, ospace);
         }
@@ -45,7 +45,7 @@ namespace NGT {
             if (!objs.is_open()) {
                 std::stringstream msg;
                 msg << "NGT::ObjectSpace: Cannot open the specified file " << ifile << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             Parent::deserialize(objs, ospace);
         }
@@ -55,7 +55,7 @@ namespace NGT {
             if (!objs.is_open()) {
                 std::stringstream msg;
                 msg << "NGT::ObjectSpace: Cannot open the specified file " << ofile << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             Parent::serializeAsText(objs, ospace);
         }
@@ -65,7 +65,7 @@ namespace NGT {
             if (!objs.is_open()) {
                 std::stringstream msg;
                 msg << "NGT::ObjectSpace: Cannot open the specified file " << ifile << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             Parent::deserializeAsText(objs, ospace);
         }
@@ -107,7 +107,7 @@ namespace NGT {
 
         void appendText(std::istream &is, size_t dataSize = 0) {
             if (dimension == 0) {
-                NGTThrowException("ObjectSpace::readText: Dimension is not specified.");
+                POLARIS_THROW_EX("ObjectSpace::readText: Dimension is not specified.");
             }
             if (size() == 0) {
                 // First entry should be always a dummy entry.
@@ -134,12 +134,12 @@ namespace NGT {
                     PersistentObject *obj = 0;
                     try {
                         obj = allocateNormalizedPersistentObject(object);
-                    } catch (Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         std::cerr << err.what() << " continue..." << std::endl;
                         obj = allocatePersistentObject(object);
                     }
                     push_back(obj);
-                } catch (Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "ObjectSpace::readText: Warning! Invalid line. " << err.what()
                               << " [" << line << "] Skip the line " << lineNo
                               << " and continue." << std::endl;
@@ -150,7 +150,7 @@ namespace NGT {
         template<typename T>
         void append(T *data, size_t objectCount) {
             if (dimension == 0) {
-                NGTThrowException("ObjectSpace::readText: Dimension is not specified.");
+                POLARIS_THROW_EX("ObjectSpace::readText: Dimension is not specified.");
             }
             if (size() == 0) {
                 // First entry should be always a dummy entry.
@@ -171,12 +171,12 @@ namespace NGT {
                     PersistentObject *obj = 0;
                     try {
                         obj = allocateNormalizedPersistentObject(object);
-                    } catch (Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         std::cerr << err.what() << " continue..." << std::endl;
                         obj = allocatePersistentObject(object);
                     }
                     push_back(obj);
-                } catch (Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "ObjectSpace::readText: Warning! Invalid data. Skip the data no. " << idx
                               << " and continue." << std::endl;
                 }
@@ -206,7 +206,7 @@ namespace NGT {
                 std::stringstream msg;
                 msg << "ObjectSpace::allocate: too few dimension. " << tokens.size() << ":" << dimension << ". "
                     << textLine;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             size_t size = innerProduct ? dimension - 1 : dimension;
             for (size_t idx = 0; idx < size; idx++) {
@@ -214,7 +214,7 @@ namespace NGT {
                     std::stringstream msg;
                     msg << "ObjectSpace::allocate: an empty value string. " << idx << ":" << tokens.size() << ":"
                         << dimension << ". " << textLine;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 char *e;
                 object[idx] = static_cast<T>(strtod(tokens[idx].c_str(), &e));
@@ -274,7 +274,7 @@ namespace NGT {
                     msg
                             << "ObjectSpace::allocateObject: Fatal error! The specified dimension is invalid. The indexed objects="
                             << dimension << " The specified object=" << size;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
             Object *po = new Object(osize);
@@ -302,7 +302,7 @@ namespace NGT {
                         << "ObjectSpace::allocatePersistentObject: Fatal error! The dimensionality is invalid. The specified dimensionality="
                         << (sparse ? dimension - 1 : dimension) << ". The specified object="
                         << (sparse ? size - 1 : size) << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return allocateObject(o, size);
         }

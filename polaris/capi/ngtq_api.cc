@@ -226,7 +226,7 @@ bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NG
     std::vector<float> *rotation = 0;
     const std::string objectPath;
     QBG::Index::create(indexPath, property, globalProperty, localProperty, rotation, objectPath);
-  } catch(NGT::Exception &err) {
+  } catch(polaris::PolarisException &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
     operate_error_string_(ss, error);
@@ -464,7 +464,7 @@ bool qbg_build_index(const char *index_path, QBGBuildParameters *parameters, QBG
 
   try {
     hierarchicalKmeans.clustering(index_path);
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
     operate_error_string_(ss, error);
@@ -496,7 +496,7 @@ bool qbg_build_index(const char *index_path, QBGBuildParameters *parameters, QBG
   try {
     auto nthreads = omp_get_max_threads();
     optimizer.optimize(index_path, nthreads);
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
     operate_error_string_(ss, error);
@@ -506,7 +506,7 @@ bool qbg_build_index(const char *index_path, QBGBuildParameters *parameters, QBG
   try {
     auto verbose = false;
     QBG::Index::build(index_path, verbose);
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
     operate_error_string_(ss, error);

@@ -136,7 +136,7 @@ namespace QBG {
 	} else {
 	  cerr << "qbg: Illegal command. " << command << endl;
 	}
-      } catch(NGT::Exception &err) {
+      } catch(polaris::PolarisException &err) {
 	cerr << "qbg: Error: " << err.what() << endl;
       }
     }

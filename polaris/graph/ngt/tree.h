@@ -143,10 +143,10 @@ namespace NGT {
       LeafNode &ln = getLeaf(id);
       try {
 	ln.removeObject(id, replaceId);
-      } catch(Exception &err) {
+      } catch(polaris::PolarisException &err) {
 	std::stringstream msg;
 	msg << "VpTree::remove: Inner error. Cannot remove object. leafNode=" << ln.id.getID() << ":" << err.what();
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       if (ln.getObjectSize() == 0) {
 	if (ln.parent.getID() != 0) {
@@ -174,13 +174,13 @@ namespace NGT {
       Node *root;
       try {
   	root = internalNodes.get(nid);
-      } catch(Exception &err) {
+      } catch(polaris::PolarisException &err) {
         try {
   	  root = leafNodes.get(nid);
-        } catch(Exception &e) {
+        } catch(polaris::PolarisException &e) {
           std::stringstream msg;
           msg << "VpTree::getRootNode: Inner error. Cannot get a leaf root node. " << nid << ":" << e.what();
-          NGTThrowException(msg);
+          POLARIS_THROW_EX(msg);
         }
       }
 

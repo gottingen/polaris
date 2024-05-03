@@ -13,6 +13,7 @@
 #include <exception>
 #include <string>
 #include <utility>
+#include <sstream>
 #include <vector>
 #include <stdexcept>
 #include <system_error>
@@ -23,22 +24,46 @@ namespace polaris {
     /// Base class for Faiss exceptions
     class PolarisException : public std::exception {
     public:
-        explicit PolarisException(const std::string &msg);
-        POLARIS_API PolarisException(const std::string &message, int errorCode);
-        POLARIS_API PolarisException(const std::string &message, int errorCode, const std::string &funcSig,
-                                 const std::string &fileName, uint32_t lineNum);
+        PolarisException() = default;
 
-        PolarisException(
-                const std::string &msg,
-                const char *funcName,
-                const char *file,
-                int line);
+        explicit PolarisException(const std::string &msg);
+
+        POLARIS_API PolarisException(const std::string &message, int errorCode);
+
+        POLARIS_API PolarisException(const std::string &message, int errorCode, const std::string &funcSig,
+                                     const std::string &fileName, uint32_t lineNum);
+
+        PolarisException(const std::string &msg, const std::string &funcName, const std::string &file, int line);
+
+        PolarisException(const std::stringstream &imsg, const std::string &funcName, const std::string &file,
+                         int line) {
+            set(imsg.str(), funcName, file, line);
+        }
+
+        void set(const std::string &m, const std::string &function, const std::string &file, size_t line);
 
         /// from std::exception
         const char *what() const noexcept override;
 
+        PolarisException &operator=(const PolarisException &e) {
+            msg = e.msg;
+            _errorCode = e._errorCode;
+            return *this;
+        }
+
+        std::string &get_message() { return msg; }
+
         std::string msg;
-        int _errorCode;
+        int _errorCode{0};
+    };
+
+    class ThreadTerminationException : public PolarisException {
+    public:
+        ThreadTerminationException(const std::string &msg, const std::string &funcName, const std::string &file,
+                                   int line) { set(msg, funcName, file, line); }
+
+        ThreadTerminationException(const std::stringstream &imsg, const std::string &funcName, const std::string &file,
+                                   int line) { set(imsg.str(), funcName, file, line); }
     };
 
     class FileException : public PolarisException {
@@ -75,3 +100,6 @@ namespace polaris {
     std::string demangle_cpp_symbol(const char *name);
 
 } // namespace polaris
+
+#define POLARIS_THROW_EX(MESSAGE) throw polaris::PolarisException(MESSAGE, __PRETTY_FUNCTION__, __FILE__, (size_t)__LINE__)
+#define POLARIS_THROW_TYPED_EX(MESSAGE, TYPE)    throw polaris::TYPE(MESSAGE, __PRETTY_FUNCTION__, __FILE__, (size_t)__LINE__)

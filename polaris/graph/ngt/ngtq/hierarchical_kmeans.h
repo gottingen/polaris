@@ -731,7 +731,7 @@ namespace QBG {
 	if (numOfRemainingClusters < 0) {
 	  std::stringstream msg;
 	  msg << " subclustering: Internal error! " << numOfRemainingClusters << ":" << idx;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	nPartialClusters[idx] = ncs;
 	ts += ncs;
@@ -749,14 +749,14 @@ namespace QBG {
 	std::stringstream msg;
 	msg << "subclustering: Internal error! " << ts << ":" << numOfLowerClusters
 	    << ":" << numOfRemainingClusters << std::endl;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
 
       auto nthreads = omp_get_max_threads();
       if (!objectList.openMultipleStreams(nthreads)) {
 	std::stringstream msg;
 	msg << "subclustering: Internal error! Cannot open multiple streams. " << nthreads;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
 
       lowerClusters.resize(upperClusters.size());
@@ -774,12 +774,12 @@ namespace QBG {
 	    if (threadid >= nthreads) {
 	      std::stringstream msg;
 	      msg << "subclustering: inner fatal error. # of threads=" << nthreads << ":" << threadid;
-	      NGTThrowException(msg);
+	      POLARIS_THROW_EX(msg);
 	    }
 	    if (!objectList.get(threadid, m.vectorID + 1, obj, &objectSpace)) {
 	      std::stringstream msg;
 	      msg << "subclustering: Fatal error! cannot get!!!! " << m.vectorID + 1;
-	      NGTThrowException(msg);
+	      POLARIS_THROW_EX(msg);
 	    }
 	    partialVectors.push_back(obj);
 	  }
@@ -787,7 +787,7 @@ namespace QBG {
 	if (upperClusters[idx].members.size() != partialVectors.size()) {
 	  std::stringstream msg;
 	  msg << "inner fatal error. the sizes of members are inconsistent. " << upperClusters[idx].members.size() << ":" << partialVectors.size() << ":" << idx;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	NGT::Clustering lowerClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
 	lowerClustering.kmeans(partialVectors, nPartialClusters[idx], lowerClusters[idx]);
@@ -854,7 +854,7 @@ namespace QBG {
 	if (numOfRemainingClusters < 0) {
 	  std::stringstream msg;
 	  msg << "subclustering: Internal error! " << numOfRemainingClusters << idx;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	nPartialClusters[idx] = ncs;
 	ts += ncs;
@@ -868,7 +868,7 @@ namespace QBG {
 	std::stringstream msg;
 	msg << "subclustering: Internal error! " << ts << ":" << numOfLowerClusters
 	    << ":" << numOfRemainingClusters << std::endl;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
 
       auto nthreads = omp_get_max_threads();
@@ -892,7 +892,7 @@ namespace QBG {
 	if (upperClusters[idx].members.size() != partialVectors.size()) {
 	  std::stringstream msg;
 	  msg << "the sizes of members are inconsistent. " << upperClusters[idx].members.size() << ":" << partialVectors.size() << ":" << idx;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	NGT::Clustering lowerClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, maximumIteration);
 	lowerClustering.kmeans(partialVectors, nPartialClusters[idx], lowerClusters[idx]);
@@ -1217,7 +1217,7 @@ namespace QBG {
 					NGT::Clustering::InitializationMode initMode = NGT::Clustering::InitializationModeKmeansPlusPlus) {
       std::cerr << "clustering with two layers... # of clusters=" << numOfClusters << std::endl;
       if (numOfClusters == 0) {
-	NGTThrowException("HierachicalKmeans:: # of clusters is zero.");
+	POLARIS_THROW_EX("HierachicalKmeans:: # of clusters is zero.");
       }
       size_t numOfFirstClusters = sqrt(numOfClusters);
       size_t numOfFirstObjects = sqrt(vectors.size());

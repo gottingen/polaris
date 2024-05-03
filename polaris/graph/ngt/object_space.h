@@ -197,12 +197,12 @@ namespace NGT {
 	  if (static_cast<float>(data[i]) != 0.0) {
 	    std::stringstream msg;
 	    msg << "ObjectSpace::normalize: Error! the sum of the object is zero for the cosine similarity, but not a zero vector. " << i << ":" << static_cast<float>(data[i]);
-	    NGTThrowException(msg);
+	    POLARIS_THROW_EX(msg);
 	  }
 	}
 	std::stringstream msg;
 	msg << "ObjectSpace::normalize: Error! the object is an invalid zero vector for the cosine similarity.";
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       sum = sqrt(sum);
       for (size_t i = 0; i < dim; i++) {
@@ -252,14 +252,14 @@ namespace NGT {
     virtual uint8_t &operator[](size_t idx) const = 0;
     void serialize(std::ostream &os, ObjectSpace *objectspace = 0) {
       if (objectspace == 0) {
-	NGTThrowException("Object: objectspace is null");
+	POLARIS_THROW_EX("Object: objectspace is null");
       }
       size_t byteSize = objectspace->getByteSizeOfObject();
       NGT::Serializer::write(os, (uint8_t*)&(*this)[0], byteSize);
     }
     void deserialize(std::istream &is, ObjectSpace *objectspace = 0) {
       if (objectspace == 0) {
-	NGTThrowException("Object: objectspace is null");
+	POLARIS_THROW_EX("Object: objectspace is null");
       }
       size_t byteSize = objectspace->getByteSizeOfObject();
       assert(&(*this)[0] != 0);
@@ -267,12 +267,12 @@ namespace NGT {
       if (is.eof()) {
 	std::stringstream msg;
 	msg << "ObjectSpace::BaseObject: Fatal Error! Read beyond the end of the object file. The object file is corrupted?" << byteSize;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
     void serializeAsText(std::ostream &os, ObjectSpace *objectspace = 0) {
       if (objectspace == 0) {
-	NGTThrowException("Object: objectspace is null");
+	POLARIS_THROW_EX("Object: objectspace is null");
       }
       const std::type_info &t = objectspace->getObjectType();
       size_t dimension = objectspace->getDimension();
@@ -296,7 +296,7 @@ namespace NGT {
     }
     void deserializeAsText(std::ifstream &is, ObjectSpace *objectspace = 0) {
       if (objectspace == 0) {
-	NGTThrowException("Object: objectspace is null");
+	POLARIS_THROW_EX("Object: objectspace is null");
       }
       const std::type_info &t = objectspace->getObjectType();
       size_t dimension = objectspace->getDimension();
@@ -325,7 +325,7 @@ namespace NGT {
       size_t dimension = objectspace.getDimension();
       void *ref = (void*)&(*this)[0];
       if (ref == 0) {
-	NGTThrowException("BaseObject::set: vector is null");
+	POLARIS_THROW_EX("BaseObject::set: vector is null");
       }
       if (t == typeid(uint8_t)) {
 	for (size_t d = 0; d < dimension; d++) {
@@ -354,7 +354,7 @@ namespace NGT {
       } else {
 	std::stringstream msg;
 	msg << "BaseObject::set: not supported data type. [" << t.name() << "]";
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
   };

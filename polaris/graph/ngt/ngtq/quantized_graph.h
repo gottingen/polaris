@@ -125,7 +125,7 @@ namespace NGTQG {
                             std::stringstream msg;
                             msg << "Fatal inner error! Invalid local centroid ID. ID=" << (*i).id << ":"
                                 << invertedIndexObjects[(*i).id].localID[idx];
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         quantizedStream.arrangeQuantizedObject(dataNo, idx,
                                                                invertedIndexObjects[(*i).id].localID[idx] - 1);
@@ -170,10 +170,10 @@ namespace NGTQG {
                     NGT::Serializer::read(is, objectStream, streamSize);
                     (*i).objects = objectStream;
                 }
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
                 msg << "QuantizedGraph::deserialize: Fatal error. " << err.what();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
         }
 
@@ -397,9 +397,9 @@ namespace NGTQG {
             }
             try {
                 searchQuantizedGraph(static_cast<NGT::NeighborhoodGraph &>(index), sc, seeds);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::cerr << err.what() << std::endl;
-                NGT::Exception e(err);
+                polaris::PolarisException e(err);
                 throw e;
             }
         }
@@ -421,7 +421,7 @@ namespace NGTQG {
                 sq.workingResult = std::move(sc.workingResult);
                 sq.distanceComputationCount = sc.distanceComputationCount;
                 sq.visitCount = sc.visitCount;
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 deleteObject(query);
                 throw err;
             }
@@ -437,7 +437,7 @@ namespace NGTQG {
                 stringstream msg;
                 msg << "Quantizer::getNumOfSubvectors: dimensionOfSubvector is invalid. " << dimension << " : "
                     << dimensionOfSubvector << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return dimension / dimensionOfSubvector;
         }
@@ -564,7 +564,7 @@ namespace NGTQG {
             if (stat(quantizedIndexPath.c_str(), &st) == 0) {
                 std::stringstream msg;
                 msg << "QuantizedGraph::create: Quantized graph is already existed. " << indexPath;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             NGT::Property ngtProperty;
             index.getProperty(ngtProperty);
@@ -579,14 +579,14 @@ namespace NGTQG {
                 msg
                         << "QuantizedGraph::quantize: the specified pseudo dimension is smaller than the genuine dimension. "
                         << ngtProperty.dimension << ":" << pseudoDimension << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             if (pseudoDimension % align != 0) {
                 std::stringstream msg;
                 msg << "QuantizedGraph::quantize: the specified pseudo dimension should be a multiple of " << align
                     << ". "
                     << pseudoDimension << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             createQuantizedGraphFrame(quantizedIndexPath, ngtProperty.dimension, pseudoDimension, dimensionOfSubvector);
 #else
@@ -611,10 +611,10 @@ namespace NGTQG {
                 if (stat(quantizedIndexPath.c_str(), &st) != 0) {
                     std::stringstream msg;
                     msg << "QuantizedGraph::quantize: Quantized graph is already existed. " << quantizedIndexPath;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 if (maxNumOfEdges == 0) {
-                    NGTThrowException("QuantizedGraph::quantize: The maximum number of edges is zero.");
+                    POLARIS_THROW_EX("QuantizedGraph::quantize: The maximum number of edges is zero.");
                 }
                 buildQuantizedGraph(indexPath, maxNumOfEdges);
             }

@@ -147,7 +147,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
     std::cerr << "Three layer clustering..." << std::endl;
     std::cerr << "HiearchicalKmeans::clustering: # of clusters=" << numOfThirdClusters << ":" << index.getQuantizer().property.globalCentroidLimit << std::endl;
     if (index.getQuantizer().objectList.size() <= 1) {
-      NGTThrowException("HierarchicelKmeans: No objects");
+      POLARIS_THROW_EX("HierarchicelKmeans: No objects");
     }
     if (numOfThirdClusters == 0) {
       if (index.getQuantizer().property.globalCentroidLimit == 0) {
@@ -171,7 +171,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
     }
 
     if (numOfThirdClusters == 0 || numOfObjects == 0) {
-      NGTThrowException("numOfThirdClusters or numOfObjects are zero");
+      POLARIS_THROW_EX("numOfThirdClusters or numOfObjects are zero");
     }
     numOfThirdObjects = numOfThirdObjects == 0 ? numOfObjects : numOfThirdObjects;
     numOfSecondClusters = numOfSecondClusters == 0 ? numOfThirdClusters : numOfSecondClusters;
@@ -185,22 +185,22 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
     if (numOfFirstObjects < numOfFirstClusters) {
       std::stringstream msg;
       msg << "# of objects for the first should be larger than # of the first clusters. " << numOfFirstObjects << ":" << numOfFirstClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numOfFirstClusters > numOfSecondClusters) {
       std::stringstream msg;
       msg << "# of the first clusters should be larger than or equal to # of the second clusters. " << numOfFirstClusters << ":" << numOfSecondClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numOfSecondClusters > numOfThirdClusters) {
       std::stringstream msg;
       msg << "# of the third clusters should be larger than or equal to # of the second clusters. " << numOfSecondClusters << ":" << numOfThirdClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numOfFirstClusters > numOfSecondClusters) {
       std::stringstream msg;
       msg << "# of the second clusters should be larger than # of the first clusters. " << numOfFirstClusters << ":" << numOfSecondClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 
     NGT::Clustering firstClustering(initMode, NGT::Clustering::ClusteringTypeKmeansWithoutNGT, 300);
@@ -219,7 +219,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
       if (!objectList.get(id, obj, &objectSpace)) {
 	std::stringstream msg;
 	msg << "qbg: Cannot get object. ID=" << id;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       vectors.push_back(obj);
     }
@@ -282,7 +282,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
 	  if (thirdClusters[idx1][idx2].members.size() == 0) {
 	    std::stringstream msg;
 	    msg << "Fatal error! found an empty cluster in thirdClusters.";
-	    NGTThrowException(msg);
+	    POLARIS_THROW_EX(msg);
 	  }
 	  if (thirdFlatClusters[idx].members.size() == 0) {
 	    std::cerr << "warning. found an empty cluster in thirdFlatClusters. " << idx << std::endl;
@@ -330,7 +330,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
     std::cerr << "Two layer clustering..." << std::endl;
     std::cerr << "HiearchicalKmeans::clustering: # of clusters=" << numOfThirdClusters << ":" << index.getQuantizer().property.globalCentroidLimit << std::endl;
     if (index.getQuantizer().objectList.size() <= 1) {
-      NGTThrowException("HierarchicelKmeans: No objects");
+      POLARIS_THROW_EX("HierarchicelKmeans: No objects");
     }
     if (numOfThirdClusters == 0) {
       if (index.getQuantizer().property.globalCentroidLimit == 0) {
@@ -355,7 +355,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
 
     std::cerr << "The first layer. " << numOfFirstClusters << ":" << numOfFirstObjects << std::endl;
     if (numOfThirdClusters == 0 || numOfObjects == 0) {
-      NGTThrowException("numOfThirdClusters or numOfObjects are zero");
+      POLARIS_THROW_EX("numOfThirdClusters or numOfObjects are zero");
     }
     numOfThirdObjects = numOfThirdObjects == 0 ? numOfObjects : numOfThirdObjects;
     numOfSecondClusters = numOfSecondClusters == 0 ? numOfThirdClusters : numOfSecondClusters;
@@ -367,22 +367,22 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
     if (numOfFirstObjects < numOfFirstClusters) {
       std::stringstream msg;
       msg << "# of objects for the first should be larger than # of the first clusters. " << numOfFirstObjects << ":" << numOfFirstClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numOfFirstClusters > numOfSecondClusters) {
       std::stringstream msg;
       msg << "# of the first clusters should be larger than or equal to # of the second clusters. " << numOfFirstClusters << ":" << numOfSecondClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numOfSecondClusters > numOfThirdClusters) {
       std::stringstream msg;
       msg << "# of the third clusters should be larger than or equal to # of the second clusters. " << numOfSecondClusters << ":" << numOfThirdClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numOfFirstClusters > numOfSecondClusters) {
       std::stringstream msg;
       msg << "# of the second clusters should be larger than # of the first clusters. " << numOfFirstClusters << ":" << numOfSecondClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 
     std::cerr << "Two layer clustering. " << numOfFirstClusters << ":" << numOfFirstObjects << "," << numOfSecondClusters << ":" << numOfSecondObjects << "," << numOfThirdClusters << ":" << numOfThirdObjects << " " << numOfObjects << std::endl;
@@ -404,7 +404,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       if (!objectList.get(id, obj, &objectSpace)) {
 	std::stringstream msg;
 	msg << "qbg: Cannot get object. ID=" << id;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       vectors.push_back(obj);
     }
@@ -460,7 +460,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
     } else {
       std::stringstream msg;
       msg << "Invalid clustering type:" << clusteringType << std::endl;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     timer.stop();
     std::cerr << "clustering for the second. time=" << timer << " vmsize=" << NGT::Common::getProcessVmSize() << std::endl;
@@ -524,13 +524,13 @@ void QBG::HierarchicalKmeans::multiLayerClustering(QBG::Index &index, std::strin
     if (clusterID < 0) {
       std::stringstream msg;
       msg << "Any target cluster ID is not specified.";
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     std::ifstream objectIDs(objectIDsFile);
     if (!objectIDs) {
       std::stringstream msg;
       msg << "Cannot open the object id file. " << objectIDsFile;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     auto &objectSpace = quantizer.globalCodebookIndex.getObjectSpace();
     uint32_t id = 1;
@@ -593,12 +593,12 @@ void QBG::HierarchicalKmeans::clustering(std::string indexPath, std::string pref
   bool readOnly = false;
   QBG::Index index(indexPath, readOnly);
   if (index.getQuantizer().objectList.size() <= 1) {
-    NGTThrowException("No objects in the index.");
+    POLARIS_THROW_EX("No objects in the index.");
   }
   if (clusteringType == QBG::HierarchicalKmeans::ClusteringTypeMultiLayer) {
     try {
       multiLayerClustering(index, prefix, objectIDsFile);
-    } catch(NGT::Exception &err) {
+    } catch(polaris::PolarisException &err) {
       redirector.end();
       throw err;
     }
@@ -629,7 +629,7 @@ void QBG::HierarchicalKmeans::clustering(std::string indexPath, std::string pref
       } else {
 	twoPlusLayerClustering(prefix, index);
       }
-    } catch(NGT::Exception &err) {
+    } catch(polaris::PolarisException &err) {
       redirector.end();
       throw err;
     }

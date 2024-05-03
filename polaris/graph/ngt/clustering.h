@@ -139,12 +139,12 @@ namespace NGT {
 	if (v.size() == 0) {
 	  std::stringstream msg;
 	  msg << "Clustering:loadVectors: Error! The dimensionality is zero." << std::endl;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	if (prevdim != 0 && prevdim != v.size()) {
 	  std::stringstream msg;
 	  msg << "Clustering:loadVectors: Error! The dimensionality is inconsist. " << prevdim << ":" <<v.size() << std::endl;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	vectors.push_back(v);
 	prevdim = v.size();
@@ -211,7 +211,7 @@ namespace NGT {
       if ((numberOfClusters != 0) && (clusters.size() < numberOfClusters)) {
 	std::stringstream msg;
 	msg << "initial cluster data are not enough. " << clusters.size() << ":" << numberOfClusters;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
 #if !defined(NGT_CLUSTER_NO_AVX)
@@ -302,7 +302,7 @@ namespace NGT {
       if (a.size() != b.size()) {
 	std::stringstream msg;
 	std::cerr << "Clustering::subtract: Mismatched dimensions. " << a.size() << "x" << b.size();
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       auto bit = b.begin();
       for (auto ait = a.begin(); ait != a.end(); ++ait, ++bit) {
@@ -494,7 +494,7 @@ namespace NGT {
 	    for (auto scit = clusters.begin(); scit != clusters.end(); ++scit) {
 	      msg << distance(clusters.begin(), scit) << ":" << (*scit).members.size() << " ";
 	    }
-	    NGTThrowException(msg);
+	    POLARIS_THROW_EX(msg);
 	  }
 	  (*cit).members.push_back((*maxit).members.back());
 	  (*cit).members.back().centroidID = distance(clusters.begin(), cit);
@@ -971,7 +971,7 @@ namespace NGT {
 	default:
 	  std::stringstream msg;
 	  msg << " kmeans: invalid initialization mode. " << initializationMode;
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
       }
     }
@@ -987,12 +987,12 @@ namespace NGT {
       if (vectors.size() == 0) {
 	std::stringstream msg;
 	msg << "Clustering::kmeans: No vector.";
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       if (vectors[0].size() == 0) {
 	std::stringstream msg;
 	msg << "Clustering::kmeans: No dimension.";
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
 
       setupInitialClusters(vectors, numberOfClusters, clusters);
@@ -1006,7 +1006,7 @@ namespace NGT {
       default:
 	std::stringstream msg;
 	msg << " kmeans: invalid clustering type. " << clusteringType;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
 

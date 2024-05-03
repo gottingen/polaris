@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
                 return 1;
             }
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         std::cerr << "Error " << err.what() << std::endl;
         return 1;
     } catch (...) {

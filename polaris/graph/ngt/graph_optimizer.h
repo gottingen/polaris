@@ -100,10 +100,10 @@ namespace NGT {
                 prop.dynamicEdgeSizeBase = coefficients.first;
                 prop.dynamicEdgeSizeRate = coefficients.second;
                 prop.edgeSizeForSearch = -2;
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
                 msg << "Optimizer::adjustSearchCoefficients: Cannot adjust the search coefficients. " << err.what();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             graph.saveIndex(indexPath);
         }
@@ -256,7 +256,7 @@ namespace NGT {
             if (access(outIndexPath.c_str(), 0) == 0) {
                 std::stringstream msg;
                 msg << "Optimizer::execute: The specified index exists. " << outIndexPath;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             const std::string com = "cp -r " + inIndexPath + " " + outIndexPath;
@@ -264,7 +264,7 @@ namespace NGT {
             if (stat != 0) {
                 std::stringstream msg;
                 msg << "Optimizer::execute: Cannot create the specified index. " << outIndexPath;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             {
@@ -275,7 +275,7 @@ namespace NGT {
                 std::cerr << " delete all of objects" << std::endl;
                 try {
                     graphIndex->destructObjectSpace();
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     delete graphIndex;
                     throw (err);
                 }
@@ -311,7 +311,7 @@ namespace NGT {
                         graphIndex->saveGraph(outIndexPath);
                         prop.graphType = NGT::NeighborhoodGraph::GraphTypeONNG;
                         graphIndex->saveProperty(outIndexPath);
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         delete graphIndex;
                         redirector.end();
                         throw (err);
@@ -335,7 +335,7 @@ namespace NGT {
                         timer.stop();
                         std::cerr << "Optimizer::execute: Path adjustment time=" << timer.time << " (sec) "
                                   << std::endl;
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         delete graphIndex;
                         redirector.end();
                         throw (err);
@@ -372,10 +372,10 @@ namespace NGT {
                     prop.dynamicEdgeSizeRate = coefficients.second;
                     prop.edgeSizeForSearch = -2;
                     outGraph.saveProperty(outIndexPath);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::stringstream msg;
                     msg << "Optimizer::execute: Cannot adjust the search coefficients. " << err.what();
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
 
@@ -396,11 +396,11 @@ namespace NGT {
                         prop.prefetchSize = prefetch.second;
                         outIndex.setProperty(prop);
                         outGraph.saveProperty(outIndexPath);
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         redirector.end();
                         std::stringstream msg;
                         msg << "Optimizer::execute: Cannot adjust prefetch parameters. " << err.what();
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                 }
                 if (accuracyTableGeneration) {
@@ -414,21 +414,21 @@ namespace NGT {
                         outIndex.getProperty(prop);
                         prop.accuracyTable = accuracyTable.getString();
                         outIndex.setProperty(prop);
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         redirector.end();
                         std::stringstream msg;
                         msg << "Optimizer::execute: Cannot generate the accuracy table. " << err.what();
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                 }
                 try {
                     outGraph.saveProperty(outIndexPath);
                     redirector.end();
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     redirector.end();
                     std::stringstream msg;
                     msg << "Optimizer::execute: Cannot save the index. " << outIndexPath << err.what();
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
 
             }
@@ -466,7 +466,7 @@ namespace NGT {
                     std::vector<NGT::Optimizer::MeasuredValue> acc;
                     NGT::Optimizer::search(index, queryStream, gtStream, searchParameters, acc);
                     if (acc.size() == 0) {
-                        NGTThrowException("Fatal error! Cannot get any accuracy value.");
+                        POLARIS_THROW_EX("Fatal error! Cannot get any accuracy value.");
                     }
                     accuracy = acc[0].meanAccuracy;
                     nOfEdges = edgeSize;
@@ -533,7 +533,7 @@ namespace NGT {
                 msg
                         << "Optimizer::optimizeNumberOfEdgesForANNG: Cannot optimize the number of edges. Too small object set. # of objects="
                         << objectRepository.size() << " target No.=" << targetNo;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             double edgeRate = 0.0;
             double accuracyRate = 0.0;
@@ -556,7 +556,7 @@ namespace NGT {
                 std::stringstream msg;
                 msg << "Optimizer::optimizeNumberOfEdgesForANNG: Cannot optimize the number of edges. "
                     << estimatedEdge << ":" << estimatedAccuracy << " # of objects=" << objectRepository.size();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             return std::make_pair(estimatedEdge, estimatedAccuracy);
@@ -588,7 +588,7 @@ namespace NGT {
                 optimizedEdge.first = noOfEdges;
                 redirector.end();
                 return optimizedEdge;
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 redirector.end();
                 throw (err);
             }

@@ -51,7 +51,7 @@ namespace NGT {
                                 << "GraphReconstructor::extractGraph: Warning! The graph size must be the same as the capacity. "
                                 << id << std::endl;
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     graph.push_back(NGT::ObjectDistances());
                     continue;
                 }
@@ -131,7 +131,7 @@ namespace NGT {
                         } else {
                             removeCount++;
                         }
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                                   << std::endl;
                         it++;
@@ -186,7 +186,7 @@ namespace NGT {
                     NGT::GraphNode &node = *outGraph.getNode(id);
                     tmpGraph.push_back(node);
                     node.clear();
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     tmpGraph.push_back(NGT::GraphNode());
@@ -196,7 +196,7 @@ namespace NGT {
                 std::stringstream msg;
                 msg << "GraphReconstructor: Fatal inner error. " << outGraph.repository.size() << ":" << tmpGraph.size()
                     << ", " << outGraph.getPath();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             timer.stop();
             std::cerr << "GraphReconstructor::adjustPaths: graph preparing time=" << timer << std::endl;
@@ -243,7 +243,7 @@ namespace NGT {
                     for (size_t i = 0; i < candidates.size(); i++) {
                         removeCandidates[id - 1].push_back(candidates[i].second);
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -314,7 +314,7 @@ namespace NGT {
                         }
                         NGT::GraphNode &outSrcNode = *outGraph.getNode(id);
                         insert(outSrcNode, srcNode[rank].id, srcNode[rank].distance);
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                                   << std::endl;
                         it++;
@@ -359,11 +359,11 @@ namespace NGT {
                         if ((edge.id & 0x80000000) != 0) {
                             std::stringstream msg;
                             msg << "ID is too large to reduce edges. ID=" << edge.id;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         edge.id |= 0x80000000;
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                 }
@@ -441,7 +441,7 @@ namespace NGT {
                         if (!found) {
                             srcNode[rank].id &= 0x7FFFFFFF;
                         }
-                    } catch (NGT::Exception &err) {
+                    } catch (polaris::PolarisException &err) {
                         std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                                   << std::endl;
                         continue;
@@ -555,7 +555,7 @@ namespace NGT {
                         n.resize(originalEdgeSize);
                         node.swap(n);
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     warningCount++;
                     if (warningCount <= warningLimit) {
                         std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
@@ -613,7 +613,7 @@ namespace NGT {
                     }
                     node.clear();
                     node.shrink_to_fit();
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -643,7 +643,7 @@ namespace NGT {
                     }
                     NGT::GraphNode tmp = n;
                     n.swap(tmp);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -684,7 +684,7 @@ namespace NGT {
                     node.clear();
                     NGT::GraphNode empty;
                     node.swap(empty);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -702,7 +702,7 @@ namespace NGT {
                     for (size_t rank = 0; rank < node.size(); rank++) {
                         reverse[node[rank].id].push_back(ObjectDistance(id, node[rank].distance));
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -763,7 +763,7 @@ namespace NGT {
                     }
                     NGT::GraphNode tmp = n;
                     n.swap(tmp);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -796,7 +796,7 @@ namespace NGT {
                         size_t nodeID = node[rank].id;
                         outGraph.addEdge(id, nodeID, distance, false);
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "GraphReconstructor: Warning. Cannot get the node. ID=" << id << ":" << err.what()
                               << std::endl;
                     continue;
@@ -827,7 +827,7 @@ namespace NGT {
                     NGT::GraphNode &node = *outGraph.getNode(id);
                     NGT::GraphNode empty;
                     node.swap(empty);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                 }
             }
 
@@ -841,7 +841,7 @@ namespace NGT {
                     for (size_t i = 0; i < node.size(); ++i) {
                         NGT::Distance distance = node[i].distance;
                         if (prevDistance > distance) {
-                            NGTThrowException("Edge distance order is invalid");
+                            POLARIS_THROW_EX("Edge distance order is invalid");
                         }
                         prevDistance = distance;
                         size_t nodeID = node[i].id;
@@ -857,7 +857,7 @@ namespace NGT {
                             break;
                         }
                     }
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                 }
             }
 
@@ -888,7 +888,7 @@ namespace NGT {
             redirector.begin();
             try {
                 refineANNG(index, epsilon, accuracy, noOfEdges, exploreEdgeSize, batchSize);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 redirector.end();
                 throw (err);
             }
@@ -935,7 +935,7 @@ namespace NGT {
                     if (!error) {
                         try {
                             index.search(searchContainer);
-                        } catch (NGT::Exception &err) {
+                        } catch (polaris::PolarisException &err) {
 #pragma omp critical
                             {
                                 error = true;
@@ -947,7 +947,7 @@ namespace NGT {
                 if (error) {
                     std::stringstream msg;
                     msg << "GraphReconstructor::refineANNG: " << errorMessage;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 // outgoing edges
 #pragma omp parallel for

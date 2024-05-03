@@ -59,7 +59,7 @@ public:
       try {
 	query = args.get("#2");
       } catch (...) {
-	NGTThrowException("ngt: Error: Query is not specified");
+	POLARIS_THROW_EX("ngt: Error: Query is not specified");
       }
       querySize = args.getl("Q", 0);
       indexType	= args.getChar("i", 't');

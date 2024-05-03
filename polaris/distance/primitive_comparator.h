@@ -81,7 +81,7 @@ namespace NGT {
       p--;
       while (*p == 0xCD) p--;
       if (*p != 0xAB) {
-	NGTThrowException("MemoryCache::alignedFree: Fatal Error! Cannot find allocated address.");
+	POLARIS_THROW_EX("MemoryCache::alignedFree: Fatal Error! Cannot find allocated address.");
       }
       delete[] p;
     }
@@ -932,7 +932,7 @@ namespace NGT {
     class SparseJaccardBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
@@ -953,35 +953,35 @@ namespace NGT {
     class L1Bfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
     class CosineSimilarityBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
     class NormalizedCosineSimilarityBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
     class AngleBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
     class NormalizedAngleBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
@@ -989,7 +989,7 @@ namespace NGT {
     class PoincareBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 
@@ -997,7 +997,7 @@ namespace NGT {
     class LorentzBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
-	NGTThrowException("Not supported.");
+	POLARIS_THROW_EX("Not supported.");
       }
     };
 

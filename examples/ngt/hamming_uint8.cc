@@ -54,7 +54,7 @@ main(int argc, char **argv) {
         }
         index.createIndex(16);
         index.save();
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         return 1;
     } catch (...) {
@@ -104,7 +104,7 @@ main(int argc, char **argv) {
             }
             cout << endl;
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         return 1;
     } catch (...) {

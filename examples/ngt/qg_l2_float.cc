@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
         std::cout << "building the index..." << std::endl;
         index.createIndex(16);
         index.save();
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         return 1;
     } catch (...) {
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     try {
         std::cout << "quantizing the index..." << std::endl;
         NGTQG::Index::quantize(indexPath, dimensionOfSubvector, maxNumberOfEdges, true);
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         return 1;
     } catch (...) {
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
             }
             cout << endl;
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         return 1;
     } catch (...) {

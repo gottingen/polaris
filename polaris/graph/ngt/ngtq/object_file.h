@@ -70,7 +70,7 @@ class ObjectFile : public ArrayFile<NGT::Object> {
     default:
       stringstream msg;
       msg << "ObjectFile::Invalid Object Type in the property. " << dataType;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
       break;
     }
     return true;
@@ -129,7 +129,7 @@ class ObjectFile : public ArrayFile<NGT::Object> {
     if (objectSpace == 0) {
       stringstream msg;
       msg << "ObjectFile::Fatal Error. objectSpace is not set." << std::endl;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     NGT::Object *object = objectSpace->allocateObject();
     if (!ArrayFile<NGT::Object>::get(id, *object, objectSpace)) {
@@ -169,12 +169,12 @@ class ObjectFile : public ArrayFile<NGT::Object> {
     if (objectSpace == 0) {
       stringstream msg;
       msg << "ObjectFile::Fatal Error. objectSpace is not set." << std::endl;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (objectSpace->getDimension() != data.size()) {
       stringstream msg;
       msg << "ObjectFile::Dimensions are inconsistency. " << objectSpace->getDimension() << ":" << data.size();
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     NGT::Object *object = objectSpace->allocateObject();
     const std::type_info &otype = objectSpace->getObjectType();
@@ -448,12 +448,12 @@ bool StaticObjectFile<TYPE>::open(const std::string &file, size_t pseudoDimensio
   if (_fileHead.noOfObjects != noOfObjects) {
     stringstream msg;
     msg << "Invalid # of objects=" << _fileHead.noOfObjects << ":" << noOfObjects;
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
   if (_fileHead.noOfDimensions != noOfDimensions) {
     stringstream msg;
     msg << "Invalid # of dimensions=" << _fileHead.noOfDimensions << ":" << noOfDimensions;
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
   _recordSize = _sizeOfElement * _fileHead.noOfDimensions;
   return ret;

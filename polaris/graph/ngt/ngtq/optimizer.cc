@@ -238,7 +238,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
   try {
     QBG::Index index(indexPath);
     if (index.getQuantizer().objectList.size() <= 1) {
-      NGTThrowException("optimize: No objects");
+      POLARIS_THROW_EX("optimize: No objects");
     }
     std::cerr << "optimize: # of objects=" << numberOfObjects << std::endl;
     if (numberOfObjects == 0) {
@@ -250,13 +250,13 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
     if (index.getQuantizer().property.localCentroidLimit == 0 && numberOfClusters == 0) {
       std::stringstream msg;
       msg << "optimize: # of clusters is illegal. " << index.getQuantizer().property.localCentroidLimit << ":" << numberOfClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (index.getQuantizer().property.localCentroidLimit != 0 && numberOfClusters != 0 &&
 	index.getQuantizer().property.localCentroidLimit != numberOfClusters) {
       std::stringstream msg;
       msg << "optimize: # of clusters is already specified. " << index.getQuantizer().property.localCentroidLimit << ":" << numberOfClusters;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
 
     }
     if (numberOfClusters == 0) {
@@ -266,7 +266,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
     if (numberOfSubvectors == 0 && index.getQuantizer().property.localDivisionNo == 0) {
       std::stringstream msg;
       msg << "optimize: # of subvectors is illegal. " << numberOfSubvectors << ":" << index.getQuantizer().property.localDivisionNo;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     if (numberOfSubvectors != 0 && index.getQuantizer().property.localDivisionNo != 0 &&
 	numberOfSubvectors != index.getQuantizer().property.localDivisionNo) {
@@ -306,7 +306,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       if (!ofs) {
 	std::stringstream msg;
 	msg << "Cannot open the file. " << QBG::Index::getCodebookIndexFile(indexPath);
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       for (size_t i = 0; i < count; i++) {
 	ofs << "0" << std::endl;
@@ -320,7 +320,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       loadVectors(objects, vectors);
 #endif
       if (vectors.size() == 0 || vectors[0].size() == 0) {
-	NGTThrowException("optimize::optimize: invalid input vectors");
+	POLARIS_THROW_EX("optimize::optimize: invalid input vectors");
       }
       std::vector<std::vector<float>> global(1);
       global[0].resize(index.getQuantizer().property.dimension, 0);
@@ -337,7 +337,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
 
     optimizeWithinIndex(indexPath);
 
-  } catch(NGT::Exception &err) {
+  } catch(polaris::PolarisException &err) {
     redirector.end();
     throw err;
   }
@@ -372,20 +372,20 @@ void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<floa
   if (vectors.size() == 0) {
     std::stringstream msg;
     msg << "optimize: error! the specified vetor is empty. the size=" << vectors.size();
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
 
   auto dim = vectors[0].size();
   if (numberOfSubvectors == 0) {
     std::stringstream msg;
     msg << "# of subspaces (m) is zero.";
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
   subvectorSize = dim / numberOfSubvectors;
   if (dim % numberOfSubvectors != 0) {
     std::stringstream msg;
     msg << "# of subspaces (m) is illegal. " << dim << ":" << numberOfSubvectors;
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
 
   generateResidualObjects(globalCentroid, vectors);
@@ -425,12 +425,12 @@ void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<floa
   if (numberOfMatrices > 100) {
     std::stringstream msg;
     msg << "# of matrices is too large. Should be less than 10. " << numberOfMatrices << " was specified.";
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
   if (seedStep > 100 || seedStep == 0) {
     std::stringstream msg;
     msg << "the seed step is illegal. Should be less than 100. " << seedStep << " was specified.";
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
   vector<Matrix<float>> rs(numberOfMatrices);
   for (auto &r: rs) {
@@ -451,7 +451,7 @@ void QBG::Optimizer::optimize(vector<vector<float>> &vectors, vector<vector<floa
       std::stringstream msg;
       msg << "# of partial vectors is too small, because # of vectors is too small or seedStep is too large."
 	  << " # of partial vectors=" << vsize << " # of vectors=" <<  vectors.size() << " seedStep=" << seedStep << std::endl;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     auto partialVectors = vectors;
     if (vsize < vectors.size()) {
@@ -533,7 +533,7 @@ void QBG::Optimizer::optimize(std::string invector, std::string ofile, std::stri
       std::stringstream msg;
       msg << "Fatal error. localClusters.size() != numberOfSubvectors "
 	  << localClusters.size() << ":" << numberOfSubvectors;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     float totalRate = 0.0;
     for (size_t m = 0; m < localClusters.size(); m++) {

@@ -29,15 +29,6 @@
 namespace NGT {
     void *evaluate_responce(void *);
 
-    class ThreadTerminationException : public Exception {
-    public:
-        ThreadTerminationException(const std::string &file, const std::string &function, size_t line,
-                                   std::stringstream &m) { set(file, function, line, m.str()); }
-
-        ThreadTerminationException(const std::string &file, const std::string &function, size_t line,
-                                   const std::string &m) { set(file, function, line, m); }
-    };
-
     class ThreadInfo;
 
     class ThreadMutex;
@@ -145,7 +136,7 @@ namespace NGT {
                 while (JobQueue::isEmpty()) {
                     if (isTerminate) {
                         JobQueue::unlock();
-                        NGTThrowSpecificException("Thread::termination", ThreadTerminationException);
+                        POLARIS_THROW_TYPED_EX("Thread::termination", ThreadTerminationException);
                     }
                     JobQueue::wait();
                 }
@@ -160,7 +151,7 @@ namespace NGT {
                 while (JobQueue::isEmpty()) {
                     if (isTerminate) {
                         JobQueue::unlock();
-                        NGTThrowSpecificException("Thread::termination", ThreadTerminationException);
+                        POLARIS_THROW_TYPED_EX("Thread::termination", ThreadTerminationException);
                     }
                     JobQueue::wait();
                 }
@@ -195,7 +186,7 @@ namespace NGT {
                 JobQueue::lock();
                 if (underPushing || !JobQueue::isEmpty()) {
                     JobQueue::unlock();
-                    NGTThrowException("Thread::teminate:Under pushing!");
+                    POLARIS_THROW_EX("Thread::teminate:Under pushing!");
                 }
                 isTerminate = true;
                 JobQueue::unlock();
@@ -247,7 +238,7 @@ namespace NGT {
                 if (threadPool->sharedData.isAvailable) {
                     return threadPool->sharedData.sharedData;
                 } else {
-                    NGTThrowException("Thread::getSharedData: Shared data is unavailable. No set yet.");
+                    POLARIS_THROW_EX("Thread::getSharedData: Shared data is unavailable. No set yet.");
                 }
             }
 

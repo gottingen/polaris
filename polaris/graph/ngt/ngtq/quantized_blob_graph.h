@@ -391,7 +391,7 @@ namespace QBG {
         static void
         rearrange(NGTQ::InvertedIndexEntry<uint16_t> &invertedIndexObjects, NGTQG::QuantizedNode &rearrangedObjects) {
             if (invertedIndexObjects.numOfSubvectors == 0) {
-                NGTThrowException("# of subvectors is zero.");
+                POLARIS_THROW_EX("# of subvectors is zero.");
             }
 
             //(*this).resize(quantizedIndex.getInvertedIndexSize());
@@ -422,7 +422,7 @@ namespace QBG {
                     if (id >= exist.size()) {
                         stringstream msg;
                         msg << "ID in the blob is invalid. " << id << ":" << objectListSize;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     if (exist.at(id)) {
                         std::cerr << "Warning: the object is duplicated. " << id << std::endl;
@@ -458,11 +458,11 @@ namespace QBG {
             try {
                 load();
                 searchable = true;
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 if (prebuilt) {
                     stringstream msg;
                     msg << "QBG::Index: No quantized blob graph. " << err.what();
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 } else {
                 }
             }
@@ -610,7 +610,7 @@ namespace QBG {
             if (tokens.size() < 2) {
                 std::stringstream msg;
                 msg << "Invalid file name format";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             double maxMag = 0.0;
             if (index.getQuantizer().property.distanceType == NGTQ::DistanceType::DistanceTypeInnerProduct) {
@@ -690,13 +690,13 @@ namespace QBG {
                 if (id >= quantizer.objectList.size()) {
                     std::stringstream msg;
                     msg << "remove: the specified object does not exist. " << id;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 auto pi = std::lower_bound(removedIDs.rbegin(), removedIDs.rend(), id);
                 if (pi != removedIDs.rend() || *pi == id) {
                     std::stringstream msg;
                     msg << "remove: the specified object is already removed. " << id;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
             vector<pair<std::vector<float>, size_t>> objects;
@@ -723,7 +723,7 @@ namespace QBG {
                 if (rmidx == rearrangedObjects.ids.size()) {
                     std::stringstream msg;
                     msg << "remove: Not found the specified ID. " << ids[bidx];
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 NGTQ::QuantizedObjectProcessingStream quantizedStream(quantizedBlobGraph.numOfSubspaces,
                                                                       rearrangedObjects.ids.size());
@@ -753,7 +753,7 @@ namespace QBG {
             if (ids.size() != 1) {
                 std::stringstream msg;
                 msg << "Fatal inner error. Cannot set the ID. size=" << ids.size();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return ids[0];
         }
@@ -763,14 +763,14 @@ namespace QBG {
             if (!searchable) {
                 std::stringstream msg;
                 msg << "The specified index is NOT completely built yet. Insert is available for a built index.";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             auto &quantizer = getQuantizer();
             if (quantizer.objectList.size() == 0) {
                 std::stringstream msg;
                 msg << "The specified index is empty. Insert is available for a built index.";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             std::vector<uint32_t> rmids;
@@ -782,7 +782,7 @@ namespace QBG {
                     if (removedID == 0 || removedID >= id) {
                         std::stringstream msg;
                         msg << "Fatal inner error. The removed ID is invalid. " << removedID;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     id = removedID;
                     removedIDs.pop_back();
@@ -794,7 +794,7 @@ namespace QBG {
                     std::stringstream msg;
                     msg << "The specified vector size is invalid. " << obj.size() << ":"
                         << quantizer.objectList.genuineDimension;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 if (typeid(T) == typeid(float)) {
                     floatObjects.emplace_back(std::make_pair(obj, id));
@@ -815,7 +815,7 @@ namespace QBG {
 
             if (gids.size() != floatObjects.size()) {
                 ids.clear();
-                NGTThrowException("Fatal inner error. Something wrong.");
+                POLARIS_THROW_EX("Fatal inner error. Something wrong.");
             }
             std::unordered_map<uint32_t, std::vector<std::pair<std::vector<float>, size_t>>> batchObjects;
             for (size_t idx = 0; idx < floatObjects.size(); idx++) {
@@ -869,13 +869,13 @@ namespace QBG {
         float getApproximateDistances(std::vector<float> &query, NGTQG::RearrangedQuantizedObjectSet &quantizedObjects,
                                       size_t subspaceID, std::vector<float> &distances) {
             if (query.empty()) {
-                NGTThrowException("The specified query is empty.");
+                POLARIS_THROW_EX("The specified query is empty.");
             }
             auto &quantizer = this->getQuantizer();
             if (quantizer.getNumOfLocalClusters() != 16) {
                 std::stringstream msg;
                 msg << "# of the local clusters is not 16. " << quantizer.getNumOfLocalClusters();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             distances.clear();
             auto noOfObjects = quantizedObjects.ids.size();
@@ -898,7 +898,7 @@ namespace QBG {
         void getApproximateDistances(std::vector<float> &query, NGTQ::QuantizedObjectSet &quantizedObjects,
                                      size_t subspaceID, std::vector<float> &distances) {
             if (query.empty()) {
-                NGTThrowException("The specified query is empty.");
+                POLARIS_THROW_EX("The specified query is empty.");
             }
             auto &quantizer = this->getQuantizer();
             distances.clear();
@@ -1039,7 +1039,7 @@ namespace QBG {
                 std::stringstream msg;
                 msg << "refineDistances: Fatal error! Invalid datatype. " << objectSpace.getObjectType().name()
                     << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             qresults.resize(qres.size());
             for (int i = qresults.size() - 1; i >= 0; i--) {
@@ -1062,7 +1062,7 @@ namespace QBG {
                 std::stringstream msg;
                 msg << "refineDistances: Fatal error! Invalid datatype. " << objectSpace.getObjectType().name()
                     << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
         }
 
@@ -1135,7 +1135,7 @@ namespace QBG {
 
             auto &quantizedObjectDistance = quantizer.getQuantizedObjectDistance();
             if (searchContainer.objectVector.size() == 0) {
-                NGTThrowException("search: object is null.");
+                POLARIS_THROW_EX("search: object is null.");
             }
             std::vector<float> rotatedQuery = searchContainer.objectVector;
             {
@@ -1242,7 +1242,7 @@ namespace QBG {
             if (!searchable) {
                 std::stringstream msg;
                 msg << "The specified index is not now searchable. ";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             auto &quantizer = getQuantizer();
@@ -1251,7 +1251,7 @@ namespace QBG {
             auto &objectSpace = globalIndex.getObjectSpace();
 
             if (globalGraph.searchRepository.empty()) {
-                NGTThrowException("QBG:Index: graph repository is empty.");
+                POLARIS_THROW_EX("QBG:Index: graph repository is empty.");
             }
             if (searchContainer.explorationCoefficient == 0.0) {
                 searchContainer.explorationCoefficient = NGT_EXPLORATION_COEFFICIENT;
@@ -1477,7 +1477,7 @@ namespace QBG {
                 std::cerr << "pass objectList.size=" << objectListSize << std::endl;
                 quantizedBlobGraph.extractRemovedIdSet(objectListSize, removedIDs);
             } else {
-                NGTThrowException("Not found the rearranged inverted index. [" + path + "]");
+                POLARIS_THROW_EX("Not found the rearranged inverted index. [" + path + "]");
             }
         }
 
@@ -1544,7 +1544,7 @@ namespace QBG {
                     if (!stream) {
                         std::stringstream msg;
                         msg << "Cannot open the codebook. " << codebookPath;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     std::string line;
                     while (getline(stream, line)) {
@@ -1558,7 +1558,7 @@ namespace QBG {
                             std::stringstream msg;
                             msg << "The specified quantizer codebook is invalid. " << quantizerCodebook[0].size()
                                 << ":" << object.size() << ":" << quantizerCodebook.size() << ":" << line;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         if (!object.empty()) {
                             quantizerCodebook.push_back(object);
@@ -1576,7 +1576,7 @@ namespace QBG {
                     if (!stream) {
                         std::stringstream msg;
                         msg << "Cannot open the codebook index. " << codebookIndexPath;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     std::string line;
                     while (getline(stream, line)) {
@@ -1586,7 +1586,7 @@ namespace QBG {
                         if (tokens.size() != 1) {
                             std::stringstream msg;
                             msg << "The specified codebook index is invalid. " << line;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         codebookIndex.push_back(NGT::Common::strtol(tokens[0]));
                     }
@@ -1602,7 +1602,7 @@ namespace QBG {
                     if (!stream) {
                         std::stringstream msg;
                         msg << "Cannot open the codebook index. " << objectIndexPath;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     std::string line;
                     while (getline(stream, line)) {
@@ -1612,7 +1612,7 @@ namespace QBG {
                         if (tokens.size() != 1) {
                             std::stringstream msg;
                             msg << "The specified object index is invalid. " << line;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         objectIndex.push_back(NGT::Common::strtol(tokens[0]));
                     }
@@ -1640,7 +1640,7 @@ namespace QBG {
                 if (codebookIndex.size() == 0) {
                     stringstream msg;
                     msg << "The specified codebook indexe invalild " << codebookIndex.size();
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 if (objectIndex.size() == 0) {
                     size_t size = index.getQuantizer().objectList.size();
@@ -1685,7 +1685,7 @@ namespace QBG {
                 index.load();
                 stringstream msg;
                 msg << "QBG::Index::buildQBG: The index is already built. ";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             } catch (...) {}
             index.quantizedBlobGraph.construct(index);
 
@@ -1702,7 +1702,7 @@ namespace QBG {
 
         void extract(std::ostream &os, size_t n, bool random = true) {
             if (n == 0) {
-                NGTThrowException("QuantizedBlobGraph::extract # of objects is zero.");
+                POLARIS_THROW_EX("QuantizedBlobGraph::extract # of objects is zero.");
             }
             auto &quantizer = getQuantizer();
             size_t dim = quantizer.property.dimension;
@@ -1841,7 +1841,7 @@ namespace QBG {
                 if (system(mvcom.c_str()) == -1) {
                     std::stringstream msg;
                     msg << "Error! moving is failed. " << mvcom;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
 
                 NGT::Index::append(tmpDir + "/" + NGTQ::Quantizer::getGlobalFile(), blobs, threadSize, dataSize);
@@ -1859,7 +1859,7 @@ namespace QBG {
                 const std::string rmcom = "rm -rf " + tmpDir;
                 try {
                     graphOptimizer.execute(tmpDir + "/" + NGTQ::Quantizer::getGlobalFile(), indexPath + "/global");
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     if (system(rmcom.c_str()) == -1) {
                         std::cerr << "Warning. remove is failed. " << rmcom << std::endl;
                     }
@@ -1875,7 +1875,7 @@ namespace QBG {
             std::vector<std::string> tokens;
             NGT::Common::tokenize(localCodebooks, tokens, "@");
             if (tokens.size() != 2) {
-                NGTThrowException("No @ in the specified local codebook string.");
+                POLARIS_THROW_EX("No @ in the specified local codebook string.");
             }
             for (size_t no = 0; no < property.localDivisionNo; no++) {
                 std::stringstream data;
@@ -1893,7 +1893,7 @@ namespace QBG {
                 if (!stream) {
                     std::stringstream msg;
                     msg << "Cannot open the codebook. " << quantizerCodebook;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 std::string line;
                 while (getline(stream, line)) {
@@ -1907,7 +1907,7 @@ namespace QBG {
                         std::stringstream msg;
                         msg << "The specified quantizer codebook is invalid. " << qCodebook[0].size()
                             << ":" << object.size() << ":" << qCodebook.size() << ":" << line;
-                        NGTThrowException(msg);
+                        POLARIS_THROW_EX(msg);
                     }
                     if (!object.empty()) {
                         qCodebook.push_back(object);
@@ -1922,7 +1922,7 @@ namespace QBG {
                 if (!stream) {
                     std::stringstream msg;
                     msg << "Cannot open the rotation. " << rotationPath;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 std::string line;
                 while (getline(stream, line)) {

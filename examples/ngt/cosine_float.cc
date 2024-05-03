@@ -64,7 +64,7 @@ void run_ann() {
         }
         index.createIndex(16);
         index.save();
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         exit(1);
     } catch (...) {
@@ -114,7 +114,7 @@ void run_ann() {
             }
             cout << endl;
         }
-    } catch (NGT::Exception &err) {
+    } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         exit(1);
     } catch (...) {

@@ -64,17 +64,17 @@ DVPTree::insert(InsertContainer &iobj,  LeafNode *leafNode)
 	  } else {
 	    idd = comparator(iobj.object, *getObjectRepository().get(loid));
 	  }
-        } catch (Exception &e) {
+        } catch (polaris::PolarisException &e) {
           stringstream msg;
           msg << "LeafNode::insert: Cannot find object which belongs to a leaf node. id="
               << objects[i].id << ":" << e.what() << endl;
-          NGTThrowException(msg.str());
+          POLARIS_THROW_EX(msg.str());
         }
         if (idd == 0.0) {
 	  if (loid == iobj.id) {
 	    stringstream msg;
 	    msg << "DVPTree::insert:already existed. " << iobj.id;
-	    NGTThrowException(msg);
+	    POLARIS_THROW_EX(msg);
 	  }
 	  return;
         }
@@ -153,7 +153,7 @@ DVPTree::recombineNodes(InsertContainer &ic, Node::Objects &fs, LeafNode &leaf)
     if (fs[0].leafDistance == Node::Object::Pivot) {
       ln[cid]->setPivot(*getObjectRepository().get(fs[0].id), *objectSpace);
     } else {
-      NGTThrowException("recombineNodes: internal error : illegal pivot.");
+      POLARIS_THROW_EX("recombineNodes: internal error : illegal pivot.");
     }
     ln[cid]->parent = inid;
     int maxClusterID = cid;
@@ -201,7 +201,7 @@ DVPTree::recombineNodes(InsertContainer &ic, Node::Objects &fs, LeafNode &leaf)
       insertNode(ln[i]);
       in->getChildren()[i] = ln[i]->id;
     }
-  } catch(Exception &e) {
+  } catch(polaris::PolarisException &e) {
     throw e;
   }
   return inid;
@@ -277,7 +277,7 @@ DVPTree::removeEmptyNodes(InternalNode &inode) {
       LeafNode *root = new LeafNode;
       insertNode(root);
       if (root->id.getID() != 1) {
-	NGTThrowException("Root id Error");
+	POLARIS_THROW_EX("Root id Error");
       }
       return;
     }
@@ -392,7 +392,7 @@ DVPTree::search(SearchContainer &so, LeafNode &node, UncheckedNode &uncheckedNod
 	so.distanceComputationCount++;
 #endif
       } catch(...) {
-        NGTThrowException("VpTree::LeafNode::search: Internal fatal error : Cannot get object");
+        POLARIS_THROW_EX("VpTree::LeafNode::search: Internal fatal error : Cannot get object");
       }
       if (d <= q.radius) {
         r.id = objects[i].id;

@@ -182,7 +182,7 @@ namespace NGT {
             } else {
                 std::stringstream msg;
                 msg << "ObjectSpace::constructor: Not supported type. " << ot.name();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             setLength(objectSize * d);
             setPaddedLength(objectSize * ObjectSpace::getPaddedDimension());
@@ -256,7 +256,7 @@ namespace NGT {
                 default:
                     std::stringstream msg;
                     msg << "NGT::ObjectSpaceRepository: The distance type is invalid. " << distanceType;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
             }
         }
 
@@ -289,7 +289,7 @@ namespace NGT {
 
         void linearSearch(Object &query, double radius, size_t size, ObjectSpace::ResultSet &results) {
             if (!results.empty()) {
-                NGTThrowException("lenearSearch: results is not empty");
+                POLARIS_THROW_EX("lenearSearch: results is not empty");
             }
 #ifndef NGT_PREFETCH_DISABLED
             size_t byteSizeOfObject = getByteSizeOfObject();
@@ -382,7 +382,7 @@ namespace NGT {
                 msg
                         << "NGT::ObjectSpaceRepository: The specified ID is out of the range. The object ID should be greater than zero. "
                         << idx << ":" << ObjectRepository::size() << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             PersistentObject &obj = *(*this)[idx];
             return reinterpret_cast<OBJECT_TYPE *>(&obj[0]);

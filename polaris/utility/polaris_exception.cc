@@ -37,28 +37,14 @@ namespace polaris {
     {
     }
 
-    PolarisException::PolarisException(
-            const std::string &m,
-            const char *funcName,
-            const char *file,
-            int line) {
-        int size = snprintf(
-                nullptr,
-                0,
-                "Error in %s at %s:%d: %s",
-                funcName,
-                file,
-                line,
-                m.c_str());
-        msg.resize(size + 1);
-        snprintf(
-                &msg[0],
-                msg.size(),
-                "Error in %s at %s:%d: %s",
-                funcName,
-                file,
-                line,
-                m.c_str());
+    PolarisException::PolarisException(const std::string &m,const std::string &funcName,const std::string&file,int line) {
+        set(m, funcName, file, line);
+    }
+
+    void PolarisException::set(const std::string &m, const std::string &function,const std::string &file,  size_t line) {
+        std::stringstream ss;
+        ss << file << ":" << function << ":" << line << ": " << m;
+        msg = ss.str();
     }
 
     const char *PolarisException::what() const noexcept {

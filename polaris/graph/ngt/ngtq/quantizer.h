@@ -215,10 +215,10 @@ namespace NGTQ {
 
         QuantizationCodebook &operator=(const std::vector<std::vector<float>> &qc) {
             if (qc.empty()) {
-                NGTThrowException("NGTQ::QuantizationCodebook::operator=: codebook is empty.");
+                POLARIS_THROW_EX("NGTQ::QuantizationCodebook::operator=: codebook is empty.");
             }
             if (paddedDimension == 0) {
-                NGTThrowException("NGTQ::QuantizationCodebook::operator=: paddedDimension is unset.");
+                POLARIS_THROW_EX("NGTQ::QuantizationCodebook::operator=: paddedDimension is unset.");
             }
             dimension = qc[0].size();
             PARENT::resize(paddedDimension * qc.size());
@@ -227,7 +227,7 @@ namespace NGTQ {
                     std::stringstream msg;
                     msg << "NGTQ::QuantizationCodebook::operator=: paddedDimension is invalid. " << i << ":"
                         << qc[i].size() << ":" << dimension;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 memcpy(PARENT::data() + i * paddedDimension, qc[i].data(), dimension * sizeof(T));
             }
@@ -295,7 +295,7 @@ namespace NGTQ {
                 } else {
                     id = find(*obj);
                 }
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 index->deleteObject(obj);
             }
             index->deleteObject(obj);
@@ -306,7 +306,7 @@ namespace NGTQ {
             if (index == 0) {
                 std::stringstream msg;
                 msg << "QuantizeationCodebook: Fatal Error! The index is not available.";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             NGT::ObjectDistances result;
             NGT::SearchContainer sc(object);
@@ -400,12 +400,12 @@ namespace NGTQ {
 
   void setup(std::vector<uint32_t> &codebookIndex) {
     if (codebookIndex.size() == 0) {
-      NGTThrowException("Fatal Error! The codebook index is empty. ");
+      POLARIS_THROW_EX("Fatal Error! The codebook index is empty. ");
     }
     if (codebookIndex[0] != 0) {
       stringstream msg;
       msg << "Fatal Error! The first entry of the codebook index is non-zero. " << codebookIndex[0];
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     PARENT::resize(codebookIndex.back() + 2);
     PARENT::at(0) = 0;
@@ -575,7 +575,7 @@ namespace NGTQ {
             if (numOfSubvectors > 0xFFFF) {
                 std::stringstream msg;
                 msg << "# of subvectors is too large. " << numOfSubvectors;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             uint16_t nids = numOfSubvectors;
             NGT::Serializer::write(os, nids);
@@ -598,12 +598,12 @@ namespace NGTQ {
 #ifdef NGTQ_QBG
                 NGT::Serializer::read(is, ssid);
 #endif
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
                 msg
                         << "InvertedIndexEntry::deserialize: It might be caused by inconsistency of the valuable type of the inverted index size. "
                         << err.what();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             numOfSubvectors = nids;
 #ifdef NGTQ_QBG
@@ -640,12 +640,12 @@ namespace NGTQ {
             if (PARENT::size() <= idx) {
                 std::stringstream msg;
                 msg << "The index is out of range. " << idx << ":" << PARENT::size();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             if (numOfSubvectors != qobj.object.size()) {
                 std::stringstream msg;
                 msg << "# of subectors are inconsitent. " << numOfSubvectors << ":" << qobj.object.size();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             PARENT::at(idx).id = qobj.objectID;
             for (size_t i = 0; i < numOfSubvectors; i++) {
@@ -657,7 +657,7 @@ namespace NGTQ {
             if (qobjs.empty()) {
                 std::stringstream msg;
                 msg << "Quantized objects is empty()";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             PARENT::clear();
             initialize(qobjs[0].object.size());
@@ -672,7 +672,7 @@ namespace NGTQ {
                 if (subspaceID != qobjs[idx].subspaceID) {
                     std::stringstream msg;
                     msg << "Subspace IDs are inconsistent. " << subspaceID << ":" << qobjs[idx].subspaceID;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
 #endif
                 set(idx, qobjs[idx]);
@@ -823,7 +823,7 @@ namespace NGTQ {
         void setupLocalIDByteSize() {
             if (localCentroidLimit > 0xffff - 1) {
                 if (localIDByteSize == 2) {
-                    NGTThrowException("NGTQ::Property: The localIDByteSize is illegal for the localCentroidLimit.");
+                    POLARIS_THROW_EX("NGTQ::Property: The localIDByteSize is illegal for the localCentroidLimit.");
                 }
                 localIDByteSize = 4;
             } else {
@@ -839,7 +839,7 @@ namespace NGTQ {
 #else
                 if (localIDByteSize != 2 && localIDByteSize != 4) {
 #endif
-                NGTThrowException("NGTQ::Property: Fatal internal error! localIDByteSize should be 2 or 4.");
+                POLARIS_THROW_EX("NGTQ::Property: Fatal internal error! localIDByteSize should be 2 or 4.");
             }
         }
 
@@ -904,7 +904,7 @@ namespace NGTQ {
 #endif
                     break;
                 default:
-                    NGTThrowException("Quantizer constructor: Inner error. Invalid data type.");
+                    POLARIS_THROW_EX("Quantizer constructor: Inner error. Invalid data type.");
                     break;
             }
             setupLocalIDByteSize();
@@ -1293,7 +1293,7 @@ namespace NGTQ {
             if (localCodebookCentroidNoSIMD != 16) {
                 std::stringstream msg;
                 msg << "Invalid number of the local centroids for SIMD. " << localCodebookCentroidNoSIMD;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             size_t dim = sizeOfObject / sizeof(float);
             size_t localDim = dim / localDivisionNo;
@@ -1598,7 +1598,7 @@ namespace NGTQ {
                 NGT::ObjectID id = 1;
                 try {
                     globalCodebookIndex->getObjectSpace().getObject(id, globalCentroid);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     std::cerr << "Cannot load the global centroid. id=" << id << std::endl;
                 }
             }
@@ -2538,7 +2538,7 @@ namespace NGTQ {
                             std::stringstream msg;
                             msg << "Quantizer::compressIntoUint4: Fatal inner error! " << (idx / 2) << ":"
                                 << uint4StreamSize;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         if (idx % 2 == 0) {
                             uint4Objects[idx / 2] = stream[idx];
@@ -2562,7 +2562,7 @@ namespace NGTQ {
                             std::stringstream msg;
                             msg << "Quantizer::uncompressFromUint4: Fatal inner error! " << (idx / 2) << ":"
                                 << uint4StreamSize;
-                            NGTThrowException(msg);
+                            POLARIS_THROW_EX(msg);
                         }
                         if (idx % 2 == 0) {
                             stream[idx] = uint4Objects[idx / 2] & 0x0f;
@@ -2711,7 +2711,7 @@ namespace NGTQ {
             if (object.size() != dimension) {
                 std::stringstream msg;
                 msg << "The dimensionalities are inconsitent." << object.size() << ":" << dimension;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 #ifdef NGTQ_VECTOR_OBJECT
             auto *vector = object.data();
@@ -2845,13 +2845,13 @@ public:
                                                                                                                                         msg << "Quantizer: data size of the object is zero. " << property.dataSize << ":" << property.dimension
 	  << ":" << property.dataType;
 #endif
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 #ifdef NGTQ_STATIC_OBJECT_FILE
                                                                                                                                     if (!objectList.create(fname, objectFile)) {
       std::stringstream msg;
       msg << "Quantizer::createEmptyIndex: cannot construct the object list. " << fname << ":" << objectFile;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
     objectList.open(fname, property.dimension);
 #ifdef MULTIPLE_OBJECT_LISTS
@@ -2893,7 +2893,7 @@ public:
             r = rotation;
 #ifdef NGTQG_ROTATED_GLOBAL_CODEBOOKS
             if (rotation.empty()) {
-                NGTThrowException("The rotation is empty.");
+                POLARIS_THROW_EX("The rotation is empty.");
             }
             qc.rotate(r);
 #endif
@@ -3442,7 +3442,7 @@ public:
                     std::stringstream msg;
                     msg << "Fatal Error! # of the local centroids is invalid. "
                         << localCodebookIndexes[li].getObjectSpace().getSize() - 1 << ":" << codebookSize;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 for (size_t cid = 1; cid <= codebookSize; cid++) {
                     std::vector<float> v;
@@ -3476,7 +3476,7 @@ public:
             if (property.dimension % property.localDivisionNo != 0) {
                 std::stringstream msg;
                 msg << "Invalid dimension or # of subspaces. " << property.dimension << ":" << property.localDivisionNo;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             size_t localDimension = property.dimension / property.localDivisionNo;
             std::unique_ptr<float[]> distance(new float[localData.size() * codebookSize * localCodebookNo]());
@@ -3628,7 +3628,7 @@ public:
                     msg << "Quantizer::insert: Fatal Error! Object ID is invalid. "
                         << idx << ":" << objects[idx].second - 1 << ":" << objectToBlobIndex.size()
                         << ":" << objects.size();
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 ids[idx].id = objectToBlobIndex[objects[idx].second - 1] + 1;
                 ids[idx].distance = 0.0;
@@ -3692,12 +3692,12 @@ public:
                     object.push_back(invertedIndex.at(id)->subspaceID * QID_WEIGHT);
 #endif
                     index->append(object);
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     stringstream msg;
                     msg << "buildGlobalCodebookWithQIDIndex: fatal inner error. " << err.what() << " : ID=" << id
                         << " size=" << invertedIndex.size();
-                    NGTThrowException(msg);
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
             std::cerr << "creating the index..." << std::endl;
@@ -3781,7 +3781,7 @@ public:
             if (property.dimension % property.localDivisionNo != 0) {
                 std::stringstream msg;
                 msg << "Invalid dimension or # of subspaces. " << property.dimension << ":" << property.localDivisionNo;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             size_t localDimension = property.dimension / property.localDivisionNo;
             quantizedObject.objectID = object.objectID;
@@ -3871,7 +3871,7 @@ public:
             } else {
                 std::stringstream msg;
                 msg << "Quantizer::InsertQBG: Warning! invalid centroidCreationMode. " << property.centroidCreationMode;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             vector<LocalDatam> localData;
             for (size_t i = 0; i < ids.size(); i++) {
@@ -3915,7 +3915,7 @@ public:
 				  invertedIndexEntry.subspaceID,
 				  subspaceObjects[i]); // subspace objects
 #endif
-                } catch (NGT::Exception &err) {
+                } catch (polaris::PolarisException &err) {
                     if (errorMessage.empty()) {
                         errorMessage = err.what();
                     }
@@ -3934,7 +3934,7 @@ public:
 
             }
             if (error) {
-                NGTThrowException(errorMessage);
+                POLARIS_THROW_EX(errorMessage);
             }
 
             if (property.singleLocalCodebook) {
@@ -4075,7 +4075,7 @@ public:
             if (!invertedIndex.empty()) {
                 stringstream msg;
                 msg << "Fatal Error! inverted index is not empty. " << invertedIndex.size();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             invertedIndex.reserve(codebookIndex.size() + 1);
             std::cerr << "codebook index size=" << codebookIndex.size() << std::endl;
@@ -4136,7 +4136,7 @@ public:
                 stringstream msg;
                 msg << "Quantizer::Error. Local centroid limit " << property.localCentroidLimit
                     << " is too large. It must be less than " << (1UL << (sizeof(LOCAL_ID_TYPE) * 8));
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 
             NGT::Property gp;
@@ -4168,24 +4168,24 @@ public:
                 stringstream msg;
                 msg << "NGTQ::Quantizer::create: dimension must be larger than genuineDimension. " << property.dimension
                     << ":" << property.genuineDimension << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 #endif
             gp.dimension = property.dimension;
             if (gp.dimension == 0) {
                 stringstream msg;
                 msg << "NGTQ::Quantizer::create: specified dimension is zero!";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             if (property.localDivisionNo == 0) {
-                NGTThrowException("NGTQ::Quantizer::create: # of subvectors is zero");
+                POLARIS_THROW_EX("NGTQ::Quantizer::create: # of subvectors is zero");
             }
             if (property.localDivisionNo != 1 && property.dimension % property.localDivisionNo != 0) {
                 stringstream msg;
                 msg << "NGTQ::Quantizer::create: The combination of dimension and localDivisionNo is invalid. "
                     << "the localDivisionNo must be a divisor of the dimension. "
                     << property.dimension << ":" << property.localDivisionNo;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             lp.dimension = property.dimension / property.localDivisionNo;
 
@@ -4202,7 +4202,7 @@ public:
                 default: {
                     stringstream msg;
                     msg << "NGTQ::Quantizer::create: Inner error! Invalid data type.";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
 
@@ -4216,7 +4216,7 @@ public:
                                                                                                                                             {
 	stringstream msg;
 	msg << "NGTQ::Quantizer::create: L2 is unavailable!!! you have to rebuild.";
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
 #endif
                     gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
@@ -4231,7 +4231,7 @@ public:
                 {
                     stringstream msg;
                     msg << "NGTQ::Quantizer::create: Angle is unavailable!!! you have to rebuild.";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
 #endif
                     gp.distanceType = NGT::Index::Property::DistanceType::DistanceTypeAngle;
@@ -4256,7 +4256,7 @@ public:
                 default: {
                     stringstream msg;
                     msg << "NGTQ::Quantizer::create Inner error! Invalid distance type.";
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
 
@@ -4447,7 +4447,7 @@ public:
                 std::stringstream msg;
                 msg << "Quantizer::extractInvertedIndexObject: Fatal error! Invalid gid. " << invertedIndex.size()
                     << ":" << gid;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
 #ifdef NGTQ_SHARED_INVERTED_INDEX
             std::cerr << "Not implemented" << std::endl;
@@ -4694,7 +4694,7 @@ public:
                     double epsilon = FLT_MAX) {
             if (aggregationMode == AggregationModeApproximateDistanceWithLookupTable) {
                 if (property.dataType != DataTypeFloat) {
-                    NGTThrowException("NGTQ: Fatal inner error. the lookup table is only for dataType float!");
+                    POLARIS_THROW_EX("NGTQ: Fatal inner error. the lookup table is only for dataType float!");
                 }
             }
             NGT::ObjectDistances objects;
@@ -4913,7 +4913,7 @@ public:
             size_t localIDByteSize = property.localIDByteSize;
             Quantizer *quantizer = 0;
             if (property.centroidCreationMode == CentroidCreationModeNone) {
-                NGTThrowException("Centroid creation mode is not specified");
+                POLARIS_THROW_EX("Centroid creation mode is not specified");
             } else {
                 if (localIDByteSize == 4) {
                     quantizer = new QuantizerInstance<uint32_t>;
@@ -4926,7 +4926,7 @@ public:
                 } else {
                     std::stringstream msg;
                     msg << "Not support the specified size of local ID. " << localIDByteSize;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
             }
 
@@ -4955,7 +4955,7 @@ public:
             NGT::Property &localProperty) {
 #endif
             if (property.dimension == 0) {
-                NGTThrowException("NGTQ::create: Error. The dimension is zero.");
+                POLARIS_THROW_EX("NGTQ::create: Error. The dimension is zero.");
             }
             property.setup(property);
             NGTQ::Quantizer *quantizer = NGTQ::Quantization::generate(property);
@@ -4974,9 +4974,9 @@ public:
        quantizer->create(index, globalProperty, localProperty);
 #endif
                 if (property.dimension == 0) {
-                    NGTThrowException("Quantizer: Dimension is zero.");
+                    POLARIS_THROW_EX("Quantizer: Dimension is zero.");
                 }
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 delete quantizer;
                 throw err;
             }
@@ -5011,7 +5011,7 @@ public:
     if (std::rename(srcObjectList.c_str(), dstObjectList.c_str()) != 0) {
       stringstream msg;
       msg << "Quantizer::rebuild: Cannot rename an object file. " << srcObjectList << "=>" << dstObjectList ;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 
     try {
@@ -5021,7 +5021,7 @@ public:
 
       index.save();
       index.close();
-    } catch(NGT::Exception &err) {
+    } catch(polaris::PolarisException &err) {
       std::rename(dstObjectList.c_str(), srcObjectList.c_str());
       throw err;
     }
@@ -5128,7 +5128,7 @@ public:
 
         NGTQ::Quantizer &getQuantizer() {
             if (quantizer == 0) {
-                NGTThrowException("NGTQ::Index: Not open.");
+                POLARIS_THROW_EX("NGTQ::Index: Not open.");
             }
             return *quantizer;
         }
@@ -5150,7 +5150,7 @@ public:
             if (!quantizer.objectList.get(id, object, &quantizer.globalCodebookIndex.getObjectSpace())) {
                 std::stringstream msg;
                 msg << "cannot get the specified object. " << id;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return object;
         }
@@ -5160,19 +5160,19 @@ public:
             NGTQ::Property property;
             try {
                 property.load(index);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 stringstream msg;
                 msg << "Quantizer::getQuantizer: Cannot load the property. " << index << " : " << err.what();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             NGTQ::Quantizer *quantizer = NGTQ::Quantization::generate(property);
             if (quantizer == 0) {
-                NGTThrowException("NGTQ::Index: Cannot get quantizer.");
+                POLARIS_THROW_EX("NGTQ::Index: Cannot get quantizer.");
             }
             try {
                 quantizer->open(index, globalProperty,
                                 property.quantizerType == NGTQ::QuantizerTypeQBG ? readOnly : false);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 delete quantizer;
                 throw err;
             }

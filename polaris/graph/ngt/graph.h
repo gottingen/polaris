@@ -87,7 +87,7 @@ namespace NGT {
             *r = objects;
             try {
                 put(id, r);
-            } catch (Exception &exp) {
+            } catch (polaris::PolarisException &exp) {
                 delete r;
                 throw exp;
             }
@@ -179,7 +179,7 @@ namespace NGT {
 
         void deserialize(std::ifstream &is, ObjectRepository &objectRepository) {
             if (!is.is_open()) {
-                NGTThrowException("NGT::SearchGraph: Not open the specified stream yet.");
+                POLARIS_THROW_EX("NGT::SearchGraph: Not open the specified stream yet.");
             }
             clear();
             size_t s;
@@ -312,7 +312,7 @@ namespace NGT {
                             }
                             break;
                         default:
-                            NGTThrowException("NGT::Graph::Search: Not supported object type.");
+                            POLARIS_THROW_EX("NGT::Graph::Search: Not supported object type.");
                             break;
                     }
                     return l1Uint8;
@@ -384,7 +384,7 @@ namespace NGT {
                                     return l2Float16ForLargeDataset;
                             }
                         default:
-                            NGTThrowException("NGT::Graph::Search: Not supported object type.");
+                            POLARIS_THROW_EX("NGT::Graph::Search: Not supported object type.");
                             break;
                     }
                     return l1Uint8ForLargeDataset;
@@ -750,10 +750,10 @@ namespace NGT {
                     insertBKNNGNode(id, objects);
                     break;
                 case GraphTypeNone:
-                    NGTThrowException("NGT::insertNode: GraphType is not specified.");
+                    POLARIS_THROW_EX("NGT::insertNode: GraphType is not specified.");
                     break;
                 default:
-                    NGTThrowException("NGT::insertNode: GraphType is invalid.");
+                    POLARIS_THROW_EX("NGT::insertNode: GraphType is invalid.");
                     break;
             }
         }
@@ -876,7 +876,7 @@ namespace NGT {
             if (property.truncationThreshold != 0) {
                 std::stringstream msg;
                 msg << "NGT::insertONNGNode: truncation should be disabled!" << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             int count = 0;
             for (ObjectDistances::iterator ri = results.begin(); ri != results.end(); ri++, count++) {
@@ -926,7 +926,7 @@ namespace NGT {
                 std::stringstream msg;
                 msg << "NGT::getEdgeSize: Invalid edge size parameters " << sc.edgeSize << ":"
                     << property.edgeSizeForSearch;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return edgeSize;
         }
@@ -959,11 +959,11 @@ namespace NGT {
             if (ni == node.end()) {
                 std::stringstream msg;
                 msg << "NGT::removeEdge: Cannot found " << edge.id;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             } else {
                 std::stringstream msg;
                 msg << "NGT::removeEdge: Cannot found " << (*ni).id << ":" << edge.id;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
         }
 
@@ -1082,7 +1082,7 @@ namespace NGT {
                 if (identityCheck) {
                     std::stringstream msg;
                     msg << "NGT::addEdge: already existed! " << (*ni).id << ":" << addID;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 return;
             }
@@ -1096,10 +1096,10 @@ namespace NGT {
             GraphNode &node = property.truncationThreshold == 0 ? *getNode(target) : *getNode(target, minsize);
             try {
                 addEdge(node, addID, addDistance, identityCheck);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
                 msg << " Cannot add the edge. " << target << "->" << addID << ". " << err.what();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             if ((size_t) property.truncationThreshold != 0 && node.size() - minsize >
                                                               (size_t) property.truncationThreshold) {
@@ -1115,11 +1115,11 @@ namespace NGT {
                 while (node.size() >= kEdge && node.back().distance > addDistance) {
                     removeEdge(node, node.back());
                 }
-            } catch (Exception &exp) {
+            } catch (polaris::PolarisException &exp) {
                 std::stringstream msg;
                 msg << "addEdge: Cannot remove. (b) " << target << "," << addID << "," << node[kEdge - 1].distance;
                 msg << ":" << exp.what();
-                NGTThrowException(msg.str());
+                POLARIS_THROW_EX(msg.str());
             }
             if (node.size() < kEdge) {
                 addEdge(node, addID, addDistance, identityCheck);

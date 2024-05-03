@@ -621,7 +621,7 @@ NeighborhoodGraph::search(NGT::SearchContainer &sc, ObjectDistances &seeds) {
         GraphNode *neighbors = 0;
         try {
             neighbors = getNode(target.id);
-        } catch (Exception &err) {
+        } catch (polaris::PolarisException &err) {
             cerr << "Graph::search: Warning. " << err.what() << "  ID=" << target.id << endl;
             continue;
         }
@@ -714,27 +714,27 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
     GraphNode *nodetmp = 0;
     try {
         nodetmp = getNode(id);
-    } catch (Exception &err) {
+    } catch (polaris::PolarisException &err) {
         stringstream msg;
         msg << "removeEdgesReliably : cannot find a node. ID=" << id;
         msg << ":" << err.what();
-        NGTThrowException(msg.str());
+        POLARIS_THROW_EX(msg.str());
     }
     if (nodetmp == 0) {
         stringstream msg;
         msg << "removeEdgesReliably : cannot find a node. ID=" << id;
-        NGTThrowException(msg.str());
+        POLARIS_THROW_EX(msg.str());
     }
     GraphNode &node = *nodetmp;
     if (node.size() == 0) {
         cerr << "removeEdgesReliably : Warning! : No edges. ID=" << id << endl;
         try {
             removeNode(id);
-        } catch (Exception &err) {
+        } catch (polaris::PolarisException &err) {
             stringstream msg;
             msg << "removeEdgesReliably : Internal error! : cannot remove a node without edges. ID=" << id;
             msg << ":" << err.what();
-            NGTThrowException(msg.str());
+            POLARIS_THROW_EX(msg.str());
         }
         return;
     }
@@ -753,7 +753,7 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
             GraphNode *n = 0;
             try {
                 n = getNode((*i).id);
-            } catch (Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 cerr << "Graph::removeEdgesReliably: Cannot find edges of a child. ID="
                      << (*i).id << " continue..." << endl;
                 i = node.erase(i);
@@ -779,7 +779,7 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
                     msg << " anyway continue...";
                     cerr << msg.str() << endl;
 #else
-                    NGTThrowException(msg.str());
+                    POLARIS_THROW_EX(msg.str());
 #endif
                 }
             }
@@ -828,7 +828,7 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
                 msg << " Anyway continue...";
                 cerr << msg.str() << endl;
 #else
-                NGTThrowException(msg.str());
+                POLARIS_THROW_EX(msg.str());
 #endif
             }
             if ((i + 1 < node.size()) && (i + 1 != (unsigned int) minj)) {
@@ -850,22 +850,22 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
             }
         }
 
-    } catch (Exception &err) {
+    } catch (polaris::PolarisException &err) {
         stringstream msg;
         msg << "removeEdgesReliably : Relink error ID=" << id << ":" << err.what();
 #ifdef NGT_FORCED_REMOVE
         cerr << msg.str() << " continue..." << endl;
 #else
-        NGTThrowException(msg.str());
+        POLARIS_THROW_EX(msg.str());
 #endif
     }
 
     try {
         removeNode(id);
-    } catch (Exception &err) {
+    } catch (polaris::PolarisException &err) {
         stringstream msg;
         msg << "removeEdgesReliably : removeEdges error. ID=" << id << ":" << err.what();
-        NGTThrowException(msg.str());
+        POLARIS_THROW_EX(msg.str());
     }
 }
 
@@ -914,9 +914,9 @@ public:
             TruncationSearchJob job;
             try {
                 poolThread.getInputJobQueue().popFront(job);
-            } catch (NGT::ThreadTerminationException &err) {
+            } catch (polaris::ThreadTerminationException &err) {
                 break;
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 cerr << "TruncationSearchThread::run()::Inner error. continue..." << endl;
             }
             NGT::SearchContainer ssc(*job.object);
@@ -1080,9 +1080,9 @@ NeighborhoodGraph::truncateEdgesOptimally(
             }
         }
         threads.terminate();
-    } catch (Exception &err) {
+    } catch (polaris::PolarisException &err) {
         threads.terminate();
-        Exception e(err);
+        polaris::PolarisException e(err);
         throw e;
     }
 

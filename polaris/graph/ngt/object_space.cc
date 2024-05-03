@@ -34,7 +34,7 @@ NGT::Distance NGT::ObjectSpace::compareWithL1(NGT::Object &o1, NGT::Object &o2) 
   } else {
     std::stringstream msg;
     msg << "ObjectSpace::compareWithL1: Fatal Inner Error! Unexpected object type.";
-    NGTThrowException(msg);
+    POLARIS_THROW_EX(msg);
   }
   return d;
 }

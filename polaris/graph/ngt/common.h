@@ -46,6 +46,7 @@
 #include <polaris/graph/ngt/shared_memory_allocator.h>
 #include <polaris/utility/half.hpp>
 #include <polaris/utility/bfloat.h>
+#include <polaris/utility/polaris_exception.h>
 
 #define ADVANCED_USE_REMOVED_LIST
 #define    SHARED_REMOVED_LIST
@@ -55,44 +56,6 @@ namespace NGT {
     typedef float Distance;
     typedef half_float::half float16;
     typedef polaris::bfloat16 bfloat16;
-
-#define    NGTThrowException(MESSAGE)            throw NGT::Exception(__FILE__, __FUNCTION__, (size_t)__LINE__, MESSAGE)
-#define    NGTThrowSpecificException(MESSAGE, TYPE)    throw NGT::TYPE(__FILE__, __FUNCTION__, (size_t)__LINE__, MESSAGE)
-
-    class Exception : public std::exception {
-    public:
-        Exception() : message("No message") {}
-
-        Exception(const std::string &file, const std::string &function, size_t line, std::stringstream &m) {
-            set(file, function, line, m.str());
-        }
-
-        Exception(const std::string &file, const std::string &function, size_t line, const std::string &m) {
-            set(file, function, line, m);
-        }
-
-        void set(const std::string &file, const std::string &function, size_t line, const std::string &m) {
-            std::stringstream ss;
-            ss << file << ":" << function << ":" << line << ": " << m;
-            message = ss.str();
-        }
-
-        ~Exception() throw() {}
-
-        Exception &operator=(const Exception &e) {
-            message = e.message;
-            return *this;
-        }
-
-        virtual const char *what() const throw() {
-            return message.c_str();
-        }
-
-        std::string &getMessage() { return message; }
-
-    protected:
-        std::string message;
-    };
 
     class Args : public std::map<std::string, std::string> {
     public:
@@ -202,7 +165,7 @@ namespace NGT {
             if (ai == this->end()) {
                 std::stringstream msg;
                 msg << s << ": Not specified" << std::endl;
-                NGTThrowException(msg.str());
+                POLARIS_THROW_EX(msg.str());
             }
             usedOptions.insert(ai->first);
             return ai->second;
@@ -229,7 +192,7 @@ namespace NGT {
                 std::stringstream msg;
                 msg << "ARGS::getl: Illegal string. Option=-" << s << " Specified value=" << get(s)
                     << " Illegal string=" << e << std::endl;
-                NGTThrowException(msg.str());
+                POLARIS_THROW_EX(msg.str());
             }
             return val;
         }
@@ -246,7 +209,7 @@ namespace NGT {
                 std::stringstream msg;
                 msg << "ARGS::getf: Illegal string. Option=-" << s << " Specified value=" << get(s)
                     << " Illegal string=" << e << std::endl;
-                NGTThrowException(msg.str());
+                POLARIS_THROW_EX(msg.str());
             }
             return val;
         }
@@ -342,7 +305,7 @@ namespace NGT {
             if (*e != 0) {
                 std::stringstream msg;
                 msg << "Invalid string. " << e;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return val;
         }
@@ -353,7 +316,7 @@ namespace NGT {
             if (*e != 0) {
                 std::stringstream msg;
                 msg << "Invalid string. " << e;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return val;
         }
@@ -364,7 +327,7 @@ namespace NGT {
             if (*e != 0) {
                 std::stringstream msg;
                 msg << "Invalid string. " << e;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return val;
         }
@@ -391,7 +354,7 @@ namespace NGT {
                     }
                     std::stringstream msg;
                     msg << "Common::extractVector: No data. sep=(" << sep << "):" << idx << ": " << textLine;
-                    NGTThrowException(msg);
+                    POLARIS_THROW_EX(msg);
                 }
                 char *e;
                 double v = ::strtod(tokens[idx].c_str(), &e);
@@ -701,7 +664,7 @@ namespace NGT {
             if (idx >= vectorSize) {
                 std::stringstream msg;
                 msg << "CompactVector: beyond the range. " << idx << ":" << vectorSize;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return vector[idx];
         }
@@ -851,7 +814,7 @@ namespace NGT {
 
         char &at(size_t idx) const {
             if (idx >= size()) {
-                NGTThrowException("CompactString: beyond the range");
+                POLARIS_THROW_EX("CompactString: beyond the range");
             }
             return vector[idx];
         }
@@ -975,7 +938,7 @@ namespace NGT {
             if (!st) {
                 std::stringstream msg;
                 msg << "PropertySet::load: Cannot load the property file " << f << ".";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             load(st);
         }
@@ -985,7 +948,7 @@ namespace NGT {
             if (!st) {
                 std::stringstream msg;
                 msg << "PropertySet::save: Cannot save. " << f << std::endl;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             save(st);
         }
@@ -1231,7 +1194,7 @@ namespace NGT {
             if (idx >= vectorSize) {
                 std::stringstream msg;
                 msg << "Vector: beyond the range. " << idx << ":" << vectorSize;
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             return *(begin() + idx);
         }
@@ -1354,12 +1317,12 @@ namespace NGT {
             uint32_t sz;
             try {
                 NGT::Serializer::read(is, sz);
-            } catch (NGT::Exception &err) {
+            } catch (polaris::PolarisException &err) {
                 std::stringstream msg;
                 msg
                         << "DynamicLengthVector::deserialize: It might be caused by inconsistency of the valuable type of the vector. "
                         << err.what();
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             resize(sz);
             is.read(reinterpret_cast<char *>(vector), sz * elementSize);
@@ -1435,14 +1398,14 @@ namespace NGT {
                 std::vector<TYPE *>::resize(idx + 1, 0);
             }
             if ((*this)[idx] != 0) {
-                NGTThrowException("put: Not empty");
+                POLARIS_THROW_EX("put: Not empty");
             }
             (*this)[idx] = n;
         }
 
         void erase(size_t idx) {
             if (isEmpty(idx)) {
-                NGTThrowException("erase: Not in-memory or invalid id");
+                POLARIS_THROW_EX("erase: Not in-memory or invalid id");
             }
             delete (*this)[idx];
             (*this)[idx] = 0;
@@ -1461,7 +1424,7 @@ namespace NGT {
             if (isEmpty(idx)) {
                 std::stringstream msg;
                 msg << "get: Not in-memory or invalid offset of node. idx=" << idx << " size=" << this->size();
-                NGTThrowException(msg.str());
+                POLARIS_THROW_EX(msg.str());
             }
             return (*this)[idx];
         }
@@ -1470,7 +1433,7 @@ namespace NGT {
 
         void serialize(std::ofstream &os, ObjectSpace *objectspace = 0) {
             if (!os.is_open()) {
-                NGTThrowException("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
             }
             NGT::Serializer::write(os, std::vector<TYPE *>::size());
             for (size_t idx = 0; idx < std::vector<TYPE *>::size(); idx++) {
@@ -1489,7 +1452,7 @@ namespace NGT {
 
         void deserialize(std::ifstream &is, ObjectSpace *objectspace = 0) {
             if (!is.is_open()) {
-                NGTThrowException("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
             }
             deleteAll();
             size_t s;
@@ -1530,7 +1493,7 @@ namespace NGT {
 
         void serializeAsText(std::ofstream &os, ObjectSpace *objectspace = 0) {
             if (!os.is_open()) {
-                NGTThrowException("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
             }
             // The format is almost the same as the default and the best in terms of the string length.
             os.setf(std::ios_base::fmtflags(0), std::ios_base::floatfield);
@@ -1555,7 +1518,7 @@ namespace NGT {
 
         void deserializeAsText(std::ifstream &is, ObjectSpace *objectspace = 0) {
             if (!is.is_open()) {
-                NGTThrowException("NGT::Common: Not open the specified stream yet.");
+                POLARIS_THROW_EX("NGT::Common: Not open the specified stream yet.");
             }
             deleteAll();
             size_t s;
@@ -1771,7 +1734,7 @@ namespace NGT {
 
         ObjectDistances &getResult() {
             if (result == 0) {
-                NGTThrowException("Inner error: results is not set");
+                POLARIS_THROW_EX("Inner error: results is not set");
             }
             return *result;
         }
@@ -1815,7 +1778,7 @@ namespace NGT {
                 dimension = 0;
                 std::stringstream msg;
                 msg << "NGT::SearchQuery: Invalid query type!";
-                NGTThrowException(msg);
+                POLARIS_THROW_EX(msg);
             }
             query = new std::vector<QTYPE>(q);
             dimension = q.size();

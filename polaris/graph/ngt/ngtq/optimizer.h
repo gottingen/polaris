@@ -165,7 +165,7 @@ namespace QBG {
 	auto gcidx = gc[0].id - 1;
 	try {
 	  NGT::Clustering::subtract(v, globalCentroid[gcidx]);
-	} catch (NGT::Exception &err) {
+	} catch (polaris::PolarisException &err) {
 	  std::cerr << err.what() << ":" << v.size() << "x" << globalCentroid[gcidx].size() << std::endl;
 	  abort();
 	}
@@ -176,7 +176,7 @@ namespace QBG {
       generateResidualObjects(string global, vector<vector<float>> &vectors)
     {
       if (global.empty()) {
-	NGTThrowException("A global codebook is not specified!");
+	POLARIS_THROW_EX("A global codebook is not specified!");
       }
       vector<vector<float>> globalCentroid;
       try {
@@ -184,7 +184,7 @@ namespace QBG {
       } catch (...) {
 	std::stringstream msg;
 	msg << "Optimizer::generateResidualObjects: Cannot load global vectors. " << global;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       generateResidualObjects(globalCentroid, vectors);
     }
@@ -213,7 +213,7 @@ namespace QBG {
       if (numberOfClusters <= 1) {
 	std::stringstream msg;
 	msg << "Optimizer::optimize: # of clusters is zero or one. " << numberOfClusters;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
       minDistortion = DBL_MAX;
       int minIt = 0;
@@ -312,7 +312,7 @@ namespace QBG {
 		  vector<double> &errors
 		  ) {
       if (vectors.size() == 0) {
-	NGTThrowException("the vector is empty");
+	POLARIS_THROW_EX("the vector is empty");
       }
       if (!reposition.isEmpty()) {
 	Matrix<float>::mulSquare(vectors, reposition);

@@ -64,7 +64,7 @@ public:
       default:
 	std::stringstream msg;
 	msg << "Command::CreateParameters: Error: Invalid centroid creation mode. " << centroidCreationMode;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
     {
@@ -76,7 +76,7 @@ public:
       default:
 	std::stringstream msg;
 	msg << "Command::CreateParameters: Error: Invalid centroid creation mode. " << localCentroidCreationMode;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
 #ifdef NGTQ_QBG
@@ -101,7 +101,7 @@ public:
     default:
       std::stringstream msg;
       msg << "Command::CreateParameters: Error: Invalid object type. " << objectType;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 
     switch (distanceType) {
@@ -114,7 +114,7 @@ public:
     default:
       std::stringstream msg;
       msg << "Command::CreateParameters: Error: Invalid distance type. " << distanceType;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 #ifdef NGTQ_QBG
     creation.genuineDimension = creation.dimension;
@@ -129,7 +129,7 @@ public:
       default:
 	std::stringstream msg;
 	msg << "Command::CreateParameters: Error: Invalid genuine object type. " << objectType;
-	NGTThrowException(msg);
+	POLARIS_THROW_EX(msg);
       }
     }
 #endif
@@ -201,7 +201,7 @@ public:
 	} else {
 	  std::stringstream msg;
 	  msg << "invalid clustering type. " << tokens[idx];
-	  NGTThrowException(msg);
+	  POLARIS_THROW_EX(msg);
 	}
 	idx++;
       } else {
@@ -269,7 +269,7 @@ public:
     } else {
       std::stringstream msg;
       msg << "invalid clustering type. " << cType;
-      NGTThrowException(msg);
+      POLARIS_THROW_EX(msg);
     }
 #else
     char clusteringType;
@@ -452,7 +452,7 @@ searchQG(NGTQG::Index &index, SearchParameters &searchParameters, ostream &strea
       float value;
       linestream >> value;
       if (linestream.fail()) {
-	NGTThrowException("NGTQG: invalid stream.");
+	POLARIS_THROW_EX("NGTQG: invalid stream.");
       }
       query.push_back(value);
     }
@@ -573,7 +573,7 @@ QBG::CLI::searchQG(NGT::Args &args) {
 
   try {
     ::searchQG(index, searchParameters, std::cout);
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     cerr << "qbg: Error " << err.what() << endl;
     cerr << usage << endl;
   } catch (std::exception &err) {
@@ -642,7 +642,7 @@ QBG::CLI::info(NGT::Args &args)
     bool readOnly = true;
     try {
       QBG::Index index(indexPath, readOnly);
-    } catch(NGT::Exception &err) {
+    } catch(polaris::PolarisException &err) {
       readOnly = false;
     }
     QBG::Index index(indexPath, readOnly);
@@ -651,7 +651,7 @@ QBG::CLI::info(NGT::Args &args)
     std::cout << "# of the dimensions: " << quantizer.globalCodebookIndex.getObjectSpace().getDimension() << std::endl;
     std::cout << "# of the padded dimensions: " << quantizer.globalCodebookIndex.getObjectSpace().getPaddedDimension() << std::endl;
     std::cout << "# of the stored objects: " << (quantizer.objectList.size() == 0 ? 0 : quantizer.objectList.size() - 1) << std::endl;
-  } catch(NGT::Exception &err) {
+  } catch(polaris::PolarisException &err) {
     bool readOnly = true;
     try {
       NGTQG::Index index(indexPath, 128, readOnly);
@@ -713,7 +713,7 @@ QBG::CLI::create(NGT::Args &args)
     } catch(...) {}
 
     QBG::Index::create(indexPath, buildParameters, rotation, objectPath);
-  } catch(NGT::Exception &err) {
+  } catch(polaris::PolarisException &err) {
     std::cerr << err.what() << std::endl;
     cerr << usage << endl;
   }
@@ -968,7 +968,7 @@ QBG::CLI::search(NGT::Args &args)
 	     << totalTime << "/" << queryCount << ")" << endl;
       }
     }
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     cerr << "Error " << err.what() << endl;
     cerr << usage << endl;
   } catch (...) {
@@ -1513,7 +1513,7 @@ QBG::CLI::assign(NGT::Args &args)
 	std::cout << objects[0].id << std::endl;
       }
     }
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     cerr << "Error " << err.what() << endl;
     return;
   } catch (...) {
@@ -1562,7 +1562,7 @@ QBG::CLI::extract(NGT::Args &args)
       os = &ofs;
     }
     index.extract(*os, n, mode == 'r');
-  } catch (NGT::Exception &err) {
+  } catch (polaris::PolarisException &err) {
     try {
       outputFile = args.get("#2");
       ofs.open(outputFile);
