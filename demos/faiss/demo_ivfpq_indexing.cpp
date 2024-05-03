@@ -12,8 +12,8 @@
 
 #include <sys/time.h>
 
-#include <polaris/index/index_flat.h>
-#include <polaris/index/index_ivf_pq.h>
+#include <polaris/faiss/index_flat.h>
+#include <polaris/faiss/index_ivf_pq.h>
 #include <polaris/core/index_io.h>
 
 double elapsed() {

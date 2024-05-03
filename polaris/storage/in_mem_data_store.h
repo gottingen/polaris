@@ -22,8 +22,8 @@
 #include <polaris/storage/abstract_data_store.h>
 
 #include <polaris/distance/distance.h>
-#include <polaris/internal/natural_number_map.h>
-#include <polaris/internal/natural_number_set.h>
+#include <polaris/utility/natural_number_map.h>
+#include <polaris/utility/natural_number_set.h>
 #include <polaris/io/aligned_file_reader.h>
 
 namespace polaris

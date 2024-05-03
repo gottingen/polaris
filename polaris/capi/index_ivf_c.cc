@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include <polaris/capi/index_ivf_c.h>
-#include <polaris/index/index_ivf.h>
+#include <polaris/faiss/index_ivf.h>
 #include <polaris/capi/clustering_c.h>
 #include <polaris/capi/index_c.h>
 #include "impl/aux_index_structures_c.h"

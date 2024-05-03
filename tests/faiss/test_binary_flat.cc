@@ -10,8 +10,8 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index/index_binary_flat.h>
-#include <polaris/utils/hamming.h>
+#include <polaris/faiss/index_binary_flat.h>
+#include <polaris/faiss/utils/hamming.h>
 
 TEST(BinaryFlat, accuracy) {
     // dimension of the vectors to index

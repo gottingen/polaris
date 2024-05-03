@@ -9,10 +9,10 @@
 #include <cstdlib>
 #include <memory>
 
-#include <polaris/quantization/clustering.h>
-#include <polaris/index/index_flat.h>
-#include <polaris/index/index_hnsw.h>
-#include <polaris/utils/distances.h>
+#include <polaris/faiss/quantization/clustering.h>
+#include <polaris/faiss/index_flat.h>
+#include <polaris/faiss/index_hnsw.h>
+#include <polaris/faiss/utils/distances.h>
 #include <polaris/core/random.h>
 
 namespace {

@@ -10,7 +10,7 @@
 
 #include <polaris/capi/impl/aux_index_structures_c.h>
 #include <polaris/core/aux_index_structures.h>
-#include <polaris/impl/distance_computer.h>
+#include <polaris/faiss/impl/distance_computer.h>
 #include <polaris/core/id_selector.h>
 #include <iostream>
 #include <polaris/capi/macros_impl.h>

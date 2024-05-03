@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include <polaris/capi/index_binary_c.h>
-#include <polaris/index/index_binary.h>
+#include <polaris/faiss/index_binary.h>
 #include <polaris/capi/macros_impl.h>
 
 extern "C" {

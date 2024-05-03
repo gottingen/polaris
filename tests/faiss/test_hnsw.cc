@@ -14,7 +14,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <polaris/impl/hnsw.h>
+#include <polaris/faiss/impl/hnsw.h>
 
 int reference_pop_min(polaris::HNSW::MinimaxHeap& heap, float* vmin_out) {
     assert(heap.k > 0);

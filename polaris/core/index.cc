@@ -10,9 +10,9 @@
 #include <polaris/core/index.h>
 
 #include <polaris/core/aux_index_structures.h>
-#include <polaris/impl/distance_computer.h>
-#include <polaris/internal/polaris_assert.h>
-#include <polaris/utils/distances.h>
+#include <polaris/faiss/impl/distance_computer.h>
+#include <polaris/utility/polaris_assert.h>
+#include <polaris/faiss/utils/distances.h>
 
 #include <cstring>
 

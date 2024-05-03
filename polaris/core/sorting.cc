@@ -10,7 +10,7 @@
 #include <polaris/core/sorting.h>
 #include <omp.h>
 #include <algorithm>
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 #include <polaris/core/utils.h>
 
 namespace polaris {

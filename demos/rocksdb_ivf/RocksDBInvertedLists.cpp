@@ -2,7 +2,7 @@
 
 #include "RocksDBInvertedLists.h"
 
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 
 using namespace polaris;
 

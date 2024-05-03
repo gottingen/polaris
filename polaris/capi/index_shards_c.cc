@@ -6,7 +6,7 @@
  */
 
 #include <polaris/capi/index_shards_c.h>
-#include <polaris/index/index_shards.h>
+#include <polaris/faiss/index_shards.h>
 #include <polaris/capi/macros_impl.h>
 
 using polaris::Index;

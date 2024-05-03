@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 #include <polaris/core/id_selector.h>
 
 namespace polaris {

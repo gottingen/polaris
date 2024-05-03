@@ -14,11 +14,11 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index/auto_tune.h>
-#include <polaris/index/ivf_lib.h>
-#include <polaris/index/index_ivf.h>
-#include <polaris/index/clone_index.h>
-#include <polaris/index/index_factory.h>
+#include <polaris/faiss/auto_tune.h>
+#include <polaris/faiss/ivf_lib.h>
+#include <polaris/faiss/index_ivf.h>
+#include <polaris/faiss/clone_index.h>
+#include <polaris/faiss/index_factory.h>
 
 using namespace polaris;
 

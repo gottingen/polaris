@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include <polaris/capi/clustering_c.h>
-#include <polaris/quantization/clustering.h>
+#include <polaris/faiss/quantization/clustering.h>
 #include <polaris/core/index.h>
 #include <vector>
 #include <polaris/capi/macros_impl.h>

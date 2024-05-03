@@ -14,11 +14,11 @@
 //
 //
 
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/distance/distance.h>
 #include <polaris/distance/norm.h>
 #include <polaris/distance/primitive.h>
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 #include <polaris/core/executor.h>
 #include <collie/taskflow/algorithm/for_each.h>
 

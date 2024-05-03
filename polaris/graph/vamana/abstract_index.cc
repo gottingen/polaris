@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 #include <polaris/core/common_includes.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/abstract_index.h>
 
 namespace polaris {

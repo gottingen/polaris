@@ -18,7 +18,7 @@
 #include <sstream>
 #include <mutex>
 
-#include <polaris/internal/polaris_exception.h>
+#include <polaris/utility/polaris_exception.h>
 #include <polaris/graph/vamana/logger.h>
 
 namespace polaris

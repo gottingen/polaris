@@ -13,9 +13,9 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index/index_flat.h>
-#include <polaris/index/index_ivf_pq.h>
-#include <polaris/utils/distances.h>
+#include <polaris/faiss/index_flat.h>
+#include <polaris/faiss/index_ivf_pq.h>
+#include <polaris/faiss/utils/distances.h>
 #include <polaris/core/utils.h>
 
 namespace {

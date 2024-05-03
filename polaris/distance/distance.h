@@ -15,7 +15,7 @@
 //
 #pragma once
 
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <cstring>
 #include <polaris/core/defines.h>
 #include <polaris/core/metric_type.h>

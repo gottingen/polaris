@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/index/index_additive_quantizer.h>
-#include <polaris/index/index_scalar_quantizer.h>
+#include <polaris/faiss/index_additive_quantizer.h>
+#include <polaris/faiss/index_scalar_quantizer.h>
 #include <polaris/core/random.h>
 #include <gtest/gtest.h>
 

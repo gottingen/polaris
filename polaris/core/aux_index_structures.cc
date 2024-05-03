@@ -12,7 +12,7 @@
 
 #include <polaris/core/aux_index_structures.h>
 
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 
 namespace polaris {
 

@@ -16,7 +16,7 @@
 
 #include <functional>
 #include <iostream>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 
 
 namespace polaris

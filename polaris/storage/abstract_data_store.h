@@ -18,8 +18,8 @@
 #include <vector>
 #include <string>
 
-#include <polaris/internal/types.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/types.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/distance/distance.h>
 
 namespace polaris {

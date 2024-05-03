@@ -18,12 +18,12 @@
 #include <polaris/core/common_includes.h>
 #include <polaris/distance/distance.h>
 #include <polaris/core/lock.h>
-#include <polaris/internal/natural_number_map.h>
-#include <polaris/internal/natural_number_set.h>
+#include <polaris/utility/natural_number_map.h>
+#include <polaris/utility/natural_number_set.h>
 #include <polaris/graph/vamana/neighbor.h>
 #include <polaris/graph/vamana/parameters.h>
 #include <polaris/graph/vamana/utils.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/scratch.h>
 #include <polaris/storage/in_mem_data_store.h>
 #include <polaris/storage/in_mem_graph_store.h>

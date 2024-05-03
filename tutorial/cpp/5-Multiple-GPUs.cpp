@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <random>
 
-#include <polaris/index/index_flat.h>
+#include <polaris/faiss/index_flat.h>
 #include <polaris/gpu/GpuAutoTune.h>
 #include <polaris/gpu/GpuCloner.h>
 #include <polaris/gpu/GpuIndexFlat.h>

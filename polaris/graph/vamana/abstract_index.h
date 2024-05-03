@@ -17,7 +17,7 @@
 #include <polaris/distance/distance.h>
 #include <polaris/graph/vamana/parameters.h>
 #include <polaris/graph/vamana/utils.h>
-#include <polaris/internal/types.h>
+#include <polaris/utility/types.h>
 #include <polaris/graph/vamana/index_config.h>
 #include <polaris/graph/vamana/index_build_params.h>
 #include <any>

@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include <polaris/capi/index_pre_transform_c.h>
-#include <polaris/index/index_pre_transform.h>
-#include <polaris/index/vector_transform.h>
+#include <polaris/faiss/index_pre_transform.h>
+#include <polaris/faiss/vector_transform.h>
 #include <polaris/capi/macros_impl.h>
 
 using polaris::Index;

@@ -42,7 +42,7 @@ typedef int FileHandle;
 #include <polaris/core/common_includes.h>
 
 #include <polaris/graph/vamana/utils.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 
 namespace polaris {
     const size_t MAX_SAMPLE_POINTS_FOR_WARMUP = 100000;

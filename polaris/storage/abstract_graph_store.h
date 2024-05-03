@@ -17,7 +17,7 @@
 
 #include <string>
 #include <vector>
-#include <polaris/internal/types.h>
+#include <polaris/utility/types.h>
 
 namespace polaris {
 

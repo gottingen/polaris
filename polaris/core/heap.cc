@@ -9,7 +9,7 @@
 
 /* Function for soft heap */
 
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 #include <polaris/core/heap.h>
 
 namespace polaris {

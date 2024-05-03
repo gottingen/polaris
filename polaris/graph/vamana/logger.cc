@@ -17,7 +17,7 @@
 #include <iostream>
 
 #include <polaris/graph/vamana/logger_impl.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 
 namespace polaris
 {

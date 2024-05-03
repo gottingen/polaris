@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include "error_impl.h"
-#include <polaris/internal/polaris_exception.h>
+#include <polaris/utility/polaris_exception.h>
 #include <exception>
 #include "error_c.h"
 

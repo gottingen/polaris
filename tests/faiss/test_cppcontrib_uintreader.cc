@@ -15,9 +15,9 @@
 #include <memory>
 #include <random>
 
-#include <polaris/utils/hamming.h>
+#include <polaris/faiss/utils/hamming.h>
 
-#include <polaris/cppcontrib/detail/UintReader.h>
+#include <polaris/faiss/cppcontrib/detail/UintReader.h>
 
 template <intptr_t N_ELEMENTS, intptr_t CODE_BITS, intptr_t CPOS>
 struct TestLoop {

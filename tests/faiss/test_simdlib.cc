@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/utils/simdlib.h>
+#include <polaris/faiss/utils/simdlib.h>
 
 using namespace polaris;
 

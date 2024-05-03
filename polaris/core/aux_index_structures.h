@@ -18,7 +18,7 @@
 #include <vector>
 
 #include <polaris/core/metric_type.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 
 namespace polaris {
 

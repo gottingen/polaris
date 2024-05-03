@@ -13,7 +13,7 @@
 #include <random>
 #include <vector>
 
-#include <polaris/utils/distances.h>
+#include <polaris/faiss/utils/distances.h>
 
 // reference implementations
 void fvec_inner_products_ny_ref(

@@ -9,12 +9,12 @@
 #include <cstdio>
 #include <memory>
 
-#include <polaris/index/ivf_lib.h>
-#include <polaris/index/index_additive_quantizer.h>
-#include <polaris/index/index_ivf_additive_quantizer.h>
+#include <polaris/faiss/ivf_lib.h>
+#include <polaris/faiss/index_additive_quantizer.h>
+#include <polaris/faiss/index_ivf_additive_quantizer.h>
 #include <polaris/core/metric_type.h>
-#include <polaris/utils/distances.h>
-#include <polaris/utils/hamming.h>
+#include <polaris/faiss/utils/distances.h>
+#include <polaris/faiss/utils/hamming.h>
 #include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 

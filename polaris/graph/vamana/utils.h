@@ -16,7 +16,7 @@
 #pragma once
 
 #include <errno.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/core/common_includes.h>
 #include <collie/filesystem/fs.h>
 
@@ -30,11 +30,11 @@
 #include <polaris/distance/distance.h>
 #include <polaris/graph/vamana/logger.h>
 #include <polaris/io/cached_io.h>
-#include <polaris/internal/polaris_exception.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/polaris_exception.h>
+#include <polaris/utility/platform_macros.h>
 #include <turbo/container/flat_hash_set.h>
-#include <polaris/internal/types.h>
-#include <polaris/internal/tag_uint128.h>
+#include <polaris/utility/types.h>
+#include <polaris/utility/tag_uint128.h>
 #include <any>
 
 

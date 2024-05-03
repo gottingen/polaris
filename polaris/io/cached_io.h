@@ -21,7 +21,7 @@
 #include <sstream>
 
 #include <polaris/graph/vamana/logger.h>
-#include <polaris/internal/polaris_exception.h>
+#include <polaris/utility/polaris_exception.h>
 
 // sequential cached reads
 class cached_ifstream {

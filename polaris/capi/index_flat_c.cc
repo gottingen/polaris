@@ -9,8 +9,8 @@
 // -*- c++ -*-
 
 #include <polaris/capi/index_flat_c.h>
-#include <polaris/index/index_flat.h>
-#include <polaris/index/index_refine.h>
+#include <polaris/faiss/index_flat.h>
+#include <polaris/faiss/index_refine.h>
 #include <polaris/capi/macros_impl.h>
 
 extern "C" {

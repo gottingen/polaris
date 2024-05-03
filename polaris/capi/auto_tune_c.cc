@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include <polaris/capi/auto_tune_c.h>
-#include <polaris/index/auto_tune.h>
+#include <polaris/faiss/auto_tune.h>
 #include <cstring>
 #include <polaris/capi/macros_impl.h>
 

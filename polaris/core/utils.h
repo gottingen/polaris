@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/core/heap.h>
 
 namespace polaris {

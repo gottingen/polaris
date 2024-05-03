@@ -11,13 +11,13 @@
 
 #include <gtest/gtest.h>
 
-#include <polaris/index/auto_tune.h>
-#include <polaris/index/ivf_lib.h>
-#include <polaris/index/index_ivf_flat.h>
-#include <polaris/index/vector_transform.h>
-#include <polaris/index/clone_index.h>
-#include <polaris/internal/io.h>
-#include <polaris/index/index_factory.h>
+#include <polaris/faiss/auto_tune.h>
+#include <polaris/faiss/ivf_lib.h>
+#include <polaris/faiss/index_ivf_flat.h>
+#include <polaris/faiss/vector_transform.h>
+#include <polaris/faiss/clone_index.h>
+#include <polaris/faiss/internal/io.h>
+#include <polaris/faiss/index_factory.h>
 #include <polaris/core/index_io.h>
 #include <polaris/core/random.h>
 

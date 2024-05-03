@@ -17,15 +17,15 @@
 #include <vector>
 
 #include <polaris/core/index.h>
-#include <polaris/index/index_2layer.h>
-#include <polaris/index/index_ivf_pq.h>
-#include <polaris/index/index_pq.h>
-#include <polaris/internal/io.h>
-#include <polaris/index/index_factory.h>
+#include <polaris/faiss/index_2layer.h>
+#include <polaris/faiss/index_ivf_pq.h>
+#include <polaris/faiss/index_pq.h>
+#include <polaris/faiss/internal/io.h>
+#include <polaris/faiss/index_factory.h>
 #include <polaris/core/index_io.h>
 
-#include <polaris/index/index_rowwise_minmax.h>
-#include <polaris/cppcontrib/SaDecodeKernels.h>
+#include <polaris/faiss/index_rowwise_minmax.h>
+#include <polaris/faiss/cppcontrib/SaDecodeKernels.h>
 
 // train a dataset
 std::tuple<std::shared_ptr<polaris::Index>, std::vector<uint8_t>> trainDataset(

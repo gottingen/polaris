@@ -9,7 +9,7 @@
 // -*- c++ -*-
 
 #include <polaris/capi/utils/distances_c.h>
-#include <polaris/utils/distances.h>
+#include <polaris/faiss/utils/distances.h>
 #include <cstdio>
 
 void faiss_pairwise_L2sqr(

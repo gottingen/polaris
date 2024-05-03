@@ -43,7 +43,7 @@
 #include <polaris/graph/ngt/shared_memory_allocator.h>
 
 #ifdef NGT_HALF_FLOAT
-#include <polaris/internal/half.hpp>
+#include <polaris/utility/half.hpp>
 #endif
 
 #define ADVANCED_USE_REMOVED_LIST

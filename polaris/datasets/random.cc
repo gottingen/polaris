@@ -16,7 +16,7 @@
 // Created by jeff on 24-4-29.
 //
 #include <polaris/datasets/random.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/graph/vamana/math_utils.h>
 #include <polaris/graph/vamana/pq.h>

@@ -17,8 +17,8 @@
 
 #include <sys/time.h>
 
-#include <polaris/index/auto_tune.h>
-#include <polaris/index/index_factory.h>
+#include <polaris/faiss/auto_tune.h>
+#include <polaris/faiss/index_factory.h>
 
 /**
  * To run this demo, please download the ANN_SIFT1M dataset from

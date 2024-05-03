@@ -15,10 +15,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include <polaris/utils/approx_topk/approx_topk.h>
+#include <polaris/faiss/utils/approx_topk/approx_topk.h>
 
-#include <polaris/internal/polaris_assert.h>
-#include <polaris/internal/polaris_exception.h>
+#include <polaris/utility/polaris_assert.h>
+#include <polaris/utility/polaris_exception.h>
 #include <polaris/core/heap.h>
 
 //

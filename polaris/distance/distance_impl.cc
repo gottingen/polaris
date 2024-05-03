@@ -20,7 +20,7 @@
 #include <polaris/distance/norm.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/graph/vamana/logger.h>
-#include <polaris/internal/polaris_exception.h>
+#include <polaris/utility/polaris_exception.h>
 
 namespace polaris {
 

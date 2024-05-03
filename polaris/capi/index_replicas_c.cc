@@ -6,7 +6,7 @@
  */
 
 #include <polaris/capi/index_replicas_c.h>
-#include <polaris/index/index_replicas.h>
+#include <polaris/faiss/index_replicas.h>
 #include <polaris/capi/macros_impl.h>
 
 using polaris::Index;

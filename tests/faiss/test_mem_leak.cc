@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/index/index_flat.h>
-#include <polaris/index/index_ivf_flat.h>
+#include <polaris/faiss/index_flat.h>
+#include <polaris/faiss/index_ivf_flat.h>
 #include <polaris/core/random.h>
 #include <polaris/core/utils.h>
 

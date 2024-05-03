@@ -26,7 +26,7 @@
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/graph/vamana/utils.h>
 
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 
 namespace polaris {
     template<typename T>

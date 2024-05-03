@@ -18,12 +18,12 @@
 #include <type_traits>
 
 #include <polaris/graph/vamana/index_factory.h>
-#include <polaris/internal/memory_mapper.h>
+#include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/timer.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
-#include <polaris/internal/platform_macros.h>
-#include <polaris/internal/tag_uint128.h>
+#include <polaris/utility/platform_macros.h>
+#include <polaris/utility/tag_uint128.h>
 #include <polaris/distance/distance_impl.h>
 
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)

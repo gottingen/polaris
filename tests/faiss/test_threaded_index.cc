@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <polaris/index/index_replicas.h>
-#include <polaris/index/index_shards.h>
-#include <polaris/impl/threaded_index.h>
+#include <polaris/faiss/index_replicas.h>
+#include <polaris/faiss/index_shards.h>
+#include <polaris/faiss/impl/threaded_index.h>
 
 #include <gtest/gtest.h>
 #include <chrono>

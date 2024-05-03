@@ -41,9 +41,9 @@
 
 #include <polaris/io/cached_io.h>
 #include <polaris/core/common_includes.h>
-#include <polaris/internal/memory_mapper.h>
+#include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/utils.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 
 // custom types (for readability)
 typedef turbo::flat_hash_set<std::string> label_set;

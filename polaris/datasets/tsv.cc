@@ -14,7 +14,7 @@
 //
 #include <string>
 #include <polaris/datasets/tsv.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/utils.h>
 #include <iostream>
 

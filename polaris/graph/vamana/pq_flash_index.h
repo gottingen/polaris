@@ -18,13 +18,13 @@
 #include <polaris/core/common_includes.h>
 
 #include <polaris/io/aligned_file_reader.h>
-#include <polaris/internal/concurrent_queue.h>
+#include <polaris/utility/concurrent_queue.h>
 #include <polaris/graph/vamana/neighbor.h>
 #include <polaris/graph/vamana/parameters.h>
 #include <polaris/graph/vamana/percentile_stats.h>
 #include <polaris/graph/vamana/pq.h>
 #include <polaris/graph/vamana/utils.h>
-#include <polaris/internal/platform_macros.h>
+#include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/scratch.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>

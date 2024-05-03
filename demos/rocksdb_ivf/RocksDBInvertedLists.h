@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <polaris/invlists/inverted_lists.h>
+#include <polaris/faiss/invlists/inverted_lists.h>
 
 #include <rocksdb/db.h>
 

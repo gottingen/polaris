@@ -16,7 +16,7 @@
 #pragma once
 
 #include <collie/simd/simd.h>
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 #include <type_traits>
 
 namespace polaris {

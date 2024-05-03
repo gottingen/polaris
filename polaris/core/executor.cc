@@ -15,7 +15,7 @@
 //
 
 #include <polaris/core/executor.h>
-#include <polaris/internal/polaris_assert.h>
+#include <polaris/utility/polaris_assert.h>
 #include <thread>
 
 namespace polaris {
