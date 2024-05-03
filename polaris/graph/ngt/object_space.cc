@@ -25,11 +25,9 @@ NGT::Distance NGT::ObjectSpace::compareWithL1(NGT::Object &o1, NGT::Object &o2) 
   if (getObjectType() == typeid(uint8_t)) {
     d = PrimitiveComparator::compareL1(reinterpret_cast<uint8_t*>(o1.getPointer()), 
 				       reinterpret_cast<uint8_t*>(o2.getPointer()), dim);
-#ifdef NGT_HALF_FLOAT
   } else if (getObjectType() == typeid(float16)) {
     d = PrimitiveComparator::compareL1(reinterpret_cast<float16*>(o1.getPointer()), 
 				       reinterpret_cast<float16*>(o2.getPointer()), dim);
-#endif
   } else if (getObjectType() == typeid(float)) {
     d = PrimitiveComparator::compareL1(reinterpret_cast<float*>(o1.getPointer()), 
 				       reinterpret_cast<float*>(o2.getPointer()), dim);

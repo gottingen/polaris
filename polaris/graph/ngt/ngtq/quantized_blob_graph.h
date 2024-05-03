@@ -1272,11 +1272,9 @@ namespace QBG {
                 globalGraph.setupDistances(searchContainer, seeds, NGT::PrimitiveComparator::L2Float::compare);
             } else if (objectSpace.getObjectType() == typeid(uint8_t)) {
                 globalGraph.setupDistances(searchContainer, seeds, NGT::PrimitiveComparator::L2Uint8::compare);
-#ifdef NGT_HALF_FLOAT
             } else if (objectSpace.getObjectType() == typeid(NGT::float16)) {
                 globalGraph.setupDistances(searchContainer, seeds, NGT::PrimitiveComparator::L2Float16::compare);
             }
-#endif
             std::sort(seeds.begin(), seeds.end());
             NGT::ObjectDistance currentNearestBlob = seeds.front();
             NGT::Distance explorationRadius = searchContainer.blobExplorationCoefficient * currentNearestBlob.distance;

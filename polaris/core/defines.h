@@ -22,15 +22,12 @@
 
 /*
 #cmakedefine NGT_GRAPH_CHECK_VECTOR		// use vector to check whether accessed
-#cmakedefine NGT_AVX_DISABLED			// not use avx
 #cmakedefine NGT_AVX2				// use avx2
 #cmakedefine NGT_LARGE_DATASET			// more than 10M objects
 #cmakedefine NGT_DISTANCE_COMPUTATION_COUNT	// count # of distance computations
 #cmakedefine NGT_QBG_DISABLED
 #cmakedefine NGTQG_ZERO_GLOBAL
 #cmakedefine NGTQG_NO_ROTATION
-#cmakedefine NGT_BFLOAT_DISABLED		// not use bfloat
-#cmakedefine NGT_BFLOAT_ENABLED
 // End of cmake defines
 */
 //////////////////////////////////////////////////////////////////////////
@@ -47,14 +44,6 @@
 
 #define		NGT_COMPACT_VECTOR
 #define		NGT_GRAPH_READ_ONLY_GRAPH
-#define		NGT_HALF_FLOAT
-
-#ifdef	NGT_BFLOAT_ENABLED
-#define		NGT_BFLOAT
-#endif
-#ifdef	NGT_BFLOAT_DISABLED
-#undef			NGT_BFLOAT
-#endif
 
 #ifdef	NGT_LARGE_DATASET
 #define	NGT_GRAPH_CHECK_HASH_BASED_BOOLEAN_SET
@@ -63,9 +52,7 @@
 #endif
 
 
-#if defined(NGT_AVX_DISABLED)
-#define NGT_NO_AVX
-#elif defined(NGT_AVX2)
+#if defined(NGT_AVX2)
 #undef NGT_AVX512
 #else
 #if defined(__AVX512F__) && defined(__AVX512DQ__)

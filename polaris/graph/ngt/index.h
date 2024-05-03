@@ -115,24 +115,16 @@ namespace NGT {
 	switch (objectType) {
 	case ObjectSpace::ObjectType::Uint8: p.set("ObjectType", "Integer-1"); break;
 	case ObjectSpace::ObjectType::Float: p.set("ObjectType", "Float-4"); break;
-#ifdef NGT_HALF_FLOAT
 	case ObjectSpace::ObjectType::Float16: p.set("ObjectType", "Float-2"); break;
-#endif
-#ifdef NGT_BFLOAT
 	case ObjectSpace::ObjectType::Bfloat16: p.set("ObjectType", "Bfloat-2"); break;
-#endif
 	default : std::cerr << "Fatal error. Invalid object type. " << objectType << std::endl; abort();
 	}
 #ifdef NGT_REFINEMENT
 	switch (refinementObjectType) {
 	case ObjectSpace::ObjectType::Uint8: p.set("RefinementObjectType", "Integer-1"); break;
 	case ObjectSpace::ObjectType::Float: p.set("RefinementObjectType", "Float-4"); break;
-#ifdef NGT_HALF_FLOAT
 	case ObjectSpace::ObjectType::Float16: p.set("RefinementObjectType", "Float-2"); break;
-#endif
-#ifdef NGT_BFLOAT
 	case ObjectSpace::ObjectType::Bfloat16: p.set("RefinementObjectType", "Bfloat-2"); break;
-#endif
 	default : std::cerr << "Fatal error. Invalid refinement object type. " << refinementObjectType << std::endl; abort();
 	}
 #endif
@@ -188,14 +180,10 @@ namespace NGT {
 	    objectType = ObjectSpace::ObjectType::Float;
 	  } else if (it->second == "Integer-1") {
 	    objectType = ObjectSpace::ObjectType::Uint8;
-#ifdef NGT_HALF_FLOAT
 	  } else if (it->second == "Float-2") {
 	    objectType = ObjectSpace::ObjectType::Float16;
-#endif
-#ifdef NGT_BFLOAT
 	  } else if (it->second == "Bfloat-2") {
 	    objectType = ObjectSpace::ObjectType::Bfloat16;
-#endif
 	  } else {
 	    std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second << std::endl;
 	  }
@@ -210,14 +198,10 @@ namespace NGT {
 	      refinementObjectType = ObjectSpace::ObjectType::Float;
 	    } else if (it->second == "Integer-1") {
 	      refinementObjectType = ObjectSpace::ObjectType::Uint8;
-#ifdef NGT_HALF_FLOAT
 	    } else if (it->second == "Float-2") {
 	      refinementObjectType = ObjectSpace::ObjectType::Float16;
-#endif
-#ifdef NGT_BFLOAT
 	    } else if (it->second == "Bfloat-2") {
 	      refinementObjectType = ObjectSpace::ObjectType::Bfloat16;
-#endif
 	    } else {
 	      std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second << std::endl;
 	    }
@@ -534,7 +518,6 @@ namespace NGT {
       }
       redirector.end();
     }
-#ifdef NGT_HALF_FLOAT
     virtual void append(const float16 *data, size_t dataSize) {
       StdOstreamRedirector redirector(redirect);
       redirector.begin();
@@ -546,7 +529,6 @@ namespace NGT {
       }
       redirector.end();
     }
-#endif
     virtual size_t getNumberOfObjects() { return getIndex().getNumberOfObjects(); }
     virtual size_t getNumberOfIndexedObjects() { return getIndex().getNumberOfIndexedObjects(); }
     virtual size_t getObjectRepositorySize() { return getIndex().getObjectRepositorySize(); }
@@ -569,9 +551,7 @@ namespace NGT {
     virtual Object *allocateObject(const std::vector<double> &obj) { return getIndex().allocateObject(obj); }
     virtual Object *allocateObject(const std::vector<float> &obj) { return getIndex().allocateObject(obj); }
     virtual Object *allocateObject(const std::vector<uint8_t> &obj) { return getIndex().allocateObject(obj); }
-#ifdef NGT_HALF_FLOAT
     virtual Object *allocateObject(const std::vector<float16> &obj) { return getIndex().allocateObject(obj); }
-#endif
     virtual Object *allocateObject(const float *obj, size_t size) { return getIndex().allocateObject(obj, size); }
     virtual size_t getSizeOfElement() { return getIndex().getSizeOfElement(); }
     virtual void setProperty(NGT::Property &prop) { getIndex().setProperty(prop); }
@@ -640,10 +620,8 @@ namespace NGT {
 	object = allocateObject(*static_cast<std::vector<double>*>(vec));
       } else if (objectType == typeid(uint8_t)) {
 	object = allocateObject(*static_cast<std::vector<uint8_t>*>(vec));
-#ifdef NGT_HALF_FLOAT
       } else if (objectType == typeid(float16)) {
 	object = allocateObject(*static_cast<std::vector<float16>*>(vec));
-#endif
       } else {
 	std::stringstream msg;
 	msg << "NGT::Index::allocateObject: Unavailable object type.";
@@ -700,12 +678,10 @@ namespace NGT {
 	ObjectSpaceRepository<unsigned char, int> *os = (ObjectSpaceRepository<unsigned char, int>*)objectSpace;
 	os->deleteAll();
 	delete os;
-#ifdef NGT_HALF_FLOAT
       } else if (property.objectType == NGT::ObjectSpace::ObjectType::Float16) {
 	ObjectSpaceRepository<float16, float> *os = (ObjectSpaceRepository<float16, float>*)objectSpace;
 	os->deleteAll();
 	delete os;
-#endif
       } else {
 	std::cerr << "Cannot find Object Type in the property. " << property.objectType << std::endl;
 	return;
@@ -778,9 +754,7 @@ namespace NGT {
     virtual void append(const float *data, size_t dataSize) { objectSpace->append(data, dataSize); }
     virtual void append(const double *data, size_t dataSize) { objectSpace->append(data, dataSize); }
     virtual void append(const uint8_t *data, size_t dataSize) { objectSpace->append(data, dataSize); }
-#ifdef NGT_HALF_FLOAT
     virtual void append(const float16 *data, size_t dataSize) { objectSpace->append(data, dataSize); }
-#endif
 
     void saveObjectRepository(const std::string &ofile) {
       try {
@@ -906,11 +880,9 @@ namespace NGT {
 	  } else if (searchQuery.getQueryType() == typeid(uint8_t)) {
 	    auto &v = *static_cast<std::vector<uint8_t>*>(searchQuery.getQuery());
 	    robject = ros.allocateNormalizedObject(v);
-#ifdef NGT_HALF_FLOAT
 	  } else if (searchQuery.getQueryType() == typeid(float16)) {
 	    auto &v = *static_cast<std::vector<float16>*>(searchQuery.getQuery());
 	    robject = ros.allocateNormalizedObject(v);
-#endif
 	  } else {
 	    std::stringstream msg;
 	    msg << "Invalid query object type.";
@@ -1251,11 +1223,9 @@ namespace NGT {
     Object *allocateObject(const std::vector<float> &obj) {
       return objectSpace->allocateNormalizedObject(obj);
     }
-#ifdef NGT_HALF_FLOAT
     Object *allocateObject(const std::vector<float16> &obj) {
       return objectSpace->allocateNormalizedObject(obj);
     }
-#endif
     Object *allocateObject(const std::vector<uint8_t> &obj) {
       return objectSpace->allocateNormalizedObject(obj);
     }
@@ -1814,11 +1784,9 @@ namespace NGT {
 	  } else if (searchQuery.getQueryType() == typeid(uint8_t)) {
 	    auto &v = *static_cast<std::vector<uint8_t>*>(searchQuery.getQuery());
 	    robject = ros.allocateNormalizedObject(v);
-#ifdef NGT_HALF_FLOAT
 	  } else if (searchQuery.getQueryType() == typeid(float16)) {
 	    auto &v = *static_cast<std::vector<float16>*>(searchQuery.getQuery());
 	    robject = ros.allocateNormalizedObject(v);
-#endif
 	  } else {
 	    std::stringstream msg;
 	    msg << "Invalid query object type.";

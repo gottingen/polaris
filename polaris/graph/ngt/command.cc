@@ -147,16 +147,12 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
         case 'c':
             property.objectType = NGT::Index::Property::ObjectType::Uint8;
             break;
-#ifdef NGT_HALF_FLOAT
         case 'h':
             property.objectType = NGT::Index::Property::ObjectType::Float16;
             break;
-#endif
-#ifdef NGT_BFLOAT
             case 'H':
               property.objectType = NGT::Index::Property::ObjectType::Bfloat16;
               break;
-#endif
         default:
             std::stringstream msg;
             msg << "Command::CreateParameter: Error: Invalid object type. " << objectType;
@@ -171,16 +167,12 @@ NGT::Command::CreateParameters::CreateParameters(Args &args) {
     case 'c':
       property.refinementObjectType = NGT::Index::Property::ObjectType::Uint8;
       break;
-#ifdef NGT_HALF_FLOAT
     case 'h':
       property.refinementObjectType = NGT::Index::Property::ObjectType::Float16;
       break;
-#endif
-#ifdef NGT_BFLOAT
     case 'H':
       property.refinementObjectType = NGT::Index::Property::ObjectType::Bfloat16;
       break;
-#endif
     default:
       std::stringstream msg;
       msg << "Command::CreateParameter: Error: Invalid refinement object type. " << objectType;
@@ -261,11 +253,7 @@ NGT::Command::create(Args &args) {
                          "-d dimension [-p #-of-thread] [-i index-type(t|g)] [-g graph-type(a|k|b|o|i)] "
                          "[-t truncation-edge-limit] [-E edge-size] [-S edge-size-for-search] [-L edge-size-limit] "
                          "[-e epsilon] "
-                         #ifdef NGT_HALF_FLOAT
                          "[-o object-type(f|h|c)] "
-                         #else
-                         "[-o object-type(f|c)] "
-                         #endif
                          "[-D distance-function(1|2|a|A|h|j|c|C|E|p|l)] [-n #-of-inserted-objects] "  // added by Nyapicom
                          "[-P path-adjustment-interval] [-B dynamic-edge-size-base] [-A object-alignment(t|f)] "
                          "[-T build-time-limit] [-O outgoing x incoming] "

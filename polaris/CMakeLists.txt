@@ -187,6 +187,7 @@ set(POLARIS_HEADERS
         distance/distance_impl.h
         distance/primitive.h
         distance/simd_utils.h
+        distance/primitive_comparator.h
         datasets/fvecs.h
         datasets/ivecs.h
         datasets/tsv.h
@@ -204,7 +205,6 @@ set(POLARIS_HEADERS
         graph/ngt/object_space.h
         graph/ngt/object_space_repository.h
         graph/ngt/optimizer.h
-        graph/ngt/primitive_comparator.h
         graph/ngt/shared_memory_allocator.h
         graph/ngt/thread.h
         graph/ngt/tree.h

@@ -520,11 +520,9 @@ NGT::GraphIndex::constructObjectSpace(NGT::Property &prop) {
         case NGT::ObjectSpace::ObjectType::Uint8 :
             objectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
             break;
-#ifdef NGT_HALF_FLOAT
         case NGT::ObjectSpace::ObjectType::Float16 :
             objectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
             break;
-#endif
         default:
             stringstream msg;
             msg << "Invalid Object Type in the property. " << prop.objectType;
@@ -538,16 +536,12 @@ NGT::GraphIndex::constructObjectSpace(NGT::Property &prop) {
     case NGT::ObjectSpace::ObjectType::Uint8 :
       refinementObjectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
       break;
-#ifdef NGT_HALF_FLOAT
     case NGT::ObjectSpace::ObjectType::Float16 :
       refinementObjectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
       break;
-#endif
-#ifdef NGT_BFLOAT
     case NGT::ObjectSpace::ObjectType::Bfloat16 :
       refinementObjectSpace = new ObjectSpaceRepository<bfloat16, float>(dimension, typeid(bfloat16), prop.distanceType);
       break;
-#endif
     default:
       stringstream msg;
       msg << "Invalid Refinement Object Type in the property. " << prop.refinementObjectType;

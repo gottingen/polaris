@@ -141,7 +141,6 @@ NeighborhoodGraph::Search::jaccardUint8(NeighborhoodGraph &graph, NGT::SearchCon
     graph.searchReadOnlyGraph<PrimitiveComparator::JaccardUint8, DistanceCheckedSet>(sc, seeds);
 }
 
-#ifdef NGT_HALF_FLOAT
 
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
@@ -200,8 +199,6 @@ NeighborhoodGraph::Search::lorentzFloat16(NeighborhoodGraph &graph, NGT::SearchC
     graph.searchReadOnlyGraph<PrimitiveComparator::LorentzFloat16, DistanceCheckedSet>(sc, seeds);
 }
 
-#endif
-////
 
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloatForLargeDataset(NeighborhoodGraph &graph,
@@ -289,7 +286,6 @@ NeighborhoodGraph::Search::jaccardUint8ForLargeDataset(NeighborhoodGraph &graph,
     graph.searchReadOnlyGraph<PrimitiveComparator::JaccardUint8, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
-#ifdef NGT_HALF_FLOAT
 
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloat16ForLargeDataset(NeighborhoodGraph &graph,
@@ -355,7 +351,6 @@ NeighborhoodGraph::Search::lorentzFloat16ForLargeDataset(NeighborhoodGraph &grap
     graph.searchReadOnlyGraph<PrimitiveComparator::LorentzFloat16, DistanceCheckedSetForLargeDataset>(sc, seeds);
 }
 
-#endif
 
 #endif
 

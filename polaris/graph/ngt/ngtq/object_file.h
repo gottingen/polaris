@@ -63,12 +63,10 @@ class ObjectFile : public ArrayFile<NGT::Object> {
       genuineDimension = ArrayFile<NGT::Object>::_fileHead.recordSize / sizeof(uint8_t);
       objectSpace = new NGT::ObjectSpaceRepository<unsigned char, int>(genuineDimension, typeid(uint8_t), distanceType);
       break;
-#ifdef NGT_HALF_FLOAT
     case DataTypeFloat16:
       genuineDimension = ArrayFile<NGT::Object>::_fileHead.recordSize / sizeof(NGT::float16);
       objectSpace = new NGT::ObjectSpaceRepository<NGT::float16, float>(genuineDimension, typeid(NGT::float16), distanceType);
       break;
-#endif
     default:
       stringstream msg;
       msg << "ObjectFile::Invalid Object Type in the property. " << dataType;

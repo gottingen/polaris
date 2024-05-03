@@ -285,7 +285,6 @@ namespace NGT {
                                     return l2Uint8;
                             }
                             break;
-#ifdef NGT_HALF_FLOAT
                         case NGT::ObjectSpace::Float16:
                             switch (dtype) {
                                 case NGT::ObjectSpace::DistanceTypeNormalizedCosine :
@@ -312,7 +311,6 @@ namespace NGT {
                                     return l2Float16;
                             }
                             break;
-#endif
                         default:
                             NGTThrowException("NGT::Graph::Search: Not supported object type.");
                             break;
@@ -360,7 +358,6 @@ namespace NGT {
                                     return l2Uint8ForLargeDataset;
                             }
                             break;
-#ifdef NGT_HALF_FLOAT
                         case NGT::ObjectSpace::Float16:
                             switch (dtype) {
                                 case NGT::ObjectSpace::DistanceTypeNormalizedCosine :
@@ -386,7 +383,6 @@ namespace NGT {
                                 default:
                                     return l2Float16ForLargeDataset;
                             }
-#endif
                         default:
                             NGTThrowException("NGT::Graph::Search: Not supported object type.");
                             break;
@@ -426,7 +422,6 @@ namespace NGT {
                                       ObjectDistances &seeds);  // added by Nyapicom
             static void lorentzFloat(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
                                      ObjectDistances &seeds);  // added by Nyapicom
-#ifdef NGT_HALF_FLOAT
 
             static void l1Float16(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
 
@@ -452,7 +447,6 @@ namespace NGT {
                                         ObjectDistances &seeds);  // added by Nyapicom
             static void lorentzFloat16(NeighborhoodGraph &graph, NGT::SearchContainer &sc,
                                        ObjectDistances &seeds);  // added by Nyapicom
-#endif
 
             static void
             l1Uint8ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
@@ -497,8 +491,6 @@ namespace NGT {
             static void
             lorentzFloatForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
 
-#ifdef NGT_HALF_FLOAT
-
             static void
             l1Float16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
 
@@ -530,7 +522,6 @@ namespace NGT {
             static void
             lorentzFloat16ForLargeDataset(NeighborhoodGraph &graph, NGT::SearchContainer &sc, ObjectDistances &seeds);
 
-#endif
         };
 
 #endif

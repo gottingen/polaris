@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <polaris/graph/ngt/primitive_comparator.h>
+#include <polaris/distance/primitive_comparator.h>
 
 class ObjectSpace;
 
@@ -124,15 +124,9 @@ namespace NGT {
     enum ObjectType {
       ObjectTypeNone	= 0,
       Uint8		= 1,
-      Float		= 2
-#ifdef NGT_HALF_FLOAT
-      ,
-      Float16		= 3
-#endif
-#ifdef NGT_BFLOAT
-      ,
+      Float		= 2,
+      Float16		= 3,
       Bfloat16		= 5
-#endif
     };
 
 
@@ -155,9 +149,7 @@ namespace NGT {
     virtual void append(const float *data, size_t dataSize) = 0;
     virtual void append(const double *data, size_t dataSize) = 0;
     virtual void append(const uint8_t *data, size_t dataSize) = 0;
-#ifdef NGT_HALF_FLOAT
     virtual void append(const float16 *data, size_t dataSize) = 0;
-#endif
 
     virtual void copy(Object &objecta, Object &objectb) = 0;
 
@@ -171,9 +163,7 @@ namespace NGT {
     virtual Object *allocateNormalizedObject(const std::string &textLine, const std::string &sep) = 0;
     virtual Object *allocateNormalizedObject(const std::vector<double> &obj) = 0;
     virtual Object *allocateNormalizedObject(const std::vector<float> &obj) = 0;
-#ifdef NGT_HALF_FLOAT
     virtual Object *allocateNormalizedObject(const std::vector<float16> &obj) = 0;
-#endif
     virtual Object *allocateNormalizedObject(const std::vector<uint8_t> &obj) = 0;
     virtual Object *allocateNormalizedObject(const float *obj, size_t size) = 0;
     virtual PersistentObject *allocateNormalizedPersistentObject(const std::vector<double> &obj) = 0;
@@ -291,10 +281,8 @@ namespace NGT {
 	NGT::Serializer::writeAsText(os, (uint8_t*)ref, dimension);
       } else if (t == typeid(float)) {
 	NGT::Serializer::writeAsText(os, (float*)ref, dimension);
-#ifdef NGT_HALF_FLOAT
       } else if (t == typeid(float16)) {
 	NGT::Serializer::writeAsText(os, (float16*)ref, dimension);
-#endif
       } else if (t == typeid(double)) {
 	NGT::Serializer::writeAsText(os, (double*)ref, dimension);
       } else if (t == typeid(uint16_t)) {
@@ -318,10 +306,8 @@ namespace NGT {
 	NGT::Serializer::readAsText(is, (uint8_t*)ref, dimension);
       } else if (t == typeid(float)) {
 	NGT::Serializer::readAsText(is, (float*)ref, dimension);
-#ifdef NGT_HALF_FLOAT
       } else if (t == typeid(float16)) {
 	NGT::Serializer::readAsText(is, (float16*)ref, dimension);
-#endif
       } else if (t == typeid(double)) {
 	NGT::Serializer::readAsText(is, (double*)ref, dimension);
       } else if (t == typeid(uint16_t)) {
@@ -349,12 +335,10 @@ namespace NGT {
 	for (size_t d = 0; d < dimension; d++) {
 	  *(static_cast<float*>(ref) + d) = v[d];
 	}
-#ifdef NGT_HALF_FLOAT
       } else if (t == typeid(float16)) {
 	for (size_t d = 0; d < dimension; d++) {
 	  *(static_cast<float16*>(ref) + d) = v[d];
 	}
-#endif
       } else if (t == typeid(double)) {
 	for (size_t d = 0; d < dimension; d++) {
 	  *(static_cast<double*>(ref) + d) = v[d];

@@ -96,9 +96,7 @@ public:
 
     switch (objectType) {
     case 'f': creation.dataType = NGTQ::DataTypeFloat; break;
-#ifdef NGT_HALF_FLOAT
     case 'h': creation.dataType = NGTQ::DataTypeFloat16; break;
-#endif
     case 'c': creation.dataType = NGTQ::DataTypeUint8; break;
     default:
       std::stringstream msg;
@@ -126,9 +124,7 @@ public:
       char objectType = args.getChar("O", 'f');
       switch (objectType) {
       case 'f': creation.genuineDataType = ObjectFile::DataTypeFloat; break;
-#ifdef NGT_HALF_FLOAT
       case 'h': creation.genuineDataType = ObjectFile::DataTypeFloat16; break;
-#endif
       case 'c': creation.genuineDataType = ObjectFile::DataTypeUint8; break;
       default:
 	std::stringstream msg;

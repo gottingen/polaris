@@ -28,7 +28,7 @@
 #include <polaris/graph/ngt/common.h>
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
-#include <polaris/graph/ngt/primitive_comparator.h>
+#include <polaris/distance/primitive_comparator.h>
 
 class ObjectSpace;
 
@@ -175,14 +175,10 @@ namespace NGT {
                 objectSize = sizeof(uint8_t);
             } else if (ot == typeid(float)) {
                 objectSize = sizeof(float);
-#ifdef NGT_HALF_FLOAT
             } else if (ot == typeid(float16)) {
                 objectSize = sizeof(float16);
-#endif
-#ifdef NGT_BFLOAT
-                } else if (ot == typeid(bfloat16)) {
-                  objectSize = sizeof(bfloat16);
-#endif
+            } else if (ot == typeid(bfloat16)) {
+                objectSize = sizeof(bfloat16);
             } else {
                 std::stringstream msg;
                 msg << "ObjectSpace::constructor: Not supported type. " << ot.name();
@@ -283,11 +279,8 @@ namespace NGT {
 
         void append(const uint8_t *data, size_t dataSize) { ObjectRepository::append(data, dataSize); }
 
-#ifdef NGT_HALF_FLOAT
 
         void append(const float16 *data, size_t dataSize) { ObjectRepository::append(data, dataSize); }
-
-#endif
 
 
         size_t insert(Object *obj) { return ObjectRepository::insert(obj); }
@@ -327,57 +320,59 @@ namespace NGT {
         }
 
         float computeMaxMagnitude(NGT::ObjectID beginID = 1) {
-          float maxMag = 0.0;
-          ObjectRepository &rep = *this;
-          auto nOfThreads = omp_get_max_threads();
-          std::vector<float> maxm(nOfThreads, 0.0);
+            float maxMag = 0.0;
+            ObjectRepository &rep = *this;
+            auto nOfThreads = omp_get_max_threads();
+            std::vector<float> maxm(nOfThreads, 0.0);
 #pragma omp parallel for
-          for (size_t idx = beginID; idx < rep.size(); idx++) {
-        if (rep[idx] == 0) {
-          continue;
-        }
-        auto thdID = omp_get_thread_num();
-        auto object = getObject(*rep[idx]);
-        double mag = 0.0;
-        for (size_t i = 0; i < object.size() - 1; i++) {
-          mag += object[i] * object[i];
-        }
-        if (mag > maxm[thdID]) {
-          maxm[thdID] = mag;
-        }
-          }
-          for (int ti = 0; ti < nOfThreads; ti++) {
-        if (maxm[ti] > maxMag) {
-              maxMag = maxm[ti];
-        }
-          }
-          return maxMag;
-        }
-      void setMagnitude(float maxMag, NGT::Repository<void> &graphNodes, NGT::ObjectID beginID = 1) {
-          ObjectRepository &rep = *this;
-#pragma omp parallel for
-          for (size_t idx = beginID; idx < rep.size(); idx++) {
-        if (rep[idx] == 0) {
-          continue;
-        }
-        if (idx < graphNodes.size() && graphNodes[idx] != 0) {
-          continue;
-        }
-
-        auto object = getObject(*rep[idx]);
-
-        double mag = 0.0;
-        for (size_t i = 0; i < object.size() - 1; i++) {
-          mag += object[i] * object[i];
-        }
-        auto v = maxMag - static_cast<float>(mag);
-        if (v < 0.0) {
-              std::cerr << "Warning! magnitude is larger than the current max magnitude. " << idx << ":" << v << ":" << maxMag << ":" << static_cast<float>(mag) << std::endl;
-              v = 0.0;
+            for (size_t idx = beginID; idx < rep.size(); idx++) {
+                if (rep[idx] == 0) {
+                    continue;
+                }
+                auto thdID = omp_get_thread_num();
+                auto object = getObject(*rep[idx]);
+                double mag = 0.0;
+                for (size_t i = 0; i < object.size() - 1; i++) {
+                    mag += object[i] * object[i];
+                }
+                if (mag > maxm[thdID]) {
+                    maxm[thdID] = mag;
+                }
             }
-        object.back() = sqrt(v);
-        setObject(*rep[idx], object);
-          }
+            for (int ti = 0; ti < nOfThreads; ti++) {
+                if (maxm[ti] > maxMag) {
+                    maxMag = maxm[ti];
+                }
+            }
+            return maxMag;
+        }
+
+        void setMagnitude(float maxMag, NGT::Repository<void> &graphNodes, NGT::ObjectID beginID = 1) {
+            ObjectRepository &rep = *this;
+#pragma omp parallel for
+            for (size_t idx = beginID; idx < rep.size(); idx++) {
+                if (rep[idx] == 0) {
+                    continue;
+                }
+                if (idx < graphNodes.size() && graphNodes[idx] != 0) {
+                    continue;
+                }
+
+                auto object = getObject(*rep[idx]);
+
+                double mag = 0.0;
+                for (size_t i = 0; i < object.size() - 1; i++) {
+                    mag += object[i] * object[i];
+                }
+                auto v = maxMag - static_cast<float>(mag);
+                if (v < 0.0) {
+                    std::cerr << "Warning! magnitude is larger than the current max magnitude. " << idx << ":" << v
+                              << ":" << maxMag << ":" << static_cast<float>(mag) << std::endl;
+                    v = 0.0;
+                }
+                object.back() = sqrt(v);
+                setObject(*rep[idx], object);
+            }
         }
 
 
@@ -454,7 +449,6 @@ namespace NGT {
             return allocatedObject;
         }
 
-#ifdef NGT_HALF_FLOAT
 
         Object *allocateNormalizedObject(const std::vector<float16> &obj) {
             Object *allocatedObject = ObjectRepository::allocateObject(obj);
@@ -464,7 +458,6 @@ namespace NGT {
             return allocatedObject;
         }
 
-#endif
 
         Object *allocateNormalizedObject(const std::vector<uint8_t> &obj) {
             Object *allocatedObject = ObjectRepository::allocateObject(obj);
@@ -498,8 +491,6 @@ namespace NGT {
             return allocatedObject;
         }
 
-#ifdef NGT_HALF_FLOAT
-
         PersistentObject *allocateNormalizedPersistentObject(const std::vector<float16> &obj) {
             PersistentObject *allocatedObject = ObjectRepository::allocatePersistentObject(obj);
             if (normalization) {
@@ -508,7 +499,6 @@ namespace NGT {
             return allocatedObject;
         }
 
-#endif
 
         PersistentObject *allocateNormalizedPersistentObject(const std::vector<uint8_t> &obj) {
             PersistentObject *allocatedObject = ObjectRepository::allocatePersistentObject(obj);
@@ -540,13 +530,11 @@ namespace NGT {
                 for (size_t i = 0; i < getDimension(); i++) {
                     os << optr[i] << " ";
                 }
-#ifdef NGT_HALF_FLOAT
             } else if (t == typeid(float16)) {
                 float16 *optr = reinterpret_cast<float16 *>(&object[0]);
                 for (size_t i = 0; i < getDimension(); i++) {
                     os << optr[i] << " ";
                 }
-#endif
             } else {
                 os << " not implement for the type.";
             }

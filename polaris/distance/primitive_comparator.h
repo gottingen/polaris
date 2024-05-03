@@ -17,19 +17,13 @@
 #pragma once
 
 #include <polaris/core/defines.h>
-
-#if defined(NGT_NO_AVX)
-#warning "*** SIMD is *NOT* available! ***"
-#else
 #include <immintrin.h>
-#endif
 
 namespace NGT {
 
   class MemoryCache {
   public:
     inline static void prefetch(unsigned char *ptr, const size_t byteSizeOfObject) {
-#if !defined(NGT_NO_AVX)
       switch((byteSizeOfObject - 1) >> 6) {
       default:
       case 28: _mm_prefetch(ptr, _MM_HINT_T0); ptr += 64;
@@ -63,12 +57,8 @@ namespace NGT {
       case 0: _mm_prefetch(ptr, _MM_HINT_T0); ptr += 64;
 	break;
       }
-#endif
     }
     inline static void *alignedAlloc(const size_t allocSize) {
-#ifdef NGT_NO_AVX
-      return new uint8_t[allocSize];
-#else
 #if defined(NGT_AVX512)
       size_t alignment = 64;
       uint64_t mask = 0xFFFFFFFFFFFFFFC0;
@@ -85,12 +75,8 @@ namespace NGT {
       *p++ = 0xAB;
       while (p != ptr) *p++ = 0xCD;
       return ptr;
-#endif
     }
     inline static void alignedFree(void *ptr) {
-#ifdef NGT_NO_AVX
-      delete[] static_cast<uint8_t*>(ptr);
-#else
       uint8_t *p = static_cast<uint8_t*>(ptr);
       p--;
       while (*p == 0xCD) p--;
@@ -98,7 +84,6 @@ namespace NGT {
 	NGTThrowException("MemoryCache::alignedFree: Fatal Error! Cannot find allocated address.");
       }
       delete[] p;
-#endif
     }
   };
 
@@ -108,47 +93,6 @@ namespace NGT {
     static double absolute(double v) { return fabs(v); }
     static int absolute(int v) { return abs(v); }
 
-#if defined(NGT_NO_AVX)
-    template <typename OBJECT_TYPE, typename COMPARE_TYPE>
-    inline static double compareL2(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
-      const OBJECT_TYPE *last = a + size;
-      const OBJECT_TYPE *lastgroup = last - 3;
-      COMPARE_TYPE diff0, diff1, diff2, diff3;
-      double d = 0.0;
-      while (a < lastgroup) {
-	diff0 = static_cast<COMPARE_TYPE>(a[0] - b[0]);
-	diff1 = static_cast<COMPARE_TYPE>(a[1] - b[1]);
-	diff2 = static_cast<COMPARE_TYPE>(a[2] - b[2]);
-	diff3 = static_cast<COMPARE_TYPE>(a[3] - b[3]);
-	d += diff0 * diff0 + diff1 * diff1 + diff2 * diff2 + diff3 * diff3;
-	a += 4;
-	b += 4;
-      }
-      while (a < last) {
-	diff0 = static_cast<COMPARE_TYPE>(*a++ - *b++);
-	d += diff0 * diff0;
-      }
-      return sqrt(static_cast<double>(d));
-    }
-
-    inline static double compareL2(const uint8_t *a, const uint8_t *b, size_t size) {
-      return compareL2<uint8_t, int>(a, b, size);
-    }
-
-    inline static double compareL2(const float *a, const float *b, size_t size) {
-      return compareL2<float, double>(a, b, size);
-    }
-#ifdef NGT_HALF_FLOAT
-    inline static double compareL2(const float16 *a, const float16 *b, size_t size) {
-      return compareL2<float16, double>(a, b, size);
-    }
-#endif
-#ifdef NGT_BFLOAT
-    inline static double compareL2(const bfloat16 *a, const bfloat16 *b, size_t size) {
-      return compareL2<bfloat16, float>(a, b, size);
-    }
-#endif
-#else
     inline static double compareL2(const float *a, const float *b, size_t size) {
       const float *last = a + size;
 #if defined(NGT_AVX512)
@@ -206,7 +150,6 @@ namespace NGT {
       return sqrt(s);
     }
 
-#ifdef NGT_HALF_FLOAT
     inline static double compareL2(const float16 *a, const float16 *b, size_t size) {
       const float16 *last = a + size;
 #if defined(NGT_AVX512)
@@ -259,9 +202,7 @@ namespace NGT {
       return sqrt(s);
       //return s;
     }
-#endif
 
-#ifdef NGT_BFLOAT
     inline static double compareL2(const bfloat16 *a, const bfloat16 *b, size_t size) {
       const bfloat16 *last = a + size;
       __m512 sum512 = _mm512_setzero_ps();
@@ -281,7 +222,6 @@ namespace NGT {
       //return sqrt(d);
       return d;
     }
-#endif
 
     inline static double compareL2(const unsigned char *a, const unsigned char *b, size_t size) {
       __m128 sum = _mm_setzero_ps();
@@ -311,8 +251,6 @@ namespace NGT {
     }
 
 
-#endif
-
     template <typename OBJECT_TYPE>
     inline static double compareNormalizedL2(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
       double v = 2.0 - 2.0 * compareDotProduct(a, b, size);
@@ -324,47 +262,6 @@ namespace NGT {
     }
 
 
-#if defined(NGT_NO_AVX)
-    template <typename OBJECT_TYPE, typename COMPARE_TYPE>
-    static double compareL1(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
-      const OBJECT_TYPE *last = a + size;
-      const OBJECT_TYPE *lastgroup = last - 3;
-      COMPARE_TYPE diff0, diff1, diff2, diff3;
-      double d = 0.0;
-      while (a < lastgroup) {
-	diff0 = (COMPARE_TYPE)(a[0] - b[0]);
-	diff1 = (COMPARE_TYPE)(a[1] - b[1]);
-	diff2 = (COMPARE_TYPE)(a[2] - b[2]);
-	diff3 = (COMPARE_TYPE)(a[3] - b[3]);
-	d += absolute(diff0) + absolute(diff1) + absolute(diff2) + absolute(diff3);
-	a += 4;
-	b += 4;
-      }
-      while (a < last) {
-	diff0 = (COMPARE_TYPE)*a++ - (COMPARE_TYPE)*b++;
-	d += absolute(diff0);
-      }
-      return d;
-    }
-
-    inline static double compareL1(const uint8_t *a, const uint8_t *b, size_t size) {
-      return compareL1<uint8_t, int>(a, b, size);
-    }
-
-    inline static double compareL1(const float *a, const float *b, size_t size) {
-      return compareL1<float, double>(a, b, size);
-    }
-#ifdef NGT_HALF_FLOAT
-    inline static double compareL1(const float16 *a, const float16 *b, size_t size) {
-      return compareL1<float16, double>(a, b, size);
-    }
-#endif
-#ifdef NGT_BFLOAT
-    inline static double compareL1(const bfloat16 *a, const bfloat16 *b, size_t size) {
-      return compareL1<bfloat16, float>(a, b, size);
-    }
-#endif
-#else
     inline static double compareL1(const float *a, const float *b, size_t size) {
       __m256 sum = _mm256_setzero_ps();
       const float *last = a + size;
@@ -386,7 +283,6 @@ namespace NGT {
       }
       return s;
     }
-#ifdef NGT_HALF_FLOAT
     inline static double compareL1(const float16 *a, const float16 *b, size_t size) {
       __m256 sum = _mm256_setzero_ps();
       const float16 *last = a + size;
@@ -409,12 +305,9 @@ namespace NGT {
       }
       return s;
     }
-#endif
-#ifdef NGT_BFLOAT
     inline static double compareL1(const bfloat16 *a, const bfloat16 *b, size_t size) {
       abort();
     }
-#endif
     inline static double compareL1(const unsigned char *a, const unsigned char *b, size_t size) {
       __m128 sum = _mm_setzero_ps();
       const unsigned char *last = a + size;
@@ -439,9 +332,8 @@ namespace NGT {
       }
       return s;
     }
-#endif
 
-#if defined(NGT_NO_AVX) || !defined(__POPCNT__)
+#if !defined(__POPCNT__)
     inline static double popCount(uint32_t x) {
       x = (x & 0x55555555) + (x >> 1 & 0x55555555);
       x = (x & 0x33333333) + (x >> 2 & 0x33333333);
@@ -481,7 +373,7 @@ namespace NGT {
     }
 #endif
 
-#if defined(NGT_NO_AVX) || !defined(__POPCNT__)
+#if !defined(__POPCNT__)
     template <typename OBJECT_TYPE>
       inline static double compareJaccardDistance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
       const uint32_t *last = reinterpret_cast<const uint32_t*>(a + size);
@@ -524,21 +416,15 @@ namespace NGT {
       abort();
     }
 
-#ifdef NGT_HALF_FLOAT
     inline static double compareSparseJaccardDistance(const float16 *a, const float16 *b, size_t size) {
       std::cerr << "compareSparseJaccardDistance: Not implemented." << std::endl;
       abort();
     }
-#endif
 
-#ifdef NGT_BFLOAT
     inline static double compareSparseJaccardDistance(const bfloat16 *a, const bfloat16 *b, size_t size) {
       std::cerr << "compareSparseJaccardDistance: Not implemented." << std::endl;
       abort();
     }
-#endif
-
-
 
     inline static double compareSparseJaccardDistance(const float *a, const float *b, size_t size) {
       size_t loca = 0;
@@ -561,32 +447,6 @@ namespace NGT {
       return 1.0 - static_cast<double>(count) / static_cast<double>(loca + locb - count);
     }
 
-#if defined(NGT_NO_AVX)
-   template <typename OBJECT_TYPE>
-    inline static double compareDotProduct(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
-      double sum = 0.0;
-      for (size_t loc = 0; loc < size; loc++) {
-	sum += static_cast<float>(a[loc]) * static_cast<float>(b[loc]);
-      }
-      return sum;
-    }
-
-    template <typename OBJECT_TYPE>
-    inline static double compareCosine(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
-      double normA = 0.0;
-      double normB = 0.0;
-      double sum = 0.0;
-      for (size_t loc = 0; loc < size; loc++) {
-	normA += static_cast<double>(a[loc]) * static_cast<double>(a[loc]);
-	normB += static_cast<double>(b[loc]) * static_cast<double>(b[loc]);
-	sum += static_cast<double>(a[loc]) * static_cast<double>(b[loc]);
-      }
-
-      double cosine = sum / sqrt(normA * normB);
-
-      return cosine;
-    }
-#else
     inline static double compareDotProduct(const float *a, const float *b, size_t size) {
       const float *last = a + size;
 #if defined(NGT_AVX512)
@@ -620,7 +480,6 @@ namespace NGT {
       return s;
     }
 
-#ifdef NGT_HALF_FLOAT
     inline static double compareDotProduct(const float16 *a, const float16 *b, size_t size) {
       const float16 *last = a + size;
 #if defined(NGT_AVX512)
@@ -661,13 +520,10 @@ namespace NGT {
       double s = static_cast<double>(f[0]) + static_cast<double>(f[1]) + static_cast<double>(f[2]) + static_cast<double>(f[3]);
       return s;
     }
-#endif
 
-#ifdef NGT_BFLOAT
     inline static double compareDotProduct(const bfloat16 *a, const bfloat16 *b, size_t size) {
       abort();
     }
-#endif
 
     inline static double compareDotProduct(const unsigned char *a, const unsigned char *b, size_t size) {
       double sum = 0.0;
@@ -744,7 +600,6 @@ namespace NGT {
       return cosine;
     }
 
-#ifdef NGT_HALF_FLOAT
     inline static double compareCosine(const float16 *a, const float16 *b, size_t size) {
 
       const float16 *last = a + size;
@@ -821,13 +676,10 @@ namespace NGT {
       double cosine = s / sqrt(na * nb);
       return cosine;
     }
-#endif
 
-#ifdef NGT_BFLOAT
     inline static double compareCosine(const bfloat16 *a, const bfloat16 *b, size_t size) {
       abort();
     }
-#endif
 
     inline static double compareCosine(const unsigned char *a, const unsigned char *b, size_t size) {
       double normA = 0.0;
@@ -844,8 +696,6 @@ namespace NGT {
       return cosine;
     }
 
-
-#endif    // #if defined(NGT_NO_AVX)
 
     template <typename OBJECT_TYPE>
     inline static double compareAngleDistance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
@@ -1008,7 +858,6 @@ namespace NGT {
       }
     };
 
-#ifdef NGT_HALF_FLOAT
     class SparseJaccardFloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
@@ -1080,8 +929,6 @@ namespace NGT {
 	return PrimitiveComparator::compareLorentzDistance((const float16*)a, (const float16*)b, size);
       }
     };
-#endif
-#ifdef NGT_BFLOAT
     class SparseJaccardBfloat16 {
     public:
       inline static double compare(const void *a, const void *b, size_t size) {
@@ -1153,7 +1000,6 @@ namespace NGT {
 	NGTThrowException("Not supported.");
       }
     };
-#endif
 
 
 };
