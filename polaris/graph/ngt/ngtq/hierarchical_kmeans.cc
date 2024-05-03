@@ -63,7 +63,7 @@ void QBG::HierarchicalKmeans::initialize() {
 }
 
 #ifdef NGTQ_QBG
-void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG::Index &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, polaris::Clustering &clustering) {
+void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG::QbgIndex &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, polaris::Clustering &clustering) {
   auto &quantizer = static_cast<NGTQ::QuantizerInstance<uint8_t>&>(index.getQuantizer());
   auto &objectSpace = quantizer.globalCodebookIndex.getObjectSpace();
   QBGObjectList &objectList = quantizer.objectList;
@@ -119,7 +119,7 @@ void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG
 	abort();
       }
       {
-	std::ofstream of(prefix + QBG::Index::getSecondCentroidSuffix());
+	std::ofstream of(prefix + QBG::QbgIndex::getSecondCentroidSuffix());
 	extractCentroids(of, nodes);
       }
       std::vector<uint32_t> qNodeIDs;
@@ -132,7 +132,7 @@ void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG
       hierarchicalKmeansWithNumberOfClustersInParallel(numOfTotalBlobs, numOfObjects, numOfTotalClusters,
 						       objectList, objectSpace, nodes, initMode);
       {
-	std::ofstream of(prefix + QBG::Index::get3rdTo2ndSuffix());
+	std::ofstream of(prefix + QBG::QbgIndex::get3rdTo2ndSuffix());
 	extractBtoQIndex(of, nodes, qNodeIDs);
       }
     }
@@ -140,7 +140,7 @@ void QBG::HierarchicalKmeans::treeBasedTopdownClustering(std::string prefix, QBG
 
 }
 
-void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Index &index) {
+void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::QbgIndex &index) {
   auto &quantizer = static_cast<NGTQ::QuantizerInstance<uint8_t>&>(index.getQuantizer());
   auto &objectSpace = quantizer.globalCodebookIndex.getObjectSpace();
   {
@@ -292,15 +292,15 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
 	}
       }
       std::cerr << "save the 3rd to the 2nd index..." << std::endl;
-      polaris::Clustering::saveVector(prefix + QBG::Index::get3rdTo2ndSuffix(), bqindex);
+      polaris::Clustering::saveVector(prefix + QBG::QbgIndex::get3rdTo2ndSuffix(), bqindex);
     }
 
     std::cerr << "save quantization centroid" << std::endl;
-    polaris::Clustering::saveClusters(prefix + QBG::Index::getSecondCentroidSuffix(), secondClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::QbgIndex::getSecondCentroidSuffix(), secondClusters);
 
     std::cerr << "save the third centroid..." << std::endl;
     auto skipEmptyClusters = true;
-    polaris::Clustering::saveClusters(prefix + QBG::Index::getThirdCentroidSuffix(), thirdFlatClusters, skipEmptyClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::QbgIndex::getThirdCentroidSuffix(), thirdFlatClusters, skipEmptyClusters);
     {
       std::vector<size_t> cindex(numOfObjects);
       size_t idx = 0;
@@ -315,7 +315,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
 	idx++;
       }
       std::cerr << "save index... " << cindex.size() << std::endl;
-      polaris::Clustering::saveVector(prefix + QBG::Index::getObjTo3rdSuffix(), cindex);
+      polaris::Clustering::saveVector(prefix + QBG::QbgIndex::getObjTo3rdSuffix(), cindex);
     }
     std::cerr << "end of clustering" << std::endl;
     return;
@@ -323,7 +323,7 @@ void QBG::HierarchicalKmeans::threeLayerClustering(std::string prefix, QBG::Inde
 
 }
 
-void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::Index &index) {
+void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::QbgIndex &index) {
   auto &quantizer = static_cast<NGTQ::QuantizerInstance<uint8_t>&>(index.getQuantizer());
   auto &objectSpace = quantizer.globalCodebookIndex.getObjectSpace();
   {
@@ -464,7 +464,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
     }
     timer.stop();
     std::cerr << "clustering for the second. time=" << timer << " vmsize=" << polaris::Common::getProcessVmSize() << std::endl;
-    polaris::Clustering::saveClusters(prefix + QBG::Index::getSecondCentroidSuffix(), secondClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::QbgIndex::getSecondCentroidSuffix(), secondClusters);
 
     timer.start();
     std::vector<polaris::Clustering::Cluster> thirdPermutedClusters;
@@ -486,7 +486,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       }
     }
     std::cerr << "save index... " << cindex.size() << std::endl;
-    polaris::Clustering::saveVector(prefix + QBG::Index::getObjTo3rdSuffix(), cindex);
+    polaris::Clustering::saveVector(prefix + QBG::QbgIndex::getObjTo3rdSuffix(), cindex);
 
     std::vector<size_t> bqindex(thirdPermutedClusters.size());
     for (size_t idx1 = 0; idx1 < secondClusters.size(); idx1++) {
@@ -495,9 +495,9 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
       }
     }
     std::cerr << "save bqindex..." << std::endl;
-    polaris::Clustering::saveVector(prefix + QBG::Index::get3rdTo2ndSuffix(), bqindex);
+    polaris::Clustering::saveVector(prefix + QBG::QbgIndex::get3rdTo2ndSuffix(), bqindex);
     std::cerr << "save the third  centroid" << std::endl;
-    polaris::Clustering::saveClusters(prefix + QBG::Index::getThirdCentroidSuffix(), thirdPermutedClusters);
+    polaris::Clustering::saveClusters(prefix + QBG::QbgIndex::getThirdCentroidSuffix(), thirdPermutedClusters);
 
   }
 
@@ -505,7 +505,7 @@ void QBG::HierarchicalKmeans::twoPlusLayerClustering(std::string prefix, QBG::In
   return;
 }
 
-void QBG::HierarchicalKmeans::multiLayerClustering(QBG::Index &index, std::string prefix, std::string objectIDsFile) {
+void QBG::HierarchicalKmeans::multiLayerClustering(QBG::QbgIndex &index, std::string prefix, std::string objectIDsFile) {
   polaris::Clustering::ClusteringType clusteringType = polaris::Clustering::ClusteringTypeKmeansWithoutNGT;
 
   uint32_t rootID = 0;
@@ -556,16 +556,16 @@ void QBG::HierarchicalKmeans::multiLayerClustering(QBG::Index &index, std::strin
     objectCount = extractCentroids(std::cout, nodes);
   } else {
     {
-      std::ofstream of(prefix + QBG::Index::getThirdCentroidSuffix());
+      std::ofstream of(prefix + QBG::QbgIndex::getThirdCentroidSuffix());
       objectCount = extractCentroids(of, nodes);
     }
     {
-      std::ofstream of(prefix + QBG::Index::getObjTo3rdSuffix());
+      std::ofstream of(prefix + QBG::QbgIndex::getObjTo3rdSuffix());
       extractIndex(of, nodes, numOfObjects);
     }
     if (numOfFirstObjects > 0) {
-      std::ofstream btoqof(prefix + QBG::Index::get3rdTo2ndSuffix());
-      std::ofstream qcof(prefix + QBG::Index::getSecondCentroidSuffix());
+      std::ofstream btoqof(prefix + QBG::QbgIndex::get3rdTo2ndSuffix());
+      std::ofstream qcof(prefix + QBG::QbgIndex::getSecondCentroidSuffix());
       extractBtoQAndQCentroid(btoqof, qcof, nodes, numOfThirdClusters);
     }
     if (numOfRandomObjects > 0) {
@@ -591,7 +591,7 @@ void QBG::HierarchicalKmeans::clustering(std::string indexPath, std::string pref
 	    << ",TC:" << numOfThirdClusters << ":TO:" << numOfThirdObjects << ",O:" << numOfObjects << std::endl;
 
   bool readOnly = false;
-  QBG::Index index(indexPath, readOnly);
+  QBG::QbgIndex index(indexPath, readOnly);
   if (index.getQuantizer().objectList.size() <= 1) {
     POLARIS_THROW_EX("No objects in the index.");
   }
@@ -610,11 +610,11 @@ void QBG::HierarchicalKmeans::clustering(std::string indexPath, std::string pref
       }
       if (prefix.empty()) {
 	std::cerr << "Prefix is not specified." << std::endl;
-	prefix = indexPath + "/" + QBG::Index::getWorkspaceName();
+	prefix = indexPath + "/" + QBG::QbgIndex::getWorkspaceName();
 	try {
-	  polaris::Index::mkdir(prefix);
+	  polaris::NgtIndex::mkdir(prefix);
 	} catch(...) {}
-	prefix +="/" + QBG::Index::getHierarchicalClusteringPrefix();
+	prefix +="/" + QBG::QbgIndex::getHierarchicalClusteringPrefix();
 	std::cerr << prefix << " is used" << std::endl;
       }
       auto &quantizer = static_cast<NGTQ::QuantizerInstance<uint8_t>&>(index.getQuantizer());

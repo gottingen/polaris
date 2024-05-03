@@ -76,7 +76,7 @@ class ObjectFile : public ArrayFile<polaris::Object> {
     return true;
   }
 
-  bool open(const std::string &file, DataType datat, polaris::Index::Property::DistanceType distt, size_t pseudoDim) {
+  bool open(const std::string &file, DataType datat, polaris::NgtIndex::Property::DistanceType distt, size_t pseudoDim) {
     dataType = datat;
     fileName = file;
     distanceType = distt;

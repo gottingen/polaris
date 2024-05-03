@@ -20,7 +20,7 @@
 #include <polaris/graph/ngt/graph_optimizer.h>
 
 namespace QBG {
-  class Index;
+  class QbgIndex;
   class BuildParameters;
   class HierarchicalClusteringParameters;
   class OptimizationParameters;
@@ -1000,7 +1000,7 @@ namespace QBG {
 
     }
 
-    static float optimizeEpsilon(polaris::Index &index, size_t beginID, size_t endID,
+    static float optimizeEpsilon(polaris::NgtIndex &index, size_t beginID, size_t endID,
 				size_t nOfObjects,
 				QBGObjectList &objectList, float expectedRecall,
 				polaris::ObjectSpace &objectSpace) {
@@ -1081,12 +1081,12 @@ namespace QBG {
 
       polaris::Property prop;
       prop.dimension = objectSpace.getDimension();
-      prop.objectType = polaris::Index::Property::ObjectType::Float;
+      prop.objectType = polaris::NgtIndex::Property::ObjectType::Float;
       prop.distanceType = polaris::Property::DistanceType::DistanceTypeL2;
       prop.edgeSizeForCreation = 10;
       prop.edgeSizeForSearch = 40;
 
-      polaris::Index anngIndex(prop);
+      polaris::NgtIndex anngIndex(prop);
       for (size_t cidx = 0; cidx < clusters.size(); cidx++) {
 	if (cidx % 100000 == 0) {
 	  std::cerr << "# of appended cluster objects=" << cidx << std::endl;
@@ -1120,14 +1120,14 @@ namespace QBG {
 	graphOptimizer.set(numOfOutgoingEdges, numOfIncomingEdges, numOfQueries, numOfResultantObjects);
 	graphOptimizer.execute(anng, onng);
       }
-      polaris::Index onngIndex(onng);
-      polaris::Index &index = onngIndex;
+      polaris::NgtIndex onngIndex(onng);
+      polaris::NgtIndex &index = onngIndex;
       const string com = "rm -rf " + tmpDir;
       if (system(com.c_str()) == -1) {
 	std::cerr << "Warning. remove is failed. " << com << std::endl;
       }
 #else
-      polaris::Index &index = anngIndex;
+      polaris::NgtIndex &index = anngIndex;
 #endif
       std::cerr << "assign with NGT..." << std::endl;
       endID++;
@@ -1206,7 +1206,7 @@ namespace QBG {
     }
 
 #ifdef NGTQ_QBG
-    void treeBasedTopdownClustering(std::string prefix, QBG::Index &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, polaris::Clustering &clustering);
+    void treeBasedTopdownClustering(std::string prefix, QBG::QbgIndex &index, uint32_t rootID, std::vector<float> &object, std::vector<HKNode*> &nodes, polaris::Clustering &clustering);
 
     static void twoLayerClustering(std::vector<std::vector<float>> vectors,
 					size_t numOfClusters,
@@ -1267,11 +1267,11 @@ namespace QBG {
       std::cerr << "subclustering for the second. time=" << timer << std::endl;
     }
 
-    void threeLayerClustering(std::string prefix, QBG::Index &index);
+    void threeLayerClustering(std::string prefix, QBG::QbgIndex &index);
 
-    void twoPlusLayerClustering(std::string prefix, QBG::Index &index);
+    void twoPlusLayerClustering(std::string prefix, QBG::QbgIndex &index);
 
-    void multiLayerClustering(QBG::Index &index, std::string prefix, std::string objectIDsFile);
+    void multiLayerClustering(QBG::QbgIndex &index, std::string prefix, std::string objectIDsFile);
 
     void clustering(std::string indexPath, std::string prefix = "", std::string objectIDsFile = "");
 #endif

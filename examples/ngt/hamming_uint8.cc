@@ -28,9 +28,9 @@ main(int argc, char **argv) {
         polaris::Property property;
         property.dimension = bitSize / 8;
         property.objectType = polaris::ObjectSpace::ObjectType::Uint8;
-        property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
-        polaris::Index::create(indexPath, property);
-        polaris::Index index(indexPath);
+        property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
+        polaris::NgtIndex::create(indexPath, property);
+        polaris::NgtIndex index(indexPath);
         ifstream is(objectFile);
         string line;
         while (getline(is, line)) {
@@ -64,7 +64,7 @@ main(int argc, char **argv) {
 
     // nearest neighbor search
     try {
-        polaris::Index index(indexPath);
+        polaris::NgtIndex index(indexPath);
         polaris::Property property;
         index.getProperty(property);
         ifstream is(queryFile);

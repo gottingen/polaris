@@ -69,7 +69,7 @@ namespace NGTQG {
     class QuantizedGraphRepository : public std::vector<QuantizedNode> {
         typedef std::vector<QuantizedNode> PARENT;
     public:
-        QuantizedGraphRepository(NGTQ::Index &quantizedIndex) : numOfSubspaces(
+        QuantizedGraphRepository(NGTQ::NgtqIndex &quantizedIndex) : numOfSubspaces(
                 quantizedIndex.getQuantizer().property.localDivisionNo) {}
 
         ~QuantizedGraphRepository() {}
@@ -82,14 +82,14 @@ namespace NGTQG {
             return PARENT::at(id).ids;
         }
 
-        void construct(polaris::Index &ngtindex, NGTQ::Index &quantizedIndex, size_t maxNoOfEdges) {
+        void construct(polaris::NgtIndex &ngtindex, NGTQ::NgtqIndex &quantizedIndex, size_t maxNoOfEdges) {
             polaris::GraphAndTreeIndex &index = static_cast<polaris::GraphAndTreeIndex &>(ngtindex.getIndex());
             polaris::NeighborhoodGraph &graph = static_cast<polaris::NeighborhoodGraph &>(index);
             polaris::GraphRepository &graphRepository = graph.repository;
             construct(graphRepository, quantizedIndex, maxNoOfEdges);
         }
 
-        void construct(polaris::GraphRepository &graphRepository, NGTQ::Index &quantizedIndex, size_t maxNoOfEdges) {
+        void construct(polaris::GraphRepository &graphRepository, NGTQ::NgtqIndex &quantizedIndex, size_t maxNoOfEdges) {
             NGTQ::InvertedIndexEntry<uint16_t> invertedIndexObjects(numOfSubspaces);
             quantizedIndex.getQuantizer().extractInvertedIndexObject(invertedIndexObjects);
             quantizedIndex.getQuantizer().eraseInvertedIndexObject();
@@ -202,10 +202,10 @@ namespace NGTQG {
     };
 
 
-    class Index : public polaris::Index {
+    class NgtqgIndex : public polaris::NgtIndex {
     public:
-        Index(const std::string &indexPath, size_t maxNoOfEdges = 128, bool rdOnly = false) :
-                polaris::Index(indexPath, rdOnly, polaris::Index::OpenTypeNone),
+        NgtqgIndex(const std::string &indexPath, size_t maxNoOfEdges = 128, bool rdOnly = false) :
+                polaris::NgtIndex(indexPath, rdOnly, polaris::NgtIndex::OpenTypeNone),
                 readOnly(rdOnly),
                 path(indexPath),
                 quantizedIndex(indexPath + "/qg", rdOnly),
@@ -265,7 +265,7 @@ namespace NGTQG {
             }
             polaris::NeighborhoodGraph::UncheckedSet unchecked;
             polaris::NeighborhoodGraph::DistanceCheckedSet distanceChecked(
-                    polaris::Index::getObjectSpace().getRepository().size());
+                    polaris::NgtIndex::getObjectSpace().getRepository().size());
             polaris::NeighborhoodGraph::ResultSet results;
 
             graph.setupDistances(sc, seeds, polaris::PrimitiveComparator::L2Float::compare);
@@ -334,8 +334,8 @@ namespace NGTQG {
                 qresults.moveFrom(results);
                 if (sc.resultExpansion >= 1.0) {
                     {
-                        polaris::ObjectRepository &objectRepository = polaris::Index::getObjectSpace().getRepository();
-                        polaris::ObjectSpace::Comparator &comparator = polaris::Index::getObjectSpace().getComparator();
+                        polaris::ObjectRepository &objectRepository = polaris::NgtIndex::getObjectSpace().getRepository();
+                        polaris::ObjectSpace::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
                         for (auto i = qresults.begin(); i != qresults.end(); ++i) {
 #ifdef NGTQG_PREFETCH
                             if (static_cast<size_t>(distance(qresults.begin(), i + 10)) < qresults.size()) {
@@ -361,8 +361,8 @@ namespace NGTQG {
             } else {
                 if (sc.resultExpansion >= 1.0) {
                     {
-                        polaris::ObjectRepository &objectRepository = polaris::Index::getObjectSpace().getRepository();
-                        polaris::ObjectSpace::Comparator &comparator = polaris::Index::getObjectSpace().getComparator();
+                        polaris::ObjectRepository &objectRepository = polaris::NgtIndex::getObjectSpace().getRepository();
+                        polaris::ObjectSpace::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
                         while (!sc.workingResult.empty()) { sc.workingResult.pop(); }
                         while (!results.empty()) {
                             polaris::ObjectDistance obj = results.top();
@@ -406,7 +406,7 @@ namespace NGTQG {
 
         void search(NGTQG::SearchQuery &sq) {
             polaris::GraphAndTreeIndex &index = static_cast<polaris::GraphAndTreeIndex &>(getIndex());
-            polaris::Object *query = Index::allocateQuery(sq);
+            polaris::Object *query = NgtqgIndex::allocateQuery(sq);
             try {
                 NGTQG::SearchContainer sc(sq, *query);
                 sc.distanceComputationCount = 0;
@@ -417,7 +417,7 @@ namespace NGTQG {
                         index.getSeedsFromTree(sc, seeds);
                     } catch (...) {}
                 }
-                NGTQG::Index::search(static_cast<polaris::GraphIndex &>(index), sc, seeds);
+                NGTQG::NgtqgIndex::search(static_cast<polaris::GraphIndex &>(index), sc, seeds);
                 sq.workingResult = std::move(sc.workingResult);
                 sq.distanceComputationCount = sc.distanceComputationCount;
                 sq.visitCount = sc.visitCount;
@@ -444,7 +444,7 @@ namespace NGTQG {
 
         static void buildQuantizedGraph(const std::string indexPath, size_t maxNumOfEdges = 128) {
             const std::string qgPath(indexPath + "/qg");
-            NGTQ::Index quantizedIndex(qgPath, false);
+            NGTQ::NgtqIndex quantizedIndex(qgPath, false);
             NGTQG::QuantizedGraphRepository quantizedGraph(quantizedIndex);
             {
                 struct stat st;
@@ -467,7 +467,7 @@ namespace NGTQG {
 
 #ifndef NGTQ_QBG
         static void buildQuantizedObjects(const std::string quantizedIndexPath, polaris::ObjectSpace &objectSpace, bool insertion = false) {
-          NGTQ::Index	quantizedIndex(quantizedIndexPath);
+          NGTQ::NgtqIndex	quantizedIndex(quantizedIndexPath);
           NGTQ::Quantizer	&quantizer = quantizedIndex.getQuantizer();
 
           {
@@ -538,7 +538,7 @@ namespace NGTQG {
 #else
             property.dimension = dimension;
 #endif
-            property.localDivisionNo = NGTQG::Index::getNumberOfSubvectors(property.dimension, dimensionOfSubvector);
+            property.localDivisionNo = NGTQG::NgtqgIndex::getNumberOfSubvectors(property.dimension, dimensionOfSubvector);
             globalProperty.edgeSizeForCreation = 10;
             globalProperty.edgeSizeForSearch = 40;
             globalProperty.indexType = polaris::Property::GraphAndTree;
@@ -547,7 +547,7 @@ namespace NGTQG {
             localProperty.indexType = polaris::Property::GraphAndTree;
             localProperty.insertionRadiusCoefficient = 1.1;
 
-            NGTQ::Index::create(quantizedIndexPath, property, globalProperty, localProperty);
+            NGTQ::NgtqIndex::create(quantizedIndexPath, property, globalProperty, localProperty);
 
         }
 
@@ -558,7 +558,7 @@ namespace NGTQG {
 #endif
 
         static void create(const std::string indexPath, size_t dimensionOfSubvector, size_t pseudoDimension) {
-            polaris::Index index(indexPath);
+            polaris::NgtIndex index(indexPath);
             std::string quantizedIndexPath = indexPath + "/qg";
             struct stat st;
             if (stat(quantizedIndexPath.c_str(), &st) == 0) {
@@ -626,7 +626,7 @@ namespace NGTQG {
           polaris::StdOstreamRedirector redirector(!verbose);
           redirector.begin();
           {
-        polaris::Index	index(indexPath);
+        polaris::NgtIndex	index(indexPath);
         polaris::ObjectSpace &objectSpace = index.getObjectSpace();
         std::string quantizedIndexPath = indexPath + "/qg";
         struct stat st;
@@ -646,8 +646,8 @@ namespace NGTQG {
 
         const bool readOnly;
         const std::string path;
-        NGTQ::Index quantizedIndex;
-        NGTQ::Index blobIndex;
+        NGTQ::NgtqIndex quantizedIndex;
+        NGTQ::NgtqIndex blobIndex;
 
         QuantizedGraphRepository quantizedGraph;
 

@@ -267,13 +267,13 @@ namespace NGTQ {
             }
             polaris::Property property;
             property.dimension = dimension;
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-                                                                                                                                    index = new polaris::Index("dummy", property);
-    std::cerr << "Not implemented" << std::endl;
-    abort();
+            index = new polaris::NgtIndex("dummy", property);
+            std::cerr << "Not implemented" << std::endl;
+            abort();
 #else
-            index = new polaris::Index(property);
+            index = new polaris::NgtIndex(property);
 #endif
             size_t noOfCentroids = PARENT::size() / paddedDimension;
             std::cerr << "QuantizationCodebook::buildIndex # of the centroids=" << noOfCentroids << std::endl;
@@ -375,7 +375,7 @@ namespace NGTQ {
 
         uint32_t dimension;
         uint32_t paddedDimension;
-        polaris::Index *index;
+        polaris::NgtIndex *index;
     };
 
 #ifdef NGTQBG_COARSE_BLOB
@@ -1584,7 +1584,7 @@ namespace NGTQ {
 #endif
         }
 
-        void set(polaris::Index *gcb, polaris::Index lcb[], QuantizationCodebook<float> *qcodebook, size_t dn, size_t lcn,
+        void set(polaris::NgtIndex *gcb, polaris::NgtIndex lcb[], QuantizationCodebook<float> *qcodebook, size_t dn, size_t lcn,
                  size_t sizeoftype, size_t dim, Rotation *r) {
             globalCodebookIndex = gcb;
             localCodebookIndexes = lcb;
@@ -1637,7 +1637,7 @@ namespace NGTQ {
 
         }
 
-        void set(polaris::Index lcb[], size_t lcn) {
+        void set(polaris::NgtIndex lcb[], size_t lcn) {
             localCodebookNo = lcn;
             localCodebookCentroidNo = lcb[0].getObjectRepositorySize();
         }
@@ -1650,8 +1650,8 @@ namespace NGTQ {
             c.initialize(localCodebookNo, localCodebookCentroidNo);
         }
 
-        polaris::Index *globalCodebookIndex;
-        polaris::Index *localCodebookIndexes;
+        polaris::NgtIndex *globalCodebookIndex;
+        polaris::NgtIndex *localCodebookIndexes;
         size_t localDivisionNo;
         size_t localCodebookNo;
         size_t localCodebookCentroidNo;
@@ -2374,7 +2374,7 @@ namespace NGTQ {
 
         size_t getNumOfLocalClusters() { return property.localCentroidLimit; }
 
-        polaris::Index &getLocalCodebook(size_t idx) { return localCodebookIndexes[idx]; }
+        polaris::NgtIndex &getLocalCodebook(size_t idx) { return localCodebookIndexes[idx]; }
 
         size_t getLocalCodebookSize(size_t size) { return localCodebookIndexes[size].getObjectRepositorySize(); }
 
@@ -2401,7 +2401,7 @@ namespace NGTQ {
 #else
                 const vector<pair<polaris::Object*, size_t>> &objects,
 #endif
-                                vector<polaris::Index::InsertionResult> &ids) {
+            vector<polaris::NgtIndex::InsertionResult> &ids) {
             ids.clear();
             ids.resize(objects.size());
 #pragma omp parallel for
@@ -2452,7 +2452,7 @@ namespace NGTQ {
 
         Property property;
 
-        polaris::Index globalCodebookIndex;
+        polaris::NgtIndex globalCodebookIndex;
 
         size_t distanceComputationCount;
 
@@ -2460,7 +2460,7 @@ namespace NGTQ {
         polaris::ObjectSpace::ObjectType objectType;
         size_t divisionNo;
 
-        std::vector<polaris::Index> localCodebookIndexes;
+        std::vector<polaris::NgtIndex> localCodebookIndexes;
 
         QuantizationCodebook<float> quantizationCodebook;
         std::vector<uint32_t> objectToBlobIndex;
@@ -2635,7 +2635,7 @@ namespace NGTQ {
 			  vector<vector<pair<polaris::Object*, size_t>>> &localObjs) = 0;
 #endif
 
-        void set(polaris::Index &gc, polaris::Index lc[], size_t dn, size_t lcn,
+        void set(polaris::NgtIndex &gc, polaris::NgtIndex lc[], size_t dn, size_t lcn,
                  Quantizer::ObjectList *ol, QuantizationCodebook<float> *qc) {
             globalCodebookIndex = &(polaris::GraphAndTreeIndex &) gc.getIndex();
             divisionNo = dn;
@@ -2644,7 +2644,7 @@ namespace NGTQ {
             quantizationCodebook = qc;
         }
 
-        void set(polaris::Index lc[], size_t lcn) {
+        void set(polaris::NgtIndex lc[], size_t lcn) {
             localCodebookIndexes.clear();
             localCodebookNo = lcn;
             for (size_t i = 0; i < localCodebookNo; ++i) {
@@ -2812,9 +2812,9 @@ public:
 #endif
         {
             rootDirectory = index;
-            polaris::Index::mkdir(rootDirectory);
+            polaris::NgtIndex::mkdir(rootDirectory);
             string global = rootDirectory + "/" + getGlobalFile();
-            polaris::Index::mkdir(global);
+            polaris::NgtIndex::mkdir(global);
 
             polaris::GraphAndTreeIndex globalCodebook(globalProperty);
             globalCodebook.saveIndex(global);
@@ -2825,7 +2825,7 @@ public:
             for (size_t i = 0; i < localCodebookNo; ++i) {
                 stringstream local;
                 local << rootDirectory << "/" + getLocalPrefix() << i;
-                polaris::Index::mkdir(local.str());
+                polaris::NgtIndex::mkdir(local.str());
                 localCodebook.saveIndex(local.str());
             }
             localCodebook.close();
@@ -3074,7 +3074,7 @@ public:
                 stringstream local;
                 local << rootDirectory << "/" + getLocalPrefix() << i;
                 try {
-                    polaris::Index::mkdir(local.str());
+                    polaris::NgtIndex::mkdir(local.str());
                 } catch (...) {}
                 localCodebookIndexes[i].saveIndex(local.str());
             }
@@ -3190,7 +3190,7 @@ public:
         void createIndex(polaris::GraphAndTreeIndex &codebook,
                          size_t centroidLimit,
                          const vector<pair<polaris::Object *, size_t>> &objects,
-                         vector<polaris::Index::InsertionResult> &ids,
+                         vector<polaris::NgtIndex::InsertionResult> &ids,
                          float &range) {
             if (centroidLimit > 0) {
                 if (getNumberOfObjects(codebook) >= centroidLimit) {
@@ -3206,7 +3206,7 @@ public:
                         } else {
                             end += s;
                         }
-                        vector<polaris::Index::InsertionResult> idstmp;
+                        vector<polaris::NgtIndex::InsertionResult> idstmp;
                         vector<pair<polaris::Object *, size_t>> objtmp;
                         std::copy(start, end, std::back_inserter(objtmp));
                         codebook.createIndex(objtmp, idstmp, range, property.threadSize);
@@ -3215,7 +3215,7 @@ public:
                         start = end;
                     } while (start != objects.end() && centroidLimit - getNumberOfObjects(codebook) > 0);
                     range = FLT_MAX;
-                    vector<polaris::Index::InsertionResult> idstmp;
+                    vector<polaris::NgtIndex::InsertionResult> idstmp;
                     vector<pair<polaris::Object *, size_t>> objtmp;
                     std::copy(start, objects.end(), std::back_inserter(objtmp));
                     codebook.createIndex(objtmp, idstmp, range, property.threadSize);
@@ -3231,10 +3231,10 @@ public:
 
 #ifdef NGTQ_VECTOR_OBJECT
 
-        void setGlobalCodeToInvertedEntry(polaris::Index::InsertionResult &id, pair<std::vector<float>, size_t> &object,
+        void setGlobalCodeToInvertedEntry(polaris::NgtIndex::InsertionResult &id, pair<std::vector<float>, size_t> &object,
                                           vector<LocalDatam> &localData) {
 #else
-            void setGlobalCodeToInvertedEntry(polaris::Index::InsertionResult &id, pair<polaris::Object*, size_t> &object, vector<LocalDatam> &localData) {
+            void setGlobalCodeToInvertedEntry(polaris::NgtIndex::InsertionResult &id, pair<polaris::Object*, size_t> &object, vector<LocalDatam> &localData) {
 #endif
             size_t globalCentroidID = id.id;
             if (invertedIndex.isEmpty(globalCentroidID)) {
@@ -3308,7 +3308,7 @@ public:
                 lr = FLT_MAX;
                 localCentroidLimit = 0;
             }
-            vector<polaris::Index::InsertionResult> lids;
+            vector<polaris::NgtIndex::InsertionResult> lids;
             createIndex(*lcodebook[0], localCentroidLimit, localObjs[0], lids, lr);
             size_t divisionNo = property.localDivisionNo;
             for (size_t i = 0; i < localData.size(); i++) {
@@ -3346,7 +3346,7 @@ public:
 	  lr = -1.0;
 	}
       }
-      vector<polaris::Index::InsertionResult> lids;
+      vector<polaris::NgtIndex::InsertionResult> lids;
       createIndex(*lcodebook[li], localCentroidLimit, localObjs[li], lids, lr);
       if (lr != FLT_MAX) {
 	localCodebookFull = false;
@@ -3391,7 +3391,7 @@ public:
                         lr = -1.0;
                     }
                 }
-                vector<polaris::Index::InsertionResult> lids;
+                vector<polaris::NgtIndex::InsertionResult> lids;
                 size_t localDimension = lcodebook[li]->getObjectSpace().getDimension();
                 vector<pair<polaris::Object *, size_t>> localObjects(localData.size());
                 for (size_t i = 0; i < localData.size(); i++) {
@@ -3528,7 +3528,7 @@ public:
 
 #endif
 
-        void buildMultipleLocalCodebooks(polaris::Index *localCodebook, size_t localCodebookNo, size_t numberOfCentroids) {
+        void buildMultipleLocalCodebooks(polaris::NgtIndex *localCodebook, size_t localCodebookNo, size_t numberOfCentroids) {
             polaris::Clustering clustering;
             clustering.epsilonFrom = 0.10;
             clustering.epsilonTo = 0.50;
@@ -3611,10 +3611,10 @@ public:
 #ifdef NGTQ_VECTOR_OBJECT
 
         void getBlobIDFromObjectToBlobIndex(const vector<pair<std::vector<float>, size_t>> &objects,
-                                            vector<polaris::Index::InsertionResult> &ids)
+                                            vector<polaris::NgtIndex::InsertionResult> &ids)
 #else
                                                                                                                                 void getBlobIDFromObjectToBlobIndex(const vector<pair<polaris::Object*, size_t>> &objects,
-				      vector<polaris::Index::InsertionResult> &ids)
+				      vector<polaris::NgtIndex::InsertionResult> &ids)
 #endif
         {
             ids.clear();
@@ -3658,17 +3658,17 @@ public:
 
 #ifdef NGTQ_QBG
 
-        polaris::Index *buildGlobalCodebookWithQIDIndex() {
+        polaris::NgtIndex *buildGlobalCodebookWithQIDIndex() {
             polaris::Property property;
 
             property.dimension = globalCodebookIndex.getObjectSpace().getDimension() + 1;
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-                                                                                                                                    polaris::Index *index = new polaris::Index("dummy", property);
+        polaris::NgtIndex *index = new polaris::NgtIndex("dummy", property);
     std::cerr << "Not implemented" << std::endl;
     abort();
 #else
-            polaris::Index *index = new polaris::Index(property);
+            polaris::NgtIndex *index = new polaris::NgtIndex(property);
 #endif
             if (globalCodebookIndex.getObjectRepositorySize() > invertedIndex.size()) {
                 std::cerr << "warning: the inverted index size is too small. Cannot build a global codebook with qid. "
@@ -3853,7 +3853,7 @@ public:
             for (size_t i = 0; i < localCodebookNo; i++) {
                 lcodebook.push_back(&static_cast<polaris::GraphAndTreeIndex &>(localCodebookIndexes[i].getIndex()));
             }
-            vector<polaris::Index::InsertionResult> ids;
+            vector<polaris::NgtIndex::InsertionResult> ids;
             if (property.centroidCreationMode == CentroidCreationModeStaticLayer ||
                 property.centroidCreationMode == CentroidCreationModeStatic) {
                 if (objectToBlobIndex.empty()) {
@@ -4148,13 +4148,13 @@ public:
             gp.batchSizeForCreation = 500;
             gp.edgeSizeLimitForCreation = 0;
             gp.edgeSizeForCreation = 100;
-            gp.graphType = polaris::Index::Property::GraphType::GraphTypeANNG;
+            gp.graphType = polaris::NgtIndex::Property::GraphType::GraphTypeANNG;
             gp.insertionRadiusCoefficient = 1.1;
 
             lp.batchSizeForCreation = 500;
             lp.edgeSizeLimitForCreation = 0;
             lp.edgeSizeForCreation = 10;
-            lp.graphType = polaris::Index::Property::GraphType::GraphTypeANNG;
+            lp.graphType = polaris::NgtIndex::Property::GraphType::GraphTypeANNG;
             lp.insertionRadiusCoefficient = 1.1;
             gp.set(globalProperty);
             lp.set(localProperty);
@@ -4162,7 +4162,7 @@ public:
             gp.edgeSizeForSearch = 40;
             lp.edgeSizeForSearch = 40;
 
-            lp.objectType = polaris::Index::Property::ObjectType::Float;
+            lp.objectType = polaris::NgtIndex::Property::ObjectType::Float;
 #ifdef NGTQ_QBG
             if (property.genuineDimension > property.dimension) {
                 stringstream msg;
@@ -4191,13 +4191,13 @@ public:
 
             switch (property.dataType) {
                 case DataTypeFloat:
-                    gp.objectType = polaris::Index::Property::ObjectType::Float;
+                    gp.objectType = polaris::NgtIndex::Property::ObjectType::Float;
                     break;
                 case DataTypeFloat16:
-                    gp.objectType = polaris::Index::Property::ObjectType::Float16;
+                    gp.objectType = polaris::NgtIndex::Property::ObjectType::Float16;
                     break;
                 case DataTypeUint8:
-                    gp.objectType = polaris::Index::Property::ObjectType::Uint8;
+                    gp.objectType = polaris::NgtIndex::Property::ObjectType::Uint8;
                     break;
                 default: {
                     stringstream msg;
@@ -4208,8 +4208,8 @@ public:
 
             switch (property.distanceType) {
                 case DistanceType::DistanceTypeL1:
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL1;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL1;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL1;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL1;
                     break;
                 case DistanceType::DistanceTypeL2:
 #ifdef NGTQ_DISTANCE_ANGLE
@@ -4219,12 +4219,12 @@ public:
 	POLARIS_THROW_EX(msg);
       }
 #endif
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeHamming:
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
                     break;
                 case DistanceType::DistanceTypeAngle:
 #ifndef NGTQ_DISTANCE_ANGLE
@@ -4234,24 +4234,24 @@ public:
                     POLARIS_THROW_EX(msg);
                 }
 #endif
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeAngle;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeAngle;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle;
                     break;
                 case DistanceType::DistanceTypeNormalizedCosine:
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedCosine;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedCosine;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeCosine:
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeCosine;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeCosine;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeNormalizedL2:
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedL2;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedL2;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
                     break;
                 case DistanceType::DistanceTypeInnerProduct:
-                    gp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
-                    lp.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
                     break;
                 default: {
                     stringstream msg;
@@ -4934,15 +4934,15 @@ public:
         }
     };
 
-    class Index {
+    class NgtqIndex {
     public:
-        Index() : quantizer(0) {}
+        NgtqIndex() : quantizer(0) {}
 
-        Index(const string &index, bool rdOnly = false) : quantizer(0) {
+        NgtqIndex(const string &index, bool rdOnly = false) : quantizer(0) {
             open(index, rdOnly);
         }
 
-        ~Index() { close(); }
+        ~NgtqIndex() { close(); }
 
 
         static void create(const string &index, Property &property,
@@ -4984,26 +4984,24 @@ public:
         }
 
 #ifdef NGTQ_SHARED_INVERTED_INDEX
-                                                                                                                                static void compress(const string &indexFile) {
-     Index index;
-     index.open(indexFile);
-     string tmpivt = indexFile + "/" + Quantizer::getInvertedIndexFile() + "-tmp";
-     index.getQuantizer().reconstructInvertedIndex(tmpivt);
-     index.close();
-     string ivt = indexFile + "/" + Quantizer::getInvertedIndexFile();
-     unlink(ivt.c_str());
-     rename(tmpivt.c_str(), ivt.c_str());
-     string ivtc = ivt + "c";
-     unlink(ivtc.c_str());
-     string tmpivtc = tmpivt + "c";
-     rename(tmpivtc.c_str(), ivtc.c_str());
-   }
+        static void compress(const string &indexFile) {
+             NGTQ::NgtqIndex index;
+             index.open(indexFile);
+             string tmpivt = indexFile + "/" + Quantizer::getInvertedIndexFile() + "-tmp";
+             index.getQuantizer().reconstructInvertedIndex(tmpivt);
+             index.close();
+             string ivt = indexFile + "/" + Quantizer::getInvertedIndexFile();
+             unlink(ivt.c_str());
+             rename(tmpivt.c_str(), ivt.c_str());
+             string ivtc = ivt + "c";
+             unlink(ivtc.c_str());
+             string tmpivtc = tmpivt + "c";
+             rename(tmpivtc.c_str(), ivtc.c_str());
+       }
 #endif
 
 #ifndef NGTQ_QBG
-                                                                                                                                static void rebuild(const string &indexName,
-		      const string &rebuiltIndexName
-		     ) {
+        static void rebuild(const string &indexName,const string &rebuiltIndexName) {
 
     const string srcObjectList = indexName + "/obj";
     const string dstObjectList = rebuiltIndexName + "/obj";
@@ -5015,7 +5013,7 @@ public:
     }
 
     try {
-      NGTQ::Index index(rebuiltIndexName);
+      NGTQ::NgtqIndex index(rebuiltIndexName);
 
       index.rebuildIndex();
 
@@ -5128,7 +5126,7 @@ public:
 
         NGTQ::Quantizer &getQuantizer() {
             if (quantizer == 0) {
-                POLARIS_THROW_EX("NGTQ::Index: Not open.");
+                POLARIS_THROW_EX("NGTQ::NgtqIndex: Not open.");
             }
             return *quantizer;
         }
@@ -5167,7 +5165,7 @@ public:
             }
             NGTQ::Quantizer *quantizer = NGTQ::Quantization::generate(property);
             if (quantizer == 0) {
-                POLARIS_THROW_EX("NGTQ::Index: Cannot get quantizer.");
+                POLARIS_THROW_EX("NGTQ::NgtqIndex: Cannot get quantizer.");
             }
             try {
                 quantizer->open(index, globalProperty,

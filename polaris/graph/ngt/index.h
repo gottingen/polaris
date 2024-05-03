@@ -40,7 +40,7 @@ namespace polaris {
 
     class Property;
 
-    class Index {
+    class NgtIndex {
     public:
         enum OpenType {
             OpenTypeNone = 0x00,
@@ -318,7 +318,7 @@ namespace polaris {
                     } else if (it->second == "Graph") {
                         indexType = IndexType::Graph;
                     } else {
-                        std::cerr << "Invalid Index Type in the property. " << it->first << ":" << it->second
+                        std::cerr << "Invalid NgtIndex Type in the property. " << it->first << ":" << it->second
                                   << std::endl;
                     }
                 } else {
@@ -499,39 +499,39 @@ namespace polaris {
             std::vector<std::pair<float, double>> table;
         };
 
-        Index() : index(0) {
+        NgtIndex() : index(0) {
 #if defined(NGT_AVX2)
             if (!CpuInfo::isAVX2()) {
                 std::stringstream msg;
                 msg
-                        << "polaris::Index: Fatal Error!. Despite that this NGT library is built with AVX2, this CPU doesn't support AVX2. This CPU supoorts "
+                        << "polaris::NgtIndex: Fatal Error!. Despite that this NGT library is built with AVX2, this CPU doesn't support AVX2. This CPU supoorts "
                         << CpuInfo::getSupportedSimdTypes();
                 POLARIS_THROW_EX(msg);
             }
 #elif defined(NGT_AVX512)
             if (!CpuInfo::isAVX512()) {
           std::stringstream msg;
-          msg << "polaris::Index: Fatal Error!. Despite that this NGT library is built with AVX512, this CPU doesn't support AVX512. This CPU supoorts " << CpuInfo::getSupportedSimdTypes();
+          msg << "polaris::NgtIndex: Fatal Error!. Despite that this NGT library is built with AVX512, this CPU doesn't support AVX512. This CPU supoorts " << CpuInfo::getSupportedSimdTypes();
           POLARIS_THROW_EX(msg);
             }
 #endif
         }
 
-        Index(polaris::Property &prop);
+        NgtIndex(polaris::Property &prop);
 
-        Index(const std::string &database, bool rdOnly = false, Index::OpenType openType = Index::OpenTypeNone) : index(
+        NgtIndex(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = NgtIndex::OpenTypeNone) : index(
                 0), redirect(false) { open(database, rdOnly, openType); }
 
-        Index(const std::string &database, polaris::Property &prop) : index(0), redirect(false) { open(database, prop); }
+        NgtIndex(const std::string &database, polaris::Property &prop) : index(0), redirect(false) { open(database, prop); }
 
-        virtual ~Index() { close(); }
+        virtual ~NgtIndex() { close(); }
 
         void open(const std::string &database, polaris::Property &prop) {
             open(database);
             setProperty(prop);
         }
 
-        void open(const std::string &database, bool rdOnly = false, Index::OpenType openType = OpenTypeNone);
+        void open(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = OpenTypeNone);
 
         void close() {
             if (index != 0) {
@@ -543,7 +543,7 @@ namespace polaris {
 
         void save() {
             if (path.empty()) {
-                POLARIS_THROW_EX("polaris::Index::saveIndex: path is empty");
+                POLARIS_THROW_EX("polaris::NgtIndex::saveIndex: path is empty");
             }
             saveIndex(path);
         }
@@ -555,7 +555,7 @@ namespace polaris {
         static void mkdir(const std::string &dir) {
             if (::mkdir(dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
                 std::stringstream msg;
-                msg << "polaris::Index::mkdir: Cannot make the specified directory. " << dir;
+                msg << "polaris::NgtIndex::mkdir: Cannot make the specified directory. " << dir;
                 POLARIS_THROW_EX(msg);
             }
         }
@@ -746,9 +746,9 @@ namespace polaris {
 
         std::vector<float> makeSparseObject(std::vector<uint32_t> &object);
 
-        Index &getIndex() {
+        NgtIndex &getIndex() {
             if (index == 0) {
-                POLARIS_THROW_EX("polaris::Index::getIndex: Index is unavailable.");
+                POLARIS_THROW_EX("polaris::NgtIndex::getIndex: NgtIndex is unavailable.");
             }
             return *index;
         }
@@ -780,7 +780,7 @@ namespace polaris {
             auto *vec = queryContainer.getQuery();
             if (vec == 0) {
                 std::stringstream msg;
-                msg << "polaris::Index::allocateObject: Object is not set. ";
+                msg << "polaris::NgtIndex::allocateObject: Object is not set. ";
                 POLARIS_THROW_EX(msg);
             }
             Object *object = 0;
@@ -795,25 +795,25 @@ namespace polaris {
                 object = allocateObject(*static_cast<std::vector<float16> *>(vec));
             } else {
                 std::stringstream msg;
-                msg << "polaris::Index::allocateObject: Unavailable object type.";
+                msg << "polaris::NgtIndex::allocateObject: Unavailable object type.";
                 POLARIS_THROW_EX(msg);
             }
             return object;
         }
 
-        static void loadAndCreateIndex(Index &index, const std::string &database, const std::string &dataFile,
+        static void loadAndCreateIndex(NgtIndex &index, const std::string &database, const std::string &dataFile,
                                        size_t threadSize, size_t dataSize);
 
-        Index *index;
+        NgtIndex *index;
         std::string path;
         bool redirect;
     };
 
-    class GraphIndex : public Index,
+    class GraphIndex : public NgtIndex,
                        public NeighborhoodGraph {
     public:
 
-        GraphIndex(const std::string &database, bool rdOnly = false, Index::OpenType openType = Index::OpenTypeNone);
+        GraphIndex(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = NgtIndex::OpenTypeNone);
 
         GraphIndex(polaris::Property &prop) : readOnly(false) {
             initialize(prop);
@@ -875,7 +875,7 @@ namespace polaris {
                 ifs->std::ifstream::open(ifile);
                 if (!(*ifs)) {
                     std::stringstream msg;
-                    msg << "Index::load: Cannot open the specified file. " << ifile;
+                    msg << "NgtIndex::load: Cannot open the specified file. " << ifile;
                     POLARIS_THROW_EX(msg);
                 }
                 is = ifs;
@@ -906,7 +906,7 @@ namespace polaris {
                 ifs->std::ifstream::open(ifile);
                 if (!(*ifs)) {
                     std::stringstream msg;
-                    msg << "Index::load: Cannot open the specified file. " << ifile;
+                    msg << "NgtIndex::load: Cannot open the specified file. " << ifile;
                     POLARIS_THROW_EX(msg);
                 }
                 is = ifs;
@@ -971,7 +971,7 @@ namespace polaris {
 
         static void loadGraph(const std::string &ifile, polaris::GraphRepository &graph);
 
-        virtual void loadIndex(const std::string &ifile, bool readOnly, polaris::Index::OpenType openType);
+        virtual void loadIndex(const std::string &ifile, bool readOnly, polaris::NgtIndex::OpenType openType);
 
         virtual void exportIndex(const std::string &ofile) {
             try {
@@ -1007,7 +1007,7 @@ namespace polaris {
         }
 
         void linearSearch(polaris::SearchQuery &searchQuery) {
-            Object *query = Index::allocateQuery(searchQuery);
+            Object *query = NgtIndex::allocateQuery(searchQuery);
             try {
                 polaris::SearchContainer sc(searchQuery, *query);
                 GraphIndex::linearSearch(sc);
@@ -1030,7 +1030,7 @@ namespace polaris {
 
         // GraphIndex
         void search(polaris::SearchQuery &searchQuery) {
-            Object *query = Index::allocateQuery(searchQuery);
+            Object *query = NgtIndex::allocateQuery(searchQuery);
             try {
                 polaris::SearchContainer sc(searchQuery, *query);
 #ifdef NGT_REFINEMENT
@@ -1461,7 +1461,7 @@ namespace polaris {
 
         NeighborhoodGraph::Property &getGraphProperty() { return NeighborhoodGraph::property; }
 
-        Index::Property &getGraphIndexProperty() { return GraphIndex::property; }
+        NgtIndex::Property &getGraphIndexProperty() { return GraphIndex::property; }
 
         virtual size_t getSharedMemorySize(std::ostream &os, SharedMemoryAllocator::GetMemorySizeType t) {
             size_t size = 0;
@@ -1471,7 +1471,7 @@ namespace polaris {
 
         float getEpsilonFromExpectedAccuracy(double accuracy) { return accuracyTable.getEpsilon(accuracy); }
 
-        Index::Property &getProperty() { return property; }
+        NgtIndex::Property &getProperty() { return property; }
 
         bool getReadOnly() { return readOnly; }
 
@@ -1538,7 +1538,7 @@ namespace polaris {
         }
 
     public:
-        Index::Property property;
+        NgtIndex::Property property;
 
     protected:
         bool readOnly;
@@ -1548,7 +1548,7 @@ namespace polaris {
 
 #endif
 
-        Index::AccuracyTable accuracyTable;
+        NgtIndex::AccuracyTable accuracyTable;
     };
 
     class GraphAndTreeIndex : public GraphIndex, public DVPTree {
@@ -1700,7 +1700,7 @@ namespace polaris {
             std::ifstream ist(ifile + "/tre");
             DVPTree::deserialize(ist);
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
-            if (property.objectAlignment == polaris::Index::Property::ObjectAlignmentTrue) {
+            if (property.objectAlignment == polaris::NgtIndex::Property::ObjectAlignmentTrue) {
                 alignObjects();
             }
 #endif
@@ -1970,7 +1970,7 @@ namespace polaris {
 
         // GraphAndTreeIndex
         void search(polaris::SearchQuery &searchQuery) {
-            Object *query = Index::allocateQuery(searchQuery);
+            Object *query = NgtIndex::allocateQuery(searchQuery);
             try {
                 polaris::SearchContainer sc(searchQuery, *query);
 #ifdef NGT_REFINEMENT
@@ -2061,33 +2061,33 @@ namespace polaris {
 
     };
 
-    class Property : public Index::Property, public NeighborhoodGraph::Property {
+    class Property : public NgtIndex::Property, public NeighborhoodGraph::Property {
     public:
         void setDefault() {
-            Index::Property::setDefault();
+            NgtIndex::Property::setDefault();
             NeighborhoodGraph::Property::setDefault();
         }
 
         void clear() {
-            Index::Property::clear();
+            NgtIndex::Property::clear();
             NeighborhoodGraph::Property::clear();
         }
 
         void set(polaris::Property &p) {
-            Index::Property::set(p);
+            NgtIndex::Property::set(p);
             NeighborhoodGraph::Property::set(p);
         }
 
         void load(const std::string &file) {
             polaris::PropertySet prop;
             prop.load(file + "/prf");
-            Index::Property::importProperty(prop);
+            NgtIndex::Property::importProperty(prop);
             NeighborhoodGraph::Property::importProperty(prop);
         }
 
         void save(const std::string &file) {
             polaris::PropertySet prop;
-            Index::Property::exportProperty(prop);
+            NgtIndex::Property::exportProperty(prop);
             NeighborhoodGraph::Property::exportProperty(prop);
             prop.save(file + "/prf");
         }
@@ -2102,7 +2102,7 @@ namespace polaris {
         void importProperty(const std::string &file) {
             polaris::PropertySet prop;
             prop.load(file + "/prf");
-            Index::Property::importProperty(prop);
+            NgtIndex::Property::importProperty(prop);
             NeighborhoodGraph::Property::importProperty(prop);
         }
 
@@ -2117,7 +2117,7 @@ namespace polaris {
 } // namespace polaris
 
 template<typename T>
-size_t polaris::Index::append(const std::vector<T> &object) {
+size_t polaris::NgtIndex::append(const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
     if (repo.size() == 0) {
@@ -2132,7 +2132,7 @@ size_t polaris::Index::append(const std::vector<T> &object) {
 
 #ifdef NGT_REFINEMENT
 template<typename T>
-size_t polaris::Index::appendToRefinement(const std::vector<T> &object)
+size_t polaris::NgtIndex::appendToRefinement(const std::vector<T> &object)
 {
   auto &os = getRefinementObjectSpace();
   auto &repo = os.getRepository();
@@ -2148,7 +2148,7 @@ size_t polaris::Index::appendToRefinement(const std::vector<T> &object)
 #endif
 
 template<typename T>
-size_t polaris::Index::insert(const std::vector<T> &object) {
+size_t polaris::NgtIndex::insert(const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
     if (repo.size() == 0) {
@@ -2161,7 +2161,7 @@ size_t polaris::Index::insert(const std::vector<T> &object) {
 }
 
 template<typename T>
-void polaris::Index::update(ObjectID id, const std::vector<T> &object) {
+void polaris::NgtIndex::update(ObjectID id, const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
 
@@ -2179,7 +2179,7 @@ void polaris::Index::update(ObjectID id, const std::vector<T> &object) {
 
 #ifdef NGT_REFINEMENT
 template<typename T>
-  void polaris::Index::updateToRefinement(ObjectID id, const std::vector<T> &object)
+  void polaris::NgtIndex::updateToRefinement(ObjectID id, const std::vector<T> &object)
 {
   auto &os = getRefinementObjectSpace();
   auto &repo = os.getRepository();

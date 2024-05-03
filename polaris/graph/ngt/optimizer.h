@@ -25,7 +25,7 @@ namespace polaris {
     class Optimizer {
     public:
 
-        Optimizer(polaris::Index &i, size_t n = 10) : index(i), nOfResults(n) {
+        Optimizer(polaris::NgtIndex &i, size_t n = 10) : index(i), nOfResults(n) {
         }
 
         ~Optimizer() {}
@@ -98,7 +98,7 @@ namespace polaris {
 
         void disableLog() { redirector.enable(); }
 
-        static void search(polaris::Index &index, std::istream &gtStream, Command::SearchParameters &sp,
+        static void search(polaris::NgtIndex &index, std::istream &gtStream, Command::SearchParameters &sp,
                            std::vector<MeasuredValue> &acc) {
             std::ifstream is(sp.query);
             if (!is) {
@@ -111,7 +111,7 @@ namespace polaris {
         }
 
         static void
-        search(polaris::Index &index, std::istream &queries, std::istream &gtStream, Command::SearchParameters &sp,
+        search(polaris::NgtIndex &index, std::istream &queries, std::istream &gtStream, Command::SearchParameters &sp,
                std::vector<MeasuredValue> &acc) {
             sp.stepOfEpsilon = 1.0;
             std::stringstream resultStream;
@@ -536,7 +536,7 @@ namespace polaris {
             }
         }
 
-        static void exploreEpsilonForAccuracy(polaris::Index &index, std::istream &queries, std::istream &gtStream,
+        static void exploreEpsilonForAccuracy(polaris::NgtIndex &index, std::istream &queries, std::istream &gtStream,
                                               Command::SearchParameters &sp, std::pair<float, float> accuracyRange,
                                               double margin) {
             double fromUnder = 0.0;
@@ -1025,7 +1025,7 @@ namespace polaris {
                       << "," << rateAccuracyRange.first << "-" << rateAccuracyRange.second << std::endl;
             std::cerr << "adjustRateSearchEdgeSize: # of queries=" << querySize << std::endl;
 
-            polaris::Index index(indexName);
+            polaris::NgtIndex index(indexName);
 
             Optimizer optimizer(index, nOfResults);
             try {
@@ -1267,13 +1267,13 @@ namespace polaris {
             }
             size_t nqueries = args.getl("n", 1000);
 
-            polaris::Index index(indexName);
+            polaris::NgtIndex index(indexName);
             polaris::Optimizer optimizer(index);
             optimizer.extractQueries(nqueries, std::cout);
 
         }
 
-        static void createGroundTruth(polaris::Index &index, double epsilon, Command::SearchParameters &searchParameters,
+        static void createGroundTruth(polaris::NgtIndex &index, double epsilon, Command::SearchParameters &searchParameters,
                                       std::stringstream &queries, std::stringstream &gtStream) {
             queries.clear();
             queries.seekg(0, std::ios_base::beg);
@@ -1554,7 +1554,7 @@ namespace polaris {
         }
 
         static std::vector<std::pair<float, double>>
-        generateAccuracyTable(polaris::Index &index, size_t nOfResults = 50, size_t querySize = 100) {
+        generateAccuracyTable(polaris::NgtIndex &index, size_t nOfResults = 50, size_t querySize = 100) {
 
             polaris::Property prop;
             index.getProperty(prop);
@@ -1635,7 +1635,7 @@ namespace polaris {
             return epsilonAccuracyMap;
         }
 
-        polaris::Index &index;
+        polaris::NgtIndex &index;
         size_t nOfResults;
         StdOstreamRedirector redirector;
     };

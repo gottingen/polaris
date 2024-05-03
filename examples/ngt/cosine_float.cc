@@ -38,9 +38,9 @@ void run_ann() {
         polaris::Property property;
         property.dimension = 128;
         property.objectType = polaris::ObjectSpace::ObjectType::Float;
-        property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeCosine;
-        polaris::Index::create(indexPath, property);
-        polaris::Index index(indexPath);
+        property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeCosine;
+        polaris::NgtIndex::create(indexPath, property);
+        polaris::NgtIndex index(indexPath);
         ifstream is(objectFile);
         string line;
         while (getline(is, line)) {
@@ -74,7 +74,7 @@ void run_ann() {
 
     // nearest neighbor search
     try {
-        polaris::Index index(indexPath);
+        polaris::NgtIndex index(indexPath);
         polaris::Property property;
         index.getProperty(property);
         ifstream is(queryFile);

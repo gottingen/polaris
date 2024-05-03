@@ -520,7 +520,7 @@ namespace polaris {
         }
 
         static void
-        assignWithNGT(polaris::Index &index, std::vector<std::vector<float> > &vectors, std::vector<Cluster> &clusters,
+        assignWithNGT(polaris::NgtIndex &index, std::vector<std::vector<float> > &vectors, std::vector<Cluster> &clusters,
                       size_t &resultSize, float epsilon = 0.12,
                       size_t clusterSize = std::numeric_limits<size_t>::max()) {
             size_t dataSize = vectors.size();
@@ -761,7 +761,7 @@ namespace polaris {
         }
 
 
-        double kmeansWithNGT(polaris::Index &index, std::vector<std::vector<float> > &vectors, size_t numberOfClusters,
+        double kmeansWithNGT(polaris::NgtIndex &index, std::vector<std::vector<float> > &vectors, size_t numberOfClusters,
                              std::vector<Cluster> &clusters, float epsilon) {
             size_t clusterSize = std::numeric_limits<size_t>::max();
             if (clusterSizeConstraint) {
@@ -810,8 +810,8 @@ namespace polaris {
             polaris::Property property;
             property.dimension = dim;
             property.graphType = polaris::Property::GraphType::GraphTypeANNG;
-            property.objectType = polaris::Index::Property::ObjectType::Float;
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+            property.objectType = polaris::NgtIndex::Property::ObjectType::Float;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
 
             float *data = new float[vectors.size() * dim];
             float *ptr = data;
@@ -822,7 +822,7 @@ namespace polaris {
             }
             size_t threadSize = 20;
 
-            polaris::Index index(property);
+            polaris::NgtIndex index(property);
             index.append(data, dataSize);
             index.createIndex(threadSize);
 
@@ -830,7 +830,7 @@ namespace polaris {
 
         }
 
-        double kmeansWithNGT(polaris::Index &index, size_t numberOfClusters, std::vector<Cluster> &clusters) {
+        double kmeansWithNGT(polaris::NgtIndex &index, size_t numberOfClusters, std::vector<Cluster> &clusters) {
             polaris::GraphIndex &graph = static_cast<polaris::GraphIndex &>(index.getIndex());
             polaris::ObjectSpace &os = graph.getObjectSpace();
             size_t size = os.getRepository().size();
@@ -854,7 +854,7 @@ namespace polaris {
             return diff;
         }
 
-        double kmeansWithNGT(polaris::Index &index, size_t numberOfClusters, polaris::Index &outIndex) {
+        double kmeansWithNGT(polaris::NgtIndex &index, size_t numberOfClusters, polaris::NgtIndex &outIndex) {
             std::vector<Cluster> clusters;
             double diff = kmeansWithNGT(index, numberOfClusters, clusters);
             for (auto i = clusters.begin(); i != clusters.end(); ++i) {
@@ -864,7 +864,7 @@ namespace polaris {
             return diff;
         }
 
-        double kmeansWithNGT(polaris::Index &index, size_t numberOfClusters) {
+        double kmeansWithNGT(polaris::NgtIndex &index, size_t numberOfClusters) {
             polaris::Property prop;
             index.getProperty(prop);
             string path = index.getPath();
@@ -873,17 +873,17 @@ namespace polaris {
             string outIndexName = path;
             string inIndexName = path + ".tmp";
             std::rename(outIndexName.c_str(), inIndexName.c_str());
-            polaris::Index::createGraphAndTree(outIndexName, prop);
+            polaris::NgtIndex::createGraphAndTree(outIndexName, prop);
             index.open(outIndexName);
-            polaris::Index inIndex(inIndexName);
+            polaris::NgtIndex inIndex(inIndexName);
             double diff = kmeansWithNGT(inIndex, numberOfClusters, index);
             inIndex.close();
-            polaris::Index::destroy(inIndexName);
+            polaris::NgtIndex::destroy(inIndexName);
             return diff;
         }
 
         double kmeansWithNGT(string &indexName, size_t numberOfClusters) {
-            polaris::Index inIndex(indexName);
+            polaris::NgtIndex inIndex(indexName);
             double diff = kmeansWithNGT(inIndex, numberOfClusters);
             inIndex.save();
             inIndex.close();

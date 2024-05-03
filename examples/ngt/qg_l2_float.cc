@@ -26,10 +26,10 @@ int main(int argc, char **argv) {
         polaris::Property property;
         property.dimension = 128;
         property.objectType = polaris::ObjectSpace::ObjectType::Uint8;
-        property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+        property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
         std::cout << "creating the index framework..." << std::endl;
-        polaris::Index::create(indexPath, property);
-        polaris::Index index(indexPath);
+        polaris::NgtIndex::create(indexPath, property);
+        polaris::NgtIndex index(indexPath);
         ifstream is(objectFile);
         string line;
         std::cout << "appending the objects..." << std::endl;
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     size_t maxNumberOfEdges = 50;
     try {
         std::cout << "quantizing the index..." << std::endl;
-        NGTQG::Index::quantize(indexPath, dimensionOfSubvector, maxNumberOfEdges, true);
+        NGTQG::NgtqgIndex::quantize(indexPath, dimensionOfSubvector, maxNumberOfEdges, true);
     } catch (polaris::PolarisException &err) {
         cerr << "Error " << err.what() << endl;
         return 1;
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 
     // nearest neighbor search
     try {
-        NGTQG::Index index(indexPath);
+        NGTQG::NgtqgIndex index(indexPath);
         polaris::Property property;
         index.getProperty(property);
         ifstream is(queryFile);

@@ -19,9 +19,9 @@
 #include <polaris/graph/ngt/ngtq/optimizer.h>
 
 #ifdef NGTQ_QBG
-void NGTQG::Index::quantize(const std::string indexPath, size_t dimensionOfSubvector, size_t maxNumOfEdges, bool verbose) {
+void NGTQG::NgtqgIndex::quantize(const std::string indexPath, size_t dimensionOfSubvector, size_t maxNumOfEdges, bool verbose) {
   {
-    polaris::Index	index(indexPath);
+    polaris::NgtIndex	index(indexPath);
     const std::string quantizedIndexPath = indexPath + "/qg";
     struct stat st;
     if (stat(quantizedIndexPath.c_str(), &st) != 0) {
@@ -31,9 +31,9 @@ void NGTQG::Index::quantize(const std::string indexPath, size_t dimensionOfSubve
       buildParameters.creation.dimensionOfSubvector = dimensionOfSubvector;
       buildParameters.setVerbose(verbose);
  
-      NGTQG::Index::create(indexPath, buildParameters);
+      NGTQG::NgtqgIndex::create(indexPath, buildParameters);
 
-      NGTQG::Index::append(indexPath, buildParameters);
+      NGTQG::NgtqgIndex::append(indexPath, buildParameters);
 
       QBG::Optimizer optimizer(buildParameters);
 #ifdef NGTQG_NO_ROTATION
@@ -51,21 +51,21 @@ void NGTQG::Index::quantize(const std::string indexPath, size_t dimensionOfSubve
 
       optimizer.optimize(quantizedIndexPath);
 
-      QBG::Index::buildNGTQ(quantizedIndexPath, verbose);
+      QBG::QbgIndex::buildNGTQ(quantizedIndexPath, verbose);
 
-      NGTQG::Index::realign(indexPath, maxNumOfEdges, verbose);
+      NGTQG::NgtqgIndex::realign(indexPath, maxNumOfEdges, verbose);
     }
   }
 
 }
 
-void NGTQG::Index::create(const std::string indexPath, QBG::BuildParameters &buildParameters) {
+void NGTQG::NgtqgIndex::create(const std::string indexPath, QBG::BuildParameters &buildParameters) {
   auto dimensionOfSubvector = buildParameters.creation.dimensionOfSubvector;
   auto dimension = buildParameters.creation.dimension;
   if (dimension != 0 && buildParameters.creation.numOfSubvectors != 0) {
     if (dimension % buildParameters.creation.numOfSubvectors != 0) {
       std::stringstream msg;
-      msg << "NGTQBG:Index::create: Invalid dimension and local division No. " << dimension << ":" << buildParameters.creation.numOfSubvectors;
+      msg << "NGTQBG::NgtqgIndex::create: Invalid dimension and local division No. " << dimension << ":" << buildParameters.creation.numOfSubvectors;
       POLARIS_THROW_EX(msg);
     }
     dimensionOfSubvector = dimension / buildParameters.creation.numOfSubvectors;
@@ -74,7 +74,7 @@ void NGTQG::Index::create(const std::string indexPath, QBG::BuildParameters &bui
 }
 
 
-void NGTQG::Index::append(const std::string indexPath, QBG::BuildParameters &buildParameters) {
-  QBG::Index::appendFromObjectRepository(indexPath, indexPath + "/qg", buildParameters.verbose);
+void NGTQG::NgtqgIndex::append(const std::string indexPath, QBG::BuildParameters &buildParameters) {
+  QBG::QbgIndex::appendFromObjectRepository(indexPath, indexPath + "/qg", buildParameters.verbose);
 }
 #endif

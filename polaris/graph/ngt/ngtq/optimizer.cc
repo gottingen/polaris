@@ -116,7 +116,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
   }
 
   Matrix<float> R;
-  Matrix<float>::load(ofile + QBG::Index::getRotationFile(), R);
+  Matrix<float>::load(ofile + QBG::QbgIndex::getRotationFile(), R);
   vector<vector<float>> qv(vectors.size());	// quantized vector
   vector<vector<float>> xp;	// residual vector
   if (residualVectors.empty()) {
@@ -194,7 +194,7 @@ void QBG::Optimizer::evaluate(string global, vector<vector<float>> &vectors, cha
 void QBG::Optimizer::evaluate(vector<vector<float>> &vectors, string &ofile, size_t &numberOfSubvectors, size_t &subvectorSize) {
   cerr << "Evaluate" << endl;
   Matrix<float> R;
-  Matrix<float>::load(ofile + QBG::Index::getRotationFile(), R);
+  Matrix<float>::load(ofile + QBG::QbgIndex::getRotationFile(), R);
   vector<vector<float>> xp = vectors;
   Matrix<float>::mulSquare(xp, R);
   for (size_t m = 0; m < numberOfSubvectors; m++) {
@@ -236,7 +236,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
     threadSize = omp_get_max_threads();
   }
   try {
-    QBG::Index index(indexPath);
+    QBG::QbgIndex index(indexPath);
     if (index.getQuantizer().objectList.size() <= 1) {
       POLARIS_THROW_EX("optimize: No objects");
     }
@@ -276,11 +276,11 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       numberOfSubvectors = index.getQuantizer().property.localDivisionNo;
     }
 
-    const std::string ws = indexPath + "/" + QBG::Index::getWorkspaceName();
+    const std::string ws = indexPath + "/" + QBG::QbgIndex::getWorkspaceName();
     try {
-      polaris::Index::mkdir(ws);
+      polaris::NgtIndex::mkdir(ws);
     } catch(...) {}
-    const std::string object = QBG::Index::getTrainObjectFile(indexPath);
+    const std::string object = QBG::QbgIndex::getTrainObjectFile(indexPath);
     std::ofstream ofs;
     ofs.open(object);
     index.extract(ofs, numberOfObjects, randomizedObjectExtraction);
@@ -288,10 +288,10 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       assert(index.getQuantizer().objectList.pseudoDimension != 0);
       std::vector<std::vector<float>> global(1);
       global[0].resize(index.getQuantizer().property.dimension, 0.0);
-      polaris::Clustering::saveVectors(QBG::Index::getQuantizerCodebookFile(indexPath), global);
+      polaris::Clustering::saveVectors(QBG::QbgIndex::getQuantizerCodebookFile(indexPath), global);
       size_t count = 0;
       {
-	ifstream ifs(QBG::Index::getCodebookIndexFile(indexPath));
+	ifstream ifs(QBG::QbgIndex::getCodebookIndexFile(indexPath));
 	if (!ifs) {
 	  count = 1;
 	  std::cerr << "the codebook index file is missing. this index must be QG." << std::endl;
@@ -302,10 +302,10 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
 	  }
 	}
       }
-      ofstream ofs(QBG::Index::getCodebookIndexFile(indexPath));
+      ofstream ofs(QBG::QbgIndex::getCodebookIndexFile(indexPath));
       if (!ofs) {
 	std::stringstream msg;
-	msg << "Cannot open the file. " << QBG::Index::getCodebookIndexFile(indexPath);
+	msg << "Cannot open the file. " << QBG::QbgIndex::getCodebookIndexFile(indexPath);
 	POLARIS_THROW_EX(msg);
       }
       for (size_t i = 0; i < count; i++) {
@@ -313,7 +313,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       }
     } else if (globalType == GlobalTypeMean) {
       std::vector<std::vector<float>> vectors;
-      std::string objects = QBG::Index::getTrainObjectFile(indexPath);
+      std::string objects = QBG::QbgIndex::getTrainObjectFile(indexPath);
 #ifdef NGT_CLUSTERING
       polaris::Clustering::loadVectors(objects, vectors);
 #else
@@ -332,7 +332,7 @@ void QBG::Optimizer::optimize(const std::string indexPath, size_t threadSize) {
       for (size_t i = 0; i < global[0].size(); i++) {
 	global[0][i] /= vectors.size();
       }
-      polaris::Clustering::saveVectors(QBG::Index::getQuantizerCodebookFile(indexPath), global);
+      polaris::Clustering::saveVectors(QBG::QbgIndex::getQuantizerCodebookFile(indexPath), global);
     }
 
     optimizeWithinIndex(indexPath);
@@ -352,13 +352,13 @@ void QBG::Optimizer::optimizeWithinIndex(std::string indexPath) {
   std::string pq;
   std::string global;
   {
-    object = QBG::Index::getTrainObjectFile(indexPath);
-    pq = QBG::Index::getPQFile(indexPath);
-    global = QBG::Index::getQuantizerCodebookFile(indexPath);
+    object = QBG::QbgIndex::getTrainObjectFile(indexPath);
+    pq = QBG::QbgIndex::getPQFile(indexPath);
+    global = QBG::QbgIndex::getQuantizerCodebookFile(indexPath);
   }
 
   try {
-    polaris::Index::mkdir(pq);
+    polaris::NgtIndex::mkdir(pq);
   } catch(...) {}
   pq += "/";
   optimize(object, pq, global);
@@ -526,7 +526,7 @@ void QBG::Optimizer::optimize(std::string invector, std::string ofile, std::stri
 
   optimize(vectors, globalCentroid, r, localClusters, errors);
 
-  Matrix<float>::save(ofile + QBG::Index::getRotationFile(), r);
+  Matrix<float>::save(ofile + QBG::QbgIndex::getRotationFile(), r);
 
   if (showClusterInfo) {
     if (localClusters.size() != numberOfSubvectors) {
@@ -563,7 +563,7 @@ void QBG::Optimizer::optimize(std::string invector, std::string ofile, std::stri
   }
   for (size_t m = 0; m < numberOfSubvectors; m++) {
     stringstream str;
-    str << ofile << QBG::Index::getSubvectorPrefix() << "-" << m;
+    str << ofile << QBG::QbgIndex::getSubvectorPrefix() << "-" << m;
 #ifdef NGT_CLUSTERING
     polaris::Clustering::saveClusters(str.str(), localClusters[m]);
 #else

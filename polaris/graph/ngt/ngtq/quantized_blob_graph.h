@@ -328,10 +328,10 @@ namespace QBG {
 
     class QuantizedBlobGraphRepository : public NGTQG::QuantizedGraphRepository {
     public:
-        QuantizedBlobGraphRepository(NGTQ::Index &quantizedIndex) : NGTQG::QuantizedGraphRepository(quantizedIndex) {
+        QuantizedBlobGraphRepository(NGTQ::NgtqIndex &quantizedIndex) : NGTQG::QuantizedGraphRepository(quantizedIndex) {
         }
 
-        void construct(NGTQ::Index &quantizedIndex) {
+        void construct(NGTQ::NgtqIndex &quantizedIndex) {
 
             (*this).resize(quantizedIndex.getInvertedIndexSize());
             polaris::Timer timer;
@@ -448,10 +448,10 @@ namespace QBG {
 
     };
 
-    class Index : public NGTQ::Index {
+    class QbgIndex : public NGTQ::NgtqIndex {
     public:
-        Index(const std::string &indexPath, bool prebuilt = false, bool verbose = false) :
-                NGTQ::Index(indexPath, prebuilt), path(indexPath), quantizedBlobGraph(*this) {
+        QbgIndex(const std::string &indexPath, bool prebuilt = false, bool verbose = false) :
+                NGTQ::NgtqIndex(indexPath, prebuilt), path(indexPath), quantizedBlobGraph(*this) {
             searchable = false;
             polaris::StdOstreamRedirector redirector(!verbose);
             redirector.begin();
@@ -461,7 +461,7 @@ namespace QBG {
             } catch (polaris::PolarisException &err) {
                 if (prebuilt) {
                     stringstream msg;
-                    msg << "QBG::Index: No quantized blob graph. " << err.what();
+                    msg << "QBG::QbgIndex: No quantized blob graph. " << err.what();
                     POLARIS_THROW_EX(msg);
                 } else {
                 }
@@ -469,7 +469,7 @@ namespace QBG {
             redirector.end();
         }
 
-        ~Index() {}
+        ~QbgIndex() {}
 
         bool &getVerbose() { return verbose; }
 
@@ -489,7 +489,7 @@ namespace QBG {
             polaris::Property localProperty;
             CreationParameters::setProperties(creation, property, globalProperty, localProperty);
             property.quantizerType = NGTQ::QuantizerTypeQBG;
-            NGTQ::Index::create(index, property, globalProperty, localProperty, rotation, objectFile);
+            NGTQ::NgtqIndex::create(index, property, globalProperty, localProperty, rotation, objectFile);
         }
 
 #endif
@@ -513,15 +513,15 @@ namespace QBG {
 #endif
             property.quantizerType = NGTQ::QuantizerTypeQBG;
 #ifdef NGTQ_QBG
-            NGTQ::Index::create(index, property, globalProperty, localProperty, rotation, objectFile);
+            NGTQ::NgtqIndex::create(index, property, globalProperty, localProperty, rotation, objectFile);
 #else
-            NGTQ::Index::create(index, property, globalProperty, localProperty);
+            NGTQ::NgtqIndex::create(index, property, globalProperty, localProperty);
 #endif
         }
 
         static void load(const std::string &indexPath, const std::vector<std::vector<float>> &quantizerCodebook,
                          const std::vector<float> &rotation) {
-            NGTQ::Index index(indexPath);
+            NGTQ::NgtqIndex index(indexPath);
             index.getQuantizer().loadQuantizationCodebookAndRotation(quantizerCodebook, rotation);
         }
 
@@ -550,7 +550,7 @@ namespace QBG {
         ) {
             polaris::StdOstreamRedirector redirector(!verbose);
             redirector.begin();
-            QBG::Index index(indexName);
+            QBG::QbgIndex index(indexName);
             auto &quantizer = index.getQuantizer();
             istream *is;
             if (data == "-") {
@@ -604,7 +604,7 @@ namespace QBG {
         ) {
             polaris::StdOstreamRedirector redirector(!verbose);
             redirector.begin();
-            QBG::Index index(indexName);
+            QBG::QbgIndex index(indexName);
             std::vector<std::string> tokens;
             polaris::Common::tokenize(data, tokens, ".");
             if (tokens.size() < 2) {
@@ -708,7 +708,7 @@ namespace QBG {
                 quantizer.objectList.get(id, object, &gcodebook.getObjectSpace());
                 objects.push_back(pair<std::vector<float>, size_t>(object, id));
             }
-            vector<polaris::Index::InsertionResult> gids;
+            vector<polaris::NgtIndex::InsertionResult> gids;
             NGTQ::Quantizer::searchIndex(gcodebook, objects, gids);
 
             for (size_t bidx = 0; bidx < gids.size(); bidx++) {
@@ -810,7 +810,7 @@ namespace QBG {
                 }
             }
             auto &gcodebook = static_cast<polaris::GraphAndTreeIndex &>(quantizer.globalCodebookIndex.getIndex());
-            vector<polaris::Index::InsertionResult> gids;
+            vector<polaris::NgtIndex::InsertionResult> gids;
             NGTQ::Quantizer::searchIndex(gcodebook, floatObjects, gids);
 
             if (gids.size() != floatObjects.size()) {
@@ -940,8 +940,8 @@ namespace QBG {
             polaris::StdOstreamRedirector redirector(!verbose);
             redirector.begin();
 
-            polaris::Index ngt(ngtIndex);
-            QBG::Index qg(qgIndex);
+            polaris::NgtIndex ngt(ngtIndex);
+            QBG::QbgIndex qg(qgIndex);
             auto &objectSpace = ngt.getObjectSpace();
             size_t size = objectSpace.getRepository().size();
             for (size_t id = 1; id < size; ++id) {
@@ -959,7 +959,7 @@ namespace QBG {
             redirector.end();
         }
 
-        void getSeeds(polaris::Index &index, polaris::Object *object, polaris::ObjectDistances &seeds, size_t noOfSeeds) {
+        void getSeeds(polaris::NgtIndex &index, polaris::Object *object, polaris::ObjectDistances &seeds, size_t noOfSeeds) {
             auto &graph = static_cast<polaris::GraphAndTreeIndex &>(index.getIndex());
             polaris::SearchContainer sc(*object);
             sc.setResults(&seeds);
@@ -1251,7 +1251,7 @@ namespace QBG {
             auto &objectSpace = globalIndex.getObjectSpace();
 
             if (globalGraph.searchRepository.empty()) {
-                POLARIS_THROW_EX("QBG:Index: graph repository is empty.");
+                POLARIS_THROW_EX("QBG::QbgIndex: graph repository is empty.");
             }
             if (searchContainer.explorationCoefficient == 0.0) {
                 searchContainer.explorationCoefficient = NGT_EXPLORATION_COEFFICIENT;
@@ -1482,7 +1482,7 @@ namespace QBG {
         }
 
         static void buildNGTQ(const std::string &indexPath, bool verbose = false) {
-            load(indexPath, QBG::Index::getQuantizerCodebookFile(indexPath), "", "", "", verbose);
+            load(indexPath, QBG::QbgIndex::getQuantizerCodebookFile(indexPath), "", "", "", verbose);
             buildNGTQ(indexPath, "", "-", "-", 1, 0, verbose);
             if (verbose) {
                 std::cerr << "NGTQ and NGTQBG indices are completed." << std::endl;
@@ -1537,7 +1537,7 @@ namespace QBG {
             {
                 std::string codebookPath = quantizerCodebookFile;
                 if (codebookPath.empty()) {
-                    codebookPath = QBG::Index::getQuantizerCodebookFile(indexPath);
+                    codebookPath = QBG::QbgIndex::getQuantizerCodebookFile(indexPath);
                 }
                 if (codebookPath != "-") {
                     std::ifstream stream(codebookPath);
@@ -1569,7 +1569,7 @@ namespace QBG {
             {
                 std::string codebookIndexPath = codebookIndexFile;
                 if (codebookIndexPath.empty()) {
-                    codebookIndexPath = QBG::Index::getCodebookIndexFile(indexPath);
+                    codebookIndexPath = QBG::QbgIndex::getCodebookIndexFile(indexPath);
                 }
                 if (codebookIndexPath != "-") {
                     std::ifstream stream(codebookIndexPath);
@@ -1595,7 +1595,7 @@ namespace QBG {
             {
                 std::string objectIndexPath = objectIndexFile;
                 if (objectIndexPath.empty()) {
-                    objectIndexPath = QBG::Index::getObjectIndexFile(indexPath);
+                    objectIndexPath = QBG::QbgIndex::getObjectIndexFile(indexPath);
                 }
                 if (objectIndexPath != "-") {
                     std::ifstream stream(objectIndexPath);
@@ -1630,7 +1630,7 @@ namespace QBG {
             redirector.begin();
             polaris::Timer timer;
             timer.start();
-            NGTQ::Index index(indexPath);
+            NGTQ::NgtqIndex index(indexPath);
             if ((quantizerCodebook.size() == 0) && (codebookIndex.size() == 0) && (objectIndex.size() == 0)) {
                 index.createIndex(beginID, endID);
             } else {
@@ -1680,11 +1680,11 @@ namespace QBG {
             polaris::Timer timer;
             timer.start();
             auto readOnly = false;
-            QBG::Index index(indexPath, readOnly, verbose);
+            QBG::QbgIndex index(indexPath, readOnly, verbose);
             try {
                 index.load();
                 stringstream msg;
-                msg << "QBG::Index::buildQBG: The index is already built. ";
+                msg << "QBG::QbgIndex::buildQBG: The index is already built. ";
                 POLARIS_THROW_EX(msg);
             } catch (...) {}
             index.quantizedBlobGraph.construct(index);
@@ -1815,16 +1815,16 @@ namespace QBG {
             polaris::StdOstreamRedirector redirector(!verbose);
             redirector.begin();
             if (blobs.empty()) {
-                blobs = QBG::Index::getBlobFile(indexPath);
+                blobs = QBG::QbgIndex::getBlobFile(indexPath);
             }
             if (localCodebooks.empty()) {
-                localCodebooks = QBG::Index::getPQFile(indexPath) + "/" + QBG::Index::getSubvectorPrefix() + "-@";
+                localCodebooks = QBG::QbgIndex::getPQFile(indexPath) + "/" + QBG::QbgIndex::getSubvectorPrefix() + "-@";
             }
             if (quantizerCodebook.empty()) {
-                quantizerCodebook = QBG::Index::getQuantizerCodebookFile(indexPath);
+                quantizerCodebook = QBG::QbgIndex::getQuantizerCodebookFile(indexPath);
             }
             if (rotationPath.empty()) {
-                rotationPath = QBG::Index::getRotationFile(indexPath);
+                rotationPath = QBG::QbgIndex::getRotationFile(indexPath);
             }
 
             threadSize = threadSize == 0 ? std::thread::hardware_concurrency() : threadSize;
@@ -1844,7 +1844,7 @@ namespace QBG {
                     POLARIS_THROW_EX(msg);
                 }
 
-                polaris::Index::append(tmpDir + "/" + NGTQ::Quantizer::getGlobalFile(), blobs, threadSize, dataSize);
+                polaris::NgtIndex::append(tmpDir + "/" + NGTQ::Quantizer::getGlobalFile(), blobs, threadSize, dataSize);
 
                 auto unlog = false;
                 polaris::GraphOptimizer graphOptimizer(unlog);
@@ -1883,7 +1883,7 @@ namespace QBG {
                 std::stringstream localCodebook;
                 localCodebook << indexPath << "/" + NGTQ::Quantizer::getLocalPrefix() << no;
                 std::cerr << data.str() << "->" << localCodebook.str() << std::endl;
-                polaris::Index::append(localCodebook.str(), data.str(), threadSize, dataSize);
+                polaris::NgtIndex::append(localCodebook.str(), data.str(), threadSize, dataSize);
             }
 
 #ifdef NGTQ_QBG
@@ -1932,7 +1932,7 @@ namespace QBG {
                         rotation.push_back(polaris::Common::strtof(token));
                     }
                 }
-                QBG::Index::load(indexPath, qCodebook, rotation);
+                QBG::QbgIndex::load(indexPath, qCodebook, rotation);
             }
 #endif
             redirector.end();

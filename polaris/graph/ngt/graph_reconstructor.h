@@ -60,7 +60,7 @@ namespace polaris {
         }
 
 
-        static void adjustPaths(polaris::Index &outIndex) {
+        static void adjustPaths(polaris::NgtIndex &outIndex) {
             polaris::GraphIndex &outGraph = dynamic_cast<polaris::GraphIndex &>(outIndex.getIndex());
             size_t rStartRank = 0;
             std::list<std::pair<size_t, polaris::GraphNode> > tmpGraph;
@@ -145,7 +145,7 @@ namespace polaris {
         }
 
         static void
-        adjustPathsEffectively(polaris::Index &outIndex, size_t minNoOfEdges = 0) {
+        adjustPathsEffectively(polaris::NgtIndex &outIndex, size_t minNoOfEdges = 0) {
             polaris::GraphIndex &outGraph = dynamic_cast<polaris::GraphIndex &>(outIndex.getIndex());
             adjustPathsEffectively(outGraph, minNoOfEdges);
         }
@@ -813,7 +813,7 @@ namespace polaris {
         // graph is a source ANNG
         // index is an index with a reconstructed ANNG
         static
-        void reconstructANNGFromANNG(std::vector<polaris::ObjectDistances> &graph, polaris::Index &index, size_t edgeSize) {
+        void reconstructANNGFromANNG(std::vector<polaris::ObjectDistances> &graph, polaris::NgtIndex &index, size_t edgeSize) {
 
             polaris::GraphIndex &outGraph = dynamic_cast<polaris::GraphIndex &>(index.getIndex());
 
@@ -881,7 +881,7 @@ namespace polaris {
         }
 
         static void
-        refineANNG(polaris::Index &index, bool unlog, float epsilon = 0.1, float accuracy = 0.0, int noOfEdges = 0,
+        refineANNG(polaris::NgtIndex &index, bool unlog, float epsilon = 0.1, float accuracy = 0.0, int noOfEdges = 0,
                    int exploreEdgeSize = INT_MIN, size_t batchSize = 10000) {
             polaris::StdOstreamRedirector redirector(unlog);
             redirector.begin();
@@ -893,7 +893,7 @@ namespace polaris {
             }
         }
 
-        static void refineANNG(polaris::Index &index, float epsilon = 0.1, float accuracy = 0.0, int noOfEdges = 0,
+        static void refineANNG(polaris::NgtIndex &index, float epsilon = 0.1, float accuracy = 0.0, int noOfEdges = 0,
                                int exploreEdgeSize = INT_MIN, size_t batchSize = 10000) {
             auto prop = static_cast<GraphIndex &>(index.getIndex()).getGraphProperty();
             polaris::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();

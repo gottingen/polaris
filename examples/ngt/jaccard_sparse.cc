@@ -55,7 +55,7 @@ append(polaris::Args &args) {
     std::ifstream *ifs = 0;
 
     try {
-        polaris::Index index(database);
+        polaris::NgtIndex index(database);
         if (data == "-") {
             is = &std::cin;
         } else {
@@ -107,7 +107,7 @@ append(polaris::Args &args) {
 
 
 void
-search(polaris::Index &index, polaris::Command::SearchParameters &searchParameters, ostream &stream) {
+search(polaris::NgtIndex &index, polaris::Command::SearchParameters &searchParameters, ostream &stream) {
 
     std::ifstream is(searchParameters.query);
     if (!is) {
@@ -222,7 +222,7 @@ search(polaris::Args &args) {
     polaris::Command::SearchParameters searchParameters(args);
 
     try {
-        polaris::Index index(database, searchParameters.openMode == 'r');
+        polaris::NgtIndex index(database, searchParameters.openMode == 'r');
         search(index, searchParameters, cout);
     } catch (polaris::PolarisException &err) {
         cerr << "jaccard-sparse: Error " << err.what() << endl;

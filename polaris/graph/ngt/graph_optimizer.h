@@ -85,7 +85,7 @@ namespace polaris {
         }
 
         void adjustSearchCoefficients(const std::string indexPath) {
-            polaris::Index index(indexPath);
+            polaris::NgtIndex index(indexPath);
             polaris::GraphIndex &graph = static_cast<polaris::GraphIndex &>(index.getIndex());
             polaris::Optimizer optimizer(index);
             if (logDisabled) {
@@ -108,7 +108,7 @@ namespace polaris {
             graph.saveIndex(indexPath);
         }
 
-        static std::pair<double, float> measureQueryTime(polaris::Index &index, size_t start, float epsilon) {
+        static std::pair<double, float> measureQueryTime(polaris::NgtIndex &index, size_t start, float epsilon) {
             polaris::ObjectSpace &objectSpace = index.getObjectSpace();
             polaris::ObjectRepository &objectRepository = objectSpace.getRepository();
             size_t nQueries = 200;
@@ -167,7 +167,7 @@ namespace polaris {
             return std::pair<double, float>(timer.time * 1000.0, epsilon);
         }
 
-        static std::pair<size_t, double> searchMinimumQueryTime(polaris::Index &index, size_t prefetchOffset,
+        static std::pair<size_t, double> searchMinimumQueryTime(polaris::NgtIndex &index, size_t prefetchOffset,
                                                                 int maxPrefetchSize, size_t seedID, float epsilon) {
             polaris::ObjectSpace &objectSpace = index.getObjectSpace();
             int step = 256;
@@ -195,7 +195,7 @@ namespace polaris {
             return std::make_pair(minPrefetchSize, minTime);
         }
 
-        static std::pair<size_t, size_t> adjustPrefetchParameters(polaris::Index &index) {
+        static std::pair<size_t, size_t> adjustPrefetchParameters(polaris::NgtIndex &index) {
 
             bool gridSearch = false;
             float epsilon = -1.0;
@@ -269,7 +269,7 @@ namespace polaris {
 
             {
                 polaris::StdOstreamRedirector redirector(logDisabled);
-                auto *graphIndex = new polaris::GraphIndex(outIndexPath, false, polaris::Index::OpenTypeObjectDisabled);
+                auto *graphIndex = new polaris::GraphIndex(outIndexPath, false, polaris::NgtIndex::OpenTypeObjectDisabled);
                 std::cerr << "GraphOptimizer::execute:  vm size=" << polaris::Common::getProcessVmSizeStr()
                           << ":" << polaris::Common::getProcessVmPeakStr() << std::endl;
                 std::cerr << " delete all of objects" << std::endl;
@@ -356,7 +356,7 @@ namespace polaris {
                 if (!logDisabled) {
                     std::cerr << "GraphOptimizer: optimizing search parameters..." << std::endl;
                 }
-                polaris::Index outIndex(outIndexPath);
+                polaris::NgtIndex outIndex(outIndexPath);
                 polaris::GraphIndex &outGraph = static_cast<polaris::GraphIndex &>(outIndex.getIndex());
                 polaris::Optimizer optimizer(outIndex);
                 if (logDisabled) {
@@ -382,7 +382,7 @@ namespace polaris {
             if (searchParameterOptimization || prefetchParameterOptimization || accuracyTableGeneration) {
                 polaris::StdOstreamRedirector redirector(logDisabled);
                 redirector.begin();
-                polaris::Index outIndex(outIndexPath, true);
+                polaris::NgtIndex outIndex(outIndexPath, true);
                 polaris::GraphIndex &outGraph = static_cast<polaris::GraphIndex &>(outIndex.getIndex());
                 if (prefetchParameterOptimization) {
                     if (!logDisabled) {
@@ -409,7 +409,7 @@ namespace polaris {
                     }
                     try {
                         auto table = polaris::Optimizer::generateAccuracyTable(outIndex, numOfResults, numOfQueries);
-                        polaris::Index::AccuracyTable accuracyTable(table);
+                        polaris::NgtIndex::AccuracyTable accuracyTable(table);
                         polaris::Property prop;
                         outIndex.getProperty(prop);
                         prop.accuracyTable = accuracyTable.getString();
@@ -438,7 +438,7 @@ namespace polaris {
         optimizeNumberOfEdgesForANNG(polaris::Optimizer &optimizer, std::vector<std::vector<float>> &queries,
                                      size_t nOfResults, float targetAccuracy, size_t maxNoOfEdges) {
 
-            polaris::Index &index = optimizer.index;
+            polaris::NgtIndex &index = optimizer.index;
             std::stringstream queryStream;
             std::stringstream gtStream;
             float maxEpsilon = 0.0;
@@ -484,7 +484,7 @@ namespace polaris {
         }
 
         static std::pair<size_t, float>
-        optimizeNumberOfEdgesForANNG(polaris::Index &index, ANNGEdgeOptimizationParameter &parameter) {
+        optimizeNumberOfEdgesForANNG(polaris::NgtIndex &index, ANNGEdgeOptimizationParameter &parameter) {
             if (parameter.targetNoOfObjects == 0) {
                 parameter.targetNoOfObjects = index.getObjectRepositorySize();
             }
@@ -571,7 +571,7 @@ namespace polaris {
             redirector.begin();
 
             try {
-                polaris::Index index(indexPath, false);
+                polaris::NgtIndex index(indexPath, false);
 
                 auto optimizedEdge = polaris::GraphOptimizer::optimizeNumberOfEdgesForANNG(index, parameter);
 

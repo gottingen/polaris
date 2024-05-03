@@ -121,7 +121,7 @@ namespace polaris {
 
         void append(Args &args);
 
-        static void search(polaris::Index &index, SearchParameters &searchParameters, std::ostream &stream) {
+        static void search(polaris::NgtIndex &index, SearchParameters &searchParameters, std::ostream &stream) {
             std::ifstream is(searchParameters.query);
             if (!is) {
                 std::cerr << "Cannot open the specified file. " << searchParameters.query << std::endl;
@@ -131,7 +131,7 @@ namespace polaris {
         }
 
         static void
-        search(polaris::Index &index, SearchParameters &searchParameters, std::istream &is, std::ostream &stream);
+        search(polaris::NgtIndex &index, SearchParameters &searchParameters, std::istream &is, std::ostream &stream);
 
         void search(Args &args);
 

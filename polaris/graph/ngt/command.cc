@@ -142,16 +142,16 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (objectType) {
         case 'f':
-            property.objectType = polaris::Index::Property::ObjectType::Float;
+            property.objectType = polaris::NgtIndex::Property::ObjectType::Float;
             break;
         case 'c':
-            property.objectType = polaris::Index::Property::ObjectType::Uint8;
+            property.objectType = polaris::NgtIndex::Property::ObjectType::Uint8;
             break;
         case 'h':
-            property.objectType = polaris::Index::Property::ObjectType::Float16;
+            property.objectType = polaris::NgtIndex::Property::ObjectType::Float16;
             break;
             case 'H':
-              property.objectType = polaris::Index::Property::ObjectType::Bfloat16;
+              property.objectType = polaris::NgtIndex::Property::ObjectType::Bfloat16;
               break;
         default:
             std::stringstream msg;
@@ -162,16 +162,16 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 #ifdef NGT_REFINEMENT
     switch (refinementObjectType) {
     case 'f':
-      property.refinementObjectType = polaris::Index::Property::ObjectType::Float;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Float;
       break;
     case 'c':
-      property.refinementObjectType = polaris::Index::Property::ObjectType::Uint8;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Uint8;
       break;
     case 'h':
-      property.refinementObjectType = polaris::Index::Property::ObjectType::Float16;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Float16;
       break;
     case 'H':
-      property.refinementObjectType = polaris::Index::Property::ObjectType::Bfloat16;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Bfloat16;
       break;
     default:
       std::stringstream msg;
@@ -182,44 +182,44 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (distanceType) {
         case '1':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL1;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL1;
             break;
         case '2':
         case 'e':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
             break;
         case 'a':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeAngle;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle;
             break;
         case 'A':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedAngle;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedAngle;
             break;
         case 'h':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeHamming;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
             break;
         case 'j':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeJaccard;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeJaccard;
             break;
         case 'J':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeSparseJaccard;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeSparseJaccard;
             break;
         case 'c':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeCosine;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeCosine;
             break;
         case 'C':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedCosine;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedCosine;
             break;
         case 'E':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeNormalizedL2;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedL2;
             break;
         case 'i':
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeInnerProduct;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeInnerProduct;
             break;
         case 'p':  // added by Nyapicom
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypePoincare;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypePoincare;
             break;
         case 'l':  // added by Nyapicom
-            property.distanceType = polaris::Index::Property::DistanceType::DistanceTypeLorentz;
+            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeLorentz;
             break;
         default:
             std::stringstream msg;
@@ -277,11 +277,11 @@ polaris::Command::create(Args &args) {
 
         switch (createParameters.indexType) {
             case 't':
-                polaris::Index::createGraphAndTree(createParameters.index, createParameters.property,
+                polaris::NgtIndex::createGraphAndTree(createParameters.index, createParameters.property,
                                                createParameters.objectPath, createParameters.numOfObjects);
                 break;
             case 'g':
-                polaris::Index::createGraph(createParameters.index, createParameters.property, createParameters.objectPath,
+                polaris::NgtIndex::createGraph(createParameters.index, createParameters.property, createParameters.objectPath,
                                         createParameters.numOfObjects);
                 break;
         }
@@ -292,7 +292,7 @@ polaris::Command::create(Args &args) {
 }
 
 
-void appendTextVectors(polaris::Index &index, const std::string &data, size_t dataSize, char destination) {
+void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t dataSize, char destination) {
     polaris::Property prop;
     index.getProperty(prop);
 
@@ -381,12 +381,12 @@ void appendTextVectors(std::string &indexPath, std::string &data, size_t dataSiz
                        size_t ioSearchSize, float ioEpsilon, float cutRate) {
     polaris::StdOstreamRedirector redirector(false);
     redirector.begin();
-    polaris::Index index(indexPath);
+    polaris::NgtIndex index(indexPath);
     index.enableLog();
     appendTextVectors(index, data, dataSize, destination);
     if (appendMode == 't') {
         if (ioSearchSize > 0) {
-            polaris::Index::InsertionOrder insertionOrder;
+            polaris::NgtIndex::InsertionOrder insertionOrder;
             insertionOrder.nOfNeighboringNodes = ioSearchSize;
             insertionOrder.epsilon = ioEpsilon;
             std::cerr << "append: insertion order optimization is enabled. "
@@ -441,7 +441,7 @@ polaris::Command::append(Args &args) {
     char destination = args.getChar("D", '-');
     if (appendMode == '-') {
         try {
-            polaris::Index::append(indexPath, data, threadSize, dataSize);
+            polaris::NgtIndex::append(indexPath, data, threadSize, dataSize);
         } catch (polaris::PolarisException &err) {
             cerr << "ngt: Error. " << err.what() << endl;
             cerr << usage << endl;
@@ -455,7 +455,7 @@ polaris::Command::append(Args &args) {
 }
 
 void
-polaris::Command::search(polaris::Index &index, polaris::Command::SearchParameters &searchParameters, istream &is,
+polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParameters &searchParameters, istream &is,
                      ostream &stream) {
 
     if (searchParameters.outputMode[0] == 'e') {
@@ -562,7 +562,7 @@ polaris::Command::search(polaris::Index &index, polaris::Command::SearchParamete
             if (searchParameters.outputMode[0] == 'e') {
                 stream << "# Query No.=" << queryCount << endl;
                 stream << "# Query=" << line.substr(0, 20) + " ..." << endl;
-                stream << "# Index Type=" << searchParameters.indexType << endl;
+                stream << "# NgtIndex Type=" << searchParameters.indexType << endl;
                 stream << "# Size=" << searchParameters.size << endl;
                 stream << "# Radius=" << searchParameters.radius << endl;
                 stream << "# Epsilon=" << epsilon << endl;
@@ -662,7 +662,7 @@ polaris::Command::search(Args &args) {
     }
 
     try {
-        polaris::Index index(database, searchParameters.openMode == 'r');
+        polaris::NgtIndex index(database, searchParameters.openMode == 'r');
         search(index, searchParameters, cout);
         if (debugLevel >= 1) {
             cerr << "Peak VM size=" << polaris::Common::getProcessVmPeakStr() << std::endl;
@@ -750,7 +750,7 @@ polaris::Command::remove(Args &args) {
             cerr << "removed ID=" << id << endl;
             objects.push_back(id);
         }
-        polaris::Index::remove(database, objects, force);
+        polaris::NgtIndex::remove(database, objects, force);
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
@@ -780,7 +780,7 @@ polaris::Command::exportIndex(Args &args) {
         return;
     }
     try {
-        polaris::Index::exportIndex(database, exportFile);
+        polaris::NgtIndex::exportIndex(database, exportFile);
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
@@ -811,7 +811,7 @@ polaris::Command::importIndex(Args &args) {
     }
 
     try {
-        polaris::Index::importIndex(database, importFile);
+        polaris::NgtIndex::importIndex(database, importFile);
     } catch (polaris::PolarisException &err) {
         cerr << "ngt: Error. " << err.what() << endl;
         cerr << usage << endl;
@@ -829,7 +829,7 @@ polaris::Command::prune(Args &args) {
     try {
         indexName = args.get("#1");
     } catch (...) {
-        cerr << "Index is not specified" << endl;
+        cerr << "NgtIndex is not specified" << endl;
         cerr << usage << endl;
         return;
     }
@@ -855,7 +855,7 @@ polaris::Command::prune(Args &args) {
         return;
     }
 
-    polaris::Index index(indexName);
+    polaris::NgtIndex index(indexName);
     cerr << "loaded the input index." << endl;
 
     polaris::GraphIndex &graph = (polaris::GraphIndex &) index.getIndex();
@@ -1002,7 +1002,7 @@ polaris::Command::optimizeSearchParameters(Args &args) {
     try {
         indexPath = args.get("#1");
     } catch (...) {
-        cerr << "Index is not specified" << endl;
+        cerr << "NgtIndex is not specified" << endl;
         cerr << usage << endl;
         return;
     }
@@ -1055,7 +1055,7 @@ polaris::Command::refineANNG(Args &args) {
         return;
     }
 
-    polaris::Index index(inIndexPath);
+    polaris::NgtIndex index(inIndexPath);
 
     float epsilon = args.getf("e", 0.1);
     float expectedAccuracy = args.getf("a", 0.0);
@@ -1084,7 +1084,7 @@ polaris::Command::repair(Args &args) {
     try {
         indexPath = args.get("#1");
     } catch (...) {
-        cerr << "Index is not specified" << endl;
+        cerr << "NgtIndex is not specified" << endl;
         cerr << usage << endl;
         return;
     }
@@ -1107,7 +1107,7 @@ polaris::Command::repair(Args &args) {
         }
     }
 
-    polaris::Index index(path);
+    polaris::NgtIndex index(path);
 
     polaris::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
     polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
@@ -1257,7 +1257,7 @@ polaris::Command::optimizeNumberOfEdgesForANNG(Args &args) {
     try {
         indexPath = args.get("#1");
     } catch (...) {
-        cerr << "Index is not specified" << endl;
+        cerr << "NgtIndex is not specified" << endl;
         cerr << usage << endl;
         return;
     }
@@ -1283,7 +1283,7 @@ void
 polaris::Command::info(Args &args) {
     const string usage = "Usage: ngt info [-E #-of-edges] [-m h|e] index";
 
-    std::cout << "NGT version: " << polaris::Index::getVersion() << std::endl;
+    std::cout << "NGT version: " << polaris::NgtIndex::getVersion() << std::endl;
     std::cout << "CPU SIMD types: ";
     CpuInfo::showSimdTypes();
 
@@ -1300,7 +1300,7 @@ polaris::Command::info(Args &args) {
     char mode = args.getChar("m", '-');
 
     try {
-        polaris::Index index(database);
+        polaris::NgtIndex index(database);
         polaris::GraphIndex::showStatisticsOfGraph(static_cast<polaris::GraphIndex &>(index.getIndex()), mode, edgeSize);
         if (mode == 'v') {
             vector<uint8_t> status;
@@ -1322,14 +1322,14 @@ void polaris::Command::exportGraph(Args &args) {
     try {
         indexPath = args.get("#1");
     } catch (...) {
-        cerr << "ngt::exportGraph: Index is not specified." << endl;
+        cerr << "ngt::exportGraph: NgtIndex is not specified." << endl;
         cerr << usage << endl;
         return;
     }
 
     int k = args.getl("k", 0);
 
-    polaris::Index index(indexPath);
+    polaris::NgtIndex index(indexPath);
     polaris::GraphIndex &graph = static_cast<polaris::GraphIndex &>(index.getIndex());
 
     size_t size = index.getObjectRepositorySize();
@@ -1361,12 +1361,12 @@ void polaris::Command::exportObjects(Args &args) {
     try {
         indexPath = args.get("#1");
     } catch (...) {
-        cerr << "ngt::exportGraph: Index is not specified." << endl;
+        cerr << "ngt::exportGraph: NgtIndex is not specified." << endl;
         cerr << usage << endl;
         return;
     }
 
-    polaris::Index index(indexPath);
+    polaris::NgtIndex index(indexPath);
     auto &objectSpace = index.getObjectSpace();
     size_t size = objectSpace.getRepository().size();
 
