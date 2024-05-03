@@ -1,0 +1,5 @@
+sift-128-euclidean*.tsv filter=lfs diff=lfs merge=lfs -text
+examples/data/benchmark/sift-128-euclidean.tsv filter=lfs diff=lfs merge=lfs -text
+examples/data/benchmark/sift-128-euclidean_gt.txt filter=lfs diff=lfs merge=lfs -text
+examples/data/benchmark/sift-128-euclidean_gtdist.txt filter=lfs diff=lfs merge=lfs -text
+examples/data/benchmark/sift-128-euclidean_query.tsv filter=lfs diff=lfs merge=lfs -text
