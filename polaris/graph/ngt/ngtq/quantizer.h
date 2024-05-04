@@ -267,7 +267,7 @@ namespace NGTQ {
             }
             polaris::Property property;
             property.dimension = dimension;
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::MetricType::METRIC_L2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
             index = new polaris::NgtIndex("dummy", property);
             std::cerr << "Not implemented" << std::endl;
@@ -735,8 +735,6 @@ namespace NGTQ {
         DataTypeFloat16 = 2
     };
 
-    typedef polaris::ObjectSpace::DistanceType DistanceType;
-
     enum CentroidCreationMode {
         CentroidCreationModeDynamic = 0,
         CentroidCreationModeStatic = 1,
@@ -775,7 +773,7 @@ namespace NGTQ {
 #endif
             dataSize = 0;
             dataType = DataTypeFloat;
-            distanceType = DistanceType::DistanceTypeNone;
+            distanceType = polaris::MetricType::METRIC_NONE;
             singleLocalCodebook = false;
             localDivisionNo = 8;
             batchSize = 1000;
@@ -804,7 +802,7 @@ namespace NGTQ {
 #endif
             prop.set("DataSize", (long) dataSize);
             prop.set("DataType", (long) dataType);
-            prop.set("DistanceType", (long) distanceType);
+            prop.set("MetricType", (long) distanceType);
             prop.set("SingleLocalCodebook", (long) singleLocalCodebook);
             prop.set("LocalDivisionNo", (long) localDivisionNo);
             prop.set("BatchSize", (long) batchSize);
@@ -858,7 +856,7 @@ namespace NGTQ {
 #endif
             dataSize = prop.getl("DataSize", dataSize);
             dataType = (DataType) prop.getl("DataType", dataType);
-            distanceType = (DistanceType) prop.getl("DistanceType", distanceType);
+            distanceType = (polaris::MetricType) prop.getl("MetricType", distanceType);
             singleLocalCodebook = prop.getl("SingleLocalCodebook", singleLocalCodebook);
             localDivisionNo = prop.getl("LocalDivisionNo", localDivisionNo);
             batchSize = prop.getl("BatchSize", batchSize);
@@ -925,7 +923,7 @@ namespace NGTQ {
 #endif
         size_t dataSize;
         DataType dataType;
-        DistanceType distanceType;
+        polaris::MetricType distanceType;
         bool singleLocalCodebook;
         size_t localDivisionNo;
         size_t batchSize;
@@ -2370,7 +2368,7 @@ namespace NGTQ {
 
         void setDimension(size_t s) { property.dimension = s; }
 
-        void setDistanceType(DistanceType t) { property.distanceType = t; }
+        void set_metric_type(polaris::MetricType t) { property.distanceType = t; }
 
         size_t getNumOfLocalClusters() { return property.localCentroidLimit; }
 
@@ -3662,7 +3660,7 @@ public:
             polaris::Property property;
 
             property.dimension = globalCodebookIndex.getObjectSpace().getDimension() + 1;
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::MetricType::METRIC_L2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
         polaris::NgtIndex *index = new polaris::NgtIndex("dummy", property);
     std::cerr << "Not implemented" << std::endl;
@@ -4207,11 +4205,11 @@ public:
             }
 
             switch (property.distanceType) {
-                case DistanceType::DistanceTypeL1:
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL1;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL1;
+                case polaris::MetricType::METRIC_L1:
+                    gp.distanceType = polaris::MetricType::METRIC_L1;
+                    lp.distanceType = polaris::MetricType::METRIC_L1;
                     break;
-                case DistanceType::DistanceTypeL2:
+                case polaris::MetricType::METRIC_L2:
 #ifdef NGTQ_DISTANCE_ANGLE
                                                                                                                                             {
 	stringstream msg;
@@ -4219,14 +4217,14 @@ public:
 	POLARIS_THROW_EX(msg);
       }
 #endif
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                    gp.distanceType = polaris::MetricType::METRIC_L2;
+                    lp.distanceType = polaris::MetricType::METRIC_L2;
                     break;
-                case DistanceType::DistanceTypeHamming:
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
+                case polaris::MetricType::METRIC_HAMMING:
+                    gp.distanceType = polaris::MetricType::METRIC_HAMMING;
+                    lp.distanceType = polaris::MetricType::METRIC_HAMMING;
                     break;
-                case DistanceType::DistanceTypeAngle:
+                case polaris::MetricType::METRIC_ANGLE:
 #ifndef NGTQ_DISTANCE_ANGLE
                 {
                     stringstream msg;
@@ -4234,24 +4232,24 @@ public:
                     POLARIS_THROW_EX(msg);
                 }
 #endif
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle;
+                    gp.distanceType = polaris::MetricType::METRIC_ANGLE;
+                    lp.distanceType = polaris::MetricType::METRIC_ANGLE;
                     break;
-                case DistanceType::DistanceTypeNormalizedCosine:
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedCosine;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                case polaris::MetricType::METRIC_NORMALIZED_COSINE:
+                    gp.distanceType = polaris::MetricType::METRIC_NORMALIZED_COSINE;
+                    lp.distanceType = polaris::MetricType::METRIC_L2;
                     break;
-                case DistanceType::DistanceTypeCosine:
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeCosine;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                case polaris::MetricType::METRIC_COSINE:
+                    gp.distanceType = polaris::MetricType::METRIC_COSINE;
+                    lp.distanceType = polaris::MetricType::METRIC_L2;
                     break;
-                case DistanceType::DistanceTypeNormalizedL2:
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedL2;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                case polaris::MetricType::METRIC_NORMALIZED_L2:
+                    gp.distanceType = polaris::MetricType::METRIC_NORMALIZED_L2;
+                    lp.distanceType = polaris::MetricType::METRIC_L2;
                     break;
-                case DistanceType::DistanceTypeInnerProduct:
-                    gp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
-                    lp.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+                case polaris::MetricType::METRIC_INNER_PRODUCT:
+                    gp.distanceType = polaris::MetricType::METRIC_L2;
+                    lp.distanceType = polaris::MetricType::METRIC_L2;
                     break;
                 default: {
                     stringstream msg;

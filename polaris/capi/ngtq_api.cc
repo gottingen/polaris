@@ -188,7 +188,7 @@ void qbg_initialize_construction_parameters(QBGConstructionParameters *parameter
     parameters->number_of_blobs = 0;
     parameters->internal_data_type = NGTQ::DataTypeFloat;
     parameters->data_type = NGTQ::DataTypeFloat;
-    parameters->distance_type = NGTQ::DistanceType::DistanceTypeL2;
+    parameters->distance_type =  polaris::MetricType::METRIC_L2;
 }
 
 bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NGTQGError error) {
@@ -214,7 +214,7 @@ bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NG
         property.localIDByteSize = 1;
         property.dataType = static_cast<NGTQ::DataType>(parameters->internal_data_type);
         property.genuineDataType = static_cast<ObjectFile::DataType>(parameters->data_type);
-        property.distanceType = static_cast<NGTQ::DistanceType>(parameters->distance_type);
+        property.distanceType = static_cast<polaris::MetricType>(parameters->distance_type);
 
         globalProperty.edgeSizeForCreation = 10;
         globalProperty.edgeSizeForSearch = 40;

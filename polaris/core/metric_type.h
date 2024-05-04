@@ -17,24 +17,7 @@ namespace polaris {
 /// Most algorithms support both inner product and L2, with the flat
 /// (brute-force) indices supporting additional metric types for vector
 /// comparison.
-/*
- *  enum DistanceType {
-            DistanceTypeNone = -1,
-            DistanceTypeL1 = 0,
-            DistanceTypeL2 = 1,
-            DistanceTypeHamming = 2,
-            DistanceTypeAngle = 3,
-            DistanceTypeCosine = 4,
-            DistanceTypeNormalizedAngle = 5,
-            DistanceTypeNormalizedCosine = 6,
-            DistanceTypeJaccard = 7,
-            DistanceTypeSparseJaccard = 8,
-            DistanceTypeNormalizedL2 = 9,
-            DistanceTypeInnerProduct = 10,
-            DistanceTypePoincare = 100,  // added by Nyapicom
-            DistanceTypeLorentz = 101  // added by Nyapicom
-        };
- */
+
 enum MetricType {
     METRIC_NONE = -1,          ///< undefined
     METRIC_L1 = 0,                ///< L1 (aka cityblock)

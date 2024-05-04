@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
         polaris::Property property;
         property.dimension = 128;
         property.objectType = polaris::ObjectSpace::ObjectType::Uint8;
-        property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+        property.distanceType = polaris::MetricType::METRIC_L2;
         std::cout << "creating the index framework..." << std::endl;
         polaris::NgtIndex::create(indexPath, property);
         polaris::NgtIndex index(indexPath);

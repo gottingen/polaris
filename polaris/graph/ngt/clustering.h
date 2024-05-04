@@ -811,7 +811,7 @@ namespace polaris {
             property.dimension = dim;
             property.graphType = polaris::Property::GraphType::GraphTypeANNG;
             property.objectType = polaris::NgtIndex::Property::ObjectType::Float;
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::MetricType::METRIC_L2;
 
             float *data = new float[vectors.size() * dim];
             float *ptr = data;

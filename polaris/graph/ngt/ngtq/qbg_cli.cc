@@ -125,22 +125,22 @@ public:
 
         switch (distanceType) {
             case '2':
-                creation.distanceType = NGTQ::DistanceType::DistanceTypeL2;
+                creation.distanceType = polaris::MetricType::METRIC_L2;
                 break;
             case '1':
-                creation.distanceType = NGTQ::DistanceType::DistanceTypeL1;
+                creation.distanceType =  polaris::MetricType::METRIC_L1;
                 break;
             case 'a':
-                creation.distanceType = NGTQ::DistanceType::DistanceTypeAngle;
+                creation.distanceType =  polaris::MetricType::METRIC_ANGLE;
                 break;
             case 'C':
-                creation.distanceType = NGTQ::DistanceType::DistanceTypeNormalizedCosine;
+                creation.distanceType =  polaris::MetricType::METRIC_NORMALIZED_COSINE;
                 break;
             case 'E':
-                creation.distanceType = NGTQ::DistanceType::DistanceTypeL2;
+                creation.distanceType =  polaris::MetricType::METRIC_L2;
                 break;
             case 'i':
-                creation.distanceType = NGTQ::DistanceType::DistanceTypeInnerProduct;
+                creation.distanceType =  polaris::MetricType::METRIC_INNER_PRODUCT;
                 break;
             default:
                 std::stringstream msg;

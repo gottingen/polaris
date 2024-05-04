@@ -45,7 +45,7 @@ namespace QBG {
             genuineDataType = ObjectFile::DataTypeFloat;
 #endif
             dataType = NGTQ::DataTypeFloat;
-            distanceType = NGTQ::DistanceType::DistanceTypeL2;
+            distanceType = polaris::MetricType::METRIC_L2;
             singleLocalCodebook = false;
             numOfSubvectors = 0;
             batchSize = 1000;
@@ -121,7 +121,7 @@ namespace QBG {
         ObjectFile::DataType genuineDataType;
 #endif
         NGTQ::DataType dataType;
-        NGTQ::DistanceType distanceType;
+        polaris::MetricType distanceType;
         bool singleLocalCodebook;
         size_t numOfSubvectors;
         size_t batchSize;
@@ -613,7 +613,7 @@ namespace QBG {
                 POLARIS_THROW_EX(msg);
             }
             double maxMag = 0.0;
-            if (index.getQuantizer().property.distanceType == NGTQ::DistanceType::DistanceTypeInnerProduct) {
+            if (index.getQuantizer().property.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
                 std::cerr << "Inner product." << std::endl;
                 polaris::Timer timer;
                 timer.start();
@@ -655,7 +655,7 @@ namespace QBG {
                     break;
                 }
                 auto object = loader.getObject();
-                if (index.getQuantizer().property.distanceType == NGTQ::DistanceType::DistanceTypeInnerProduct) {
+                if (index.getQuantizer().property.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
                   double mag = 0.0;
                   for (auto &v : object) {
                     //std::cerr << v << ":" << mag << std::endl;

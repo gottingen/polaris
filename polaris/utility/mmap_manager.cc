@@ -98,8 +98,8 @@ namespace MemoryManager {
             }
             if (close(fd) == -1) std::cerr << controlFile << "[WARN] : filedescript cannot close" << std::endl;
 
-            boot_st bootStruct = {0};
-            control_st controlStruct = {0};
+            boot_st bootStruct;
+            control_st controlStruct;
             _impl->initBootStruct(bootStruct, size);
             _impl->initControlStruct(controlStruct, size);
 

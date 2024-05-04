@@ -275,7 +275,7 @@ polaris::NgtIndex::searchUsingOnlyGraph(polaris::SearchQuery &searchQuery) {
 std::vector<float>
 polaris::NgtIndex::makeSparseObject(std::vector<uint32_t> &object) {
     if (static_cast<polaris::GraphIndex &>(getIndex()).getProperty().distanceType !=
-        polaris::ObjectSpace::DistanceType::DistanceTypeSparseJaccard) {
+        polaris::MetricType::METRIC_SPARSE_JACCARD) {
         POLARIS_THROW_EX("polaris::NgtIndex::makeSparseObject: Not sparse jaccard.");
     }
     size_t dimension = getObjectSpace().getDimension();
@@ -305,7 +305,7 @@ polaris::NgtIndex::createIndex(size_t threadNumber, size_t sizeOfRepository) {
         InsertionOrder insertionOrder;
         polaris::Property prop;
         getProperty(prop);
-        if (prop.distanceType == ObjectSpace::DistanceTypeInnerProduct) {
+        if (prop.distanceType == MetricType::METRIC_INNER_PRODUCT) {
             size_t beginId = 1;
             polaris::GraphRepository &graphRepository = static_cast<polaris::GraphIndex &>(getIndex()).repository;
             auto &graphNodes = static_cast<Repository<GraphNode> &>(graphRepository);
@@ -339,7 +339,7 @@ polaris::NgtIndex::Property::set(polaris::Property &prop) {
 #ifdef NGT_REFINEMENT
     if (prop.refinementObjectType != ObjectSpace::ObjectTypeNone) refinementObjectType = prop.refinementObjectType;
 #endif
-    if (prop.distanceType != DistanceType::DistanceTypeNone) distanceType = prop.distanceType;
+    if (prop.distanceType != MetricType::METRIC_NONE) distanceType = prop.distanceType;
     if (prop.indexType != IndexTypeNone) indexType = prop.indexType;
     if (prop.databaseType != DatabaseTypeNone) databaseType = prop.databaseType;
     if (prop.objectAlignment != ObjectAlignmentNone) objectAlignment = prop.objectAlignment;
@@ -508,8 +508,8 @@ void
 polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
     assert(prop.dimension != 0);
     size_t dimension = prop.dimension;
-    if (prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeSparseJaccard ||
-        prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
+    if (prop.distanceType == polaris::MetricType::METRIC_SPARSE_JACCARD ||
+        prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
         dimension++;
     }
 

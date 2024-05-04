@@ -17,6 +17,7 @@
 #pragma once
 
 #include <polaris/distance/primitive_comparator.h>
+#include <polaris/core/metric_type.h>
 
 class ObjectSpace;
 
@@ -119,23 +120,6 @@ namespace polaris {
             virtual ~Comparator() {}
         };
 
-        enum DistanceType {
-            DistanceTypeNone = -1,
-            DistanceTypeL1 = 0,
-            DistanceTypeL2 = 1,
-            DistanceTypeHamming = 2,
-            DistanceTypeAngle = 3,
-            DistanceTypeCosine = 4,
-            DistanceTypeNormalizedAngle = 5,
-            DistanceTypeNormalizedCosine = 6,
-            DistanceTypeJaccard = 7,
-            DistanceTypeSparseJaccard = 8,
-            DistanceTypeNormalizedL2 = 9,
-            DistanceTypeInnerProduct = 10,
-            DistanceTypePoincare = 100,  // added by Nyapicom
-            DistanceTypeLorentz = 101  // added by Nyapicom
-        };
-
         enum ObjectType {
             ObjectTypeNone = 0,
             Uint8 = 1,
@@ -147,7 +131,7 @@ namespace polaris {
 
         typedef std::priority_queue<ObjectDistance, std::vector<ObjectDistance>, std::less<ObjectDistance> > ResultSet;
 
-        ObjectSpace(size_t d) : dimension(d), distanceType(DistanceTypeNone), comparator(0), normalization(false),
+        ObjectSpace(size_t d) : dimension(d), distanceType(MetricType::METRIC_NONE), comparator(0), normalization(false),
                                 prefetchOffset(-1), prefetchSize(-1) {}
 
         virtual ~ObjectSpace() { if (comparator != 0) { delete comparator; }}
@@ -215,7 +199,7 @@ namespace polaris {
 
         virtual ObjectRepository &getRepository() = 0;
 
-        virtual void setDistanceType(DistanceType t) = 0;
+        virtual void set_metric_type(MetricType t) = 0;
 
         virtual void *getObject(size_t idx) = 0;
 
@@ -229,7 +213,7 @@ namespace polaris {
 
         virtual void setMagnitude(float maxMag, polaris::Repository<void> &graphNodes, ObjectID beginId) = 0;
 
-        DistanceType getDistanceType() { return distanceType; }
+        MetricType getDistanceType() { return distanceType; }
 
         size_t getDimension() { return dimension; }
 
@@ -286,16 +270,16 @@ namespace polaris {
         }
 
         bool isNormalizedDistance() {
-            return (getDistanceType() == ObjectSpace::DistanceTypeNormalizedAngle) ||
-                   (getDistanceType() == ObjectSpace::DistanceTypeNormalizedCosine) ||
-                   (getDistanceType() == ObjectSpace::DistanceTypeNormalizedL2);
+            return (getDistanceType() == MetricType::METRIC_NORMALIZED_ANGLE) ||
+                   (getDistanceType() == MetricType::METRIC_NORMALIZED_COSINE) ||
+                   (getDistanceType() == MetricType::METRIC_NORMALIZED_L2);
         }
 
         polaris::distance_t compareWithL1(polaris::Object &o1, polaris::Object &o2);
 
     protected:
         const size_t dimension;
-        DistanceType distanceType;
+        MetricType distanceType;
         Comparator *comparator;
         bool normalization;
         int32_t prefetchOffset;

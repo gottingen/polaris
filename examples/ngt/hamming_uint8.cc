@@ -28,7 +28,7 @@ main(int argc, char **argv) {
         polaris::Property property;
         property.dimension = bitSize / 8;
         property.objectType = polaris::ObjectSpace::ObjectType::Uint8;
-        property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
+        property.distanceType = polaris::MetricType::METRIC_HAMMING;
         polaris::NgtIndex::create(indexPath, property);
         polaris::NgtIndex index(indexPath);
         ifstream is(objectFile);

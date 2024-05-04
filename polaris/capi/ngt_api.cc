@@ -242,7 +242,7 @@ bool ngt_set_property_object_type_integer(NGTProperty prop, NGTError error) {
   return true;
 }
 
-bool ngt_set_property_distance_type(NGTProperty prop, polaris::NgtIndex::Property::DistanceType type, NGTError error) {
+bool ngt_set_property_distance_type(NGTProperty prop, polaris::MetricType type, NGTError error) {
   if(prop == NULL){
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : parametor error: prop = " << prop;
@@ -255,55 +255,55 @@ bool ngt_set_property_distance_type(NGTProperty prop, polaris::NgtIndex::Propert
 }
 
 bool ngt_set_property_distance_type_l1(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeL1, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_L1, error);
 }
 
 bool ngt_set_property_distance_type_l2(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeL2, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_L2, error);
 }
 
 bool ngt_set_property_distance_type_angle(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_ANGLE, error);
 }
 
 bool ngt_set_property_distance_type_hamming(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_HAMMING, error);
 }
 
 bool ngt_set_property_distance_type_poincare(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypePoincare, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_POINCARE, error);
 }
 
 bool ngt_set_property_distance_type_lorentz(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeLorentz, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_LORENTZ, error);
 }
 
 bool ngt_set_property_distance_type_jaccard(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeJaccard, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_JACCARD, error);
 }
 
 bool ngt_set_property_distance_type_sparse_jaccard(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeSparseJaccard, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_SPARSE_JACCARD, error);
 }
 
 bool ngt_set_property_distance_type_normalized_l2(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedL2, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_NORMALIZED_L2, error);
 }
 
 bool ngt_set_property_distance_type_cosine(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeCosine, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_COSINE, error);
 }
 
 bool ngt_set_property_distance_type_normalized_angle(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedAngle, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_NORMALIZED_ANGLE, error);
 }
 
 bool ngt_set_property_distance_type_normalized_cosine(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedCosine, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_NORMALIZED_COSINE, error);
 }
 
 bool ngt_set_property_distance_type_inner_product(NGTProperty prop, NGTError error) {
-  return ngt_set_property_distance_type(prop, polaris::NgtIndex::Property::DistanceType::DistanceTypeInnerProduct, error);
+  return ngt_set_property_distance_type(prop, polaris::MetricType::METRIC_INNER_PRODUCT, error);
 }
 
 NGTObjectDistances ngt_create_empty_results(NGTError error) {

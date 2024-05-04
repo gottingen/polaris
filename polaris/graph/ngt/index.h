@@ -52,7 +52,6 @@ namespace polaris {
         class Property {
         public:
             typedef ObjectSpace::ObjectType ObjectType;
-            typedef ObjectSpace::DistanceType DistanceType;
             typedef NeighborhoodGraph::SeedType SeedType;
             typedef NeighborhoodGraph::GraphType GraphType;
             enum ObjectAlignment {
@@ -80,7 +79,7 @@ namespace polaris {
 #ifdef NGT_REFINEMENT
                 refinementObjectType	= ObjectSpace::ObjectType::Float;
 #endif
-                distanceType = DistanceType::DistanceTypeL2;
+                distanceType = MetricType::METRIC_L2;
                 indexType = IndexType::GraphAndTree;
                 objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
                 pathAdjustmentInterval = 0;
@@ -99,7 +98,7 @@ namespace polaris {
 #ifdef NGT_REFINEMENT
                 refinementObjectType	= ObjectSpace::ObjectTypeNone;
 #endif
-                distanceType = DistanceType::DistanceTypeNone;
+                distanceType = MetricType::METRIC_NONE;
                 indexType = IndexTypeNone;
                 databaseType = DatabaseTypeNone;
                 objectAlignment = ObjectAlignment::ObjectAlignmentNone;
@@ -142,47 +141,47 @@ namespace polaris {
                 }
 #endif
                 switch (distanceType) {
-                    case DistanceType::DistanceTypeNone:
-                        p.set("DistanceType", "None");
+                    case MetricType::METRIC_NONE:
+                        p.set("MetricType", "None");
                         break;
-                    case DistanceType::DistanceTypeL1:
-                        p.set("DistanceType", "L1");
+                    case MetricType::METRIC_L1:
+                        p.set("MetricType", "L1");
                         break;
-                    case DistanceType::DistanceTypeL2:
-                        p.set("DistanceType", "L2");
+                    case MetricType::METRIC_L2:
+                        p.set("MetricType", "L2");
                         break;
-                    case DistanceType::DistanceTypeHamming:
-                        p.set("DistanceType", "Hamming");
+                    case MetricType::METRIC_HAMMING:
+                        p.set("MetricType", "Hamming");
                         break;
-                    case DistanceType::DistanceTypeJaccard:
-                        p.set("DistanceType", "Jaccard");
+                    case MetricType::METRIC_JACCARD:
+                        p.set("MetricType", "Jaccard");
                         break;
-                    case DistanceType::DistanceTypeSparseJaccard:
-                        p.set("DistanceType", "SparseJaccard");
+                    case MetricType::METRIC_SPARSE_JACCARD:
+                        p.set("MetricType", "SparseJaccard");
                         break;
-                    case DistanceType::DistanceTypeAngle:
-                        p.set("DistanceType", "Angle");
+                    case MetricType::METRIC_ANGLE:
+                        p.set("MetricType", "Angle");
                         break;
-                    case DistanceType::DistanceTypeCosine:
-                        p.set("DistanceType", "Cosine");
+                    case MetricType::METRIC_COSINE:
+                        p.set("MetricType", "Cosine");
                         break;
-                    case DistanceType::DistanceTypeNormalizedAngle:
-                        p.set("DistanceType", "NormalizedAngle");
+                    case MetricType::METRIC_NORMALIZED_ANGLE:
+                        p.set("MetricType", "NormalizedAngle");
                         break;
-                    case DistanceType::DistanceTypeNormalizedCosine:
-                        p.set("DistanceType", "NormalizedCosine");
+                    case MetricType::METRIC_NORMALIZED_COSINE:
+                        p.set("MetricType", "NormalizedCosine");
                         break;
-                    case DistanceType::DistanceTypeNormalizedL2:
-                        p.set("DistanceType", "NormalizedL2");
+                    case MetricType::METRIC_NORMALIZED_L2:
+                        p.set("MetricType", "NormalizedL2");
                         break;
-                    case DistanceType::DistanceTypeInnerProduct:
-                        p.set("DistanceType", "InnerProduct");
+                    case MetricType::METRIC_INNER_PRODUCT:
+                        p.set("MetricType", "InnerProduct");
                         break;
-                    case DistanceType::DistanceTypePoincare:
-                        p.set("DistanceType", "Poincare");
+                    case MetricType::METRIC_POINCARE:
+                        p.set("MetricType", "Poincare");
                         break;  // added by Nyapicom
-                    case DistanceType::DistanceTypeLorentz:
-                        p.set("DistanceType", "Lorentz");
+                    case MetricType::METRIC_LORENTZ:
+                        p.set("MetricType", "Lorentz");
                         break;  // added by Nyapicom
                     default :
                         std::cerr << "Fatal error. Invalid distance type. " << distanceType << std::endl;
@@ -274,42 +273,42 @@ namespace polaris {
                   }
                 }
 #endif
-                it = p.find("DistanceType");
+                it = p.find("MetricType");
                 if (it != p.end()) {
                     if (it->second == "None") {
-                        distanceType = DistanceType::DistanceTypeNone;
+                        distanceType = MetricType::METRIC_NONE;
                     } else if (it->second == "L1") {
-                        distanceType = DistanceType::DistanceTypeL1;
+                        distanceType = MetricType::METRIC_L1;
                     } else if (it->second == "L2") {
-                        distanceType = DistanceType::DistanceTypeL2;
+                        distanceType = MetricType::METRIC_L2;
                     } else if (it->second == "Hamming") {
-                        distanceType = DistanceType::DistanceTypeHamming;
+                        distanceType = MetricType::METRIC_HAMMING;
                     } else if (it->second == "Jaccard") {
-                        distanceType = DistanceType::DistanceTypeJaccard;
+                        distanceType = MetricType::METRIC_JACCARD;
                     } else if (it->second == "SparseJaccard") {
-                        distanceType = DistanceType::DistanceTypeSparseJaccard;
+                        distanceType = MetricType::METRIC_SPARSE_JACCARD;
                     } else if (it->second == "Angle") {
-                        distanceType = DistanceType::DistanceTypeAngle;
+                        distanceType = MetricType::METRIC_ANGLE;
                     } else if (it->second == "Cosine") {
-                        distanceType = DistanceType::DistanceTypeCosine;
+                        distanceType = MetricType::METRIC_COSINE;
                     } else if (it->second == "Poincare") {  // added by Nyapicom
-                        distanceType = DistanceType::DistanceTypePoincare;
+                        distanceType = MetricType::METRIC_POINCARE;
                     } else if (it->second == "Lorentz") {  // added by Nyapicom
-                        distanceType = DistanceType::DistanceTypeLorentz;
+                        distanceType = MetricType::METRIC_LORENTZ;
                     } else if (it->second == "NormalizedAngle") {
-                        distanceType = DistanceType::DistanceTypeNormalizedAngle;
+                        distanceType = MetricType::METRIC_NORMALIZED_ANGLE;
                     } else if (it->second == "NormalizedCosine") {
-                        distanceType = DistanceType::DistanceTypeNormalizedCosine;
+                        distanceType = MetricType::METRIC_NORMALIZED_COSINE;
                     } else if (it->second == "NormalizedL2") {
-                        distanceType = DistanceType::DistanceTypeNormalizedL2;
+                        distanceType = MetricType::METRIC_NORMALIZED_L2;
                     } else if (it->second == "InnerProduct") {
-                        distanceType = DistanceType::DistanceTypeInnerProduct;
+                        distanceType = MetricType::METRIC_INNER_PRODUCT;
                     } else {
                         std::cerr << "Invalid distance_t Type in the property. " << it->first << ":" << it->second
                                   << std::endl;
                     }
                 } else {
-                    std::cerr << "Not found \"DistanceType\"" << std::endl;
+                    std::cerr << "Not found \"MetricType\"" << std::endl;
                 }
                 it = p.find("IndexType");
                 if (it != p.end()) {
@@ -377,7 +376,7 @@ namespace polaris {
             int dimension;
             int threadPoolSize;
             ObjectSpace::ObjectType objectType;
-            DistanceType distanceType;
+            MetricType distanceType;
             IndexType indexType;
             DatabaseType databaseType;
             ObjectAlignment objectAlignment;

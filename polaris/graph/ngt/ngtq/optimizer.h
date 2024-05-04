@@ -130,7 +130,7 @@ namespace QBG {
 
       polaris::Property property;
       property.objectType = polaris::NgtIndex::Property::ObjectType::Float;
-      property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+      property.distanceType = polaris::MetricType::METRIC_L2;
       if (globalCentroid[0].size() != vectors[0].size()) {
 	std::cerr << "optimizer: Warning. The dimension is inconsistency. " << globalCentroid[0].size() << ":" << vectors[0].size() << std::endl;
       }

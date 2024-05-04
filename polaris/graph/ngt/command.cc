@@ -182,44 +182,44 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (distanceType) {
         case '1':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL1;
+            property.distanceType = polaris::MetricType::METRIC_L1;
             break;
         case '2':
         case 'e':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeL2;
+            property.distanceType = polaris::MetricType::METRIC_L2;
             break;
         case 'a':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeAngle;
+            property.distanceType = polaris::MetricType::METRIC_ANGLE;
             break;
         case 'A':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedAngle;
+            property.distanceType = polaris::MetricType::METRIC_NORMALIZED_ANGLE;
             break;
         case 'h':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeHamming;
+            property.distanceType = polaris::MetricType::METRIC_HAMMING;
             break;
         case 'j':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeJaccard;
+            property.distanceType = polaris::MetricType::METRIC_JACCARD;
             break;
         case 'J':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeSparseJaccard;
+            property.distanceType = polaris::MetricType::METRIC_SPARSE_JACCARD;
             break;
         case 'c':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeCosine;
+            property.distanceType = polaris::MetricType::METRIC_COSINE;
             break;
         case 'C':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedCosine;
+            property.distanceType = polaris::MetricType::METRIC_NORMALIZED_COSINE;
             break;
         case 'E':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeNormalizedL2;
+            property.distanceType = polaris::MetricType::METRIC_NORMALIZED_L2;
             break;
         case 'i':
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeInnerProduct;
+            property.distanceType = polaris::MetricType::METRIC_INNER_PRODUCT;
             break;
         case 'p':  // added by Nyapicom
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypePoincare;
+            property.distanceType = polaris::MetricType::METRIC_POINCARE;
             break;
         case 'l':  // added by Nyapicom
-            property.distanceType = polaris::NgtIndex::Property::DistanceType::DistanceTypeLorentz;
+            property.distanceType = polaris::MetricType::METRIC_LORENTZ;
             break;
         default:
             std::stringstream msg;
@@ -315,7 +315,7 @@ void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t
         vector<string> tokens;
         polaris::Common::tokenize(line, tokens, "\t, ");
         for (auto &v: tokens) object.push_back(polaris::Common::strtod(v));
-        if (prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
+        if (prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
             double mag = 0.0;
             for (auto &v: object) {
                 mag += v * v;
@@ -348,7 +348,7 @@ void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t
             timer.restart();
         }
     }
-    if (prop.distanceType == polaris::ObjectSpace::DistanceType::DistanceTypeInnerProduct) {
+    if (prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
         polaris::ObjectSpace *rep = 0;
 #ifdef NGT_REFINEMENT
         if (destination == 'r') {

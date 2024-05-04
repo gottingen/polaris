@@ -241,31 +241,31 @@ namespace polaris {
         class Search {
         public:
             static void
-            (*getMethod(polaris::ObjectSpace::DistanceType dtype, polaris::ObjectSpace::ObjectType otype, size_t size))(
+            (*getMethod(MetricType dtype, polaris::ObjectSpace::ObjectType otype, size_t size))(
                     polaris::NeighborhoodGraph &, polaris::SearchContainer &, polaris::ObjectDistances &) {
                 if (size < 5000000) {
                     switch (otype) {
                         case polaris::ObjectSpace::Float:
                             switch (dtype) {
-                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloat;
-                                case polaris::ObjectSpace::DistanceTypeCosine :
+                                case polaris::MetricType::METRIC_COSINE :
                                     return cosineSimilarityFloat;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::MetricType::METRIC_NORMALIZED_ANGLE :
                                     return normalizedAngleFloat;
-                                case polaris::ObjectSpace::DistanceTypeAngle :
+                                case polaris::MetricType::METRIC_ANGLE :
                                     return angleFloat;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::MetricType::METRIC_NORMALIZED_L2 :
                                     return normalizedL2Float;
-                                case polaris::ObjectSpace::DistanceTypeL2 :
+                                case polaris::MetricType::METRIC_L2 :
                                     return l2Float;
-                                case polaris::ObjectSpace::DistanceTypeL1 :
+                                case polaris::MetricType::METRIC_L1 :
                                     return l1Float;
-                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::MetricType::METRIC_SPARSE_JACCARD :
                                     return sparseJaccardFloat;
-                                case polaris::ObjectSpace::DistanceTypePoincare :
+                                case polaris::MetricType::METRIC_POINCARE :
                                     return poincareFloat;  // added by Nyapicom
-                                case polaris::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::MetricType::METRIC_LORENTZ :
                                     return lorentzFloat;  // added by Nyapicom
                                 default:
                                     return l2Float;
@@ -273,13 +273,13 @@ namespace polaris {
                             break;
                         case polaris::ObjectSpace::Uint8:
                             switch (dtype) {
-                                case polaris::ObjectSpace::DistanceTypeHamming :
+                                case polaris::MetricType::METRIC_HAMMING :
                                     return hammingUint8;
-                                case polaris::ObjectSpace::DistanceTypeJaccard :
+                                case polaris::MetricType::METRIC_JACCARD :
                                     return jaccardUint8;
-                                case polaris::ObjectSpace::DistanceTypeL2 :
+                                case polaris::MetricType::METRIC_L2 :
                                     return l2Uint8;
-                                case polaris::ObjectSpace::DistanceTypeL1 :
+                                case polaris::MetricType::METRIC_L1 :
                                     return l1Uint8;
                                 default :
                                     return l2Uint8;
@@ -287,25 +287,25 @@ namespace polaris {
                             break;
                         case polaris::ObjectSpace::Float16:
                             switch (dtype) {
-                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloat16;
-                                case polaris::ObjectSpace::DistanceTypeCosine :
+                                case polaris::MetricType::METRIC_COSINE :
                                     return cosineSimilarityFloat16;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::MetricType::METRIC_NORMALIZED_ANGLE :
                                     return normalizedAngleFloat16;
-                                case polaris::ObjectSpace::DistanceTypeAngle :
+                                case polaris::MetricType::METRIC_ANGLE :
                                     return angleFloat16;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::MetricType::METRIC_NORMALIZED_L2 :
                                     return normalizedL2Float16;
-                                case polaris::ObjectSpace::DistanceTypeL2 :
+                                case polaris::MetricType::METRIC_L2 :
                                     return l2Float16;
-                                case polaris::ObjectSpace::DistanceTypeL1 :
+                                case polaris::MetricType::METRIC_L1 :
                                     return l1Float16;
-                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::MetricType::METRIC_SPARSE_JACCARD :
                                     return sparseJaccardFloat16;
-                                case polaris::ObjectSpace::DistanceTypePoincare :
+                                case polaris::MetricType::METRIC_POINCARE :
                                     return poincareFloat16;  // added by Nyapicom
-                                case polaris::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::MetricType::METRIC_LORENTZ :
                                     return lorentzFloat16;  // added by Nyapicom
                                 default:
                                     return l2Float16;
@@ -320,25 +320,25 @@ namespace polaris {
                     switch (otype) {
                         case polaris::ObjectSpace::Float:
                             switch (dtype) {
-                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeCosine :
+                                case polaris::MetricType::METRIC_COSINE :
                                     return cosineSimilarityFloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::MetricType::METRIC_NORMALIZED_ANGLE :
                                     return normalizedAngleFloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeAngle :
+                                case polaris::MetricType::METRIC_ANGLE :
                                     return angleFloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::MetricType::METRIC_NORMALIZED_L2 :
                                     return normalizedL2FloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeL2 :
+                                case polaris::MetricType::METRIC_L2 :
                                     return l2FloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeL1 :
+                                case polaris::MetricType::METRIC_L1 :
                                     return l1FloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::MetricType::METRIC_SPARSE_JACCARD :
                                     return sparseJaccardFloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypePoincare :
+                                case polaris::MetricType::METRIC_POINCARE :
                                     return poincareFloatForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::MetricType::METRIC_LORENTZ :
                                     return lorentzFloatForLargeDataset;
                                 default:
                                     return l2FloatForLargeDataset;
@@ -346,13 +346,13 @@ namespace polaris {
                             break;
                         case polaris::ObjectSpace::Uint8:
                             switch (dtype) {
-                                case polaris::ObjectSpace::DistanceTypeHamming :
+                                case polaris::MetricType::METRIC_HAMMING :
                                     return hammingUint8ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeJaccard :
+                                case polaris::MetricType::METRIC_JACCARD :
                                     return jaccardUint8ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeL2 :
+                                case polaris::MetricType::METRIC_L2 :
                                     return l2Uint8ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeL1 :
+                                case polaris::MetricType::METRIC_L1 :
                                     return l1Uint8ForLargeDataset;
                                 default :
                                     return l2Uint8ForLargeDataset;
@@ -360,25 +360,25 @@ namespace polaris {
                             break;
                         case polaris::ObjectSpace::Float16:
                             switch (dtype) {
-                                case polaris::ObjectSpace::DistanceTypeNormalizedCosine :
+                                case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloat16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeCosine :
+                                case polaris::MetricType::METRIC_COSINE :
                                     return cosineSimilarityFloat16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedAngle :
+                                case polaris::MetricType::METRIC_NORMALIZED_ANGLE :
                                     return normalizedAngleFloat16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeAngle :
+                                case polaris::MetricType::METRIC_ANGLE :
                                     return angleFloat16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeNormalizedL2 :
+                                case polaris::MetricType::METRIC_NORMALIZED_L2 :
                                     return normalizedL2Float16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeL2 :
+                                case polaris::MetricType::METRIC_L2 :
                                     return l2Float16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeL1 :
+                                case polaris::MetricType::METRIC_L1 :
                                     return l1Float16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeSparseJaccard :
+                                case polaris::MetricType::METRIC_SPARSE_JACCARD :
                                     return sparseJaccardFloat16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypePoincare :
+                                case polaris::MetricType::METRIC_POINCARE :
                                     return poincareFloat16ForLargeDataset;
-                                case polaris::ObjectSpace::DistanceTypeLorentz :
+                                case polaris::MetricType::METRIC_LORENTZ :
                                     return lorentzFloat16ForLargeDataset;
                                 default:
                                     return l2Float16ForLargeDataset;
