@@ -163,7 +163,7 @@ void pairwise_extra_distances(
         HANDLE_VAR(BrayCurtis);
         HANDLE_VAR(JensenShannon);
         HANDLE_VAR(Lp);
-        HANDLE_VAR(Jaccard);
+        HANDLE_VAR(JACCARD);
 #undef HANDLE_VAR
         default:
             POLARIS_THROW_MSG("metric type not implemented");
@@ -194,7 +194,7 @@ void knn_extra_metrics(
         HANDLE_VAR(BrayCurtis);
         HANDLE_VAR(JensenShannon);
         HANDLE_VAR(Lp);
-        HANDLE_VAR(Jaccard);
+        HANDLE_VAR(JACCARD);
 #undef HANDLE_VAR
         default:
             POLARIS_THROW_MSG("metric type not implemented");
@@ -241,7 +241,7 @@ FlatCodesDistanceComputer* get_extra_distance_computer(
         HANDLE_VAR(BrayCurtis);
         HANDLE_VAR(JensenShannon);
         HANDLE_VAR(Lp);
-        HANDLE_VAR(Jaccard);
+        HANDLE_VAR(JACCARD);
 #undef HANDLE_VAR
         default:
             POLARIS_THROW_MSG("metric type not implemented");

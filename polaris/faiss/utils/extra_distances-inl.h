@@ -117,7 +117,7 @@ inline float VectorDistance<METRIC_JensenShannon>::operator()(
 }
 
 template <>
-inline float VectorDistance<METRIC_Jaccard>::operator()(
+inline float VectorDistance<METRIC_JACCARD>::operator()(
         const float* x,
         const float* y) const {
     // WARNING: this distance is defined only for positive input vectors.

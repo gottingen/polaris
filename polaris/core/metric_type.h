@@ -17,22 +17,48 @@ namespace polaris {
 /// Most algorithms support both inner product and L2, with the flat
 /// (brute-force) indices supporting additional metric types for vector
 /// comparison.
+/*
+ *  enum DistanceType {
+            DistanceTypeNone = -1,
+            DistanceTypeL1 = 0,
+            DistanceTypeL2 = 1,
+            DistanceTypeHamming = 2,
+            DistanceTypeAngle = 3,
+            DistanceTypeCosine = 4,
+            DistanceTypeNormalizedAngle = 5,
+            DistanceTypeNormalizedCosine = 6,
+            DistanceTypeJaccard = 7,
+            DistanceTypeSparseJaccard = 8,
+            DistanceTypeNormalizedL2 = 9,
+            DistanceTypeInnerProduct = 10,
+            DistanceTypePoincare = 100,  // added by Nyapicom
+            DistanceTypeLorentz = 101  // added by Nyapicom
+        };
+ */
 enum MetricType {
-    METRIC_INNER_PRODUCT = 0, ///< maximum inner product search
+    METRIC_NONE = -1,          ///< undefined
+    METRIC_L1 = 0,                ///< L1 (aka cityblock)
     METRIC_L2 = 1,            ///< squared L2 search
-    METRIC_L1,                ///< L1 (aka cityblock)
-    METRIC_Linf,              ///< infinity distance
-    METRIC_Lp,                ///< L_p distance, p is given by a polaris::Index
-                              /// metric_arg
-    METRIC_COSINE,            ///< cosine similarity
-    METRIC_FAST_L2,           ///< fast L2 search
+    METRIC_HAMMING = 2,        ///< Hamming distance (binary vectors)
+    METRIC_ANGLE = 3,          ///< angle distance
+    METRIC_COSINE = 4,            ///< cosine similarity
+    METRIC_NORMALIZED_ANGLE = 5,  ///< normalized angle distance
+    METRIC_NORMALIZED_COSINE = 6, ///< normalized cosine distance
+    METRIC_JACCARD = 7,            ///< Jaccard distance defined as: sum_i(min(a_i, b_i)) / sum_i(max(a_i, b_i))
+    METRIC_SPARSE_JACCARD = 8,    ///< Jaccard distance for sparse binary vectors
+    METRIC_NORMALIZED_L2 = 9,     ///< normalized L2 distance
+    METRIC_INNER_PRODUCT = 10, ///< maximum inner product search
+    METRIC_POINCARE = 11,     ///< Poincare distance
+    METRIC_LORENTZ = 12,      ///< Lorentz distance
+    METRIC_FAST_L2 = 13,           ///< fast L2 search
 
     /// some additional metrics defined in scipy.spatial.distance
+    METRIC_Linf,              ///< infinity distance
+    METRIC_Lp,                ///< L_p distance, p is given by a polaris::Index
+    /// metric_arg
     METRIC_Canberra = 20,
     METRIC_BrayCurtis,
     METRIC_JensenShannon,
-    METRIC_Jaccard, ///< defined as: sum_i(min(a_i, b_i)) / sum_i(max(a_i, b_i))
-                    ///< where a_i, b_i > 0
 };
 
 /// all vector indices are this type
@@ -42,7 +68,7 @@ using idx_t = int64_t;
 /// we need to support similarity and dis-similarity metrics in a flexible way
 constexpr bool is_similarity_metric(MetricType metric_type) {
     return ((metric_type == METRIC_INNER_PRODUCT) ||
-            (metric_type == METRIC_Jaccard));
+            (metric_type == METRIC_JACCARD));
 }
 
 } // namespace polaris
