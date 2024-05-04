@@ -1052,7 +1052,7 @@ namespace polaris {
 
         void outputObject(std::ostream &os, std::vector<float> &v, polaris::Property &prop) {
             switch (prop.objectType) {
-                case polaris::ObjectSpace::ObjectType::Uint8: {
+                case polaris::ObjectType::Uint8: {
                     for (auto i = v.begin(); i != v.end(); ++i) {
                         int d = *i;
                         os << d;
@@ -1064,8 +1064,8 @@ namespace polaris {
                 }
                     break;
                 default:
-                case polaris::ObjectSpace::ObjectType::Float16:
-                case polaris::ObjectSpace::ObjectType::Float: {
+                case polaris::ObjectType::Float16:
+                case polaris::ObjectType::Float: {
                     for (auto i = v.begin(); i != v.end(); ++i) {
                         os << *i;
                         if (i + 1 != v.end()) {
@@ -1090,7 +1090,7 @@ namespace polaris {
         std::vector<float> extractObject(size_t id, polaris::Property &prop) {
             std::vector<float> v;
             switch (prop.objectType) {
-                case polaris::ObjectSpace::ObjectType::Uint8: {
+                case polaris::ObjectType::Uint8: {
                     auto *obj = static_cast<uint8_t *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
                         int d = *obj++;
@@ -1098,7 +1098,7 @@ namespace polaris {
                     }
                 }
                     break;
-                case polaris::ObjectSpace::ObjectType::Float16: {
+                case polaris::ObjectType::Float16: {
                     auto *obj = static_cast<polaris::float16 *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
                         float d = *obj++;
@@ -1107,7 +1107,7 @@ namespace polaris {
                 }
                     break;
                 default:
-                case polaris::ObjectSpace::ObjectType::Float: {
+                case polaris::ObjectType::Float: {
                     auto *obj = static_cast<float *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
                         float d = *obj++;
@@ -1122,7 +1122,7 @@ namespace polaris {
         std::vector<float> meanObject(size_t id1, size_t id2, polaris::Property &prop) {
             std::vector<float> v;
             switch (prop.objectType) {
-                case polaris::ObjectSpace::ObjectType::Uint8: {
+                case polaris::ObjectType::Uint8: {
                     auto *obj1 = static_cast<uint8_t *>(index.getObjectSpace().getObject(id1));
                     auto *obj2 = static_cast<uint8_t *>(index.getObjectSpace().getObject(id2));
                     for (int i = 0; i < prop.dimension; i++) {
@@ -1131,7 +1131,7 @@ namespace polaris {
                     }
                 }
                     break;
-                case polaris::ObjectSpace::ObjectType::Float16: {
+                case polaris::ObjectType::Float16: {
                     auto *obj1 = static_cast<polaris::float16 *>(index.getObjectSpace().getObject(id1));
                     auto *obj2 = static_cast<polaris::float16 *>(index.getObjectSpace().getObject(id2));
                     for (int i = 0; i < prop.dimension; i++) {
@@ -1141,7 +1141,7 @@ namespace polaris {
                 }
                     break;
                 default:
-                case polaris::ObjectSpace::ObjectType::Float: {
+                case polaris::ObjectType::Float: {
                     auto *obj1 = static_cast<float *>(index.getObjectSpace().getObject(id1));
                     auto *obj2 = static_cast<float *>(index.getObjectSpace().getObject(id2));
                     for (int i = 0; i < prop.dimension; i++) {

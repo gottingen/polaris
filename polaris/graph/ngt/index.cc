@@ -335,7 +335,7 @@ void
 polaris::NgtIndex::Property::set(polaris::Property &prop) {
     if (prop.dimension != -1) dimension = prop.dimension;
     if (prop.threadPoolSize != -1) threadPoolSize = prop.threadPoolSize;
-    if (prop.objectType != ObjectSpace::ObjectTypeNone) objectType = prop.objectType;
+    if (prop.objectType != ObjectType::ObjectTypeNone) objectType = prop.objectType;
 #ifdef NGT_REFINEMENT
     if (prop.refinementObjectType != ObjectSpace::ObjectTypeNone) refinementObjectType = prop.refinementObjectType;
 #endif
@@ -514,13 +514,13 @@ polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
     }
 
     switch (prop.objectType) {
-        case polaris::ObjectSpace::ObjectType::Float :
+        case polaris::ObjectType::Float :
             objectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
             break;
-        case polaris::ObjectSpace::ObjectType::Uint8 :
+        case polaris::ObjectType::Uint8 :
             objectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
             break;
-        case polaris::ObjectSpace::ObjectType::Float16 :
+        case polaris::ObjectType::Float16 :
             objectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
             break;
         default:
@@ -530,16 +530,16 @@ polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
     }
 #ifdef NGT_REFINEMENT
     switch (prop.refinementObjectType) {
-    case polaris::ObjectSpace::ObjectType::Float :
+    case polaris::ObjectType::Float :
       refinementObjectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
       break;
-    case polaris::ObjectSpace::ObjectType::Uint8 :
+    case polaris::ObjectType::Uint8 :
       refinementObjectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
       break;
-    case polaris::ObjectSpace::ObjectType::Float16 :
+    case polaris::ObjectType::Float16 :
       refinementObjectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
       break;
-    case polaris::ObjectSpace::ObjectType::Bfloat16 :
+    case polaris::ObjectType::Bfloat16 :
       refinementObjectSpace = new ObjectSpaceRepository<bfloat16, float>(dimension, typeid(bfloat16), prop.distanceType);
       break;
     default:

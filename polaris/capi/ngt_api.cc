@@ -195,15 +195,15 @@ int32_t ngt_get_property_object_type(NGTProperty prop, NGTError error) {
 }
 
 bool ngt_is_property_object_type_float(int32_t object_type) {
-    return (object_type == polaris::ObjectSpace::ObjectType::Float);
+    return (object_type == polaris::ObjectType::Float);
 }
 
 bool ngt_is_property_object_type_float16(int32_t object_type) {
-    return (object_type == polaris::ObjectSpace::ObjectType::Float16);
+    return (object_type == polaris::ObjectType::Float16);
 }
 
 bool ngt_is_property_object_type_integer(int32_t object_type) {
-    return (object_type == polaris::ObjectSpace::ObjectType::Uint8);
+    return (object_type == polaris::ObjectType::Uint8);
 }
 
 bool ngt_set_property_object_type_float(NGTProperty prop, NGTError error) {
@@ -214,7 +214,7 @@ bool ngt_set_property_object_type_float(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectSpace::ObjectType::Float;
+  (*static_cast<polaris::Property*>(prop)).objectType =polaris::ObjectType::Float;
   return true;
 }
 
@@ -226,7 +226,7 @@ bool ngt_set_property_object_type_float16(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectSpace::ObjectType::Float16;
+  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectType::Float16;
   return true;
 }
 
@@ -238,7 +238,7 @@ bool ngt_set_property_object_type_integer(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectSpace::ObjectType::Uint8;
+  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectType::Uint8;
   return true;
 }
 

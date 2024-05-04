@@ -121,15 +121,6 @@ namespace polaris {
             virtual ~Comparator() {}
         };
 
-        enum ObjectType {
-            ObjectTypeNone = 0,
-            Uint8 = 1,
-            Float = 2,
-            Float16 = 3,
-            Bfloat16 = 5
-        };
-
-
         typedef std::priority_queue<ObjectDistance, std::vector<ObjectDistance>, std::less<ObjectDistance> > ResultSet;
 
         ObjectSpace(size_t d) : dimension(d), distanceType(MetricType::METRIC_NONE), comparator(0), normalization(false),

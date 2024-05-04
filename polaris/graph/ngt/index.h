@@ -50,7 +50,6 @@ namespace polaris {
 
         class Property {
         public:
-            typedef ObjectSpace::ObjectType ObjectType;
             typedef NeighborhoodGraph::SeedType SeedType;
             typedef NeighborhoodGraph::GraphType GraphType;
             enum ObjectAlignment {
@@ -74,9 +73,9 @@ namespace polaris {
             void setDefault() {
                 dimension = 0;
                 threadPoolSize = 32;
-                objectType = ObjectSpace::ObjectType::Float;
+                objectType = ObjectType::Float;
 #ifdef NGT_REFINEMENT
-                refinementObjectType	= ObjectSpace::ObjectType::Float;
+                refinementObjectType	= ObjectType::Float;
 #endif
                 distanceType = MetricType::METRIC_L2;
                 indexType = IndexType::GraphAndTree;
@@ -93,7 +92,7 @@ namespace polaris {
             void clear() {
                 dimension = -1;
                 threadPoolSize = -1;
-                objectType = ObjectSpace::ObjectTypeNone;
+                objectType = ObjectType::ObjectTypeNone;
 #ifdef NGT_REFINEMENT
                 refinementObjectType	= ObjectSpace::ObjectTypeNone;
 #endif
@@ -114,16 +113,16 @@ namespace polaris {
                 p.set("Dimension", dimension);
                 p.set("ThreadPoolSize", threadPoolSize);
                 switch (objectType) {
-                    case ObjectSpace::ObjectType::Uint8:
+                    case polaris::ObjectType::Uint8:
                         p.set("ObjectType", "Integer-1");
                         break;
-                    case ObjectSpace::ObjectType::Float:
+                    case polaris::ObjectType::Float:
                         p.set("ObjectType", "Float-4");
                         break;
-                    case ObjectSpace::ObjectType::Float16:
+                    case polaris::ObjectType::Float16:
                         p.set("ObjectType", "Float-2");
                         break;
-                    case ObjectSpace::ObjectType::Bfloat16:
+                    case polaris::ObjectType::Bfloat16:
                         p.set("ObjectType", "Bfloat-2");
                         break;
                     default :
@@ -132,10 +131,10 @@ namespace polaris {
                 }
 #ifdef NGT_REFINEMENT
                 switch (refinementObjectType) {
-                case ObjectSpace::ObjectType::Uint8: p.set("RefinementObjectType", "Integer-1"); break;
-                case ObjectSpace::ObjectType::Float: p.set("RefinementObjectType", "Float-4"); break;
-                case ObjectSpace::ObjectType::Float16: p.set("RefinementObjectType", "Float-2"); break;
-                case ObjectSpace::ObjectType::Bfloat16: p.set("RefinementObjectType", "Bfloat-2"); break;
+                case polaris::ObjectType::Uint8: p.set("RefinementObjectType", "Integer-1"); break;
+                case polaris::ObjectType::Float: p.set("RefinementObjectType", "Float-4"); break;
+                case polaris::ObjectType::Float16: p.set("RefinementObjectType", "Float-2"); break;
+                case polaris::ObjectType::Bfloat16: p.set("RefinementObjectType", "Bfloat-2"); break;
                 default : std::cerr << "Fatal error. Invalid refinement object type. " << refinementObjectType << std::endl; abort();
                 }
 #endif
@@ -238,13 +237,13 @@ namespace polaris {
                 PropertySet::iterator it = p.find("ObjectType");
                 if (it != p.end()) {
                     if (it->second == "Float-4") {
-                        objectType = ObjectSpace::ObjectType::Float;
+                        objectType = polaris::ObjectType::Float;
                     } else if (it->second == "Integer-1") {
-                        objectType = ObjectSpace::ObjectType::Uint8;
+                        objectType = polaris::ObjectType::Uint8;
                     } else if (it->second == "Float-2") {
-                        objectType = ObjectSpace::ObjectType::Float16;
+                        objectType = polaris::ObjectType::Float16;
                     } else if (it->second == "Bfloat-2") {
-                        objectType = ObjectSpace::ObjectType::Bfloat16;
+                        objectType = polaris::ObjectType::Bfloat16;
                     } else {
                         std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second
                                   << std::endl;
@@ -257,13 +256,13 @@ namespace polaris {
                   PropertySet::iterator it = p.find("RefinementObjectType");
                   if (it != p.end()) {
                     if (it->second == "Float-4") {
-                      refinementObjectType = ObjectSpace::ObjectType::Float;
+                      refinementObjectType = polaris::ObjectType::Float;
                     } else if (it->second == "Integer-1") {
-                      refinementObjectType = ObjectSpace::ObjectType::Uint8;
+                      refinementObjectType = polaris::ObjectType::Uint8;
                     } else if (it->second == "Float-2") {
-                      refinementObjectType = ObjectSpace::ObjectType::Float16;
+                      refinementObjectType = polaris::ObjectType::Float16;
                     } else if (it->second == "Bfloat-2") {
-                      refinementObjectType = ObjectSpace::ObjectType::Bfloat16;
+                      refinementObjectType = polaris::ObjectType::Bfloat16;
                     } else {
                       std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second << std::endl;
                     }
@@ -374,7 +373,7 @@ namespace polaris {
 
             int dimension;
             int threadPoolSize;
-            ObjectSpace::ObjectType objectType;
+            polaris::ObjectType objectType;
             MetricType distanceType;
             IndexType indexType;
             DatabaseType databaseType;
@@ -388,7 +387,7 @@ namespace polaris {
             int nOfNeighborsForInsertionOrder;
             float epsilonForInsertionOrder;
 #ifdef NGT_REFINEMENT
-            ObjectSpace::ObjectType	refinementObjectType;
+            polaris::ObjectType	refinementObjectType;
 #endif
         };
 
@@ -841,15 +840,15 @@ namespace polaris {
             if (objectSpace == 0) {
                 return;
             }
-            if (property.objectType == polaris::ObjectSpace::ObjectType::Float) {
+            if (property.objectType == polaris::ObjectType::Float) {
                 ObjectSpaceRepository<float, double> *os = (ObjectSpaceRepository<float, double> *) objectSpace;
                 os->deleteAll();
                 delete os;
-            } else if (property.objectType == polaris::ObjectSpace::ObjectType::Uint8) {
+            } else if (property.objectType == polaris::ObjectType::Uint8) {
                 ObjectSpaceRepository<unsigned char, int> *os = (ObjectSpaceRepository<unsigned char, int> *) objectSpace;
                 os->deleteAll();
                 delete os;
-            } else if (property.objectType == polaris::ObjectSpace::ObjectType::Float16) {
+            } else if (property.objectType == polaris::ObjectType::Float16) {
                 ObjectSpaceRepository<float16, float> *os = (ObjectSpaceRepository<float16, float> *) objectSpace;
                 os->deleteAll();
                 delete os;

@@ -1081,7 +1081,7 @@ namespace QBG {
 
       polaris::Property prop;
       prop.dimension = objectSpace.getDimension();
-      prop.objectType = polaris::NgtIndex::Property::ObjectType::Float;
+      prop.objectType = polaris::ObjectType::Float;
       prop.distanceType = polaris::MetricType::METRIC_L2;
       prop.edgeSizeForCreation = 10;
       prop.edgeSizeForSearch = 40;

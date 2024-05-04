@@ -52,6 +52,14 @@ namespace polaris {
     typedef half_float::half float16;
     typedef polaris::bfloat16 bfloat16;
 
+    enum ObjectType {
+        ObjectTypeNone = 0,
+        Uint8 = 1,
+        Float = 2,
+        Float16 = 3,
+        Bfloat16 = 5
+    };
+
 #pragma pack()
 
     class Object;

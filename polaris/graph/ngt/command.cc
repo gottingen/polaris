@@ -143,16 +143,16 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (objectType) {
         case 'f':
-            property.objectType = polaris::NgtIndex::Property::ObjectType::Float;
+            property.objectType = polaris::ObjectType::Float;
             break;
         case 'c':
-            property.objectType = polaris::NgtIndex::Property::ObjectType::Uint8;
+            property.objectType = polaris::ObjectType::Uint8;
             break;
         case 'h':
-            property.objectType = polaris::NgtIndex::Property::ObjectType::Float16;
+            property.objectType = polaris::ObjectType::Float16;
             break;
             case 'H':
-              property.objectType = polaris::NgtIndex::Property::ObjectType::Bfloat16;
+              property.objectType = polaris::ObjectType::Bfloat16;
               break;
         default:
             std::stringstream msg;

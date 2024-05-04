@@ -243,11 +243,11 @@ namespace polaris {
         class Search {
         public:
             static void
-            (*getMethod(MetricType dtype, polaris::ObjectSpace::ObjectType otype, size_t size))(
+            (*getMethod(MetricType dtype, polaris::ObjectType otype, size_t size))(
                     polaris::NeighborhoodGraph &, polaris::SearchContainer &, polaris::ObjectDistances &) {
                 if (size < 5000000) {
                     switch (otype) {
-                        case polaris::ObjectSpace::Float:
+                        case polaris::ObjectType::Float:
                             switch (dtype) {
                                 case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloat;
@@ -273,7 +273,7 @@ namespace polaris {
                                     return l2Float;
                             }
                             break;
-                        case polaris::ObjectSpace::Uint8:
+                        case polaris::ObjectType::Uint8:
                             switch (dtype) {
                                 case polaris::MetricType::METRIC_HAMMING :
                                     return hammingUint8;
@@ -287,7 +287,7 @@ namespace polaris {
                                     return l2Uint8;
                             }
                             break;
-                        case polaris::ObjectSpace::Float16:
+                        case polaris::ObjectType::Float16:
                             switch (dtype) {
                                 case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloat16;
@@ -320,7 +320,7 @@ namespace polaris {
                     return l1Uint8;
                 } else {
                     switch (otype) {
-                        case polaris::ObjectSpace::Float:
+                        case polaris::ObjectType::Float:
                             switch (dtype) {
                                 case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloatForLargeDataset;
@@ -346,7 +346,7 @@ namespace polaris {
                                     return l2FloatForLargeDataset;
                             }
                             break;
-                        case polaris::ObjectSpace::Uint8:
+                        case polaris::ObjectType::Uint8:
                             switch (dtype) {
                                 case polaris::MetricType::METRIC_HAMMING :
                                     return hammingUint8ForLargeDataset;
@@ -360,7 +360,7 @@ namespace polaris {
                                     return l2Uint8ForLargeDataset;
                             }
                             break;
-                        case polaris::ObjectSpace::Float16:
+                        case polaris::ObjectType::Float16:
                             switch (dtype) {
                                 case polaris::MetricType::METRIC_NORMALIZED_COSINE :
                                     return normalizedCosineSimilarityFloat16ForLargeDataset;
