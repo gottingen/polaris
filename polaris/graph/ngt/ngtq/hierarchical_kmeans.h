@@ -73,7 +73,7 @@ namespace QBG {
 	  float min = std::numeric_limits<float>::max();
 	  int32_t minid = 0;
 	  for (auto &c : internalNode.children) {
-	    auto d = polaris::PrimitiveComparator::compareL2(reinterpret_cast<float*>(&object[0]),
+	    auto d = polaris::primitive::compare_l2(reinterpret_cast<float*>(&object[0]),
 							 c.second.data(), c.second.size());
 	    if (d < min) {
 	      min = d;
@@ -932,7 +932,7 @@ namespace QBG {
 	float min = std::numeric_limits<float>::max();
 	int minidx = -1;
 	for (size_t cidx = 0; cidx != clusters.size(); cidx++) {
-	  auto d = polaris::PrimitiveComparator::compareL2(reinterpret_cast<float*>(obj.data()),
+	  auto d = polaris::primitive::compare_l2(reinterpret_cast<float*>(obj.data()),
 						       clusters[cidx].centroid.data(), obj.size());
 	  if (d < min) {
 	    min = d;
@@ -977,7 +977,7 @@ namespace QBG {
 	float min = std::numeric_limits<float>::max();
 	int minidx = -1;
 	for (size_t cidx = 0; cidx != clusters.size(); cidx++) {
-	  auto d = polaris::PrimitiveComparator::compareL2(reinterpret_cast<float*>(obj.data()),
+	  auto d = polaris::primitive::compare_l2(reinterpret_cast<float*>(obj.data()),
 						       clusters[cidx].centroid.data(), obj.size());
 	  if (d < min) {
 	    min = d;

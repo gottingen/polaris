@@ -154,7 +154,7 @@ namespace polaris {
             return (a.id & 0x7FFFFFFF) < (b.id & 0x7FFFFFFF);
         }
 
-        static void insert(polaris::GraphNode &node, size_t edgeID, polaris::Distance edgeDistance) {
+        static void insert(polaris::GraphNode &node, size_t edgeID, polaris::distance_t edgeDistance) {
             polaris::ObjectDistance edge(edgeID, edgeDistance);
             GraphNode::iterator ni = std::lower_bound(node.begin(), node.end(), edge, edgeComp);
             node.insert(ni, edge);
@@ -590,7 +590,7 @@ namespace polaris {
                         rsize = node.size();
                     }
                     for (size_t i = 0; i < rsize; ++i) {
-                        polaris::Distance distance = node[i].distance;
+                        polaris::distance_t distance = node[i].distance;
                         size_t nodeID = node[i].id;
                         try {
                             polaris::GraphNode &n = *outGraph.getNode(nodeID);
@@ -791,7 +791,7 @@ namespace polaris {
                             case 'c':
                                 break;
                         }
-                        polaris::Distance distance = node[rank].distance;
+                        polaris::distance_t distance = node[rank].distance;
                         size_t nodeID = node[rank].id;
                         outGraph.addEdge(id, nodeID, distance, false);
                     }
@@ -835,10 +835,10 @@ namespace polaris {
                 try {
                     polaris::ObjectDistances &node = graph[id - 1];
                     polaris::GraphNode &n = *outGraph.getNode(id);
-                    polaris::Distance prevDistance = 0.0;
+                    polaris::distance_t prevDistance = 0.0;
                     assert(n.size() == 0);
                     for (size_t i = 0; i < node.size(); ++i) {
-                        polaris::Distance distance = node[i].distance;
+                        polaris::distance_t distance = node[i].distance;
                         if (prevDistance > distance) {
                             POLARIS_THROW_EX("Edge distance order is invalid");
                         }

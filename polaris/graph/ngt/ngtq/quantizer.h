@@ -332,7 +332,7 @@ namespace NGTQ {
             auto mind = std::numeric_limits<float>::max();
             size_t minidx = 0;
             for (size_t idx = 0; idx < noOfCentroids; idx++) {
-                auto d = polaris::PrimitiveComparator::compareL2(static_cast<float *>(object.getPointer()), data(idx),
+                auto d = polaris::primitive::compare_l2(static_cast<float *>(object.getPointer()), data(idx),
                                                              paddedDimension);
                 if (mind > d) {
                     mind = d;
@@ -2316,7 +2316,7 @@ namespace NGTQ {
 
         virtual void eraseInvertedIndexObject() = 0;
 
-        virtual polaris::Distance getApproximateDistance(polaris::Object &query, uint32_t globalID, uint16_t *localID,
+        virtual polaris::distance_t getApproximateDistance(polaris::Object &query, uint32_t globalID, uint16_t *localID,
                                                      QuantizedObjectDistance::DistanceLookupTable &distanceLUT) {
             std::cerr << "getApproximateDistance() is not implemented." << std::endl;
             abort();
@@ -4313,7 +4313,7 @@ public:
 	{
 	  polaris::Object *o = globalCodebookIndex.getObjectSpace().getRepository().allocateObject();
 	  objectList.get(invertedIndexEntry.id, *o, &globalCodebookIndex.getObjectSpace());
-	  polaris::Distance distance = globalCodebookIndex.getObjectSpace().getComparator()(*gcentroidFromList, *o);
+	  polaris::distance_t distance = globalCodebookIndex.getObjectSpace().getComparator()(*gcentroidFromList, *o);
 	  cerr << ":distance=" << distance;
 	}
 	cerr << ":local codebook IDs=";
@@ -4556,7 +4556,7 @@ public:
             }
         }
 
-        inline polaris::Distance getApproximateDistance(polaris::Object &query, uint32_t globalID, LOCAL_ID_TYPE *localID,
+        inline polaris::distance_t getApproximateDistance(polaris::Object &query, uint32_t globalID, LOCAL_ID_TYPE *localID,
                                                     QuantizedObjectDistance::DistanceLookupTable &distanceLUT) {
             double distance;
             distance = (*quantizedObjectDistance)(query, globalID, localID, distanceLUT);
@@ -4767,7 +4767,7 @@ public:
 #endif
 	  distance += d;
 	  count++;
-	  polaris::Distance gd = globalCodebookIndex.getObjectSpace().getComparator()(object, gcentroid);
+	  polaris::distance_t gd = globalCodebookIndex.getObjectSpace().getComparator()(object, gcentroid);
 	  globalDistance += gd;
 	}
       }

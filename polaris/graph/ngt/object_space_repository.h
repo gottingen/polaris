@@ -43,7 +43,7 @@ namespace polaris {
             ComparatorL1(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareL1((OBJECT_TYPE *) &objecta[0], (OBJECT_TYPE *) &objectb[0],
+                return polaris::primitive::compare_l1((OBJECT_TYPE *) &objecta[0], (OBJECT_TYPE *) &objectb[0],
                                                       dimension);
             }
         };
@@ -53,7 +53,7 @@ namespace polaris {
             ComparatorL2(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareL2((OBJECT_TYPE *) &objecta[0], (OBJECT_TYPE *) &objectb[0],
+                return polaris::primitive::compare_l2((OBJECT_TYPE *) &objecta[0], (OBJECT_TYPE *) &objectb[0],
                                                       dimension);
             }
         };
@@ -63,7 +63,7 @@ namespace polaris {
             ComparatorNormalizedL2(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareNormalizedL2((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_normalized_l2((OBJECT_TYPE *) &objecta[0],
                                                                 (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -73,7 +73,7 @@ namespace polaris {
             ComparatorHammingDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareHammingDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_hamming_distance((OBJECT_TYPE *) &objecta[0],
                                                                    (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -83,7 +83,7 @@ namespace polaris {
             ComparatorJaccardDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareJaccardDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_jaccard_distance((OBJECT_TYPE *) &objecta[0],
                                                                    (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -93,7 +93,7 @@ namespace polaris {
             ComparatorSparseJaccardDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareSparseJaccardDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_sparse_jaccard_distance((OBJECT_TYPE *) &objecta[0],
                                                                          (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -103,7 +103,7 @@ namespace polaris {
             ComparatorAngleDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareAngleDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_angle_distance((OBJECT_TYPE *) &objecta[0],
                                                                  (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -113,7 +113,7 @@ namespace polaris {
             ComparatorNormalizedAngleDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareNormalizedAngleDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_normalized_angle_distance((OBJECT_TYPE *) &objecta[0],
                                                                            (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -123,7 +123,7 @@ namespace polaris {
             ComparatorCosineSimilarity(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareCosineSimilarity((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_cosine_similarity((OBJECT_TYPE *) &objecta[0],
                                                                     (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -133,7 +133,7 @@ namespace polaris {
             ComparatorNormalizedCosineSimilarity(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareNormalizedCosineSimilarity((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_normalized_cosine_similarity((OBJECT_TYPE *) &objecta[0],
                                                                               (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -143,7 +143,7 @@ namespace polaris {
             ComparatorPoincareDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::comparePoincareDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_poincare_distance((OBJECT_TYPE *) &objecta[0],
                                                                     (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -153,7 +153,7 @@ namespace polaris {
             ComparatorLorentzDistance(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareLorentzDistance((OBJECT_TYPE *) &objecta[0],
+                return polaris::primitive::compare_lorentz_distance((OBJECT_TYPE *) &objecta[0],
                                                                    (OBJECT_TYPE *) &objectb[0], dimension);
             }
         };
@@ -163,7 +163,7 @@ namespace polaris {
             ComparatorInnerProduct(size_t d) : Comparator(d) {}
 
             double operator()(Object &objecta, Object &objectb) {
-                return PrimitiveComparator::compareDotProduct((OBJECT_TYPE *) &objecta[0], (OBJECT_TYPE *) &objectb[0],
+                return polaris::primitive::compare_dot_product((OBJECT_TYPE *) &objecta[0], (OBJECT_TYPE *) &objectb[0],
                                                               dimension);
             }
         };
@@ -303,7 +303,7 @@ namespace polaris {
                 if (rep[idx] == 0) {
                     continue;
                 }
-                Distance d = (*comparator)((Object &) query, (Object &) *rep[idx]);
+                distance_t d = (*comparator)((Object &) query, (Object &) *rep[idx]);
                 if (radius < 0.0 || d <= radius) {
                     polaris::ObjectDistance obj(idx, d);
                     results.push(obj);

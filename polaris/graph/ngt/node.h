@@ -91,8 +91,8 @@ namespace polaris {
             static const double Pivot;
             ObjectID id;
             PersistentObject *object;
-            Distance distance;
-            Distance leafDistance;
+            distance_t distance;
+            distance_t leafDistance;
             int clusterID;
         };
 
@@ -180,7 +180,7 @@ namespace polaris {
             for (size_t i = 0; i < childrenSize; i++) {
                 getChildren()[i] = 0;
             }
-            borders = new Distance[childrenSize - 1];
+            borders = new distance_t[childrenSize - 1];
             for (size_t i = 0; i < childrenSize - 1; i++) {
                 getBorders()[i] = 0;
             }
@@ -190,7 +190,7 @@ namespace polaris {
 
         ID *getChildren() { return children; }
 
-        Distance *getBorders() { return borders; }
+        distance_t *getBorders() { return borders; }
 
         void serialize(std::ofstream &os, ObjectSpace *objectspace = 0) {
             Node::serialize(os);
@@ -280,7 +280,7 @@ namespace polaris {
         static const int InternalChildrenSizeMax = 5;
         const size_t childrenSize;
         ID *children;
-        Distance *borders;
+        distance_t *borders;
     };
 
 

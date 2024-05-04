@@ -1064,7 +1064,7 @@ namespace polaris {
 
     protected:
         void
-        addBKNNGEdge(ObjectID target, ObjectID addID, Distance addDistance) {
+        addBKNNGEdge(ObjectID target, ObjectID addID, distance_t addDistance) {
             if (repository.isEmpty(target)) {
                 ObjectDistances objs;
                 objs.push_back(ObjectDistance(addID, addDistance));
@@ -1075,7 +1075,7 @@ namespace polaris {
         }
 
     public:
-        void addEdge(GraphNode &node, ObjectID addID, Distance addDistance, bool identityCheck = true) {
+        void addEdge(GraphNode &node, ObjectID addID, distance_t addDistance, bool identityCheck = true) {
             ObjectDistance obj(addID, addDistance);
             GraphNode::iterator ni = std::lower_bound(node.begin(), node.end(), obj);
             if ((ni != node.end()) && ((*ni).id == addID)) {
@@ -1091,7 +1091,7 @@ namespace polaris {
 
         // identityCheck is checking whether the same edge has already added to the node.
         // return whether truncation is needed that means the node has too many edges.
-        bool addEdge(ObjectID target, ObjectID addID, Distance addDistance, bool identityCheck = true) {
+        bool addEdge(ObjectID target, ObjectID addID, distance_t addDistance, bool identityCheck = true) {
             size_t minsize = 0;
             GraphNode &node = property.truncationThreshold == 0 ? *getNode(target) : *getNode(target, minsize);
             try {
@@ -1108,7 +1108,7 @@ namespace polaris {
             return false;
         }
 
-        void addEdgeWithDeletion(ObjectID target, ObjectID addID, Distance addDistance, size_t kEdge,
+        void addEdgeWithDeletion(ObjectID target, ObjectID addID, distance_t addDistance, size_t kEdge,
                                  bool identityCheck = true) {
             GraphNode &node = *getNode(target);
             try {

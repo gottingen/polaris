@@ -567,11 +567,11 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
                 stream << "# Radius=" << searchParameters.radius << endl;
                 stream << "# Epsilon=" << epsilon << endl;
                 stream << "# Query Time (msec)=" << timer.time * 1000.0 << endl;
-                stream << "# Distance Computation=" << sc.distanceComputationCount << endl;
+                stream << "# distance_t Computation=" << sc.distanceComputationCount << endl;
                 stream << "# Visit Count=" << sc.visitCount << endl;
             } else {
                 stream << "Query No." << queryCount << endl;
-                stream << "Rank\tID\tDistance" << endl;
+                stream << "Rank\tID\tdistance_t" << endl;
             }
             for (size_t i = 0; i < objects.size(); i++) {
                 stream << i + 1 << "\t" << objects[i].id << "\t";

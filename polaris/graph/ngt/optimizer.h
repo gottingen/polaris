@@ -1489,7 +1489,7 @@ namespace polaris {
                     queryObjects.push_back(index.allocateObject(*i));
                 }
                 int identityCount = 0;
-                std::vector<polaris::Distance> lastDistances(nOfQueries);
+                std::vector<polaris::distance_t> lastDistances(nOfQueries);
                 double time = 0.0;
                 double step = 0.02;
                 for (float e = 0.0; e < 10.0; e += step) {
@@ -1510,7 +1510,7 @@ namespace polaris {
                             msg << "generatePseudoGroundTruth: Cannot get any search result.";
                             POLARIS_THROW_EX(msg);
                         }
-                        polaris::Distance d = results.back().distance;
+                        polaris::distance_t d = results.back().distance;
                         if (d != lastDistances[idx]) {
                             identity = false;
                         }

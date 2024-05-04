@@ -49,13 +49,13 @@ DVPTree::insert(InsertContainer &iobj,  LeafNode *leafNode)
   size_t fsize = leaf.getObjectSize();
   if (fsize != 0) {
     polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
-    Distance d = comparator(iobj.object, leaf.getPivot());
+      distance_t d = comparator(iobj.object, leaf.getPivot());
 
     polaris::ObjectDistance *objects = leaf.getObjectIDs();
 
     for (size_t i = 0; i < fsize; i++) {
       if (objects[i].distance == d) {
-	Distance idd = 0.0;
+          distance_t idd = 0.0;
 	ObjectID loid;
         try {
 	  loid = objects[i].id;
@@ -162,7 +162,7 @@ DVPTree::recombineNodes(InsertContainer &ic, Node::Objects &fs, LeafNode &leaf)
       if (clusterID > maxClusterID) {
 	maxClusterID = clusterID;
       }
-      Distance ld;
+        distance_t ld;
       if (fs[i].leafDistance == Node::Object::Pivot) {
         // pivot
 	ln[clusterID]->setPivot(*getObjectRepository().get(fs[i].id), *objectSpace);
@@ -221,7 +221,7 @@ DVPTree::insertObject(InsertContainer &ic, LeafNode &leaf) {
     leaf.getObjectIDs()[leaf.objectSize++].distance = 0;
 #endif
   } else {
-    Distance d = objectSpace->getComparator()(ic.object, leaf.getPivot());
+      distance_t d = objectSpace->getComparator()(ic.object, leaf.getPivot());
 
 #ifdef NGT_NODE_USE_VECTOR
     LeafNode::ObjectIDs fid;
@@ -299,7 +299,7 @@ DVPTree::removeEmptyNodes(InternalNode &inode) {
 void
 DVPTree::search(SearchContainer &sc, InternalNode &node, UncheckedNode &uncheckedNode)
 {
-  Distance d = objectSpace->getComparator()(sc.object, node.getPivot());
+    distance_t d = objectSpace->getComparator()(sc.object, node.getPivot());
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT
   sc.distanceComputationCount++;
 #endif
@@ -310,7 +310,7 @@ DVPTree::search(SearchContainer &sc, InternalNode &node, UncheckedNode &unchecke
   regions.reserve(internalChildrenSize);
 
   ObjectDistance child;
-  Distance *borders = node.getBorders();
+    distance_t *borders = node.getBorders();
   int mid;
   for (mid = 0; mid < bsize; mid++) {
     if (d < borders[mid]) {
@@ -374,7 +374,7 @@ DVPTree::search(SearchContainer &so, LeafNode &node, UncheckedNode &uncheckedNod
   if (node.getObjectSize() == 0) {
     return;
   }
-  Distance pq = objectSpace->getComparator()(q.object, node.getPivot());
+    distance_t pq = objectSpace->getComparator()(q.object, node.getPivot());
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT
   so.distanceComputationCount++;
 #endif
@@ -385,7 +385,7 @@ DVPTree::search(SearchContainer &so, LeafNode &node, UncheckedNode &uncheckedNod
   for (size_t i = 0; i < node.getObjectSize(); i++) {
     if ((objects[i].distance <= pq + q.radius) &&
         (objects[i].distance >= pq - q.radius)) {
-      Distance d = 0;
+        distance_t d = 0;
       try {
 	d = objectSpace->getComparator()(q.object, *q.vptree->getObjectRepository().get(objects[i].id));
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT

@@ -271,7 +271,7 @@ namespace NGTQG {
             graph.setupDistances(sc, seeds, polaris::PrimitiveComparator::L2Float::compare);
             graph.setupSeeds(sc, seeds, results, unchecked, distanceChecked);
             auto specifiedRadius = sc.radius;
-            polaris::Distance explorationRadius = sc.explorationCoefficient * sc.radius;
+            polaris::distance_t explorationRadius = sc.explorationCoefficient * sc.radius;
             polaris::ObjectDistance result;
             polaris::ObjectDistance target;
 
@@ -302,7 +302,7 @@ namespace NGTQG {
                 quantizedObjectDistance(quantizedGraph.get(target.id), ds, neighborSize, cache[1]);
 #endif
                 for (size_t idx = 0; idx < neighborSize; idx++) {
-                    polaris::Distance distance = ds[idx];
+                    polaris::distance_t distance = ds[idx];
                     auto objid = neighborIDs[idx];
                     if (distance <= explorationRadius) {
                         bool checked = distanceChecked[objid];

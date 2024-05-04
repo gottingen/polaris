@@ -305,7 +305,7 @@ namespace polaris {
                     } else if (it->second == "InnerProduct") {
                         distanceType = DistanceType::DistanceTypeInnerProduct;
                     } else {
-                        std::cerr << "Invalid Distance Type in the property. " << it->first << ":" << it->second
+                        std::cerr << "Invalid distance_t Type in the property. " << it->first << ":" << it->second
                                   << std::endl;
                     }
                 } else {
@@ -417,11 +417,11 @@ namespace polaris {
         public:
             InsertionResult() : id(0), identical(false), distance(0.0) {}
 
-            InsertionResult(size_t i, bool tf, Distance d) : id(i), identical(tf), distance(d) {}
+            InsertionResult(size_t i, bool tf, distance_t d) : id(i), identical(tf), distance(d) {}
 
             size_t id;
             bool identical;
-            Distance distance; // the distance between the centroid and the inserted object.
+            distance_t distance; // the distance between the centroid and the inserted object.
         };
 
         class AccuracyTable {

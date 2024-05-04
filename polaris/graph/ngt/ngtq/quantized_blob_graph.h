@@ -969,7 +969,7 @@ namespace QBG {
             graph.search(sc);
         }
 
-        polaris::Distance getDistance(void *objects, std::vector<float> &distances, size_t noOfObjects,
+        polaris::distance_t getDistance(void *objects, std::vector<float> &distances, size_t noOfObjects,
                                   NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8 &lut
         ) {
             auto &quantizedObjectDistance = getQuantizer().getQuantizedObjectDistance();
@@ -983,8 +983,8 @@ namespace QBG {
 #endif
         }
 
-        std::tuple<polaris::Distance, polaris::Distance>
-        judge(NGTQG::QuantizedNode &ivi, size_t k, polaris::Distance radius,
+        std::tuple<polaris::distance_t, polaris::distance_t>
+        judge(NGTQG::QuantizedNode &ivi, size_t k, polaris::distance_t radius,
               NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8 &lut,
               polaris::NeighborhoodGraph::ResultSet &result, size_t &foundCount
         ) {
@@ -1101,7 +1101,7 @@ namespace QBG {
 #else
                     quantizer.objectList.get(r.id, object);
 #endif
-                    r.distance = polaris::PrimitiveComparator::compareL2(static_cast<T *>(query.getPointer()),
+                    r.distance = polaris::primitive::compare_l2(static_cast<T *>(query.getPointer()),
                                                                      static_cast<T *>(object.data()), paddedDimension);
 
 
@@ -1160,7 +1160,7 @@ namespace QBG {
             std::unordered_map<size_t, NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8> luts;
             size_t foundCount = 0;
             size_t k = searchContainer.size;
-            polaris::Distance radius = FLT_MAX;
+            polaris::distance_t radius = FLT_MAX;
             polaris::NeighborhoodGraph::ResultSet result;
 #ifdef NGTQBG_COARSE_BLOB
             NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8 lookupTable;
@@ -1168,7 +1168,7 @@ namespace QBG {
 #endif
             for (size_t idx = 0; idx < blobs.size(); idx++) {
 #ifdef NGTQBG_COARSE_BLOB
-                polaris::Distance blobDistance = std::numeric_limits<polaris::Distance>::max();
+                polaris::distance_t blobDistance = std::numeric_limits<polaris::distance_t>::max();
                 auto graphNodeID = blobs[idx].id;
                 auto &graphNodeToInvertedIndexEntries = quantizer.getGraphNodeToInvertedIndexEntries();
                 auto beginIvtID = graphNodeToInvertedIndexEntries[graphNodeID - 1] + 1;
@@ -1192,7 +1192,7 @@ namespace QBG {
                     NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8 &lut = (*luti).second;
 #endif
 
-                    polaris::Distance bd;
+                    polaris::distance_t bd;
                     std::tie(bd, radius) = judge(quantizedBlobGraph[blobID], k, radius, lut, result, foundCount);
 #ifdef NGTQBG_COARSE_BLOB
                     if (bd < blobDistance) {
@@ -1277,7 +1277,7 @@ namespace QBG {
             }
             std::sort(seeds.begin(), seeds.end());
             polaris::ObjectDistance currentNearestBlob = seeds.front();
-            polaris::Distance explorationRadius = searchContainer.blobExplorationCoefficient * currentNearestBlob.distance;
+            polaris::distance_t explorationRadius = searchContainer.blobExplorationCoefficient * currentNearestBlob.distance;
             std::priority_queue<polaris::ObjectDistance, std::vector<polaris::ObjectDistance>, std::greater<polaris::ObjectDistance>> discardedObjects;
             untracedNodes.push(seeds.front());
             distanceChecked.insert(seeds.front().id);
@@ -1291,7 +1291,7 @@ namespace QBG {
             std::unordered_map<size_t, NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8> luts;
             std::vector<float> rotatedQuery = searchContainer.objectVector;
             quantizedObjectDistance.rotation->mul(rotatedQuery.data());
-            polaris::Distance radius = searchContainer.radius;
+            polaris::distance_t radius = searchContainer.radius;
             if (requestedSize >= std::numeric_limits<int32_t>::max()) {
                 radius *= searchContainer.explorationCoefficient;
             }
@@ -1306,7 +1306,7 @@ namespace QBG {
             for (;;) {
                 if (untracedNodes.empty() || untracedNodes.top().distance > explorationRadius) {
                     explorationSize++;
-                    polaris::Distance blobDistance = std::numeric_limits<polaris::Distance>::max();
+                    polaris::distance_t blobDistance = std::numeric_limits<polaris::distance_t>::max();
 #ifdef NGTQBG_COARSE_BLOB
                     auto graphNodeID = currentNearestBlob.id;
                     auto &graphNodeToInvertedIndexEntries = quantizer.getGraphNodeToInvertedIndexEntries();
@@ -1332,7 +1332,7 @@ namespace QBG {
                         NGTQ::QuantizedObjectDistance::DistanceLookupTableUint8 &lut = (*luti).second;
 #endif
                         size_t foundCount;
-                        polaris::Distance bd;
+                        polaris::distance_t bd;
                         std::tie(bd, radius) = judge(quantizedBlobGraph[blobID], requestedSize,
                                                      radius, lut, results, foundCount);
 #ifdef NGTQBG_COARSE_BLOB
@@ -1432,7 +1432,7 @@ namespace QBG {
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT
                     searchContainer.distanceComputationCount++;
 #endif
-                    polaris::Distance distance = objectSpace.getComparator()(searchContainer.object, *neighborptr->second);
+                    polaris::distance_t distance = objectSpace.getComparator()(searchContainer.object, *neighborptr->second);
                     polaris::ObjectDistance r;
                     r.set(neighborptr->first, distance);
                     untracedNodes.push(r);

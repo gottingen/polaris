@@ -53,7 +53,7 @@
 
 namespace polaris {
     typedef unsigned int ObjectID;
-    typedef float Distance;
+    typedef float distance_t;
     typedef half_float::half float16;
     typedef polaris::bfloat16 bfloat16;
 
@@ -1722,7 +1722,7 @@ namespace polaris {
 
         void setResults(ObjectDistances *r) { result = r; }
 
-        void setRadius(Distance r) { radius = r; }
+        void setRadius(distance_t r) { radius = r; }
 
         void setEpsilon(float e) { explorationCoefficient = e + 1.0; }
 
@@ -1743,7 +1743,7 @@ namespace polaris {
 
 
         size_t size;
-        Distance radius;
+        distance_t radius;
         float explorationCoefficient;
         int edgeSize;
         size_t distanceComputationCount;

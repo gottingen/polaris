@@ -494,7 +494,7 @@ NeighborhoodGraph::searchReadOnlyGraph(polaris::SearchContainer &sc, ObjectDista
     setupDistances(sc, seeds, COMPARATOR::compare);
     setupSeeds(sc, seeds, results, unchecked, distanceChecked);
 
-    Distance explorationRadius = sc.explorationCoefficient * sc.radius;
+    distance_t explorationRadius = sc.explorationCoefficient * sc.radius;
     const size_t dimension = objectSpace->getPaddedDimension();
     ReadOnlyGraphNode *nodes = &searchRepository.front();
     ObjectDistance result;
@@ -537,7 +537,7 @@ NeighborhoodGraph::searchReadOnlyGraph(polaris::SearchContainer &sc, ObjectDista
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT
             sc.distanceComputationCount++;
 #endif
-            Distance distance = COMPARATOR::compare((void *) &sc.object[0],
+            distance_t distance = COMPARATOR::compare((void *) &sc.object[0],
                                                     (void *) &(*static_cast<PersistentObject *>(neighborptr->second))[0],
                                                     dimension);
             if (distance <= explorationRadius) {
@@ -591,7 +591,7 @@ NeighborhoodGraph::search(polaris::SearchContainer &sc, ObjectDistances &seeds) 
     ResultSet results;
     setupDistances(sc, seeds);
     setupSeeds(sc, seeds, results, unchecked, distanceChecked);
-    Distance explorationRadius = sc.explorationCoefficient * sc.radius;
+    distance_t explorationRadius = sc.explorationCoefficient * sc.radius;
     polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
     ObjectRepository &objectRepository = getObjectRepository();
     const size_t prefetchSize = objectSpace->getPrefetchSize();
@@ -663,7 +663,7 @@ NeighborhoodGraph::search(polaris::SearchContainer &sc, ObjectDistances &seeds) 
             sc.explorationCoefficient = exp(-(double)distanceChecked.size() / 20000.0) / 10.0 + 1.0;
 #endif
 
-            Distance distance = comparator(sc.object, *objectRepository.get(neighbor.id));
+            distance_t distance = comparator(sc.object, *objectRepository.get(neighbor.id));
             sc.distanceComputationCount++;
             if (distance <= explorationRadius) {
                 result.set(neighbor.id, distance);
@@ -780,10 +780,10 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
         for (unsigned int i = 0; i < node.size() - 1; i++) {
             assert(node[i].id != id);
             int minj = -1;
-            Distance mind = FLT_MAX;
+            distance_t mind = FLT_MAX;
             for (unsigned int j = i + 1; j < node.size(); j++) {
                 assert(node[j].id != id);
-                Distance d = objectSpace->getComparator()(*objtbl[i], *objtbl[j]);
+                distance_t d = objectSpace->getComparator()(*objtbl[i], *objtbl[j]);
                 if (d < mind) {
                     minj = j;
                     mind = d;
@@ -878,18 +878,18 @@ public:
     PersistentObject *object;
     ObjectDistance nearest;
     ObjectDistance start;
-    polaris::Distance radius;
+    polaris::distance_t radius;
 };
 
 class TruncationSearchSharedData {
 public:
-    TruncationSearchSharedData(polaris::NeighborhoodGraph &g, polaris::ObjectID id, size_t size, polaris::Distance lr) :
+    TruncationSearchSharedData(polaris::NeighborhoodGraph &g, polaris::ObjectID id, size_t size, polaris::distance_t lr) :
             graphIndex(g), targetID(id), resultSize(size), explorationCoefficient(lr) {}
 
     polaris::NeighborhoodGraph &graphIndex;
     polaris::ObjectID targetID;
     size_t resultSize;
-    polaris::Distance explorationCoefficient;
+    polaris::distance_t explorationCoefficient;
 };
 
 class TruncationSearchThread : public polaris::Thread {

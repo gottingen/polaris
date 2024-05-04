@@ -41,10 +41,10 @@ namespace polaris {
     LeafNode::selectPivotByMaxDistance(Container &c, Node::Objects &fs) {
         DVPTree::InsertContainer &iobj = (DVPTree::InsertContainer &) c;
         int fsize = fs.size();
-        Distance maxd = 0.0;
+        distance_t maxd = 0.0;
         int maxid = 0;
         for (int i = 1; i < fsize; i++) {
-            Distance d = iobj.vptree->objectSpace->getComparator()(*fs[0].object, *fs[i].object);
+            distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[0].object, *fs[i].object);
             if (d >= maxd) {
                 maxd = d;
                 maxid = i;
@@ -55,7 +55,7 @@ namespace polaris {
         maxd = 0.0;
         maxid = 0;
         for (int i = 0; i < fsize; i++) {
-            Distance d = iobj.vptree->objectSpace->getComparator()(*fs[aid].object, *fs[i].object);
+            distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[aid].object, *fs[i].object);
             if (i == aid) {
                 continue;
             }
@@ -69,7 +69,7 @@ namespace polaris {
         maxd = 0.0;
         maxid = 0;
         for (int i = 0; i < fsize; i++) {
-            Distance d = iobj.vptree->objectSpace->getComparator()(*fs[bid].object, *fs[i].object);
+            distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[bid].object, *fs[i].object);
             if (i == bid) {
                 continue;
             }
@@ -86,7 +86,7 @@ namespace polaris {
         DVPTree::InsertContainer &iobj = (DVPTree::InsertContainer &) c;
 
         int fsize = fs.size();
-        Distance *distance = new Distance[fsize * fsize];
+        distance_t *distance = new distance_t[fsize * fsize];
 
         for (int i = 0; i < fsize; i++) {
             distance[i * fsize + i] = 0;
@@ -94,7 +94,7 @@ namespace polaris {
 
         for (int i = 0; i < fsize; i++) {
             for (int j = i + 1; j < fsize; j++) {
-                Distance d = iobj.vptree->objectSpace->getComparator()(*fs[i].object, *fs[j].object);
+                distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[i].object, *fs[j].object);
                 distance[i * fsize + j] = d;
                 distance[j * fsize + i] = d;
             }
@@ -139,7 +139,7 @@ namespace polaris {
             if (i == pv) {
                 fs[i].distance = 0;
             } else {
-                Distance d = iobj.vptree->objectSpace->getComparator()(*fs[pv].object, *fs[i].object);
+                distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[pv].object, *fs[i].object);
                 fs[i].distance = d;
             }
         }
@@ -205,7 +205,7 @@ namespace polaris {
                 pivots[fs[i].clusterID] = i;
                 fs[i].leafDistance = Object::Pivot;
             } else {
-                Distance d = iobj.vptree->objectSpace->getComparator()(*fs[pivots[fs[i].clusterID]].object,
+                distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[pivots[fs[i].clusterID]].object,
                                                                        *fs[i].object);
                 fs[i].leafDistance = d;
             }

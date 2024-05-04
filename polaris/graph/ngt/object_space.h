@@ -291,7 +291,7 @@ namespace polaris {
                    (getDistanceType() == ObjectSpace::DistanceTypeNormalizedL2);
         }
 
-        polaris::Distance compareWithL1(polaris::Object &o1, polaris::Object &o2);
+        polaris::distance_t compareWithL1(polaris::Object &o1, polaris::Object &o2);
 
     protected:
         const size_t dimension;

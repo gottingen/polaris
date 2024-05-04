@@ -19,17 +19,17 @@
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
 
-polaris::Distance polaris::ObjectSpace::compareWithL1(polaris::Object &o1, polaris::Object &o2) {
+polaris::distance_t polaris::ObjectSpace::compareWithL1(polaris::Object &o1, polaris::Object &o2) {
   auto dim = getPaddedDimension();
-  polaris::Distance d;
+  polaris::distance_t d;
   if (getObjectType() == typeid(uint8_t)) {
-    d = PrimitiveComparator::compareL1(reinterpret_cast<uint8_t*>(o1.getPointer()), 
+    d = polaris::primitive::compare_l1(reinterpret_cast<uint8_t*>(o1.getPointer()),
 				       reinterpret_cast<uint8_t*>(o2.getPointer()), dim);
   } else if (getObjectType() == typeid(float16)) {
-    d = PrimitiveComparator::compareL1(reinterpret_cast<float16*>(o1.getPointer()), 
+    d = polaris::primitive::compare_l1(reinterpret_cast<float16*>(o1.getPointer()),
 				       reinterpret_cast<float16*>(o2.getPointer()), dim);
   } else if (getObjectType() == typeid(float)) {
-    d = PrimitiveComparator::compareL1(reinterpret_cast<float*>(o1.getPointer()), 
+    d = polaris::primitive::compare_l1(reinterpret_cast<float*>(o1.getPointer()),
 				       reinterpret_cast<float*>(o2.getPointer()), dim);
   } else {
     std::stringstream msg;
