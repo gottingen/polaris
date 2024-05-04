@@ -28,7 +28,7 @@
 #endif
 
 #include <polaris/graph/ngt/ngtq/matrix.h>
-
+#include <polaris/utility/timer.h>
 
 namespace QBG {
   class BuildParameters;
@@ -287,8 +287,8 @@ namespace QBG {
 	  break;
 	}
 	timelimitTimer.stop();
-	if (timelimitTimer.time > timelimit) {
-	  std::cerr << "Optimizer: Warning. The elapsed time exceeded the limit-time. " << timelimit << ":" << timelimitTimer.time << std::endl;
+	if (timelimitTimer.delta.to_seconds<double>() > timelimit) {
+	  std::cerr << "Optimizer: Warning. The elapsed time exceeded the limit-time. " << timelimit << ":" << timelimitTimer.delta.to_seconds<double>() << std::endl;
 	  timelimitTimer.restart();
 	  break;
 	}

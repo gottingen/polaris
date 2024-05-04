@@ -16,6 +16,7 @@
 #pragma once
 
 #include <polaris/graph/ngt/index.h>
+#include <polaris/utility/args.h>
 
 namespace polaris {
 

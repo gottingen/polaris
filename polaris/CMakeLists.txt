@@ -169,21 +169,24 @@ set(POLARIS_SRC
 
 
 set(POLARIS_HEADERS
-        core/index.h
         core/aux_index_structures.h
-        core/result_handler.h
-        core/heap.h
-        core/lock.h
-        core/ordered_key_value.h
-        core/utils.h
-        core/sorting.h
-        core/matrix_stats.h
-        core/metric_type.h
+        core/common.h
         core/common_includes.h
+        core/defines.h
         core/executor.h
-        core/random.h
+        core/heap.h
         core/id_selector.h
+        core/index.h
+        core/index_io.h
+        core/lock.h
+        core/matrix_stats.h
         core/memory.h
+        core/metric_type.h
+        core/ordered_key_value.h
+        core/random.h
+        core/result_handler.h
+        core/sorting.h
+        core/utils.h
         distance/cosine_similarity.h
         distance/distance_impl.h
         distance/primitive.h
@@ -355,28 +358,37 @@ set(POLARIS_HEADERS
         io/array_file.h
         storage/abstract_data_store.h
         storage/abstract_graph_store.h
+        storage/dynamic_length_vector.h
         storage/in_mem_graph_store.h
         storage/in_mem_data_store.h
+        storage/repository.h
         utility/any_wrappers.h
+        utility/args.h
         utility/bfloat.h
-        utility/common.h
+        utility/boolean_set.h
+        utility/compact.h
         utility/concurrent_queue.h
         utility/doubly_buffered_data.h
         utility/half.hpp
+        utility/hash_based_boolean_set.h
         utility/memory_mapper.h
+        utility/mmap_manager.h
+        utility/mmap_manager_defs.h
+        utility/mmap_manager_exception.h
+        utility/mmap_manager_impl.h
         utility/natural_number_map.h
         utility/natural_number_set.h
         utility/platform_macros.h
         utility/polaris_assert.h
         utility/polaris_exception.h
-        utility/tag_uint128.h
-        utility/types.h
-        utility/hash_based_boolean_set.h
-        utility/mmap_manager.h
-        utility/mmap_manager_defs.h
-        utility/mmap_manager_exception.h
-        utility/mmap_manager_impl.h
+        utility/prefetch.h
+        utility/property_set.h
+        utility/serialize.h
         utility/shared_memory_allocator.h
+        utility/tag_uint128.h
+        utility/timer.h
+        utility/types.h
+        utility/utils.h
         unified_index.h
 )
 

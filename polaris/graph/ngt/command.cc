@@ -18,6 +18,7 @@
 #include <polaris/graph/ngt/graph_reconstructor.h>
 #include <polaris/graph/ngt/optimizer.h>
 #include <polaris/graph/ngt/graph_optimizer.h>
+#include <polaris/utility/timer.h>
 
 using namespace std;
 
@@ -463,7 +464,7 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
     }
 
     string line;
-    double totalTime = 0;
+    turbo::Duration totalTime;
     size_t queryCount = 0;
     while (getline(is, line)) {
         if (searchParameters.querySize > 0 && queryCount >= searchParameters.querySize) {
@@ -501,9 +502,8 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
             polaris::Timer timer;
             try {
                 if (searchParameters.outputMode[0] == 'e') {
-                    double time = 0.0;
-                    uint64_t ntime = 0;
-                    double minTime = DBL_MAX;
+                    turbo::Duration duration;
+                    auto minTime = turbo::Duration::infinite();
                     size_t trial = searchParameters.trial <= 0 ? 1 : searchParameters.trial;
                     for (size_t t = 0; t < trial; t++) {
                         switch (searchParameters.indexType) {
@@ -523,16 +523,13 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
                                 timer.stop();
                                 break;
                         }
-                        if (minTime > timer.time) {
-                            minTime = timer.time;
+                        if (minTime > timer.delta) {
+                            minTime = timer.delta;
                         }
-                        time += timer.time;
-                        ntime += timer.ntime;
+                        duration += timer.delta;
                     }
-                    time /= (double) trial;
-                    ntime /= trial;
-                    timer.time = minTime;
-                    timer.ntime = ntime;
+                    duration /= (double) trial;
+                    timer.delta = minTime;
                 } else {
                     switch (searchParameters.indexType) {
                         case 't':
@@ -558,7 +555,7 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
                     throw err;
                 }
             }
-            totalTime += timer.time;
+            totalTime += timer.delta;
             if (searchParameters.outputMode[0] == 'e') {
                 stream << "# Query No.=" << queryCount << endl;
                 stream << "# Query=" << line.substr(0, 20) + " ..." << endl;
@@ -566,7 +563,7 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
                 stream << "# Size=" << searchParameters.size << endl;
                 stream << "# Radius=" << searchParameters.radius << endl;
                 stream << "# Epsilon=" << epsilon << endl;
-                stream << "# Query Time (msec)=" << timer.time * 1000.0 << endl;
+                stream << "# Query Time (msec)=" << timer.delta.to_milliseconds<double>() << endl;
                 stream << "# distance_t Computation=" << sc.distanceComputationCount << endl;
                 stream << "# Visit Count=" << sc.visitCount << endl;
             } else {
@@ -580,7 +577,7 @@ polaris::Command::search(polaris::NgtIndex &index, polaris::Command::SearchParam
             if (searchParameters.outputMode[0] == 'e') {
                 stream << "# End of Search" << endl;
             } else {
-                stream << "Query Time= " << timer.time << " (sec), " << timer.time * 1000.0 << " (msec)" << endl;
+                stream << "Query Time= " << timer.delta.to_seconds<double>() << " (sec), " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
             }
         }
         if (searchParameters.outputMode[0] == 'e') {

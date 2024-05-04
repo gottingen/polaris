@@ -14,7 +14,7 @@
 //
 //
 #pragma once
-#include <polaris/core/defines.h>
+#include <polaris/core/common.h>
 #include <immintrin.h>
 #include <polaris/utility/polaris_exception.h>
 

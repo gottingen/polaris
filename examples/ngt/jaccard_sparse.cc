@@ -20,6 +20,7 @@
 //
 
 #include <polaris/graph/ngt/command.h>
+#include <polaris/utility/timer.h>
 
 using namespace std;
 
@@ -166,7 +167,7 @@ search(polaris::NgtIndex &index, polaris::Command::SearchParameters &searchParam
                 timer.stop();
                 break;
         }
-        totalTime += timer.time;
+        totalTime += timer.delta.to_seconds<double>();
         if (searchParameters.outputMode[0] == 'e') {
             stream << "# Query No.=" << queryCount << endl;
             stream << "# Query=" << line.substr(0, 20) + " ..." << endl;
@@ -174,7 +175,7 @@ search(polaris::NgtIndex &index, polaris::Command::SearchParameters &searchParam
             stream << "# Size=" << searchParameters.size << endl;
             stream << "# Radius=" << searchParameters.radius << endl;
             stream << "# Epsilon=" << epsilon << endl;
-            stream << "# Query Time (msec)=" << timer.time * 1000.0 << endl;
+            stream << "# Query Time (msec)=" << timer.delta.to_milliseconds<double>() << endl;
             stream << "# Distance Computation=" << sc.distanceComputationCount << endl;
             stream << "# Visit Count=" << sc.visitCount << endl;
         } else {
@@ -188,7 +189,7 @@ search(polaris::NgtIndex &index, polaris::Command::SearchParameters &searchParam
         if (searchParameters.outputMode[0] == 'e') {
             stream << "# End of Search" << endl;
         } else {
-            stream << "Query Time= " << timer.time << " (sec), " << timer.time * 1000.0 << " (msec)" << endl;
+            stream << "Query Time= " << timer.delta.to_seconds<double>() << " (sec), " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
         }
         if (searchParameters.outputMode[0] == 'e') {
             stream << "# End of Query" << endl;

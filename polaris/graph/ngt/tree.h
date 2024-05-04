@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include <polaris/core/defines.h>
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
 #include <polaris/graph/ngt/node.h>
 
 #include <string>

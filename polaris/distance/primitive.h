@@ -15,10 +15,9 @@
 
 #pragma once
 
-#include <polaris/core/defines.h>
 #include <collie/simd/simd.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
 #include <type_traits>
 #include <cmath>
 

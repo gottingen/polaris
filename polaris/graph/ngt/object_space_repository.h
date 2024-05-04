@@ -25,7 +25,7 @@
 #warning "*** OMP is *NOT* available! ***"
 #endif
 
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
 #include <polaris/distance/primitive_comparator.h>

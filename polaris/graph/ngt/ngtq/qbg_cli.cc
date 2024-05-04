@@ -15,6 +15,7 @@
 //
 
 #include <polaris/graph/ngt/ngtq/quantizer.h>
+#include <polaris/utility/timer.h>
 
 #if defined(NGTQ_QBG) && !defined(NGTQ_SHARED_INVERTED_INDEX)
 
@@ -567,7 +568,7 @@ searchQG(NGTQG::NgtqgIndex &index, SearchParameters &searchParameters, ostream &
                     timer.stop();
                     break;
             }
-            totalTime += timer.time;
+            totalTime += timer.delta.to_seconds<double>();
             if (searchParameters.outputMode[0] == 'e') {
                 stream << "# Query No.=" << queryCount << endl;
                 stream << "# Query=" << line.substr(0, 20) + " ..." << endl;
@@ -577,7 +578,7 @@ searchQG(NGTQG::NgtqgIndex &index, SearchParameters &searchParameters, ostream &
                 stream << "# Epsilon*=" << epsilon << endl;
                 stream << "# Result Expansion*=" << resultExpansion << endl;
                 stream << "# Factor=" << param << endl;
-                stream << "# Query Time (msec)=" << timer.time * 1000.0 << endl;
+                stream << "# Query Time (msec)=" << timer.delta.to_milliseconds<double>() << endl;
                 stream << "# Distance Computation=" << searchQuery.distanceComputationCount << endl;
                 stream << "# VM Peak=" << polaris::Common::getProcessVmPeakStr() << endl;
                 stream << "# Visit Count=" << searchQuery.visitCount << endl;
@@ -592,7 +593,7 @@ searchQG(NGTQG::NgtqgIndex &index, SearchParameters &searchParameters, ostream &
             if (searchParameters.outputMode[0] == 'e') {
                 stream << "# End of Search" << endl;
             } else {
-                stream << "Query Time= " << timer.time << " (sec), " << timer.time * 1000.0 << " (msec)" << endl;
+                stream << "Query Time= " << timer.delta.to_seconds<double>() << " (sec), " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
             }
         }
         if (searchParameters.outputMode[0] == 'e') {
@@ -988,7 +989,7 @@ QBG::CLI::search(polaris::Args &args) {
                         objects.resize(size);
                     }
                     timer.stop();
-                    totalTime += timer.time;
+                    totalTime += timer.delta.to_seconds<double>();
                     if (outputMode == 'e' || outputMode == 'E') {
                         cout << "# Query No.=" << queryCount << endl;
                         cout << "# Query=" << line.substr(0, 20) + " ..." << endl;
@@ -1003,7 +1004,7 @@ QBG::CLI::search(polaris::Args &args) {
                             cout << "# Factor=" << re << endl;
                         }
                         cout << "# Distance Computation=" << index.getQuantizer().distanceComputationCount << endl;
-                        cout << "# Query Time (msec)=" << timer.time * 1000.0 << endl;
+                        cout << "# Query Time (msec)=" << timer.delta.to_milliseconds<double>() << endl;
                     } else {
                         cout << "Query No." << queryCount << endl;
                         cout << "Rank\tIN-ID\tID\tDistance" << endl;
@@ -1017,7 +1018,7 @@ QBG::CLI::search(polaris::Args &args) {
                     if (outputMode == 'e' || outputMode == 'E') {
                         cout << "# End of Search" << endl;
                     } else {
-                        cout << "Query Time= " << timer.time << " (sec), " << timer.time * 1000.0 << " (msec)" << endl;
+                        cout << "Query Time= " << timer.delta.to_seconds<double>() << " (sec), " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
                     }
                 }
                 if (outputMode == 'e' || outputMode == 'E') {

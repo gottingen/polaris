@@ -17,6 +17,7 @@
 #pragma once
 
 #include <polaris/graph/ngt/index.h>
+#include <polaris/utility/timer.h>
 
 using namespace std;
 

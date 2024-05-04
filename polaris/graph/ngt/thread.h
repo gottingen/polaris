@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
 
 #include <cstdio>
 #include <cstdlib>

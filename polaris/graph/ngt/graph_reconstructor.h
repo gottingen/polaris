@@ -19,7 +19,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <list>
-
+#include <polaris/utility/timer.h>
+#include <polaris/utility/utils.h>
 #ifdef _OPENMP
 
 #include <omp.h>
@@ -380,15 +381,15 @@ namespace polaris {
             auto repositorySize = outGraph.repository.size();
             std::cerr << "  vm size(3)=" << polaris::Common::getProcessVmSizeStr() << ":"
                       << polaris::Common::getProcessVmPeakStr() << std::endl;
-            double prevTime = 0.0;
+            turbo::Duration prevTime;
             for (uint32_t rank = 1; rank < maxRank; rank++) {
                 timer.stop();
-                if (timer.time - prevTime > 4.0) {
+                if (timer.delta - prevTime > turbo::Duration::seconds(4)){
                     std::cerr << "rank=" << rank << " " << "removed=" << removeCount << " "
                               << polaris::Common::getProcessVmSizeStr() << "/"
                               << polaris::Common::getProcessVmPeakStr()
                               << " time=" << timer << std::endl;
-                    prevTime = timer.time;
+                    prevTime = timer.delta;
                     timer.restart();
                 }
 #ifdef _OPENMP
@@ -649,8 +650,8 @@ namespace polaris {
                 }
             }
             normalizeEdgeTimer.stop();
-            std::cerr << "Reconstruction time=" << originalEdgeTimer.time << ":" << reverseEdgeTimer.time
-                      << ":" << normalizeEdgeTimer.time << std::endl;
+            std::cerr << "Reconstruction time=" << originalEdgeTimer.delta.to_seconds<double>() << ":" << reverseEdgeTimer.delta.to_seconds<double>()
+                      << ":" << normalizeEdgeTimer.delta.to_seconds<double>() << std::endl;
 
             polaris::Property prop;
             outGraph.getProperty().get(prop);
@@ -804,8 +805,8 @@ namespace polaris {
             originalEdgeTimer.stop();
             polaris::GraphIndex::showStatisticsOfGraph(outGraph);
 
-            std::cerr << "Reconstruction time=" << originalEdgeTimer.time << ":" << reverseEdgeTimer.time
-                      << ":" << normalizeEdgeTimer.time << std::endl;
+            std::cerr << "Reconstruction time=" << originalEdgeTimer.delta.to_seconds<double>() << ":" << reverseEdgeTimer.delta.to_seconds<double>()
+                      << ":" << normalizeEdgeTimer.delta.to_seconds<double>() << std::endl;
 
         }
 

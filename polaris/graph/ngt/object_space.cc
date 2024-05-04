@@ -14,8 +14,7 @@
 // limitations under the License.
 //
 
-#include <polaris/core/defines.h>
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
 #include <polaris/distance/primitive_comparator.h>

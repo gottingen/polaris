@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <polaris/core/defines.h>
-
 #include <polaris/graph/ngt/tree.h>
 #include <polaris/graph/ngt/node.h>
 

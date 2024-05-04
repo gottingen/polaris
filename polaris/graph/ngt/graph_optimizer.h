@@ -18,6 +18,7 @@
 
 #include <polaris/graph/ngt/graph_reconstructor.h>
 #include <polaris/graph/ngt/optimizer.h>
+#include <polaris/utility/timer.h>
 
 namespace polaris {
     class GraphOptimizer {
@@ -144,9 +145,9 @@ namespace polaris {
                     index.search(searchContainer);
                     timer.stop();
                     std::cerr << timer << std::endl;
-                    std::cerr << timer.ntime << std::endl;
+                    std::cerr << timer.delta.to_nanoseconds() << std::endl;
                     std::cerr << epsilon << std::endl;
-                    if (timer.ntime < 1000000.0) {
+                    if (timer.delta.to_nanoseconds() < 1000000.0) {
                         break;
                     }
                 }
@@ -164,7 +165,7 @@ namespace polaris {
                 index.search(searchContainer);
                 timer.stop();
             }
-            return std::pair<double, float>(timer.time * 1000.0, epsilon);
+            return std::pair<double, float>(timer.delta.to_milliseconds<double>(), epsilon);
         }
 
         static std::pair<size_t, double> searchMinimumQueryTime(polaris::NgtIndex &index, size_t prefetchOffset,
@@ -306,7 +307,7 @@ namespace polaris {
                         polaris::GraphReconstructor::reconstructGraph(graph, *graphIndex, numOfOutgoingEdges,
                                                                   numOfIncomingEdges, maxNumOfEdges);
                         timer.stop();
-                        std::cerr << "Optimizer::execute: Graph reconstruction time=" << timer.time << " (sec) "
+                        std::cerr << "Optimizer::execute: Graph reconstruction time=" << timer.delta.to_seconds<double>() << " (sec) "
                                   << std::endl;
                         graphIndex->saveGraph(outIndexPath);
                         prop.graphType = polaris::NeighborhoodGraph::GraphTypeONNG;
@@ -333,7 +334,7 @@ namespace polaris {
                             polaris::GraphReconstructor::adjustPathsEffectively(*graphIndex, minNumOfEdges);
                         }
                         timer.stop();
-                        std::cerr << "Optimizer::execute: Path adjustment time=" << timer.time << " (sec) "
+                        std::cerr << "Optimizer::execute: Path adjustment time=" << timer.delta.to_milliseconds<double>() << " (sec) "
                                   << std::endl;
                     } catch (polaris::PolarisException &err) {
                         delete graphIndex;

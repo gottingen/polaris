@@ -19,9 +19,11 @@
 #include <bitset>
 
 #include <polaris/core/defines.h>
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
 #include <polaris/graph/ngt/object_space_repository.h>
 #include <polaris/utility/hash_based_boolean_set.h>
+#include <polaris/utility/boolean_set.h>
+#include <polaris/utility/property_set.h>
 
 #ifndef NGT_GRAPH_CHECK_VECTOR
 #include <unordered_set>

@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#include <polaris/core/defines.h>
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
+#include <polaris/utility/timer.h>
 #include <polaris/graph/ngt/object_space_repository.h>
 #include <polaris/graph/ngt/index.h>
 #include <polaris/graph/ngt/thread.h>
@@ -148,7 +148,7 @@ polaris::NgtIndex::loadAndCreateIndex(NgtIndex &index, const string &database, c
         return;
     }
     timer.stop();
-    cerr << "loadAndCreateIndex: Data loading time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)"
+    cerr << "loadAndCreateIndex: Data loading time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)"
          << endl;
     if (index.getObjectRepositorySize() == 0) {
         POLARIS_THROW_EX("NgtIndex::create: Data file is empty.");
@@ -159,7 +159,7 @@ polaris::NgtIndex::loadAndCreateIndex(NgtIndex &index, const string &database, c
     index.createIndex(threadSize);
     timer.stop();
     index.saveIndex(database);
-    cerr << "NgtIndex creation time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "NgtIndex creation time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
 }
 
 void
@@ -171,7 +171,7 @@ polaris::NgtIndex::append(const string &database, const string &dataFile, size_t
         index.append(dataFile, dataSize);
     }
     timer.stop();
-    cerr << "append: Data loading time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "append: Data loading time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << index.getObjectRepositorySize() - 1 << endl;
     timer.reset();
     timer.start();
@@ -180,7 +180,7 @@ polaris::NgtIndex::append(const string &database, const string &dataFile, size_t
     index.createIndex(threadSize, endOfAppendedObjectID);
     timer.stop();
     index.saveIndex(database);
-    cerr << "NgtIndex creation time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "NgtIndex creation time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     return;
 }
 
@@ -195,14 +195,14 @@ polaris::NgtIndex::append(const string &database, const float *data, size_t data
         POLARIS_THROW_EX("NgtIndex::append: No data.");
     }
     timer.stop();
-    cerr << "Data loading time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "Data loading time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << index.getObjectRepositorySize() - 1 << endl;
     timer.reset();
     timer.start();
     index.createIndex(threadSize);
     timer.stop();
     index.saveIndex(database);
-    cerr << "NgtIndex creation time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "NgtIndex creation time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     return;
 }
 
@@ -220,7 +220,7 @@ polaris::NgtIndex::remove(const string &database, vector<ObjectID> &objects, boo
         }
     }
     timer.stop();
-    cerr << "Data removing time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "Data removing time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << index.getObjectRepositorySize() - 1 << endl;
     index.saveIndex(database);
     return;
@@ -245,7 +245,7 @@ polaris::NgtIndex::importIndex(const string &database, const string &file) {
     }
     idx->importIndex(file);
     timer.stop();
-    cerr << "Data importing time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "Data importing time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << idx->getObjectRepositorySize() - 1 << endl;
     idx->saveIndex(database);
     delete idx;
@@ -258,7 +258,7 @@ polaris::NgtIndex::exportIndex(const string &database, const string &file) {
     timer.start();
     idx.exportIndex(file);
     timer.stop();
-    cerr << "Data exporting time=" << timer.time << " (sec) " << timer.time * 1000.0 << " (msec)" << endl;
+    cerr << "Data exporting time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << idx.getObjectRepositorySize() - 1 << endl;
 }
 
@@ -472,7 +472,7 @@ public:
     void adjustEdgeSize(size_t c) {
         if (buildTimeLimit > 0.0 && count <= c) {
             timer.stop();
-            double estimatedTime = time + timer.time / interval * (noOfInsertedObjects - count);
+            double estimatedTime = time + timer.delta.to_seconds<double>() / interval * (noOfInsertedObjects - count);
             estimatedTime /= 60 * 60;    // hour
             const size_t edgeInterval = 5;
             const int minimumEdge = 5;
@@ -487,7 +487,7 @@ public:
                     }
                 }
             }
-            time += timer.time;
+            time += timer.delta.to_seconds<double>();
             count += interval;
             timer.start();
         }

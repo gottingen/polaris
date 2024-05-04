@@ -28,9 +28,8 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <stdint.h>
-
-#include <polaris/core/defines.h>
-#include <polaris/utility/common.h>
+#include <polaris/core/common.h>
+#include <polaris/utility/property_set.h>
 #include <polaris/graph/ngt/tree.h>
 #include <polaris/graph/ngt/thread.h>
 #include <polaris/graph/ngt/graph.h>

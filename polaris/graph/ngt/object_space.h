@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include <polaris/core/metric_type.h>
+#include <polaris/core/common.h>
 #include <polaris/core/memory.h>
+#include <polaris/storage/repository.h>
 
 class ObjectSpace;
 

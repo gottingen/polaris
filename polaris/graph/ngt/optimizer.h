@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include "command.h"
-
+#include <polaris/graph/ngt/command.h>
+#include <polaris/utility/timer.h>
+#include <polaris/utility/utils.h>
 
 #define NGT_LOG_BASED_OPTIMIZATION
 
@@ -1490,7 +1491,7 @@ namespace polaris {
                 }
                 int identityCount = 0;
                 std::vector<polaris::distance_t> lastDistances(nOfQueries);
-                double time = 0.0;
+                turbo::Duration time = turbo::Duration::zero();
                 double step = 0.02;
                 for (float e = 0.0; e < 10.0; e += step) {
                     size_t idx;
@@ -1517,9 +1518,9 @@ namespace polaris {
                         lastDistances[idx] = d;
                     }
                     if (e == 0.0) {
-                        time = timer.time;
+                        time = timer.delta;
                     }
-                    if (timer.time > time * 40.0) {
+                    if (timer.delta > time * 40.0) {
                         maxEpsilon = e;
                         break;
                     }

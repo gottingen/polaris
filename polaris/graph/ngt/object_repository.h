@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <polaris/utility/utils.h>
+
 namespace polaris {
     class ObjectRepository : public Repository<Object> {
     public:

@@ -21,7 +21,8 @@
 #include <polaris/graph/ngt/clustering.h>
 #include <unordered_map>
 #include <polaris/graph/ngt/ngtq/object_file.h>
-
+#include <polaris/utility/timer.h>
+#include <polaris/storage/dynamic_length_vector.h>
 
 #if defined(NGT_QBG_DISABLED)
 #undef NGTQ_QBG
