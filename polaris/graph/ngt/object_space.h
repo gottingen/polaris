@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <polaris/distance/primitive_comparator.h>
 #include <polaris/core/metric_type.h>
+#include <polaris/core/memory.h>
 
 class ObjectSpace;
 

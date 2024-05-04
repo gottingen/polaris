@@ -18,6 +18,7 @@
 #include <polaris/utility/common.h>
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
+#include <polaris/distance/primitive_comparator.h>
 
 polaris::distance_t polaris::ObjectSpace::compareWithL1(polaris::Object &o1, polaris::Object &o2) {
   auto dim = getPaddedDimension();

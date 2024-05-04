@@ -183,6 +183,7 @@ set(POLARIS_HEADERS
         core/executor.h
         core/random.h
         core/id_selector.h
+        core/memory.h
         distance/cosine_similarity.h
         distance/distance_impl.h
         distance/primitive.h
