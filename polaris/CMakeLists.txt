@@ -37,6 +37,7 @@ set(POLARIS_SRC
         core/heap.cc
         core/utils.cc
         core/sorting.cc
+        core/log.cc
         core/matrix_stats.cc
         core/executor.cc
         core/random.cc
@@ -179,6 +180,7 @@ set(POLARIS_HEADERS
         core/index.h
         core/index_io.h
         core/lock.h
+        core/log.h
         core/matrix_stats.h
         core/memory.h
         core/metric_type.h
@@ -353,9 +355,10 @@ set(POLARIS_HEADERS
         faiss/internal/partitioning.h
         faiss/internal/quantize_lut.h
         io/aligned_file_reader.h
-        io/linux_aligned_file_reader.h
-        io/cached_io.h
         io/array_file.h
+        io/cached_io.h
+        io/linux_aligned_file_reader.h
+        io/utils.h
         storage/abstract_data_store.h
         storage/abstract_graph_store.h
         storage/dynamic_length_vector.h

@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <list>
 #include <memory>
+#include <polaris/io/utils.h>
 
 namespace hnswlib {
 typedef unsigned int tableint;
@@ -683,29 +684,29 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
     }
 
     void saveIndex(const std::string &location) {
-        std::ofstream output(location, std::ios::binary);
+        std::ofstream output;
         std::streampos position;
+        polaris::open_to_write(output, location, true);
+        polaris::write_binary_pod(output, offsetLevel0_);
+        polaris::write_binary_pod(output, max_elements_);
+        polaris::write_binary_pod(output, cur_element_count);
+        polaris::write_binary_pod(output, size_data_per_element_);
+        polaris::write_binary_pod(output, label_offset_);
+        polaris::write_binary_pod(output, offsetData_);
+        polaris::write_binary_pod(output, maxlevel_);
+        polaris::write_binary_pod(output, enterpoint_node_);
+        polaris::write_binary_pod(output, maxM_);
 
-        writeBinaryPOD(output, offsetLevel0_);
-        writeBinaryPOD(output, max_elements_);
-        writeBinaryPOD(output, cur_element_count);
-        writeBinaryPOD(output, size_data_per_element_);
-        writeBinaryPOD(output, label_offset_);
-        writeBinaryPOD(output, offsetData_);
-        writeBinaryPOD(output, maxlevel_);
-        writeBinaryPOD(output, enterpoint_node_);
-        writeBinaryPOD(output, maxM_);
-
-        writeBinaryPOD(output, maxM0_);
-        writeBinaryPOD(output, M_);
-        writeBinaryPOD(output, mult_);
-        writeBinaryPOD(output, ef_construction_);
+        polaris::write_binary_pod(output, maxM0_);
+        polaris::write_binary_pod(output, M_);
+        polaris::write_binary_pod(output, mult_);
+        polaris::write_binary_pod(output, ef_construction_);
 
         output.write(data_level0_memory_, cur_element_count * size_data_per_element_);
 
         for (size_t i = 0; i < cur_element_count; i++) {
             unsigned int linkListSize = element_levels_[i] > 0 ? size_links_per_element_ * element_levels_[i] : 0;
-            writeBinaryPOD(output, linkListSize);
+            polaris::write_binary_pod(output, linkListSize);
             if (linkListSize)
                 output.write(linkLists_[i], linkListSize);
         }
@@ -714,8 +715,8 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
 
 
     void loadIndex(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) {
-        std::ifstream input(location, std::ios::binary);
-
+        std::ifstream input;
+        polaris::open_to_read(input, location);
         if (!input.is_open())
             throw std::runtime_error("Cannot open file");
 
@@ -725,25 +726,25 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         std::streampos total_filesize = input.tellg();
         input.seekg(0, input.beg);
 
-        readBinaryPOD(input, offsetLevel0_);
-        readBinaryPOD(input, max_elements_);
-        readBinaryPOD(input, cur_element_count);
+        polaris::read_binary_pod(input, offsetLevel0_);
+        polaris::read_binary_pod(input, max_elements_);
+        polaris::read_binary_pod(input, cur_element_count);
 
         size_t max_elements = max_elements_i;
         if (max_elements < cur_element_count)
             max_elements = max_elements_;
         max_elements_ = max_elements;
-        readBinaryPOD(input, size_data_per_element_);
-        readBinaryPOD(input, label_offset_);
-        readBinaryPOD(input, offsetData_);
-        readBinaryPOD(input, maxlevel_);
-        readBinaryPOD(input, enterpoint_node_);
+        polaris::read_binary_pod(input, size_data_per_element_);
+        polaris::read_binary_pod(input, label_offset_);
+        polaris::read_binary_pod(input, offsetData_);
+        polaris::read_binary_pod(input, maxlevel_);
+        polaris::read_binary_pod(input, enterpoint_node_);
 
-        readBinaryPOD(input, maxM_);
-        readBinaryPOD(input, maxM0_);
-        readBinaryPOD(input, M_);
-        readBinaryPOD(input, mult_);
-        readBinaryPOD(input, ef_construction_);
+        polaris::read_binary_pod(input, maxM_);
+        polaris::read_binary_pod(input, maxM0_);
+        polaris::read_binary_pod(input, M_);
+        polaris::read_binary_pod(input, mult_);
+        polaris::read_binary_pod(input, ef_construction_);
 
         data_size_ = s->get_data_size();
         fstdistfunc_ = s->get_dist_func();
@@ -759,7 +760,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
             }
 
             unsigned int linkListSize;
-            readBinaryPOD(input, linkListSize);
+            polaris::read_binary_pod(input, linkListSize);
             if (linkListSize != 0) {
                 input.seekg(linkListSize, input.cur);
             }
@@ -796,7 +797,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         for (size_t i = 0; i < cur_element_count; i++) {
             label_lookup_[getExternalLabel(i)] = i;
             unsigned int linkListSize;
-            readBinaryPOD(input, linkListSize);
+            polaris::read_binary_pod(input, linkListSize);
             if (linkListSize == 0) {
                 element_levels_[i] = 0;
                 linkLists_[i] = nullptr;

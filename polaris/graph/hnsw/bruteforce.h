@@ -4,6 +4,7 @@
 #include <mutex>
 #include <algorithm>
 #include <assert.h>
+#include <polaris/io/utils.h>
 
 namespace hnswlib {
 template<typename dist_t>
@@ -139,9 +140,9 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
         std::ofstream output(location, std::ios::binary);
         std::streampos position;
 
-        writeBinaryPOD(output, maxelements_);
-        writeBinaryPOD(output, size_per_element_);
-        writeBinaryPOD(output, cur_element_count);
+        polaris::write_binary_pod(output, maxelements_);
+        polaris::write_binary_pod(output, size_per_element_);
+        polaris::write_binary_pod(output, cur_element_count);
 
         output.write(data_, maxelements_ * size_per_element_);
 
@@ -153,9 +154,9 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
         std::ifstream input(location, std::ios::binary);
         std::streampos position;
 
-        readBinaryPOD(input, maxelements_);
-        readBinaryPOD(input, size_per_element_);
-        readBinaryPOD(input, cur_element_count);
+        polaris::read_binary_pod(input, maxelements_);
+        polaris::read_binary_pod(input, size_per_element_);
+        polaris::read_binary_pod(input, cur_element_count);
 
         data_size_ = s->get_data_size();
         fstdistfunc_ = s->get_dist_func();

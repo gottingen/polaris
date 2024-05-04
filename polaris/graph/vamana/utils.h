@@ -38,23 +38,6 @@
 #include <any>
 
 
-inline void open_file_to_write(std::ofstream &writer, const std::string &filename) {
-    writer.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    std::error_code ec;
-    if (!collie::filesystem::exists(filename, ec))
-        writer.open(filename, std::ios::binary | std::ios::out);
-    else
-        writer.open(filename, std::ios::binary | std::ios::in | std::ios::out);
-
-    if (writer.fail()) {
-        char buff[1024];
-        auto ret = std::string(strerror_r(errno, buff, 1024));
-        auto message = std::string("Failed to open file") + filename + " for write because " + buff + ", ret=" + ret;
-        polaris::cerr << message << std::endl;
-        throw polaris::PolarisException(message, -1);
-    }
-}
-
 
 // generates formatted_label and _labels_map file.
 inline void convert_labels_string_to_int(const std::string &inFileName, const std::string &outFileName,

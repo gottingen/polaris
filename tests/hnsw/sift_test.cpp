@@ -24,16 +24,6 @@
 using namespace std;
 using namespace hnswlib;
 
-/*
-template <typename T>
-void writeBinaryPOD(ostream& out, const T& podRef) {
-    out.write((char*)&podRef, sizeof(T));
-}
-
-template <typename T>
-static void readBinaryPOD(istream& in, T& podRef) {
-    in.read((char*)&podRef, sizeof(T));
-}*/
 class StopW {
     std::chrono::steady_clock::time_point time_begin;
  public:
