@@ -30,8 +30,6 @@
 #include <polaris/graph/ngt/object_repository.h>
 #include <polaris/distance/primitive_comparator.h>
 
-class ObjectSpace;
-
 namespace polaris {
 
     template<typename OBJECT_TYPE, typename COMPARE_TYPE>

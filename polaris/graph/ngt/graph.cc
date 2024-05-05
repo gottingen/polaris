@@ -357,7 +357,7 @@ NeighborhoodGraph::Search::lorentzFloat16ForLargeDataset(NeighborhoodGraph &grap
 void
 NeighborhoodGraph::setupDistances(polaris::SearchContainer &sc, ObjectDistances &seeds) {
     ObjectRepository &objectRepository = getObjectRepository();
-    polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
+    polaris::Comparator &comparator = objectSpace->getComparator();
     ObjectDistances tmp;
     tmp.reserve(seeds.size());
     size_t seedSize = seeds.size();
@@ -592,7 +592,7 @@ NeighborhoodGraph::search(polaris::SearchContainer &sc, ObjectDistances &seeds) 
     setupDistances(sc, seeds);
     setupSeeds(sc, seeds, results, unchecked, distanceChecked);
     distance_t explorationRadius = sc.explorationCoefficient * sc.radius;
-    polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
+    polaris::Comparator &comparator = objectSpace->getComparator();
     ObjectRepository &objectRepository = getObjectRepository();
     const size_t prefetchSize = objectSpace->getPrefetchSize();
     ObjectDistance result;

@@ -46,7 +46,7 @@ DVPTree::insert(InsertContainer &iobj,  LeafNode *leafNode)
   LeafNode &leaf = *leafNode;
   size_t fsize = leaf.getObjectSize();
   if (fsize != 0) {
-    polaris::ObjectSpace::Comparator &comparator = objectSpace->getComparator();
+    polaris::Comparator &comparator = objectSpace->getComparator();
       distance_t d = comparator(iobj.object, leaf.getPivot());
 
     polaris::ObjectDistance *objects = leaf.getObjectIDs();

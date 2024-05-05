@@ -24,8 +24,6 @@ class ObjectSpace;
 
 namespace polaris {
 
-    class PersistentObjectDistances;
-
     class ObjectDistances : public std::vector<ObjectDistance> {
     public:
         ObjectDistances(polaris::ObjectSpace *os = 0) {}
@@ -100,7 +98,6 @@ namespace polaris {
             }
         }
 
-        ObjectDistances &operator=(PersistentObjectDistances &objs);
     };
 
     typedef ObjectDistances GraphNode;
@@ -110,17 +107,6 @@ namespace polaris {
 
     class ObjectSpace {
     public:
-        class Comparator {
-        public:
-            Comparator(size_t d) : dimension(d) {}
-
-            virtual double operator()(Object &objecta, Object &objectb) = 0;
-
-            size_t dimension;
-
-            virtual ~Comparator() {}
-        };
-
         typedef std::priority_queue<ObjectDistance, std::vector<ObjectDistance>, std::less<ObjectDistance> > ResultSet;
 
         ObjectSpace(size_t d) : dimension(d), distanceType(MetricType::METRIC_NONE), comparator(0), normalization(false),

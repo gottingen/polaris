@@ -335,7 +335,7 @@ namespace NGTQG {
                 if (sc.resultExpansion >= 1.0) {
                     {
                         polaris::ObjectRepository &objectRepository = polaris::NgtIndex::getObjectSpace().getRepository();
-                        polaris::ObjectSpace::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
+                        polaris::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
                         for (auto i = qresults.begin(); i != qresults.end(); ++i) {
 #ifdef NGTQG_PREFETCH
                             if (static_cast<size_t>(distance(qresults.begin(), i + 10)) < qresults.size()) {
@@ -362,7 +362,7 @@ namespace NGTQG {
                 if (sc.resultExpansion >= 1.0) {
                     {
                         polaris::ObjectRepository &objectRepository = polaris::NgtIndex::getObjectSpace().getRepository();
-                        polaris::ObjectSpace::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
+                        polaris::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
                         while (!sc.workingResult.empty()) { sc.workingResult.pop(); }
                         while (!results.empty()) {
                             polaris::ObjectDistance obj = results.top();

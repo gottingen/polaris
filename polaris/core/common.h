@@ -244,5 +244,16 @@ namespace polaris {
         InsertContainer(Object &f, ObjectID i) : Container(f, i) {}
     };
 
+    class Comparator {
+    public:
+        Comparator(size_t d) : dimension(d) {}
+
+        virtual double operator()(Object &objecta, Object &objectb) = 0;
+
+        size_t dimension;
+
+        virtual ~Comparator() {}
+    };
+
 } // namespace polaris
 
