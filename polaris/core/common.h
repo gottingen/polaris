@@ -54,10 +54,25 @@ namespace polaris {
 
     enum ObjectType {
         ObjectTypeNone = 0,
-        Uint8 = 1,
-        Float = 2,
-        Float16 = 3,
-        Bfloat16 = 5
+        UINT8 = 1,
+        INT8 = 2,
+        UINT16 = 3,
+        INT16 = 4,
+        UINT32 = 5,
+        INT32 = 6,
+        UINT64 = 7,
+        INT64 = 8,
+        FLOAT = 9,
+        FLOAT16 = 10,
+        DOUBLE = 11,
+        BFLOAT16 = 12
+    };
+
+    struct SpaceMeta {
+        ObjectType object_type;
+        size_t dimension;
+        size_t byte_size;
+        MetricType metric_type;
     };
 
 #pragma pack()

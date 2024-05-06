@@ -357,7 +357,7 @@ NeighborhoodGraph::Search::lorentzFloat16ForLargeDataset(NeighborhoodGraph &grap
 void
 NeighborhoodGraph::setupDistances(polaris::SearchContainer &sc, ObjectDistances &seeds) {
     ObjectRepository &objectRepository = getObjectRepository();
-    polaris::Comparator &comparator = objectSpace->getComparator();
+    auto &comparator = objectSpace->getComparator();
     ObjectDistances tmp;
     tmp.reserve(seeds.size());
     size_t seedSize = seeds.size();
@@ -377,7 +377,7 @@ NeighborhoodGraph::setupDistances(polaris::SearchContainer &sc, ObjectDistances 
             cerr << "setupseeds:warning! unavailable object:" << seeds[i].id << "." << endl;
             continue;
         }
-        seeds[i].distance = comparator(sc.object, *objects[seeds[i].id]);
+        seeds[i].distance = comparator(sc.object.get_view(), objects[seeds[i].id]->get_view());
     }
 
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT
@@ -592,7 +592,7 @@ NeighborhoodGraph::search(polaris::SearchContainer &sc, ObjectDistances &seeds) 
     setupDistances(sc, seeds);
     setupSeeds(sc, seeds, results, unchecked, distanceChecked);
     distance_t explorationRadius = sc.explorationCoefficient * sc.radius;
-    polaris::Comparator &comparator = objectSpace->getComparator();
+    auto &comparator = objectSpace->getComparator();
     ObjectRepository &objectRepository = getObjectRepository();
     const size_t prefetchSize = objectSpace->getPrefetchSize();
     ObjectDistance result;
@@ -663,7 +663,7 @@ NeighborhoodGraph::search(polaris::SearchContainer &sc, ObjectDistances &seeds) 
             sc.explorationCoefficient = exp(-(double)distanceChecked.size() / 20000.0) / 10.0 + 1.0;
 #endif
 
-            distance_t distance = comparator(sc.object, *objectRepository.get(neighbor.id));
+            distance_t distance = comparator(sc.object.get_view(), objectRepository.get(neighbor.id)->get_view());
             sc.distanceComputationCount++;
             if (distance <= explorationRadius) {
                 result.set(neighbor.id, distance);
@@ -783,7 +783,7 @@ NeighborhoodGraph::removeEdgesReliably(ObjectID id) {
             distance_t mind = FLT_MAX;
             for (unsigned int j = i + 1; j < node.size(); j++) {
                 assert(node[j].id != id);
-                distance_t d = objectSpace->getComparator()(*objtbl[i], *objtbl[j]);
+                distance_t d = objectSpace->getComparator()(objtbl[i]->get_view(), objtbl[j]->get_view());
                 if (d < mind) {
                     minj = j;
                     mind = d;

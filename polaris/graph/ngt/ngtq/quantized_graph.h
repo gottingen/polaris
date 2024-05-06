@@ -335,7 +335,7 @@ namespace NGTQG {
                 if (sc.resultExpansion >= 1.0) {
                     {
                         polaris::ObjectRepository &objectRepository = polaris::NgtIndex::getObjectSpace().getRepository();
-                        polaris::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
+                        auto &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
                         for (auto i = qresults.begin(); i != qresults.end(); ++i) {
 #ifdef NGTQG_PREFETCH
                             if (static_cast<size_t>(distance(qresults.begin(), i + 10)) < qresults.size()) {
@@ -344,7 +344,7 @@ namespace NGTQG {
                             }
 #endif
                             polaris::Object &obj = *objectRepository[(*i).id];
-                            (*i).distance = comparator(sc.object, obj);
+                            (*i).distance = comparator(sc.object.get_view(), obj.get_view());
                         }
                         std::sort(qresults.begin(), qresults.end());
                         if (specifiedRadius < std::numeric_limits<float>::max()) {
@@ -362,11 +362,11 @@ namespace NGTQG {
                 if (sc.resultExpansion >= 1.0) {
                     {
                         polaris::ObjectRepository &objectRepository = polaris::NgtIndex::getObjectSpace().getRepository();
-                        polaris::Comparator &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
+                        auto &comparator = polaris::NgtIndex::getObjectSpace().getComparator();
                         while (!sc.workingResult.empty()) { sc.workingResult.pop(); }
                         while (!results.empty()) {
                             polaris::ObjectDistance obj = results.top();
-                            obj.distance = comparator(sc.object, *objectRepository.get(obj.id));
+                            obj.distance = comparator(sc.object.get_view(), objectRepository.get(obj.id)->get_view());
                             results.pop();
                             sc.workingResult.push(obj);
                         }

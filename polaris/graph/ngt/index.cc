@@ -514,13 +514,13 @@ polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
     }
 
     switch (prop.objectType) {
-        case polaris::ObjectType::Float :
+        case polaris::ObjectType::FLOAT :
             objectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
             break;
-        case polaris::ObjectType::Uint8 :
+        case polaris::ObjectType::UINT8 :
             objectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
             break;
-        case polaris::ObjectType::Float16 :
+        case polaris::ObjectType::FLOAT16 :
             objectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
             break;
         default:
@@ -530,16 +530,16 @@ polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
     }
 #ifdef NGT_REFINEMENT
     switch (prop.refinementObjectType) {
-    case polaris::ObjectType::Float :
+    case polaris::ObjectType::FLOAT :
       refinementObjectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
       break;
-    case polaris::ObjectType::Uint8 :
+    case polaris::ObjectType::UINT8 :
       refinementObjectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
       break;
-    case polaris::ObjectType::Float16 :
+    case polaris::ObjectType::FLOAT16 :
       refinementObjectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
       break;
-    case polaris::ObjectType::Bfloat16 :
+    case polaris::ObjectType::BFLOAT16 :
       refinementObjectSpace = new ObjectSpaceRepository<bfloat16, float>(dimension, typeid(bfloat16), prop.distanceType);
       break;
     default:
@@ -849,7 +849,7 @@ insertMultipleSearchResults(GraphIndex &neighborhoodGraph,
             ObjectDistances &objs = *output[idxi].results;
             for (size_t idxj = 0; idxj < idxi; idxj++) {
                 ObjectDistance r;
-                r.distance = neighborhoodGraph.objectSpace->getComparator()(*output[idxi].object, *output[idxj].object);
+                r.distance = neighborhoodGraph.objectSpace->getComparator()(output[idxi].object->get_view(), output[idxj].object->get_view());
                 r.id = output[idxj].id;
                 objs.push_back(r);
             }
@@ -1494,8 +1494,8 @@ GraphAndTreeIndex::createIndex(const vector<pair<polaris::Object *, size_t> > &o
                                 continue;
                             }
                             ObjectDistance r;
-                            r.distance = GraphIndex::objectSpace->getComparator()(*output[idxi].object,
-                                                                                  *output[idxj].object);
+                            r.distance = GraphIndex::objectSpace->getComparator()(output[idxi].object->get_view(),
+                                                                                  output[idxj].object->get_view());
                             r.id = output[idxj].id;
                             objs.push_back(r);
                         }

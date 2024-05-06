@@ -143,16 +143,16 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (objectType) {
         case 'f':
-            property.objectType = polaris::ObjectType::Float;
+            property.objectType = polaris::ObjectType::FLOAT;
             break;
         case 'c':
-            property.objectType = polaris::ObjectType::Uint8;
+            property.objectType = polaris::ObjectType::UINT8;
             break;
         case 'h':
-            property.objectType = polaris::ObjectType::Float16;
+            property.objectType = polaris::ObjectType::FLOAT16;
             break;
             case 'H':
-              property.objectType = polaris::ObjectType::Bfloat16;
+              property.objectType = polaris::ObjectType::BFLOAT16;
               break;
         default:
             std::stringstream msg;
@@ -163,16 +163,16 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 #ifdef NGT_REFINEMENT
     switch (refinementObjectType) {
     case 'f':
-      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Float;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::FLOAT;
       break;
     case 'c':
-      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Uint8;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::UINT8;
       break;
     case 'h':
-      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Float16;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::FLOAT16;
       break;
     case 'H':
-      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::Bfloat16;
+      property.refinementObjectType = polaris::NgtIndex::Property::ObjectType::BFLOAT16;
       break;
     default:
       std::stringstream msg;

@@ -42,7 +42,7 @@ namespace polaris {
         distance_t maxd = 0.0;
         int maxid = 0;
         for (int i = 1; i < fsize; i++) {
-            distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[0].object, *fs[i].object);
+            distance_t d = iobj.vptree->objectSpace->getComparator()(fs[0].object->get_view(), fs[i].object->get_view());
             if (d >= maxd) {
                 maxd = d;
                 maxid = i;
@@ -53,7 +53,7 @@ namespace polaris {
         maxd = 0.0;
         maxid = 0;
         for (int i = 0; i < fsize; i++) {
-            distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[aid].object, *fs[i].object);
+            distance_t d = iobj.vptree->objectSpace->getComparator()(fs[aid].object->get_view(), fs[i].object->get_view());
             if (i == aid) {
                 continue;
             }
@@ -67,7 +67,7 @@ namespace polaris {
         maxd = 0.0;
         maxid = 0;
         for (int i = 0; i < fsize; i++) {
-            distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[bid].object, *fs[i].object);
+            distance_t d = iobj.vptree->objectSpace->getComparator()(fs[bid].object->get_view(), fs[i].object->get_view());
             if (i == bid) {
                 continue;
             }
@@ -92,7 +92,7 @@ namespace polaris {
 
         for (int i = 0; i < fsize; i++) {
             for (int j = i + 1; j < fsize; j++) {
-                distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[i].object, *fs[j].object);
+                distance_t d = iobj.vptree->objectSpace->getComparator()(fs[i].object->get_view(), fs[j].object->get_view());
                 distance[i * fsize + j] = d;
                 distance[j * fsize + i] = d;
             }
@@ -137,7 +137,7 @@ namespace polaris {
             if (i == pv) {
                 fs[i].distance = 0;
             } else {
-                distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[pv].object, *fs[i].object);
+                distance_t d = iobj.vptree->objectSpace->getComparator()(fs[pv].object->get_view(), fs[i].object->get_view());
                 fs[i].distance = d;
             }
         }
@@ -203,8 +203,8 @@ namespace polaris {
                 pivots[fs[i].clusterID] = i;
                 fs[i].leafDistance = Object::Pivot;
             } else {
-                distance_t d = iobj.vptree->objectSpace->getComparator()(*fs[pivots[fs[i].clusterID]].object,
-                                                                       *fs[i].object);
+                distance_t d = iobj.vptree->objectSpace->getComparator()(fs[pivots[fs[i].clusterID]].object->get_view(),
+                                                                       fs[i].object->get_view());
                 fs[i].leafDistance = d;
             }
         }

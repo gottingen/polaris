@@ -2977,8 +2977,8 @@ public:
             polaris::Property globalProperty;
             globalCodebookIndex.getProperty(globalProperty);
             size_t sizeoftype = 0;
-            if (globalProperty.objectType == polaris::ObjectType::Float ||
-                globalProperty.objectType == polaris::ObjectType::Float16) {
+            if (globalProperty.objectType == polaris::ObjectType::FLOAT ||
+                globalProperty.objectType == polaris::ObjectType::FLOAT16) {
                 if (property.localIDByteSize == 4) {
                     quantizedObjectDistance = new QuantizedObjectDistanceFloat<uint32_t>;
                 } else if (property.localIDByteSize == 2) {
@@ -2993,7 +2993,7 @@ public:
                 }
                 generateResidualObject = new GenerateResidualObjectFloat;
                 sizeoftype = sizeof(float);
-            } else if (globalProperty.objectType == polaris::ObjectType::Uint8) {
+            } else if (globalProperty.objectType == polaris::ObjectType::UINT8) {
                 if (property.localIDByteSize == 4) {
                     quantizedObjectDistance = new QuantizedObjectDistanceUint8<uint32_t>;
                 } else if (property.localIDByteSize == 2) {
@@ -4161,7 +4161,7 @@ public:
             gp.edgeSizeForSearch = 40;
             lp.edgeSizeForSearch = 40;
 
-            lp.objectType = polaris::ObjectType::Float;
+            lp.objectType = polaris::ObjectType::FLOAT;
 #ifdef NGTQ_QBG
             if (property.genuineDimension > property.dimension) {
                 stringstream msg;
@@ -4190,13 +4190,13 @@ public:
 
             switch (property.dataType) {
                 case DataTypeFloat:
-                    gp.objectType = polaris::ObjectType::Float;
+                    gp.objectType = polaris::ObjectType::FLOAT;
                     break;
                 case DataTypeFloat16:
-                    gp.objectType = polaris::ObjectType::Float16;
+                    gp.objectType = polaris::ObjectType::FLOAT16;
                     break;
                 case DataTypeUint8:
-                    gp.objectType = polaris::ObjectType::Uint8;
+                    gp.objectType = polaris::ObjectType::UINT8;
                     break;
                 default: {
                     stringstream msg;

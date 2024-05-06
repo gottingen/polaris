@@ -37,7 +37,7 @@ void run_ann() {
     try {
         polaris::Property property;
         property.dimension = 128;
-        property.objectType = polaris::ObjectType::Float;
+        property.objectType = polaris::ObjectType::FLOAT;
         property.distanceType = polaris::MetricType::METRIC_COSINE;
         polaris::NgtIndex::create(indexPath, property);
         polaris::NgtIndex index(indexPath);

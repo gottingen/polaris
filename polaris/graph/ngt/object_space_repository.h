@@ -29,13 +29,14 @@
 #include <polaris/graph/ngt/object_space.h>
 #include <polaris/graph/ngt/object_repository.h>
 #include <polaris/distance/primitive_comparator.h>
+#include <polaris/distance/comparator.h>
 
 namespace polaris {
 
     template<typename OBJECT_TYPE, typename COMPARE_TYPE>
     class ObjectSpaceRepository : public ObjectSpace, public ObjectRepository {
     public:
-
+        /*
         class ComparatorL1 : public Comparator {
         public:
             ComparatorL1(size_t d) : Comparator(d) {}
@@ -165,6 +166,7 @@ namespace polaris {
                                                               dimension);
             }
         };
+         */
 
         ObjectSpaceRepository(size_t d, const std::type_info &ot, MetricType t) : ObjectSpace(d),
                                                                                     ObjectRepository(d, ot) {
@@ -200,55 +202,53 @@ namespace polaris {
             distanceType = t;
             switch (distanceType) {
                 case METRIC_L1:
-                    comparator = new ObjectSpaceRepository::ComparatorL1(ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorL1<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_L2:
-                    comparator = new ObjectSpaceRepository::ComparatorL2(ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorL2<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_NORMALIZED_L2:
-                    comparator = new ObjectSpaceRepository::ComparatorNormalizedL2(ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorNormalizedL2<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     normalization = true;
                     break;
                 case METRIC_HAMMING:
-                    comparator = new ObjectSpaceRepository::ComparatorHammingDistance(
+                    comparator = new ComparatorHammingDistance<OBJECT_TYPE>(
                             ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_JACCARD:
-                    comparator = new ObjectSpaceRepository::ComparatorJaccardDistance(
+                    comparator = new ComparatorJaccardDistance<OBJECT_TYPE>(
                             ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_SPARSE_JACCARD:
-                    comparator = new ObjectSpaceRepository::ComparatorSparseJaccardDistance(
+                    comparator = new ComparatorSparseJaccardDistance<OBJECT_TYPE>(
                             ObjectSpace::getPaddedDimension());
                     setSparse();
                     break;
                 case METRIC_ANGLE:
-                    comparator = new ObjectSpaceRepository::ComparatorAngleDistance(ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorAngleDistance<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_COSINE:
-                    comparator = new ObjectSpaceRepository::ComparatorCosineSimilarity(
+                    comparator = new ComparatorCosineSimilarity<OBJECT_TYPE>(
                             ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_POINCARE:  // added by Nyapicom
-                    comparator = new ObjectSpaceRepository::ComparatorPoincareDistance(
-                            ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorPoincareDistance<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_LORENTZ:  // added by Nyapicom
-                    comparator = new ObjectSpaceRepository::ComparatorLorentzDistance(
-                            ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorLorentzDistance<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     break;
                 case METRIC_NORMALIZED_ANGLE:
-                    comparator = new ObjectSpaceRepository::ComparatorNormalizedAngleDistance(
+                    comparator = new ComparatorNormalizedAngleDistance<OBJECT_TYPE>(
                             ObjectSpace::getPaddedDimension());
                     normalization = true;
                     break;
                 case METRIC_NORMALIZED_COSINE:
-                    comparator = new ObjectSpaceRepository::ComparatorNormalizedCosineSimilarity(
+                    comparator = new ComparatorNormalizedCosineSimilarity<OBJECT_TYPE>(
                             ObjectSpace::getPaddedDimension());
                     normalization = true;
                     break;
                 case METRIC_INNER_PRODUCT:
-                    comparator = new ObjectSpaceRepository::ComparatorL2(ObjectSpace::getPaddedDimension());
+                    comparator = new ComparatorL2<OBJECT_TYPE>(ObjectSpace::getPaddedDimension());
                     setInnerProduct();
                     break;
                 default:
@@ -301,7 +301,7 @@ namespace polaris {
                 if (rep[idx] == 0) {
                     continue;
                 }
-                distance_t d = (*comparator)((Object &) query, (Object &) *rep[idx]);
+                distance_t d = (*comparator)(query.get_view(), rep[idx]->get_view());
                 if (radius < 0.0 || d <= radius) {
                     polaris::ObjectDistance obj(idx, d);
                     results.push(obj);

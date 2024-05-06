@@ -129,7 +129,7 @@ namespace QBG {
       vector<vector<float>> residualVectors;
 
       polaris::Property property;
-      property.objectType = polaris::ObjectType::Float;
+      property.objectType = polaris::ObjectType::FLOAT;
       property.distanceType = polaris::MetricType::METRIC_L2;
       if (globalCentroid[0].size() != vectors[0].size()) {
 	std::cerr << "optimizer: Warning. The dimension is inconsistency. " << globalCentroid[0].size() << ":" << vectors[0].size() << std::endl;

@@ -1086,7 +1086,7 @@ namespace QBG {
                                 result.top().id)->getPointer());
                         polaris::MemoryCache::prefetch(ptr, prefetchSize);
                     }
-                    r.distance = objectSpace.getComparator()(query, object);
+                    r.distance = objectSpace.getComparator()(query.get_view(), object.get_view());
                     qresults.push(r);
                 }
             } else {
@@ -1432,7 +1432,7 @@ namespace QBG {
 #ifdef NGT_DISTANCE_COMPUTATION_COUNT
                     searchContainer.distanceComputationCount++;
 #endif
-                    polaris::distance_t distance = objectSpace.getComparator()(searchContainer.object, *neighborptr->second);
+                    polaris::distance_t distance = objectSpace.getComparator()(searchContainer.object.get_view(), neighborptr->second->get_view());
                     polaris::ObjectDistance r;
                     r.set(neighborptr->first, distance);
                     untracedNodes.push(r);

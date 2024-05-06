@@ -19,6 +19,8 @@
 #include <polaris/core/common.h>
 #include <polaris/core/memory.h>
 #include <polaris/storage/repository.h>
+#include <polaris/distance/comparator.h>
+#include <polaris/core/array_view.h>
 
 class ObjectSpace;
 
@@ -116,7 +118,7 @@ namespace polaris {
 
         virtual size_t insert(Object *obj) = 0;
 
-        Comparator &getComparator() { return *comparator; }
+        DistanceComparator &getComparator() { return *comparator; }
 
         virtual void serialize(const std::string &of) = 0;
 
@@ -258,7 +260,7 @@ namespace polaris {
     protected:
         const size_t dimension;
         MetricType distanceType;
-        Comparator *comparator;
+        DistanceComparator *comparator;
         bool normalization;
         int32_t prefetchOffset;
         int32_t prefetchSize;
@@ -267,6 +269,10 @@ namespace polaris {
     class BaseObject {
     public:
         virtual uint8_t &operator[](size_t idx) const = 0;
+
+        virtual ArrayView get_view(size_t idx = 0) const {
+            POLARIS_THROW_EX("Object: objectspace is null");
+        }
 
         void serialize(std::ostream &os, ObjectSpace *objectspace = 0) {
             if (objectspace == 0) {
@@ -422,6 +428,12 @@ namespace polaris {
 
         void *getPointer(size_t idx = 0) const { return vector + idx; }
 
+        ArrayView get_view(size_t idx = 0) const {
+            ArrayView v;
+            v.set_data(getPointer(idx));
+            return v;
+        }
+
         bool isEmpty() { return vector == 0; }
 
         static Object *allocate(ObjectSpace &objectspace) { return new Object(&objectspace); }
@@ -443,7 +455,6 @@ namespace polaris {
 
         uint8_t *vector;
     };
-
 
 }
 
