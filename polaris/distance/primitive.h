@@ -43,28 +43,6 @@ namespace polaris {
     }
 
     template<typename T, typename Arch, typename Tag>
-    float PrimL2Sqr(const T *x, const T *y, size_t d) {
-        using b_type = collie::simd::batch<T, Arch>;
-        std::size_t inc = b_type::size;
-        std::size_t vec_size = d - d % inc;
-        float sum = 0.0;
-        b_type sum_vec = collie::simd::broadcast(T(0));
-        for (std::size_t i = 0; i < vec_size; i += inc) {
-            b_type xvec = b_type::load(x + i, Tag());
-            b_type yvec = b_type::load(y + i, Tag());
-            auto delta = xvec - yvec;
-            sum_vec += delta * delta;
-        }
-        sum = collie::simd::reduce_add(sum_vec);
-        for (std::size_t i = vec_size; i < d; ++i) {
-            auto delta = x[i] - y[i];
-            sum += delta * delta;
-        }
-        return sum;
-    }
-
-
-    template<typename T, typename Arch, typename Tag>
     float PrimLinf(const T *x, const T *y, size_t d) {
         using b_type = collie::simd::batch<T, Arch>;
         std::size_t inc = b_type::size;
@@ -162,50 +140,148 @@ namespace polaris {
 
 namespace polaris::primitive {
 
+    template<typename T>
+    struct unsigned_overflow : public std::false_type {};
+    template<>
+    struct unsigned_overflow<uint8_t> : public std::true_type {};
+    template<>
+    struct unsigned_overflow<uint16_t> : public std::true_type {};
+    template<>
+    struct unsigned_overflow<uint32_t> : public std::true_type {};
+    template<>
+    struct unsigned_overflow<uint64_t> : public std::true_type {};
+
+    template<typename T>
+    struct need_promotion : public std::false_type {};
+    template<>
+    struct need_promotion<int8_t> : public std::true_type {};
+    template<>
+    struct need_promotion<uint8_t> : public std::true_type {};
+    template<>
+    struct need_promotion<int16_t> : public std::true_type {};
+    template<>
+    struct need_promotion<uint16_t> : public std::true_type {};
+
     /// l2
-    inline distance_t compare_l2(const float *__restrict a, const float *__restrict b, size_t d) {
-        using b_type = collie::simd::batch<float, collie::simd::best_arch>;
+    template <typename T>
+    float compare_simple_l2_sqrd(const T *__restrict x, const T *__restrict y, size_t d) {
+        float sum = 0.0;
+        for (size_t i = 0; i < d; ++i) {
+            auto delta = x[i] - y[i];
+            sum += delta * delta;
+        }
+        return sum;
+    }
+
+    template <typename T>
+    float compare_simple_l2(const T *__restrict x, const T *__restrict y, size_t d) {
+        return std::sqrt(compare_simple_l2_sqrd(x, y, d));
+    }
+
+    template<typename T, typename Arch, typename Tag, typename std::enable_if<unsigned_overflow<T>::value && !need_promotion<T>::value, int>::type =0>
+    float compare_template_l2_sqr(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<T, Arch>;
         std::size_t inc = b_type::size;
         std::size_t vec_size = d - d % inc;
         float sum = 0.0;
-        b_type sum_vec = collie::simd::broadcast(0.0f);
+        b_type sum_vec = collie::simd::broadcast(T(0));
         for (std::size_t i = 0; i < vec_size; i += inc) {
-            b_type xvec = b_type::load(a + i, collie::simd::aligned_mode());
-            b_type yvec = b_type::load(a + i, collie::simd::aligned_mode());
-            auto delta = xvec - yvec;
-            sum_vec += delta * delta;
+            b_type xvec = b_type::load(x + i, Tag());
+            b_type yvec = b_type::load(y + i, Tag());
+            auto max = collie::simd::max(xvec, yvec);
+            auto min = collie::simd::min(xvec, yvec);
+            auto delta = collie::simd::sub(max, min);
+            sum_vec += collie::simd::mul(delta, delta);
         }
         sum = collie::simd::reduce_add(sum_vec);
         for (std::size_t i = vec_size; i < d; ++i) {
-            auto delta = a[i] - a[i];
+            auto delta = x[i] >= y[i] ? x[i] - y[i] : y[i] - x[i];
             sum += delta * delta;
         }
-        return std::sqrt(sum);
+        return sum;
     }
 
-#if COLLIE_SIMD_AVX512F
-    inline static float compare_l2(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
-        const bfloat16 *last = a + size;
-        __m512 sum512 = _mm512_setzero_ps();
-        while (a < last) {
-            __m512i av = _mm512_slli_epi32(_mm512_cvtepu16_epi32(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(a))), 16);
-            __m512i bv = _mm512_slli_epi32(_mm512_cvtepu16_epi32(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(b))), 16);
-            __m512 sub = _mm512_sub_ps(reinterpret_cast<__m512>(av), reinterpret_cast<__m512>(bv));
-            sum512 = _mm512_fmadd_ps(sub, sub, sum512);
-            a += 16;
-            b += 16;
+    template<typename T, typename Arch, typename Tag, typename std::enable_if<!unsigned_overflow<T>::value && !need_promotion<T>::value, int>::type =0>
+    float compare_template_l2_sqr(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<T, Arch>;
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(T(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec = b_type::load(x + i, Tag());
+            b_type yvec = b_type::load(y + i, Tag());
+            auto delta = collie::simd::sub(xvec, yvec);
+            sum_vec += collie::simd::mul(delta, delta);
         }
-        __m256 sum256 = _mm256_add_ps(_mm512_extractf32x8_ps(sum512, 0), _mm512_extractf32x8_ps(sum512, 1));
-        __m128 sum128 = _mm_add_ps(_mm256_extractf128_ps(sum256, 0), _mm256_extractf128_ps(sum256, 1));
-        __m128 tmp = _mm_hadd_ps(sum128, _mm_set1_ps(0));
-        double d = _mm_cvtss_f32(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 0))) +
-                   _mm_cvtss_f32(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 1)));
-        //return sqrt(d);
-        return d;
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            auto delta = x[i] - y[i];
+            sum += delta * delta;
+        }
+        return sum;
     }
-#endif
 
-    inline distance_t compare_l2(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+    template<typename T, typename U, typename Arch, typename Tag>
+    float compare_template_l2_sqr(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<U, Arch>;
+        using index_type = typename collie::simd::as_integer_t<b_type>;
+        const index_type index = collie::simd::detail::make_sequence_as_batch<index_type>();
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(U(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec =b_type::gather(x + i, index);
+            b_type yvec =b_type::gather(y + i, index);
+            auto delta = collie::simd::sub(xvec, yvec);
+            sum_vec += collie::simd::mul(delta, delta);
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            auto delta = x[i] - y[i];
+            sum += delta * delta;
+        }
+        return sum;
+    }
+
+    inline distance_t compare_l2_sqr(const int8_t *__restrict a, const int8_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<int8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<uint8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const int16_t *__restrict a, const int16_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<int16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<uint16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const int32_t *__restrict a, const int32_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<int32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<uint32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const int64_t *__restrict a, const int64_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<int64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t d) {
+        return compare_template_l2_sqr<uint64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const float *__restrict a, const float *__restrict b, size_t d) {
+        return compare_template_l2_sqr<float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d);
+    }
+
+    inline distance_t compare_l2_sqr(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
         const float16 *last = a + size;
 #if COLLIE_SIMD_AVX512F
         __m512 sum512 = _mm512_setzero_ps();
@@ -239,35 +315,54 @@ namespace polaris::primitive {
         __m128 tmp = _mm_hadd_ps(sum128, _mm_set1_ps(0));
         double s = _mm_cvtss_f32(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 0))) +
                    _mm_cvtss_f32(_mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0, 0, 0, 1)));
-        return sqrt(s);
+        return s;
     }
 
-    inline distance_t compare_l2(const unsigned char *__restrict a, const unsigned char *__restrict b, size_t size) {
-        __m128 sum = _mm_setzero_ps();
-        const unsigned char *last = a + size;
-        const unsigned char *lastgroup = last - 7;
-        const __m128i zero = _mm_setzero_si128();
-        while (a < lastgroup) {
-            //__m128i x1 = _mm_cvtepu8_epi16(*reinterpret_cast<__m128i const*>(a));
-            __m128i x1 = _mm_cvtepu8_epi16(_mm_loadu_si128((__m128i const *) a));
-            //__m128i x2 = _mm_cvtepu8_epi16(*reinterpret_cast<__m128i const*>(b));
-            __m128i x2 = _mm_cvtepu8_epi16(_mm_loadu_si128((__m128i const *) b));
-            x1 = _mm_subs_epi16(x1, x2);
-            __m128i v = _mm_mullo_epi16(x1, x1);
-            sum = _mm_add_ps(sum, _mm_cvtepi32_ps(_mm_unpacklo_epi16(v, zero)));
-            sum = _mm_add_ps(sum, _mm_cvtepi32_ps(_mm_unpackhi_epi16(v, zero)));
-            a += 8;
-            b += 8;
-        }
-        __attribute__((aligned(32))) float f[4];
-        _mm_store_ps(f, sum);
-        double s = f[0] + f[1] + f[2] + f[3];
-        while (a < last) {
-            int d = (int) *a++ - (int) *b++;
-            s += d * d;
-        }
-        return sqrt(s);
+
+    inline distance_t compare_l2(const int8_t *__restrict a, const int8_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<int8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
     }
+
+    inline distance_t compare_l2(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<uint8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const int16_t *__restrict a, const int16_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<int16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<uint16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const int32_t *__restrict a, const int32_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<int32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<uint32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const int64_t *__restrict a, const int64_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<int64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<uint64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const float *__restrict a, const float *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
+    inline distance_t compare_l2(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        return std::sqrt(compare_l2_sqr(a, b, size));
+    }
+
+    inline distance_t compare_l2(const double *__restrict a, const double *__restrict b, size_t d) {
+        return std::sqrt(compare_template_l2_sqr<double, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, d));
+    }
+
     /// l1
     template <typename T>
     inline distance_t compare_simple_l1(const T * __restrict a, const T *__restrict b, size_t size) {
@@ -278,7 +373,7 @@ namespace polaris::primitive {
         return sum;
     }
 
-    template<typename T, typename Arch, typename Tag, typename std::enable_if<std::is_unsigned_v<T>, int>::type =0>
+    template<typename T, typename Arch, typename Tag, typename std::enable_if<unsigned_overflow<T>::value && !need_promotion<T>::value, int>::type =0>
     distance_t compare_template_l1(const T *__restrict x, const T *__restrict y, size_t d) {
         using b_type = collie::simd::batch<T, Arch>;
         std::size_t inc = b_type::size;
@@ -299,7 +394,7 @@ namespace polaris::primitive {
         return sum;
     }
 
-    template<typename T, typename Arch, typename Tag, typename std::enable_if<!std::is_unsigned_v<T>, int>::type =0>
+    template<typename T, typename Arch, typename Tag, typename std::enable_if<!unsigned_overflow<T>::value && !need_promotion<T>::value, int>::type =0>
     float compare_template_l1(const T *__restrict x, const T *__restrict y, size_t d) {
         using b_type = collie::simd::batch<T, Arch>;
         std::size_t inc = b_type::size;
@@ -344,11 +439,11 @@ namespace polaris::primitive {
     }
 
     inline distance_t compare_l1(const uint16_t * __restrict a, const uint16_t *__restrict b, size_t size) {
-        return compare_template_l1<uint16_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+        return compare_template_l1<uint16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
     }
 
     inline distance_t compare_l1(const int16_t * __restrict a, const int16_t *__restrict b, size_t size) {
-        return compare_template_l1<int16_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+        return compare_template_l1<int16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
     }
 
     inline distance_t compare_l1(const uint32_t * __restrict a, const uint32_t *__restrict b, size_t size) {

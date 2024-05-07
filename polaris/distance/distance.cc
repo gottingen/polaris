@@ -28,9 +28,9 @@ namespace polaris {
         auto al = collie::simd::is_aligned<collie::simd::best_arch>(x) &&
                   collie::simd::is_aligned<collie::simd::best_arch>(y);
         if (al) {
-            return PrimL2Sqr<float, collie::simd::best_arch, collie::simd::aligned_mode>(x, y, d);
+            return primitive::compare_template_l2_sqr<float, collie::simd::best_arch, collie::simd::aligned_mode>(x, y, d);
         }
-        return PrimL2Sqr<float, collie::simd::best_arch, collie::simd::unaligned_mode>(x, y, d);
+        return primitive::compare_template_l2_sqr<float, collie::simd::best_arch, collie::simd::unaligned_mode>(x, y, d);
     }
 
     void fvec_L2sqr_ny(float *dis, const float *x, const float *y, size_t d, size_t ny, void *executor) {
