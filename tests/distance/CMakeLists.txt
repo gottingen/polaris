@@ -44,4 +44,15 @@ carbin_cc_test(
         polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
+carbin_cc_test(
+        NAME ip_test
+        MODULE distance
+        SOURCES
+        ip_test.cc
+        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
+        LINKS
+        polaris::polaris
+        ${POLARIS_DEPS_LINKS}
+)
+
 

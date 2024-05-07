@@ -24,25 +24,6 @@
 namespace polaris {
 
     template<typename T, typename Arch, typename Tag>
-    float PrimIP(const T *x, const T *y, size_t d) {
-        using b_type = collie::simd::batch<T, Arch>;
-        std::size_t inc = b_type::size;
-        std::size_t vec_size = d - d % inc;
-        float sum = 0.0;
-        b_type sum_vec = collie::simd::broadcast(T(0));
-        for (std::size_t i = 0; i < vec_size; i += inc) {
-            b_type xvec = b_type::load(x + i, Tag());
-            b_type yvec = b_type::load(y + i, Tag());
-            sum_vec += xvec * yvec;
-        }
-        sum = collie::simd::reduce_add(sum_vec);
-        for (std::size_t i = vec_size; i < d; ++i) {
-            sum += x[i] * y[i];
-        }
-        return sum;
-    }
-
-    template<typename T, typename Arch, typename Tag>
     float PrimLinf(const T *x, const T *y, size_t d) {
         using b_type = collie::simd::batch<T, Arch>;
         std::size_t inc = b_type::size;
@@ -140,6 +121,9 @@ namespace polaris {
 
 namespace polaris::primitive {
 
+    /// unsigned type has a bug for overflow
+    /// eg. uint32_t a = 0, b = 2; abs(a - b) = 4294967294
+    /// but we expect abs(a-b) =2
     template<typename T>
     struct unsigned_overflow : public std::false_type {};
     template<>
@@ -151,6 +135,8 @@ namespace polaris::primitive {
     template<>
     struct unsigned_overflow<uint64_t> : public std::true_type {};
 
+    /// uint8_t, uint16_t, int8_t, int16_t need to be promoted to float
+    /// these type take 1 or 2 bytes, which is not enough to store the result of the multiplication
     template<typename T>
     struct need_promotion : public std::false_type {};
     template<>
@@ -618,41 +604,57 @@ namespace polaris::primitive {
     }
 
     /// dot product
-    inline distance_t compare_dot_product(const float * __restrict a, const float *__restrict b, size_t size) {
-        const float *last = a + size;
-#if defined(NGT_AVX512)
-        __m512 sum512 = _mm512_setzero_ps();
-            while (a < last) {
-          sum512 = _mm512_add_ps(sum512, _mm512_mul_ps(_mm512_loadu_ps(a), _mm512_loadu_ps(b)));
-          a += 16;
-          b += 16;
-            }
-            __m256 sum256 = _mm256_add_ps(_mm512_extractf32x8_ps(sum512, 0), _mm512_extractf32x8_ps(sum512, 1));
-            __m128 sum128 = _mm_add_ps(_mm256_extractf128_ps(sum256, 0), _mm256_extractf128_ps(sum256, 1));
-#elif defined(NGT_AVX2)
-        __m256 sum256 = _mm256_setzero_ps();
-        while (a < last) {
-            sum256 = _mm256_add_ps(sum256, _mm256_mul_ps(_mm256_loadu_ps(a), _mm256_loadu_ps(b)));
-            a += 8;
-            b += 8;
+
+    template<typename T>
+    distance_t compare_simple_dot_product(const T * __restrict a, const T *__restrict b, size_t size) {
+        float sum = 0.0;
+        for (size_t i = 0; i < size; i++) {
+            sum += (distance_t)a[i] * (distance_t)b[i];
         }
-        __m128 sum128 = _mm_add_ps(_mm256_extractf128_ps(sum256, 0), _mm256_extractf128_ps(sum256, 1));
-#else
-        __m128 sum128 = _mm_setzero_ps();
-            while (a < last) {
-          sum128 = _mm_add_ps(sum128, _mm_mul_ps(_mm_loadu_ps(a), _mm_loadu_ps(b)));
-          a += 4;
-          b += 4;
-            }
-#endif
-        __attribute__((aligned(32))) float f[4];
-        _mm_store_ps(f, sum128);
-        double s = static_cast<double>(f[0]) + static_cast<double>(f[1]) + static_cast<double>(f[2]) +
-                   static_cast<double>(f[3]);
-        return s;
+        return sum;
     }
 
-    inline distance_t compare_dot_product(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+    template<typename T, typename Arch, typename Tag, std::enable_if_t<!need_promotion<T>::value, int> = 0>
+    distance_t compare_template_dot_product(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<T, Arch>;
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(T(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec = b_type::load(x + i, Tag());
+            b_type yvec = b_type::load(y + i, Tag());
+            sum_vec += xvec * yvec;
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += x[i] * y[i];
+        }
+        return sum;
+    }
+
+    template<typename T, typename U, typename Arch, typename Tag, std::enable_if_t<need_promotion<T>::value, int> = 0>
+    distance_t compare_template_dot_product(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<U, Arch>;
+        using index_type = typename collie::simd::as_integer_t<b_type>;
+        const index_type index = collie::simd::detail::make_sequence_as_batch<index_type>();
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(U(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec =b_type::gather(x + i, index);
+            b_type yvec =b_type::gather(y + i, index);
+            sum_vec += xvec * yvec;
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += x[i] * y[i];
+        }
+        return sum;
+    }
+
+    inline distance_t compare_template_dot_product(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
         const float16 *last = a + size;
 #if defined(NGT_AVX512)
         __m512 sum512 = _mm512_setzero_ps();
@@ -695,17 +697,54 @@ namespace polaris::primitive {
         return s;
     }
 
+    inline distance_t compare_dot_product(const int8_t *__restrict a, const int8_t *__restrict b, size_t size) {
+        return compare_template_dot_product<int8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t size) {
+        return compare_template_dot_product<uint8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const int16_t *__restrict a, const int16_t *__restrict b, size_t size) {
+        return compare_template_dot_product<int16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t size) {
+        return compare_template_dot_product<uint16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const int32_t *__restrict a, const int32_t *__restrict b, size_t size) {
+        return compare_template_dot_product<int32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t size) {
+        return compare_template_dot_product<uint32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const int64_t *__restrict a, const int64_t *__restrict b, size_t size) {
+        return compare_template_dot_product<int64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t size) {
+        return compare_template_dot_product<uint64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const float *__restrict a, const float *__restrict b, size_t size) {
+        return compare_template_dot_product<float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_dot_product(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        return compare_template_dot_product(a, b, size);
+    }
+
     inline distance_t compare_dot_product(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
         abort();
     }
 
-    inline distance_t compare_dot_product(const unsigned char *__restrict a, const unsigned char *__restrict b, size_t size) {
-        double sum = 0.0;
-        for (size_t loc = 0; loc < size; loc++) {
-            sum += static_cast<double>(a[loc]) * static_cast<double>(b[loc]);
-        }
-        return sum;
+    inline distance_t compare_dot_product(const double *__restrict a, const double *__restrict b, size_t size) {
+        return compare_template_dot_product<double, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
     }
+
 
     /// cosine
     inline distance_t compare_cosine(const float *a, const float *b, size_t size) {
