@@ -23,6 +23,7 @@ namespace polaris {
     class ArrayView {
     public:
         ArrayView() = default;
+        explicit ArrayView(void *data) : _data(data) {}
 
         [[nodiscard]] const void *data() const { return _data; }
 

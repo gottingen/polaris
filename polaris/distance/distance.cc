@@ -148,9 +148,9 @@ namespace polaris {
         auto al = collie::simd::is_aligned<collie::simd::best_arch>(x) &&
                   collie::simd::is_aligned<collie::simd::best_arch>(y);
         if (al) {
-            return PrimL1<float, collie::simd::best_arch, collie::simd::aligned_mode>(x, y, d);
+            return polaris::primitive::compare_template_l1<float, collie::simd::best_arch, collie::simd::aligned_mode>(x, y, d);
         }
-        return PrimL1<float, collie::simd::best_arch, collie::simd::unaligned_mode>(x, y, d);
+        return polaris::primitive::compare_template_l1<float, collie::simd::best_arch, collie::simd::unaligned_mode>(x, y, d);
     }
 
     float fvec_norm_L2sqr(const float *x, size_t d) {

@@ -24,25 +24,6 @@
 namespace polaris {
 
     template<typename T, typename Arch, typename Tag>
-    float PrimL1(const T *x, const T *y, size_t d) {
-        using b_type = collie::simd::batch<T, Arch>;
-        std::size_t inc = b_type::size;
-        std::size_t vec_size = d - d % inc;
-        float sum = 0.0;
-        b_type sum_vec = collie::simd::broadcast(T(0));
-        for (std::size_t i = 0; i < vec_size; i += inc) {
-            b_type xvec = b_type::load(x + i, Tag());
-            b_type yvec = b_type::load(y + i, Tag());
-            sum_vec += collie::simd::abs(xvec - yvec);
-        }
-        sum = collie::simd::reduce_add(sum_vec);
-        for (std::size_t i = vec_size; i < d; ++i) {
-            sum += std::abs(x[i] - y[i]);
-        }
-        return sum;
-    }
-
-    template<typename T, typename Arch, typename Tag>
     float PrimIP(const T *x, const T *y, size_t d) {
         using b_type = collie::simd::batch<T, Arch>;
         std::size_t inc = b_type::size;
@@ -288,26 +269,106 @@ namespace polaris::primitive {
         return sqrt(s);
     }
     /// l1
+    template <typename T>
+    inline distance_t compare_simple_l1(const T * __restrict a, const T *__restrict b, size_t size) {
+        distance_t sum = 0;
+        for (size_t i = 0; i < size; i++) {
+            sum += std::abs((distance_t)a[i] - (distance_t)b[i]);
+        }
+        return sum;
+    }
+
+    template<typename T, typename Arch, typename Tag, typename std::enable_if<std::is_unsigned_v<T>, int>::type =0>
+    distance_t compare_template_l1(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<T, Arch>;
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(T(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec = b_type::load(x + i, Tag());
+            b_type yvec = b_type::load(y + i, Tag());
+            auto max = collie::simd::max(xvec, yvec);
+            auto min = collie::simd::min(xvec, yvec);
+            sum_vec += collie::simd::sub(max, min);
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += x[i] >= y[i] ? x[i] - y[i] : y[i] - x[i];
+        }
+        return sum;
+    }
+
+    template<typename T, typename Arch, typename Tag, typename std::enable_if<!std::is_unsigned_v<T>, int>::type =0>
+    float compare_template_l1(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<T, Arch>;
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(T(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec = b_type::load(x + i, Tag());
+            b_type yvec = b_type::load(y + i, Tag());
+            sum_vec += collie::simd::abs(xvec - yvec);
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += std::abs(x[i] - y[i]);
+        }
+        return sum;
+    }
+
+    template<typename T, typename U, typename Arch, typename Tag>
+    float compare_template_l1(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<U, Arch>;
+        using index_type = typename collie::simd::as_integer_t<b_type>;
+        const index_type index = collie::simd::detail::make_sequence_as_batch<index_type>();
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(U(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec =b_type::gather(x + i, index);
+            b_type yvec =b_type::gather(y + i, index);
+            sum_vec += collie::simd::abs(xvec - yvec);
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += std::abs((U)x[i] - (U)y[i]);
+        }
+        return sum;
+    }
+
     inline distance_t compare_l1(const float * __restrict a, const float *__restrict b, size_t size) {
-        __m256 sum = _mm256_setzero_ps();
-        const float *last = a + size;
-        const float *lastgroup = last - 7;
-        while (a < lastgroup) {
-            __m256 x1 = _mm256_sub_ps(_mm256_loadu_ps(a), _mm256_loadu_ps(b));
-            const __m256 mask = _mm256_set1_ps(-0.0f);
-            __m256 v = _mm256_andnot_ps(mask, x1);
-            sum = _mm256_add_ps(sum, v);
-            a += 8;
-            b += 8;
-        }
-        __attribute__((aligned(32))) float f[8];
-        _mm256_store_ps(f, sum);
-        double s = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7];
-        while (a < last) {
-            double d = fabs(*a++ - *b++);
-            s += d;
-        }
-        return s;
+        return compare_template_l1<float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const uint16_t * __restrict a, const uint16_t *__restrict b, size_t size) {
+        return compare_template_l1<uint16_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const int16_t * __restrict a, const int16_t *__restrict b, size_t size) {
+        return compare_template_l1<int16_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const uint32_t * __restrict a, const uint32_t *__restrict b, size_t size) {
+        return compare_template_l1<uint32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const int32_t * __restrict a, const int32_t *__restrict b, size_t size) {
+        return compare_template_l1<int32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const uint64_t * __restrict a, const uint64_t *__restrict b, size_t size) {
+        return compare_template_l1<uint64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const int64_t * __restrict a, const int64_t *__restrict b, size_t size) {
+        return compare_template_l1<int64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_l1(const double * __restrict a, const double *__restrict b, size_t size) {
+        return compare_template_l1<double, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
     }
 
     inline distance_t compare_l1(const float16 * __restrict a, const float16 * __restrict b, size_t size) {
@@ -336,32 +397,12 @@ namespace polaris::primitive {
     inline distance_t compare_l1(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
         abort();
     }
-
-    inline distance_t compare_l1(const unsigned char *__restrict a, const unsigned char *__restrict b, size_t size) {
-        __m128 sum = _mm_setzero_ps();
-        const unsigned char *last = a + size;
-        const unsigned char *lastgroup = last - 7;
-        const __m128i zero = _mm_setzero_si128();
-        while (a < lastgroup) {
-            __m128i x1 = _mm_cvtepu8_epi16(*reinterpret_cast<__m128i const *>(a));
-            __m128i x2 = _mm_cvtepu8_epi16(*reinterpret_cast<__m128i const *>(b));
-            x1 = _mm_subs_epi16(x1, x2);
-            x1 = _mm_sign_epi16(x1, x1);
-            sum = _mm_add_ps(sum, _mm_cvtepi32_ps(_mm_unpacklo_epi16(x1, zero)));
-            sum = _mm_add_ps(sum, _mm_cvtepi32_ps(_mm_unpackhi_epi16(x1, zero)));
-            a += 8;
-            b += 8;
-        }
-        __attribute__((aligned(32))) float f[4];
-        _mm_store_ps(f, sum);
-        distance_t s = f[0] + f[1] + f[2] + f[3];
-        while (a < last) {
-            distance_t d = std::fabs(static_cast<double>(*a++) - static_cast<double>(*b++));
-            s += d;
-        }
-        return s;
+    inline distance_t compare_l1(const uint8_t * __restrict a, const uint8_t * __restrict b, size_t size) {
+        return compare_template_l1<unsigned char, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
     }
-
+    inline distance_t compare_l1(const int8_t * __restrict a, const int8_t  * __restrict b, size_t size) {
+        return compare_template_l1<int8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
     /// hamming
 #if !defined(__POPCNT__)
     inline distance_t popCount(uint32_t x) {
