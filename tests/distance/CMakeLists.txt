@@ -55,4 +55,26 @@ carbin_cc_test(
         ${POLARIS_DEPS_LINKS}
 )
 
+carbin_cc_test(
+        NAME cosine_test
+        MODULE distance
+        SOURCES
+        cosine_test.cc
+        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
+        LINKS
+        polaris::polaris
+        ${POLARIS_DEPS_LINKS}
+)
+
+carbin_cc_test(
+        NAME angle_test
+        MODULE distance
+        SOURCES
+        angle_test.cc
+        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
+        LINKS
+        polaris::polaris
+        ${POLARIS_DEPS_LINKS}
+)
+
 

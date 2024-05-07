@@ -496,7 +496,7 @@ namespace polaris::primitive {
         }
 
         template <typename OBJECT_TYPE>
-        inline distance_t compare_hamming_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+        inline distance_t compare_hamming_distance(const OBJECT_TYPE * __restrict a, const OBJECT_TYPE *__restrict b, size_t size) {
           const uint32_t *last = reinterpret_cast<const uint32_t*>(a + size);
 
           const uint32_t *uinta = reinterpret_cast<const uint32_t*>(a);
@@ -511,7 +511,7 @@ namespace polaris::primitive {
 #else
 
     template<typename OBJECT_TYPE>
-    inline distance_t compare_hamming_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_hamming_distance(const OBJECT_TYPE *__restrict a, const OBJECT_TYPE *__restrict b, size_t size) {
         const uint64_t *last = reinterpret_cast<const uint64_t *>(a + size);
 
         const uint64_t *uinta = reinterpret_cast<const uint64_t *>(a);
@@ -529,7 +529,7 @@ namespace polaris::primitive {
     /// jaccard
 #if !defined(__POPCNT__)
     template <typename OBJECT_TYPE>
-          inline distance_t compare_jaccard_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+          inline distance_t compare_jaccard_distance(const OBJECT_TYPE *__restrict a, const OBJECT_TYPE *__restrict b, size_t size) {
           const uint32_t *last = reinterpret_cast<const uint32_t*>(a + size);
 
           const uint32_t *uinta = reinterpret_cast<const uint32_t*>(a);
@@ -548,7 +548,7 @@ namespace polaris::primitive {
 #else
 
     template<typename OBJECT_TYPE>
-    inline distance_t compare_jaccard_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_jaccard_distance(const OBJECT_TYPE *__restrict a, const OBJECT_TYPE *__restrict b, size_t size) {
         const uint64_t *last = reinterpret_cast<const uint64_t *>(a + size);
 
         const uint64_t *uinta = reinterpret_cast<const uint64_t *>(a);
@@ -567,22 +567,22 @@ namespace polaris::primitive {
 
 #endif
     /// sparse jaccard
-    inline distance_t compare_sparse_jaccard_distance(const unsigned char *a, const unsigned char *b, size_t size) {
+    inline distance_t compare_sparse_jaccard_distance(const unsigned char *__restrict a, const unsigned char *__restrict b, size_t size) {
         std::cerr << "compare_sparse_jaccard_distance: Not implemented." << std::endl;
         abort();
     }
 
-    inline distance_t compare_sparse_jaccard_distance(const float16 *a, const float16 *b, size_t size) {
+    inline distance_t compare_sparse_jaccard_distance(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
         std::cerr << "compare_sparse_jaccard_distance: Not implemented." << std::endl;
         abort();
     }
 
-    inline distance_t compare_sparse_jaccard_distance(const bfloat16 *a, const bfloat16 *b, size_t size) {
+    inline distance_t compare_sparse_jaccard_distance(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
         std::cerr << "compare_sparse_jaccard_distance: Not implemented." << std::endl;
         abort();
     }
 
-    inline distance_t compare_sparse_jaccard_distance(const float *a, const float *b, size_t size) {
+    inline distance_t compare_sparse_jaccard_distance(const float *__restrict a, const float *__restrict b, size_t size) {
         size_t loca = 0;
         size_t locb = 0;
         const uint32_t *ai = reinterpret_cast<const uint32_t *>(a);
@@ -746,76 +746,77 @@ namespace polaris::primitive {
     }
 
 
-    /// cosine
-    inline distance_t compare_cosine(const float *a, const float *b, size_t size) {
+    /// distance cosine
 
-        const float *last = a + size;
-#if defined(NGT_AVX512)
-        __m512 normA = _mm512_setzero_ps();
-            __m512 normB = _mm512_setzero_ps();
-            __m512 sum = _mm512_setzero_ps();
-            while (a < last) {
-          __m512 am = _mm512_loadu_ps(a);
-          __m512 bm = _mm512_loadu_ps(b);
-          normA = _mm512_add_ps(normA, _mm512_mul_ps(am, am));
-          normB = _mm512_add_ps(normB, _mm512_mul_ps(bm, bm));
-          sum = _mm512_add_ps(sum, _mm512_mul_ps(am, bm));
-          a += 16;
-          b += 16;
-            }
-            __m256 am256 = _mm256_add_ps(_mm512_extractf32x8_ps(normA, 0), _mm512_extractf32x8_ps(normA, 1));
-            __m256 bm256 = _mm256_add_ps(_mm512_extractf32x8_ps(normB, 0), _mm512_extractf32x8_ps(normB, 1));
-            __m256 s256 = _mm256_add_ps(_mm512_extractf32x8_ps(sum, 0), _mm512_extractf32x8_ps(sum, 1));
-            __m128 am128 = _mm_add_ps(_mm256_extractf128_ps(am256, 0), _mm256_extractf128_ps(am256, 1));
-            __m128 bm128 = _mm_add_ps(_mm256_extractf128_ps(bm256, 0), _mm256_extractf128_ps(bm256, 1));
-            __m128 s128 = _mm_add_ps(_mm256_extractf128_ps(s256, 0), _mm256_extractf128_ps(s256, 1));
-#elif defined(NGT_AVX2)
-        __m256 normA = _mm256_setzero_ps();
-        __m256 normB = _mm256_setzero_ps();
-        __m256 sum = _mm256_setzero_ps();
-        __m256 am, bm;
-        while (a < last) {
-            am = _mm256_loadu_ps(a);
-            bm = _mm256_loadu_ps(b);
-            normA = _mm256_add_ps(normA, _mm256_mul_ps(am, am));
-            normB = _mm256_add_ps(normB, _mm256_mul_ps(bm, bm));
-            sum = _mm256_add_ps(sum, _mm256_mul_ps(am, bm));
-            a += 8;
-            b += 8;
+    template<typename T>
+    distance_t compare_simple_cosine(const T * __restrict a, const T *__restrict b, size_t size) {
+        float sum = 0.0;
+        float normA = 0.0;
+        float normB = 0.0;
+        for (size_t i = 0; i < size; i++) {
+            normA += (distance_t)a[i] * (distance_t)a[i];
+            normB += (distance_t)b[i] * (distance_t)b[i];
+            sum += (distance_t)a[i] * (distance_t)b[i];
         }
-        __m128 am128 = _mm_add_ps(_mm256_extractf128_ps(normA, 0), _mm256_extractf128_ps(normA, 1));
-        __m128 bm128 = _mm_add_ps(_mm256_extractf128_ps(normB, 0), _mm256_extractf128_ps(normB, 1));
-        __m128 s128 = _mm_add_ps(_mm256_extractf128_ps(sum, 0), _mm256_extractf128_ps(sum, 1));
-#else
-        __m128 am128 = _mm_setzero_ps();
-            __m128 bm128 = _mm_setzero_ps();
-            __m128 s128 = _mm_setzero_ps();
-            __m128 am, bm;
-            while (a < last) {
-          am = _mm_loadu_ps(a);
-          bm = _mm_loadu_ps(b);
-          am128 = _mm_add_ps(am128, _mm_mul_ps(am, am));
-          bm128 = _mm_add_ps(bm128, _mm_mul_ps(bm, bm));
-          s128 = _mm_add_ps(s128, _mm_mul_ps(am, bm));
-          a += 4;
-          b += 4;
-            }
-
-#endif
-
-        __attribute__((aligned(32))) float f[4];
-        _mm_store_ps(f, am128);
-        distance_t na = f[0] + f[1] + f[2] + f[3];
-        _mm_store_ps(f, bm128);
-        distance_t nb = f[0] + f[1] + f[2] + f[3];
-        _mm_store_ps(f, s128);
-        distance_t s = f[0] + f[1] + f[2] + f[3];
-
-        distance_t cosine = s / std::sqrt(na * nb);
-        return cosine;
+        return sum / std::sqrt(normA * normB);
     }
 
-    inline distance_t compare_cosine(const float16 *a, const float16 *b, size_t size) {
+    template<typename T, typename Arch, typename Tag, std::enable_if_t<!need_promotion<T>::value, int> = 0>
+    distance_t compare_template_cosine(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<T, Arch>;
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(T(0));
+        b_type normA = collie::simd::broadcast(T(0));
+        b_type normB = collie::simd::broadcast(T(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec = b_type::load(x + i, Tag());
+            b_type yvec = b_type::load(y + i, Tag());
+            sum_vec += xvec * yvec;
+            normA += xvec * xvec;
+            normB += yvec * yvec;
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        float na = collie::simd::reduce_add(normA);
+        float nb = collie::simd::reduce_add(normB);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += x[i] * y[i];
+            na += x[i] * x[i];
+            nb += y[i] * y[i];
+        }
+        return sum / std::sqrt(na * nb);
+    }
+
+    template<typename T, typename U, typename Arch, typename Tag, std::enable_if_t<need_promotion<T>::value, int> = 0>
+    distance_t compare_template_cosine(const T *__restrict x, const T *__restrict y, size_t d) {
+        using b_type = collie::simd::batch<U, Arch>;
+        using index_type = typename collie::simd::as_integer_t<b_type>;
+        const index_type index = collie::simd::detail::make_sequence_as_batch<index_type>();
+        std::size_t inc = b_type::size;
+        std::size_t vec_size = d - d % inc;
+        float sum = 0.0;
+        b_type sum_vec = collie::simd::broadcast(U(0));
+        b_type normA = collie::simd::broadcast(U(0));
+        b_type normB = collie::simd::broadcast(U(0));
+        for (std::size_t i = 0; i < vec_size; i += inc) {
+            b_type xvec =b_type::gather(x + i, index);
+            b_type yvec =b_type::gather(y + i, index);
+            sum_vec += xvec * yvec;
+            normA += xvec * xvec;
+            normB += yvec * yvec;
+        }
+        sum = collie::simd::reduce_add(sum_vec);
+        float na = collie::simd::reduce_add(normA);
+        float nb = collie::simd::reduce_add(normB);
+        for (std::size_t i = vec_size; i < d; ++i) {
+            sum += x[i] * y[i];
+            na += x[i] * x[i];
+            nb += y[i] * y[i];
+        }
+        return sum / std::sqrt(na * nb);
+    }
+    inline distance_t compare_template_cosine(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
 
         const float16 *last = a + size;
 #if defined(NGT_AVX512)
@@ -892,27 +893,141 @@ namespace polaris::primitive {
         return cosine;
     }
 
-    inline distance_t compare_cosine(const bfloat16 *a, const bfloat16 *b, size_t size) {
+    inline distance_t compare_cosine(const int8_t *__restrict a, const int8_t *__restrict b, size_t size) {
+        return compare_template_cosine<int8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t size) {
+        return compare_template_cosine<uint8_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const int16_t *__restrict a, const int16_t *__restrict b, size_t size) {
+        return compare_template_cosine<int16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t size) {
+        return compare_template_cosine<uint16_t, float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const int32_t *__restrict a, const int32_t *__restrict b, size_t size) {
+        return compare_template_cosine<int32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t size) {
+        return compare_template_cosine<uint32_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const int64_t *__restrict a, const int64_t *__restrict b, size_t size) {
+        return compare_template_cosine<int64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t size) {
+        return compare_template_cosine<uint64_t, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const float *__restrict a, const float *__restrict b, size_t size) {
+        return compare_template_cosine<float, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const double *__restrict a, const double *__restrict b, size_t size) {
+        return compare_template_cosine<double, collie::simd::best_arch, collie::simd::aligned_mode>(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        return compare_template_cosine(a, b, size);
+    }
+
+    inline distance_t compare_cosine(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
         abort();
     }
 
-    inline distance_t compare_cosine(const unsigned char *a, const unsigned char *b, size_t size) {
-        double normA = 0.0;
-        double normB = 0.0;
-        distance_t sum = 0.0;
-        for (size_t loc = 0; loc < size; loc++) {
-            normA += static_cast<double>(a[loc]) * static_cast<double>(a[loc]);
-            normB += static_cast<double>(b[loc]) * static_cast<double>(b[loc]);
-            sum += static_cast<double>(a[loc]) * static_cast<double>(b[loc]);
-        }
-
-        double cosine = sum / sqrt(normA * normB);
-
-        return cosine;
+    template<typename T>
+    distance_t compare_simple_cosine_similarity(const T * __restrict a, const T *__restrict b, size_t size) {
+        auto v = 1.0 - compare_simple_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
     }
 
-    template<typename OBJECT_TYPE>
-    inline distance_t compare_angle_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_cosine_similarity(const int8_t *__restrict a, const int8_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const int16_t *__restrict a, const int16_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const int32_t *__restrict a, const int32_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const int64_t *__restrict a, const int64_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const float *__restrict a, const float *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const double *__restrict a, const double *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        auto v = 1.0 - compare_cosine(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_cosine_similarity(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
+        abort();
+    }
+
+    /// distance angle
+    template<typename T>
+    distance_t compare_simple_angle(const T * __restrict a, const T *__restrict b, size_t size) {
+        float sum = 0.0;
+        float normA = 0.0;
+        float normB = 0.0;
+        for (size_t i = 0; i < size; i++) {
+            normA += (distance_t)a[i] * (distance_t)a[i];
+            normB += (distance_t)b[i] * (distance_t)b[i];
+            sum += (distance_t)a[i] * (distance_t)b[i];
+        }
+        auto cosine = sum / std::sqrt(normA * normB);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const int8_t *__restrict a, const int8_t *__restrict b, size_t size) {
         distance_t cosine = compare_cosine(a, b, size);
         if (cosine >= 1.0) {
             return 0.0;
@@ -923,20 +1038,255 @@ namespace polaris::primitive {
         }
     }
 
-    template<typename OBJECT_TYPE>
-    inline distance_t compare_normalized_angle_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_angle_distance(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const int16_t *__restrict a, const int16_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const int32_t *__restrict a, const int32_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const int64_t *__restrict a, const int64_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const float *__restrict a, const float *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const double *__restrict a, const double *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_angle_distance(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
+        distance_t cosine = compare_cosine(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const int8_t *__restrict a, const int8_t *__restrict b, size_t size) {
         distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
         if (cosine >= 1.0) {
             return 0.0;
         } else if (cosine <= -1.0) {
-            return acos(-1.0);
+            return std::acos(-1.0);
         } else {
-            return acos(cosine);
+            return std::acos(cosine);
         }
     }
 
-    template<typename OBJECT_TYPE>
-    inline distance_t compare_normalized_l2(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_normalized_angle_distance(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const int16_t *__restrict a, const int16_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const int32_t *__restrict a, const int32_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const int64_t *__restrict a, const int64_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const float *__restrict a, const float *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const double *__restrict a, const double *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        distance_t cosine = polaris::primitive::compare_dot_product(a, b, size);
+        if (cosine >= 1.0) {
+            return 0.0;
+        } else if (cosine <= -1.0) {
+            return std::acos(-1.0);
+        } else {
+            return std::acos(cosine);
+        }
+    }
+
+    inline distance_t compare_normalized_angle_distance(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
+        abort();
+    }
+
+    /// distance l2
+
+    inline distance_t compare_normalized_l2(const int8_t * __restrict a, const int8_t * __restrict b, size_t size) {
         double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
         if (v < 0.0) {
             return 0.0;
@@ -945,8 +1295,103 @@ namespace polaris::primitive {
         }
     }
 
+    inline distance_t compare_normalized_l2(const uint8_t *__restrict a, const uint8_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const int16_t *__restrict a, const int16_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const uint16_t *__restrict a, const uint16_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const int32_t *__restrict a, const int32_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const uint32_t *__restrict a, const uint32_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const int64_t *__restrict a, const int64_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const uint64_t *__restrict a, const uint64_t *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const float *__restrict a, const float *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const double *__restrict a, const double *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const float16 *__restrict a, const float16 *__restrict b, size_t size) {
+        double v = 2.0 - 2.0 * polaris::primitive::compare_dot_product(a, b, size);
+        if (v < 0.0) {
+            return 0.0;
+        } else {
+            return sqrt(v);
+        }
+    }
+
+    inline distance_t compare_normalized_l2(const bfloat16 *__restrict a, const bfloat16 *__restrict b, size_t size) {
+        abort();
+    }
+
+    /// distance poincare
     template<typename OBJECT_TYPE>
-    inline distance_t compare_poincare_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_poincare_distance(const OBJECT_TYPE *__restrict a, const OBJECT_TYPE *__restrict b, size_t size) {
         // Unlike the other distance functions, this is not optimized...
         double a2 = 0.0;
         double b2 = 0.0;
@@ -958,8 +1403,9 @@ namespace polaris::primitive {
         return std::acosh(1 + 2.0 * c2 * c2 / (1.0 - a2) / (1.0 - b2));
     }
 
+    /// distance lorentz
     template<typename OBJECT_TYPE>
-    inline distance_t compare_lorentz_distance(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_lorentz_distance(const OBJECT_TYPE *__restrict a, const OBJECT_TYPE *__restrict b, size_t size) {
         // Unlike the other distance functions, this is not optimized...
         double sum = static_cast<double>(a[0]) * static_cast<double>(b[0]);
         for (size_t i = 1; i < size; i++) {
@@ -968,18 +1414,67 @@ namespace polaris::primitive {
         return std::acosh(sum);
     }
 
-    template<typename OBJECT_TYPE>
-    inline distance_t compare_cosine_similarity(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
-        auto v = 1.0 - compare_cosine(a, b, size);
-        return v < 0.0 ? -v : v;
-    }
+    /// normalized cosine similarity
 
-    template<typename OBJECT_TYPE>
-    inline distance_t
-    compare_normalized_cosine_similarity(const OBJECT_TYPE *a, const OBJECT_TYPE *b, size_t size) {
+    inline distance_t compare_normalized_cosine_similarity(const int8_t * __restrict a, const int8_t *__restrict b, size_t size) {
         auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
         return v < 0.0 ? -v : v;
     }
+
+    inline distance_t compare_normalized_cosine_similarity(const uint8_t * __restrict a, const uint8_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const int16_t * __restrict a, const int16_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const uint16_t * __restrict a, const uint16_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const int32_t * __restrict a, const int32_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const uint32_t * __restrict a, const uint32_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const int64_t * __restrict a, const int64_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const uint64_t * __restrict a, const uint64_t *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const float * __restrict a, const float *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const double * __restrict a, const double *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const float16 * __restrict a, const float16 *__restrict b, size_t size) {
+        auto v = 1.0 - polaris::primitive::compare_dot_product(a, b, size);
+        return v < 0.0 ? -v : v;
+    }
+
+    inline distance_t compare_normalized_cosine_similarity(const bfloat16 * __restrict a, const bfloat16 *__restrict b, size_t size) {
+        abort();
+    }
+
 
 }  // namespace polaris::primitive
 

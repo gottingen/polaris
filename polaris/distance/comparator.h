@@ -170,8 +170,8 @@ namespace polaris {
         ComparatorCosineSimilarity(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
-            return polaris::primitive::compare_cosine_similarity((OBJECT_TYPE *) a.data(),
-                                                                 (OBJECT_TYPE *) b.data(), dimension);
+            return polaris::primitive::compare_cosine_similarity((const OBJECT_TYPE *) a.data(),
+                                                                 (const OBJECT_TYPE *) b.data(), dimension);
         }
         MetricType get_metric() const override {
             return MetricType::METRIC_COSINE;
