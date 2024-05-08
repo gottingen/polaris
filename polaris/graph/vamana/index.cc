@@ -1666,18 +1666,10 @@ namespace polaris {
     template<typename T>
     std::pair<uint32_t, uint32_t>
     VamanaIndex<T>::_search(const DataType &query, const size_t K, const uint32_t L,
-                                    std::any &indices, float *distances) {
+                            localid_t *indices, float *distances) {
         try {
             auto typed_query = std::any_cast<const T *>(query);
-            if (typeid(uint32_t *) == indices.type()) {
-                auto u32_ptr = std::any_cast<uint32_t *>(indices);
-                return this->search(typed_query, K, L, u32_ptr, distances);
-            } else if (typeid(uint64_t *) == indices.type()) {
-                auto u64_ptr = std::any_cast<uint64_t *>(indices);
-                return this->search(typed_query, K, L, u64_ptr, distances);
-            } else {
-                throw PolarisException("Error: indices type can only be uint64_t or uint32_t.", -1);
-            }
+            return this->search(typed_query, K, L, indices, distances);
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException("Error: bad any cast while searching. " + std::string(e.what()), -1);
@@ -1688,9 +1680,8 @@ namespace polaris {
     }
 
     template<typename T>
-    template<typename IdType>
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::search(const T *query, const size_t K, const uint32_t L,
-                                                                 IdType *indices, float *distances) {
+                                                         localid_t *indices, float *distances) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
@@ -1721,7 +1712,7 @@ namespace polaris {
             if (best_L_nodes[i].id < _max_points) {
                 // safe because VamanaIndex uses uint32_t ids internally
                 // and IDType will be uint32_t or uint64_t
-                indices[pos] = (IdType) best_L_nodes[i].id;
+                indices[pos] = (localid_t) best_L_nodes[i].id;
                 if (distances != nullptr) {
                     distances[pos] = _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 * best_L_nodes[i].distance
                                                                                     : best_L_nodes[i].distance;
@@ -1742,26 +1733,17 @@ namespace polaris {
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::_search_with_filters(const DataType &query,
                                                                                const std::string &raw_label,
                                                                                const size_t K,
-                                                                               const uint32_t L, std::any &indices,
+                                                                               const uint32_t L, localid_t *indices,
                                                                                float *distances) {
         auto converted_label = this->get_converted_label(raw_label);
-        if (typeid(uint64_t *) == indices.type()) {
-            auto ptr = std::any_cast<uint64_t *>(indices);
-            return this->search_with_filters(std::any_cast<T *>(query), converted_label, K, L, ptr, distances);
-        } else if (typeid(uint32_t *) == indices.type()) {
-            auto ptr = std::any_cast<uint32_t *>(indices);
-            return this->search_with_filters(std::any_cast<T *>(query), converted_label, K, L, ptr, distances);
-        } else {
-            throw PolarisException("Error: Id type can only be uint64_t or uint32_t.", -1);
-        }
+        return this->search_with_filters(std::any_cast<T *>(query), converted_label, K, L, indices, distances);
     }
 
     template<typename T>
-    template<typename IdType>
     std::pair<uint32_t, uint32_t>
     VamanaIndex<T>::search_with_filters(const T *query, const labid_t &filter_label,
                                                 const size_t K, const uint32_t L,
-                                                IdType *indices, float *distances) {
+                                        localid_t *indices, float *distances) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
@@ -1804,7 +1786,7 @@ namespace polaris {
         size_t pos = 0;
         for (size_t i = 0; i < best_L_nodes.size(); ++i) {
             if (best_L_nodes[i].id < _max_points) {
-                indices[pos] = (IdType) best_L_nodes[i].id;
+                indices[pos] = (localid_t) best_L_nodes[i].id;
 
                 if (distances != nullptr) {
                     distances[pos] = _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 * best_L_nodes[i].distance
@@ -2878,10 +2860,10 @@ namespace polaris {
         }
     }
 
-/*  Internals of the library */
+    /*  Internals of the library */
     template<typename T> const float VamanaIndex<T>::INDEX_GROWTH_FACTOR = 1.5f;
 
-// EXPORTS
+    // EXPORTS
     template POLARIS_API
     class VamanaIndex<float>;
 
@@ -2890,25 +2872,5 @@ namespace polaris {
 
     template POLARIS_API
     class VamanaIndex<uint8_t>;
-
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float>::search<uint64_t>(
-            const float *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float>::search<uint32_t>(
-            const float *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t>::search<uint64_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t>::search<uint32_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t>::search<uint64_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t>::search<uint32_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
 
 } // namespace polaris

@@ -26,12 +26,11 @@ namespace polaris {
         this->_build(any_data, num_points_to_load, any_tags_vec);
     }
 
-    template<typename data_type, typename IDType>
+    template<typename data_type>
     std::pair<uint32_t, uint32_t> AbstractIndex::search(const data_type *query, const size_t K, const uint32_t L,
-                                                        IDType *indices, float *distances) {
-        auto any_indices = std::any(indices);
+                                                        localid_t *indices, float *distances) {
         auto any_query = std::any(query);
-        return _search(any_query, K, L, any_indices, distances);
+        return _search(any_query, K, L, indices, distances);
     }
 
     template<typename data_type>
@@ -45,13 +44,11 @@ namespace polaris {
                                        filter_label);
     }
 
-    template<typename IndexType>
     std::pair<uint32_t, uint32_t>
     AbstractIndex::search_with_filters(const DataType &query, const std::string &raw_label,
-                                       const size_t K, const uint32_t L, IndexType *indices,
+                                       const size_t K, const uint32_t L, localid_t *indices,
                                        float *distances) {
-        auto any_indices = std::any(indices);
-        return _search_with_filters(query, raw_label, K, L, any_indices, distances);
+        return _search_with_filters(query, raw_label, K, L, indices, distances);
     }
 
     template<typename data_type>
@@ -123,31 +120,14 @@ namespace polaris {
                                                                      const std::vector<vid_t> &tags);
 
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<float, uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<float>(
             const float *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<uint8_t, uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<uint8_t>(
             const uint8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<int8_t, uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<int8_t>(
             const int8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<float, uint64_t>(
-            const float *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<uint8_t, uint64_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search<int8_t, uint64_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search_with_filters<uint32_t>(
-            const DataType &query, const std::string &raw_label, const size_t K, const uint32_t L, uint32_t *indices,
-            float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> AbstractIndex::search_with_filters<uint64_t>(
-            const DataType &query, const std::string &raw_label, const size_t K, const uint32_t L, uint64_t *indices,
-            float *distances);
 
     template POLARIS_API size_t AbstractIndex::search_with_tags<float>(
             const float *query, const uint64_t K, const uint32_t L, vid_t *tags, float *distances,

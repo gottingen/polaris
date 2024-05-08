@@ -131,9 +131,8 @@ namespace polaris {
 
         // Added search overload that takes L as parameter, so that we
         // can customize L on a per-query basis without tampering with "Parameters"
-        template<typename IDType>
         POLARIS_API std::pair<uint32_t, uint32_t> search(const T *query, const size_t K, const uint32_t L,
-                                                         IDType *indices, float *distances = nullptr);
+                                                         localid_t *indices, float *distances = nullptr);
 
         // Initialize space for res_vectors before calling.
         POLARIS_API size_t search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
@@ -141,10 +140,9 @@ namespace polaris {
                                             const std::string filter_label = "");
 
         // Filter support search
-        template<typename IndexType>
         POLARIS_API std::pair<uint32_t, uint32_t> search_with_filters(const T *query, const labid_t &filter_label,
                                                                       const size_t K, const uint32_t L,
-                                                                      IndexType *indices, float *distances);
+                                                                      localid_t *indices, float *distances);
 
         // Will fail if tag already in the index or if tag=0.
         POLARIS_API int insert_point(const T *point, const vid_t tag);
@@ -207,11 +205,11 @@ namespace polaris {
         virtual void _build(const DataType &data, const size_t num_points_to_load, TagVector &tags) override;
 
         virtual std::pair<uint32_t, uint32_t> _search(const DataType &query, const size_t K, const uint32_t L,
-                                                      std::any &indices, float *distances = nullptr) override;
+                                                      localid_t *indices, float *distances = nullptr) override;
 
         virtual std::pair<uint32_t, uint32_t> _search_with_filters(const DataType &query,
                                                                    const std::string &filter_label_raw, const size_t K,
-                                                                   const uint32_t L, std::any &indices,
+                                                                   const uint32_t L, localid_t*indices,
                                                                    float *distances) override;
 
         virtual int _insert_point(const DataType &data_point, const TagType tag) override;
