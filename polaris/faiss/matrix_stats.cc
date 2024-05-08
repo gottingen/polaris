@@ -7,11 +7,11 @@
 
 // -*- c++ -*-
 
-#include <polaris/core/matrix_stats.h>
+#include <polaris/faiss/matrix_stats.h>
 
 #include <cstdarg> /* va_list, va_start, va_arg, va_end */
 
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 #include <cinttypes>
 #include <cmath>
 #include <cstdio>

@@ -11,11 +11,11 @@
 
 #include <polaris/faiss/ivf_lib.h>
 #include <polaris/faiss/index_ivf.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 #include <polaris/faiss/index_factory.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 #include <polaris/core/random.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 /************************
  * This benchmark attempts to measure the runtime overhead to use an IDSelector

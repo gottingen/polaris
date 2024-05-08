@@ -12,11 +12,11 @@
 #include <memory>
 #include <random>
 #include <algorithm>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/hamming.h> // BitstringWriter
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 #include <polaris/faiss/utils/approx_topk/approx_topk.h>
 // this is needed for prefetching
 #include <polaris/utility/platform_macros.h>

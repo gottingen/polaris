@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include <polaris/core/aux_index_structures.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/aux_index_structures.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/internal/partitioning.h>
 
 namespace polaris {

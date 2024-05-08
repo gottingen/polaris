@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 #include <polaris/faiss/index_binary.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 
 #include <unordered_map>
 #include <vector>

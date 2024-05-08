@@ -15,10 +15,10 @@
 
 #include <memory>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/utils/distances.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 #include <polaris/faiss/invlists/block_inverted_lists.h>
 

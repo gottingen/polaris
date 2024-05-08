@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <numeric>

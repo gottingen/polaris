@@ -16,7 +16,7 @@
 
 #include <polaris/faiss/quantization/additive_quantizer.h>
 #include <polaris/utility/platform_macros.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

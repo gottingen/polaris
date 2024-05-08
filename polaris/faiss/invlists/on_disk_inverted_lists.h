@@ -14,7 +14,7 @@
 #include <vector>
 
 #include <polaris/faiss/index_ivf.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 #include <polaris/faiss/invlists/inverted_lists_io_hook.h>
 
 namespace polaris {

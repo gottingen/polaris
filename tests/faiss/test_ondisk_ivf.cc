@@ -19,7 +19,7 @@
 
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_ivf_flat.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 #include <polaris/faiss/invlists/on_disk_inverted_lists.h>
 #include <polaris/core/random.h>
 

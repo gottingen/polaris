@@ -21,7 +21,7 @@
 #include <vector>
 
 #include <polaris/utility/platform_macros.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 namespace polaris {
 

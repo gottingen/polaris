@@ -13,7 +13,7 @@
 
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_ivf_pq.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 
 TEST(IVFPQ, accuracy) {
     // dimension of the vectors to index

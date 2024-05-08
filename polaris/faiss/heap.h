@@ -30,7 +30,7 @@
 
 #include <limits>
 
-#include <polaris/core/ordered_key_value.h>
+#include <polaris/faiss/ordered_key_value.h>
 
 namespace polaris {
 

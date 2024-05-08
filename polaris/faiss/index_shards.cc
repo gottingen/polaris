@@ -12,7 +12,7 @@
 #include <functional>
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/internal/worker_thread.h>
 
 namespace polaris {

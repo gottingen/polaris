@@ -18,7 +18,7 @@
 #include <polaris/faiss/clone_index.h>
 #include <polaris/faiss/internal/io.h>
 #include <polaris/faiss/index_factory.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 #include <polaris/core/random.h>
 
 namespace {

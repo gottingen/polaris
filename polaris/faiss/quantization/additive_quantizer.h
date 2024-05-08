@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/quantization/quantizer.h>
 

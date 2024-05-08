@@ -15,7 +15,7 @@
 #include <polaris/faiss/index_binary.h>
 #include <polaris/faiss/index_binary_flat.h>
 #include <polaris/utility/platform_macros.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 namespace polaris {
 

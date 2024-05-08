@@ -10,7 +10,7 @@
 #include <polaris/faiss/index_binary_from_float.h>
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 #include <algorithm>
 #include <memory>
 

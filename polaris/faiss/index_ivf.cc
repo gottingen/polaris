@@ -21,13 +21,13 @@
 #include <memory>
 
 #include <polaris/faiss/utils/hamming.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 #include <polaris/faiss/index_flat.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/faiss/internal/code_packer.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 
 namespace polaris {
 

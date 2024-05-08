@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 #include <polaris/faiss/quantization/additive_quantizer.h>
 #include <polaris/faiss/quantization/local_search_quantizer.h>
 #include <polaris/faiss/quantization/residual_quantizer.h>

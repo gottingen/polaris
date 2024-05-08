@@ -12,7 +12,7 @@
 
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/internal/aligned_table.h>
-#include <polaris/core/ordered_key_value.h>
+#include <polaris/faiss/ordered_key_value.h>
 #include <polaris/faiss/utils/simdlib.h>
 #include <polaris/utility/platform_macros.h>
 

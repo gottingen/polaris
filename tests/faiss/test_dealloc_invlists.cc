@@ -18,7 +18,7 @@
 #include <polaris/faiss/ivf_lib.h>
 #include <polaris/faiss/index_ivf.h>
 #include <polaris/faiss/index_factory.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 
 using namespace polaris;
 

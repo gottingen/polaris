@@ -11,7 +11,7 @@
 
 #include <polaris/faiss/index_binary_flat.h>
 #include <polaris/faiss/impl/hnsw.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

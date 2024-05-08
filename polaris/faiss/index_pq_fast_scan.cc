@@ -15,7 +15,7 @@
 
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/impl/pq4_fast_scan.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

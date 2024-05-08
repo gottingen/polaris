@@ -9,10 +9,10 @@
 
 #include <string>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/faiss/impl/distance_computer.h>
-#include <polaris/core/id_selector.h>
-#include <polaris/core/result_handler.h>
+#include <polaris/faiss/id_selector.h>
+#include <polaris/faiss/result_handler.h>
 #include <polaris/faiss/internal/prefetch.h>
 
 #include <polaris/utility/platform_macros.h>

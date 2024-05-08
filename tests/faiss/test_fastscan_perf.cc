@@ -17,7 +17,7 @@
 
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_ivf_pq_fast_scan.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 
 TEST(TestFastScan, knnVSrange) {
     // small vectors and database

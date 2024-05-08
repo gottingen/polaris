@@ -16,7 +16,7 @@
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/hamming.h>
 #include <polaris/core/random.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 /* This demo file shows how to:
  * - use a DistanceComputer to compute distances with encoded vectors

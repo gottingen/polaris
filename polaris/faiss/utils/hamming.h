@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 #include <polaris/utility/platform_macros.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 // Low-level Hamming distance computations and hamdis_t.
 #include <polaris/faiss/utils/hamming_distance/hamdis-inl.h>

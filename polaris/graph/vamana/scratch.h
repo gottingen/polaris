@@ -20,11 +20,10 @@
 #include <turbo/container/flat_hash_set.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_map.h>
-
+#include <polaris/core/vamana_parameters.h>
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/graph/vamana/abstract_scratch.h>
 #include <polaris/graph/vamana/neighbor.h>
-#include <polaris/core/defaults.h>
 #include <polaris/utility/concurrent_queue.h>
 #include <collie/container/dynamic_bitset.h>
 

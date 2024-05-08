@@ -10,7 +10,7 @@
 // I/O code for indexes
 
 #include "index_io_c.h"
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 #include <polaris/capi/macros_impl.h>
 
 using polaris::Index;

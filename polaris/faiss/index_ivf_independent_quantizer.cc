@@ -8,7 +8,7 @@
 #include <polaris/faiss/index_ivf_independent_quantizer.h>
 #include <polaris/faiss/index_ivf_pq.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

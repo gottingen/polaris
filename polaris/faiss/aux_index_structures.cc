@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 
 #include <polaris/utility/polaris_assert.h>
 

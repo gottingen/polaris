@@ -6,7 +6,7 @@
  */
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 
 namespace polaris {
 

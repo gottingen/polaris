@@ -32,16 +32,9 @@ carbin_cc_library(
 ]]
 
 set(POLARIS_SRC
-        core/index.cc
-        core/aux_index_structures.cc
-        core/heap.cc
-        core/utils.cc
-        core/sorting.cc
         core/log.cc
-        core/matrix_stats.cc
         core/executor.cc
         core/random.cc
-        core/id_selector.cc
         distance/distance.cc
         distance/distance_impl.cc
         datasets/fvecs.cc
@@ -50,6 +43,13 @@ set(POLARIS_SRC
         datasets/to_float.cc
         datasets/random.cc
         datasets/recall.cc
+        faiss/index.cc
+        faiss/id_selector.cc
+        faiss/utils.cc
+        faiss/matrix_stats.cc
+        faiss/sorting.cc
+        faiss/heap.cc
+        faiss/aux_index_structures.cc
         faiss/index_flat.cc
         faiss/index_ivf.cc
         faiss/index_ivf_pq.cc
@@ -170,29 +170,19 @@ set(POLARIS_SRC
 
 
 set(POLARIS_HEADERS
-        core/aux_index_structures.h
         core/common.h
         core/common_includes.h
         core/defaults.h
         core/defines.h
         core/executor.h
-        core/heap.h
-        core/id_selector.h
-        core/index.h
         core/index_build_params.h
         core/index_config.h
-        core/index_io.h
         core/lock.h
         core/log.h
-        core/matrix_stats.h
         core/memory.h
         core/metric_type.h
-        core/ordered_key_value.h
-        core/parameters.h
+        core/vamana_parameters.h
         core/random.h
-        core/result_handler.h
-        core/sorting.h
-        core/utils.h
         distance/cosine_similarity.h
         distance/distance_impl.h
         distance/primitive.h
@@ -246,6 +236,16 @@ set(POLARIS_HEADERS
         graph/vamana/scratch.h
         graph/vamana/timer.h
         graph/vamana/utils.h
+        faiss/aux_index_structures.h
+        faiss/index_io.h
+        faiss/id_selector.h
+        faiss/matrix_stats.h
+        faiss/ordered_key_value.h
+        faiss/sorting.h
+        faiss/heap.h
+        faiss/utils.h
+        faiss/result_handler.h
+        faiss/index.h
         faiss/index_flat.h
         faiss/index_ivf.h
         faiss/index_ivf_pq.h

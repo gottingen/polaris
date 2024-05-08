@@ -21,7 +21,7 @@
 #include <polaris/utility/natural_number_map.h>
 #include <polaris/utility/natural_number_set.h>
 #include <polaris/graph/vamana/neighbor.h>
-#include <polaris/core/parameters.h>
+#include <polaris/core/vamana_parameters.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/scratch.h>

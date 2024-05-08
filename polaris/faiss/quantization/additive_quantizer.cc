@@ -21,10 +21,10 @@
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/quantization/local_search_quantizer.h>
 #include <polaris/faiss/quantization/residual_quantizer.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/hamming.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 extern "C" {
 

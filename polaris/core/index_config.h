@@ -15,16 +15,9 @@
 
 #include <polaris/core/common_includes.h>
 #include <polaris/core/common.h>
-#include <polaris/core/parameters.h>
+#include <polaris/core/vamana_parameters.h>
 
 namespace polaris {
-    enum class DataStoreStrategy {
-        MEMORY
-    };
-
-    enum class GraphStoreStrategy {
-        MEMORY
-    };
 
     struct IndexBasicConfig {
         IndexBasicConfig() = default;
@@ -41,26 +34,6 @@ namespace polaris {
         ObjectType object_type;
         size_t dimension;
         size_t max_points;
-    };
-
-    struct VamanaIndexConfig {
-        DataStoreStrategy data_strategy;
-        GraphStoreStrategy graph_strategy;
-        bool dynamic_index{false};
-        bool enable_tags{false};
-        bool pq_dist_build{false};
-        bool concurrent_consolidate{false};
-        bool use_opq{false};
-        bool filtered_index{defaults::HAS_LABELS};
-
-        size_t num_pq_chunks{0};
-        size_t num_frozen_pts{defaults::NUM_FROZEN_POINTS_STATIC};
-
-        std::string label_type{"uint32"};
-        // Params for building index
-        std::shared_ptr<IndexWriteParameters> index_write_params;
-        // Params for searching index
-        std::shared_ptr<IndexSearchParams> index_search_params;
     };
 
     struct IndexConfig {

@@ -14,14 +14,14 @@
 #include <omp.h>
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 #include <polaris/faiss/impl/lookup_table_scaler.h>
-#include <polaris/core/result_handler.h>
+#include <polaris/faiss/result_handler.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/extra_distances.h>
 #include <polaris/faiss/utils/hamming.h>
 #include <polaris/core/random.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 #include <polaris/faiss/impl/pq4_fast_scan.h>
 #include <polaris/faiss/impl/simd_result_handlers.h>

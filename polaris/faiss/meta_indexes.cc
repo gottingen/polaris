@@ -14,13 +14,13 @@
 #include <cstdio>
 #include <limits>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/id_selector.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/id_selector.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/internal/worker_thread.h>
 #include <polaris/core/random.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

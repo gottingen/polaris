@@ -15,7 +15,7 @@
 #include <polaris/faiss/index_pq.h>
 #include <polaris/faiss/index_scalar_quantizer.h>
 #include <polaris/faiss/impl/hnsw.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

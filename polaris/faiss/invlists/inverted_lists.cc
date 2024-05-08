@@ -13,7 +13,7 @@
 #include <memory>
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

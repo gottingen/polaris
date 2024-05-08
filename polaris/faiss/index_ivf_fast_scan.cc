@@ -17,7 +17,7 @@
 #include <memory>
 
 #include <polaris/faiss/index_ivf_pq.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/impl/lookup_table_scaler.h>
 #include <polaris/faiss/impl/pq4_fast_scan.h>
@@ -26,7 +26,7 @@
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/hamming.h>
 #include <polaris/faiss/internal/quantize_lut.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

@@ -13,10 +13,10 @@
 
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/quantization/residual_quantizer.h>
-#include <polaris/core/result_handler.h>
+#include <polaris/faiss/result_handler.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/extra_distances.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

@@ -15,7 +15,7 @@
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_ivf_flat.h>
 #include <polaris/faiss/index_pq.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 
 double elapsed() {
     struct timeval tv;

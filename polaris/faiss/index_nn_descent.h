@@ -13,7 +13,7 @@
 
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/impl/nn_descent.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

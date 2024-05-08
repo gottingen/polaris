@@ -20,7 +20,7 @@
 #include <polaris/faiss/impl/residual_quantizer_encode_steps.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/faiss/utils/hamming.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 extern "C" {
 

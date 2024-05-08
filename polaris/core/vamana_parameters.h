@@ -20,9 +20,33 @@
 #include <unordered_map>
 
 #include <omp.h>
-#include <polaris/core/defaults.h>
+#include <polaris/utility/polaris_exception.h>
 
 namespace polaris {
+    namespace defaults {
+        const float ALPHA = 1.2f;
+        const uint32_t NUM_THREADS = 0;
+        const uint32_t MAX_OCCLUSION_SIZE = 750;
+        const bool HAS_LABELS = false;
+        const uint32_t FILTER_LIST_SIZE = 0;
+        const uint32_t NUM_FROZEN_POINTS_STATIC = 0;
+        const uint32_t NUM_FROZEN_POINTS_DYNAMIC = 1;
+
+        // In-mem index related limits
+        const float GRAPH_SLACK_FACTOR = 1.3f;
+
+        // SSD VamanaIndex related limits
+        const uint64_t MAX_GRAPH_DEGREE = 512;
+        const uint64_t SECTOR_LEN = 4096;
+        const uint64_t MAX_N_SECTOR_READS = 128;
+
+        // following constants should always be specified, but are useful as a
+        // sensible default at cli / python boundaries
+        const uint32_t MAX_DEGREE = 64;
+        const uint32_t BUILD_LIST_SIZE = 100;
+        const uint32_t SATURATE_GRAPH = false;
+        const uint32_t SEARCH_LIST_SIZE = 100;
+    } // namespace defaults
 
     class IndexWriteParameters {
     public:
@@ -115,6 +139,94 @@ namespace polaris {
         float _alpha{defaults::ALPHA};
         uint32_t _num_threads{defaults::NUM_THREADS};
         uint32_t _filter_list_size{defaults::FILTER_LIST_SIZE};
+    };
+
+    struct IndexFilterParams {
+    public:
+        std::string save_path_prefix;
+        std::string label_file;
+        std::string tags_file;
+        std::string universal_label;
+        uint32_t filter_threshold = 0;
+
+    private:
+        IndexFilterParams(const std::string &save_path_prefix, const std::string &label_file,
+                          const std::string &universal_label, uint32_t filter_threshold)
+                : save_path_prefix(save_path_prefix), label_file(label_file), universal_label(universal_label),
+                  filter_threshold(filter_threshold) {
+        }
+
+        friend class IndexFilterParamsBuilder;
+    };
+
+    class IndexFilterParamsBuilder {
+    public:
+        IndexFilterParamsBuilder() = default;
+
+        IndexFilterParamsBuilder &with_save_path_prefix(const std::string &save_path_prefix) {
+            if (save_path_prefix.empty() || save_path_prefix == "")
+                throw PolarisException("Error: save_path_prefix can't be empty", -1);
+            this->_save_path_prefix = save_path_prefix;
+            return *this;
+        }
+
+        IndexFilterParamsBuilder &with_label_file(const std::string &label_file) {
+            this->_label_file = label_file;
+            return *this;
+        }
+
+        IndexFilterParamsBuilder &with_universal_label(const std::string &univeral_label) {
+            this->_universal_label = univeral_label;
+            return *this;
+        }
+
+        IndexFilterParamsBuilder &with_filter_threshold(const std::uint32_t &filter_threshold) {
+            this->_filter_threshold = filter_threshold;
+            return *this;
+        }
+
+        IndexFilterParams build() {
+            return IndexFilterParams(_save_path_prefix, _label_file, _universal_label, _filter_threshold);
+        }
+
+        IndexFilterParamsBuilder(const IndexFilterParamsBuilder &) = delete;
+
+        IndexFilterParamsBuilder &operator=(const IndexFilterParamsBuilder &) = delete;
+
+    private:
+        std::string _save_path_prefix;
+        std::string _label_file;
+        std::string _tags_file;
+        std::string _universal_label;
+        uint32_t _filter_threshold = 0;
+    };
+
+    enum class DataStoreStrategy {
+        MEMORY
+    };
+
+    enum class GraphStoreStrategy {
+        MEMORY
+    };
+
+    struct VamanaIndexConfig {
+        DataStoreStrategy data_strategy;
+        GraphStoreStrategy graph_strategy;
+        bool dynamic_index{false};
+        bool enable_tags{false};
+        bool pq_dist_build{false};
+        bool concurrent_consolidate{false};
+        bool use_opq{false};
+        bool filtered_index{defaults::HAS_LABELS};
+
+        size_t num_pq_chunks{0};
+        size_t num_frozen_pts{defaults::NUM_FROZEN_POINTS_STATIC};
+
+        std::string label_type{"uint32"};
+        // Params for building index
+        std::shared_ptr<IndexWriteParameters> index_write_params;
+        // Params for searching index
+        std::shared_ptr<IndexSearchParams> index_search_params;
     };
 
 } // namespace polaris

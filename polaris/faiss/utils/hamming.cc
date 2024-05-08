@@ -29,11 +29,11 @@
 #include <memory>
 #include <vector>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/approx_topk_hamming/approx_topk_hamming.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

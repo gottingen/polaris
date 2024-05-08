@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <polaris/core/result_handler.h>
+#include <polaris/faiss/result_handler.h>
 
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 namespace polaris {
 

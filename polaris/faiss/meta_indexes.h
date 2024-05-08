@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 #include <polaris/faiss/index_id_map.h>
 #include <polaris/faiss/index_replicas.h>
 #include <polaris/faiss/index_shards.h>

@@ -7,11 +7,11 @@
 
 #include <polaris/faiss/index_flat_codes.h>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/faiss/internal/code_packer.h>
 #include <polaris/faiss/impl/distance_computer.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 
 namespace polaris {
 

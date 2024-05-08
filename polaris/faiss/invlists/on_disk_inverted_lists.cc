@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 #include <polaris/faiss/internal/io.h>
 #include <polaris/faiss/internal/io_macros.h>

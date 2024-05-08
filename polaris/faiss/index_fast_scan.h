@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 #include <polaris/faiss/internal/aligned_table.h>
 
 namespace polaris {

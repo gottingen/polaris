@@ -9,7 +9,7 @@
 
 #include <polaris/faiss/quantization/clustering.h>
 #include <polaris/faiss/vector_transform.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 
 #include <cinttypes>
 #include <cmath>
@@ -23,7 +23,7 @@
 #include <polaris/faiss/internal/kmeans1d.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/core/random.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

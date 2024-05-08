@@ -19,7 +19,7 @@
 
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/utility/polaris_exception.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 //
 using namespace polaris;

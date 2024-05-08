@@ -15,12 +15,12 @@
 #include <vector>
 
 #include <polaris/faiss/quantization/clustering.h>
-#include <polaris/core/index.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/index.h>
+#include <polaris/faiss/id_selector.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/faiss/invlists/direct_map.h>
 #include <polaris/faiss/invlists/inverted_lists.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 namespace polaris {
 

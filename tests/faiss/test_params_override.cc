@@ -19,8 +19,8 @@
 #include <polaris/faiss/index_binary_ivf.h>
 #include <polaris/faiss/index_ivf.h>
 #include <polaris/faiss/clone_index.h>
-#include <polaris/core/aux_index_structures.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/aux_index_structures.h>
+#include <polaris/faiss/id_selector.h>
 #include <polaris/faiss/index_factory.h>
 
 using namespace polaris;

@@ -18,11 +18,11 @@
 
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_lsh.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/utils/hamming.h>
-#include <polaris/core/sorting.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/sorting.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

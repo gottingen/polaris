@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 #include <polaris/faiss/index_binary.h>
 #include <polaris/faiss/internal/worker_thread.h>
 #include <memory>

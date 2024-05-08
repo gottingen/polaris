@@ -11,9 +11,9 @@
 
 #include <cinttypes>
 
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/distances.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 #include <polaris/utility/polaris_assert.h>
 

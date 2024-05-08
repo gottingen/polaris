@@ -19,7 +19,7 @@
 #include <polaris/faiss/quantization/residual_quantizer.h>
 #include <polaris/faiss/impl/pq4_fast_scan.h>
 #include <polaris/faiss/internal/quantize_lut.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

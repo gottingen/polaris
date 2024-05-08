@@ -16,9 +16,9 @@
 
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_nn_descent.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/distances.h>
 
 namespace polaris {

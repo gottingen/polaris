@@ -14,11 +14,11 @@
 
 #include <omp.h>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/id_selector.h>
 #include <polaris/faiss/quantization/scalar_quantizer.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

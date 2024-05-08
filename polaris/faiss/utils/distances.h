@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 #include <polaris/utility/platform_macros.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/distance/distance.h>
 
 namespace polaris {

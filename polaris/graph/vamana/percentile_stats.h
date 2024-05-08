@@ -28,7 +28,7 @@
 #include <vector>
 
 #include <polaris/distance/distance.h>
-#include <polaris/core/parameters.h>
+#include <polaris/core/vamana_parameters.h>
 
 namespace polaris {
     struct QueryStats {

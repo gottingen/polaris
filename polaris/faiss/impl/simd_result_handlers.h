@@ -11,11 +11,11 @@
 #include <type_traits>
 #include <vector>
 
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/simdlib.h>
 
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/result_handler.h>
+#include <polaris/faiss/result_handler.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/faiss/internal/aligned_table.h>
 #include <polaris/faiss/internal/partitioning.h>

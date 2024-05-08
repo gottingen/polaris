@@ -23,11 +23,11 @@
 #include <cstdint>
 
 #include <polaris/faiss/index_binary_flat.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/faiss/impl/distance_computer.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/result_handler.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/result_handler.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/hamming.h>
 #include <polaris/core/random.h>
 

@@ -14,7 +14,7 @@
 #include <polaris/faiss/quantization/clustering.h>
 #include <polaris/faiss/index_binary.h>
 #include <polaris/faiss/index_ivf.h>
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 namespace polaris {
 

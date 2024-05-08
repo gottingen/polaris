@@ -16,7 +16,7 @@
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_ivf_pq.h>
 #include <polaris/faiss/utils/distances.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace {
 

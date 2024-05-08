@@ -17,9 +17,9 @@
 
 #include <algorithm>
 
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 #include <polaris/faiss/utils/distances.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 #include <polaris/faiss/quantization/clustering.h>
 #include <polaris/faiss/index_flat.h>
@@ -28,8 +28,8 @@
 
 #include <polaris/utility/polaris_assert.h>
 
-#include <polaris/core/aux_index_structures.h>
-#include <polaris/core/id_selector.h>
+#include <polaris/faiss/aux_index_structures.h>
+#include <polaris/faiss/id_selector.h>
 
 #include <polaris/faiss/quantization/product_quantizer.h>
 

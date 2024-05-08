@@ -23,7 +23,7 @@
 #include <omp.h>
 #include <polaris/graph/vamana/filter_utils.h>
 #include <polaris/graph/vamana/index.h>
-#include <polaris/core/parameters.h>
+#include <polaris/core/vamana_parameters.h>
 #include <polaris/graph/vamana/utils.h>
 
 namespace polaris {

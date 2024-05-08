@@ -27,12 +27,12 @@
 #include <polaris/faiss/index_2layer.h>
 #include <polaris/faiss/index_flat.h>
 #include <polaris/faiss/index_ivf_pq.h>
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/result_handler.h>
+#include <polaris/faiss/result_handler.h>
 #include <polaris/faiss/utils/distances.h>
 #include <polaris/core/random.h>
-#include <polaris/core/sorting.h>
+#include <polaris/faiss/sorting.h>
 
 extern "C" {
 

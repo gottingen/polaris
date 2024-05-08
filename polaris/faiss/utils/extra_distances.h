@@ -12,9 +12,9 @@
 
 #include <stdint.h>
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 
-#include <polaris/core/heap.h>
+#include <polaris/faiss/heap.h>
 
 namespace polaris {
 

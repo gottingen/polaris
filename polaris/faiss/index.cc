@@ -7,9 +7,9 @@
 
 // -*- c++ -*-
 
-#include <polaris/core/index.h>
+#include <polaris/faiss/index.h>
 
-#include <polaris/core/aux_index_structures.h>
+#include <polaris/faiss/aux_index_structures.h>
 #include <polaris/faiss/impl/distance_computer.h>
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/faiss/utils/distances.h>

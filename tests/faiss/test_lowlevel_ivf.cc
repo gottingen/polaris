@@ -23,7 +23,7 @@
 #include <polaris/faiss/index_pre_transform.h>
 #include <polaris/faiss/vector_transform.h>
 #include <polaris/faiss/index_factory.h>
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 
 using namespace polaris;
 

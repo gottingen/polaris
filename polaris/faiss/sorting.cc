@@ -7,11 +7,11 @@
 
 // -*- c++ -*-
 
-#include <polaris/core/sorting.h>
+#include <polaris/faiss/sorting.h>
 #include <omp.h>
 #include <algorithm>
 #include <polaris/utility/polaris_assert.h>
-#include <polaris/core/utils.h>
+#include <polaris/faiss/utils.h>
 
 namespace polaris {
 

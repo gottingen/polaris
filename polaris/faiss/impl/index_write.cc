@@ -7,7 +7,7 @@
 
 // -*- c++ -*-
 
-#include <polaris/core/index_io.h>
+#include <polaris/faiss/index_io.h>
 
 #include <polaris/faiss/internal/io.h>
 #include <polaris/faiss/internal/io_macros.h>
