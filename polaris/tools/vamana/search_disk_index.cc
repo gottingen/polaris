@@ -48,7 +48,7 @@ void print_stats(std::string category, std::vector<float> percentiles, std::vect
     polaris::cout << std::endl;
 }
 
-template<typename T, typename LabelT = uint32_t>
+template<typename T>
 int search_disk_index(polaris::MetricType &metric, const std::string &index_path_prefix,
                       const std::string &result_output_prefix, const std::string &query_file, std::string &gt_file,
                       const uint32_t num_threads, const uint32_t recall_at, const uint32_t beamwidth,
@@ -97,8 +97,8 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     std::shared_ptr<AlignedFileReader> reader = nullptr;
     reader.reset(new LinuxAlignedFileReader());
 
-    std::unique_ptr<polaris::PQFlashIndex<T, LabelT>> _pFlashIndex(
-            new polaris::PQFlashIndex<T, LabelT>(reader, metric));
+    std::unique_ptr<polaris::PQFlashIndex<T>> _pFlashIndex(
+            new polaris::PQFlashIndex<T>(reader, metric));
 
     int res = _pFlashIndex->load(num_threads, index_path_prefix.c_str());
 
@@ -206,7 +206,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
                                                  query_result_dists[test_id].data() + (i * recall_at),
                                                  optimized_beamwidth, use_reorder_data, stats + i);
             } else {
-                LabelT label_for_search;
+                polaris::labid_t label_for_search;
                 if (query_filters.size() == 1) { // one label for all queries
                     label_for_search = _pFlashIndex->get_converted_label(query_filters[0]);
                 } else { // one label for each query
@@ -380,21 +380,21 @@ namespace polaris {
             int r;
             if (!query_filters.empty() && ctx.label_type == "ushort") {
                 if (ctx.data_type == std::string("float"))
-                    r = search_disk_index<float, uint16_t>(
+                    r = search_disk_index<float>(
                             metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file, ctx.gt_file,
                             ctx.num_threads, ctx.K, ctx.W,
                             ctx.num_nodes_to_cache, ctx.search_io_limit, ctx.Lvec, ctx.fail_if_recall_below,
                             query_filters,
                             ctx.use_reorder_data);
                 else if (ctx.data_type == std::string("int8"))
-                    r = search_disk_index<int8_t, uint16_t>(
+                    r = search_disk_index<int8_t>(
                             metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file, ctx.gt_file,
                             ctx.num_threads, ctx.K, ctx.W,
                             ctx.num_nodes_to_cache, ctx.search_io_limit, ctx.Lvec, ctx.fail_if_recall_below,
                             query_filters,
                             ctx.use_reorder_data);
                 else if (ctx.data_type == std::string("uint8"))
-                    r = search_disk_index<uint8_t, uint16_t>(
+                    r = search_disk_index<uint8_t>(
                             metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file, ctx.gt_file,
                             ctx.num_threads, ctx.K, ctx.W,
                             ctx.num_nodes_to_cache, ctx.search_io_limit, ctx.Lvec, ctx.fail_if_recall_below,

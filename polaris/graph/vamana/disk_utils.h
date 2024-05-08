@@ -53,7 +53,7 @@ namespace polaris {
     const uint32_t WARMUP_L = 20;
     const uint32_t NUM_KMEANS_REPS = 12;
 
-    template<typename T, typename LabelT>
+    template<typename T>
     class PQFlashIndex;
 
     POLARIS_API double get_memory_budget(const std::string &mem_budget_str);
@@ -83,7 +83,7 @@ namespace polaris {
     POLARIS_API std::string preprocess_base_file(const std::string &infile, const std::string &indexPrefix,
                                                  polaris::MetricType &distMetric);
 
-    template<typename T, typename LabelT = uint32_t>
+    template<typename T>
     POLARIS_API int build_merged_vamana_index(std::string base_file, polaris::MetricType _compareMetric, uint32_t L,
                                               uint32_t R, double sampling_rate, double ram_budget,
                                               std::string mem_index_path, std::string medoids_file,
@@ -93,13 +93,13 @@ namespace polaris {
                                               const std::string &labels_to_medoids_file = std::string(""),
                                               const std::string &universal_label = "", const uint32_t Lf = 0);
 
-    template<typename T, typename LabelT>
-    POLARIS_API uint32_t optimize_beamwidth(std::unique_ptr<polaris::PQFlashIndex<T, LabelT>> &_pFlashIndex,
+    template<typename T>
+    POLARIS_API uint32_t optimize_beamwidth(std::unique_ptr<polaris::PQFlashIndex<T>> &_pFlashIndex,
                                             T *tuning_sample, uint64_t tuning_sample_num,
                                             uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
                                             uint32_t start_bw = 2);
 
-    template<typename T, typename LabelT = uint32_t>
+    template<typename T>
     POLARIS_API int build_disk_index(
             const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
             polaris::MetricType _compareMetric, bool use_opq = false,

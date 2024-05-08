@@ -16,7 +16,7 @@
 #pragma once
 
 #include <polaris/utility/common_includes.h>
-
+#include <polaris/core/common.h>
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/utility/concurrent_queue.h>
 #include <polaris/graph/vamana/neighbor.h>
@@ -33,7 +33,7 @@
 
 namespace polaris {
 
-    template<typename T, typename LabelT = uint32_t>
+    template<typename T>
     class PQFlashIndex {
     public:
         POLARIS_API PQFlashIndex(std::shared_ptr<AlignedFileReader> &fileReader,
@@ -63,7 +63,7 @@ namespace polaris {
 
         POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
                                             uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
-                                            const bool use_filter, const LabelT &filter_label,
+                                            const bool use_filter, const labid_t &filter_label,
                                             const bool use_reorder_data = false, QueryStats *stats = nullptr);
 
         POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
@@ -73,11 +73,11 @@ namespace polaris {
 
         POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
                                             uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
-                                            const bool use_filter, const LabelT &filter_label,
+                                            const bool use_filter, const labid_t &filter_label,
                                             const uint32_t io_limit, const bool use_reorder_data = false,
                                             QueryStats *stats = nullptr);
 
-        POLARIS_API LabelT get_converted_label(const std::string &filter_label);
+        POLARIS_API labid_t get_converted_label(const std::string &filter_label);
 
         POLARIS_API uint32_t range_search(const T *query1, const double range, const uint64_t min_l_search,
                                           const uint64_t max_l_search, std::vector<uint64_t> &indices,
@@ -110,19 +110,19 @@ namespace polaris {
 
         POLARIS_API void setup_thread_data(uint64_t nthreads, uint64_t visited_reserve = 4096);
 
-        POLARIS_API void set_universal_label(const LabelT &label);
+        POLARIS_API void set_universal_label(const labid_t &label);
 
     private:
-        POLARIS_API inline bool point_has_label(uint32_t point_id, LabelT label_id);
+        POLARIS_API inline bool point_has_label(uint32_t point_id, labid_t label_id);
 
-        std::unordered_map<std::string, LabelT> load_label_map(std::basic_istream<char> &infile);
+        std::unordered_map<std::string, labid_t> load_label_map(std::basic_istream<char> &infile);
 
         POLARIS_API void parse_label_file(std::basic_istream<char> &infile, size_t &num_pts_labels);
 
         POLARIS_API void get_label_file_metadata(const std::string &fileContent, uint32_t &num_pts,
                                                  uint32_t &num_total_labels);
 
-        POLARIS_API void generate_random_labels(std::vector<LabelT> &labels, const uint32_t num_labels,
+        POLARIS_API void generate_random_labels(std::vector<labid_t> &labels, const uint32_t num_labels,
                                                 const uint32_t nthreads);
 
         void reset_stream_for_reading(std::basic_istream<char> &infile);
@@ -227,15 +227,15 @@ namespace polaris {
         // filter support
         uint32_t *_pts_to_label_offsets = nullptr;
         uint32_t *_pts_to_label_counts = nullptr;
-        LabelT *_pts_to_labels = nullptr;
-        std::unordered_map<LabelT, std::vector<uint32_t>> _filter_to_medoid_ids;
+        labid_t *_pts_to_labels = nullptr;
+        std::unordered_map<labid_t, std::vector<uint32_t>> _filter_to_medoid_ids;
         bool _use_universal_label = false;
-        LabelT _universal_filter_label;
+        labid_t _universal_filter_label;
         turbo::flat_hash_set<uint32_t> _dummy_pts;
         turbo::flat_hash_set<uint32_t> _has_dummy_pts;
         turbo::flat_hash_map<uint32_t, uint32_t> _dummy_to_real_map;
         turbo::flat_hash_map<uint32_t, std::vector<uint32_t>> _real_to_dummy_map;
-        std::unordered_map<std::string, LabelT> _label_map;
+        std::unordered_map<std::string, labid_t> _label_map;
 
     };
 } // namespace polaris

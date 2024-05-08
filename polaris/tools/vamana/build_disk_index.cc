@@ -169,14 +169,14 @@ namespace polaris {
                                                           build_disk_index_context.filter_threshold,
                                                           build_disk_index_context.Lf);
                 else if (build_disk_index_context.data_type == std::string("uint8"))
-                    r = polaris::build_disk_index<uint8_t, uint16_t>(
+                    r = polaris::build_disk_index<uint8_t>(
                             build_disk_index_context.data_path.c_str(),
                             build_disk_index_context.index_path_prefix.c_str(), params.c_str(), metric,
                             build_disk_index_context.use_opq, build_disk_index_context.codebook_prefix,
                             use_filters, build_disk_index_context.label_file, build_disk_index_context.universal_label,
                             build_disk_index_context.filter_threshold, build_disk_index_context.Lf);
                 else if (build_disk_index_context.data_type == std::string("float"))
-                    r = polaris::build_disk_index<float, uint16_t>(
+                    r = polaris::build_disk_index<float>(
                             build_disk_index_context.data_path.c_str(),
                             build_disk_index_context.index_path_prefix.c_str(), params.c_str(), metric,
                             build_disk_index_context.use_opq, build_disk_index_context.codebook_prefix,

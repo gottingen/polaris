@@ -47,7 +47,7 @@ namespace polaris {
         return OVERHEAD_FACTOR * (size_of_data + size_of_graph + size_of_locks + size_of_outer_vector);
     }
 
-    template<typename T, typename LabelT = uint32_t>
+    template<typename T>
     class VamanaIndex : public AbstractIndex {
         /**************************************************************************
          *
@@ -89,7 +89,7 @@ namespace polaris {
         POLARIS_API size_t get_max_points();
 
         POLARIS_API bool detect_common_filters(uint32_t point_id, bool search_invocation,
-                                               const std::vector<LabelT> &incoming_labels);
+                                               const std::vector<labid_t> &incoming_labels);
 
         // Batch build from a file. Optionally pass tags vector.
         POLARIS_API void build(const char *filename, const size_t num_points_to_load,
@@ -110,10 +110,10 @@ namespace polaris {
                                               const size_t num_points_to_load,
                                               const std::vector<vid_t> &tags = std::vector<vid_t>());
 
-        POLARIS_API void set_universal_label(const LabelT &label);
+        POLARIS_API void set_universal_label(const labid_t &label);
 
         // Get converted integer label from string to int map (_label_map)
-        POLARIS_API LabelT get_converted_label(const std::string &raw_label);
+        POLARIS_API labid_t get_converted_label(const std::string &raw_label);
 
         // Set starting point of an index before inserting any points incrementally.
         // The data count should be equal to _num_frozen_pts * _aligned_dim.
@@ -142,7 +142,7 @@ namespace polaris {
 
         // Filter support search
         template<typename IndexType>
-        POLARIS_API std::pair<uint32_t, uint32_t> search_with_filters(const T *query, const LabelT &filter_label,
+        POLARIS_API std::pair<uint32_t, uint32_t> search_with_filters(const T *query, const labid_t &filter_label,
                                                                       const size_t K, const uint32_t L,
                                                                       IndexType *indices, float *distances);
 
@@ -150,7 +150,7 @@ namespace polaris {
         POLARIS_API int insert_point(const T *point, const vid_t tag);
 
         // Will fail if tag already in the index or if tag=0.
-        POLARIS_API int insert_point(const T *point, const vid_t tag, const std::vector<LabelT> &label);
+        POLARIS_API int insert_point(const T *point, const vid_t tag, const std::vector<labid_t> &label);
 
         // call this before issuing deletions to sets relevant flags
         POLARIS_API int enable_delete();
@@ -238,9 +238,9 @@ namespace polaris {
         virtual void _set_universal_label(const LabelType universal_label) override;
 
         // No copy/assign.
-        VamanaIndex(const VamanaIndex<T, LabelT> &) = delete;
+        VamanaIndex(const VamanaIndex<T> &) = delete;
 
-        VamanaIndex<T, LabelT> &operator=(const VamanaIndex<T, LabelT> &) = delete;
+        VamanaIndex<T> &operator=(const VamanaIndex<T> &) = delete;
 
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
@@ -255,7 +255,7 @@ namespace polaris {
 
         void parse_label_file(const std::string &label_file, size_t &num_pts_labels);
 
-        std::unordered_map<std::string, LabelT> load_label_map(const std::string &map_file);
+        std::unordered_map<std::string, labid_t> load_label_map(const std::string &map_file);
 
         // Returns the locations of start point and frozen points suitable for use
         // with iterate_to_fixed_point.
@@ -264,7 +264,7 @@ namespace polaris {
         // The query to use is placed in scratch->aligned_query
         std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids, bool use_filter,
-                                                             const std::vector<LabelT> &filters,
+                                                             const std::vector<labid_t> &filters,
                                                              bool search_invocation);
 
         void search_for_point_and_prune(int location, uint32_t Lindex, std::vector<uint32_t> &pruned_list,
@@ -343,8 +343,10 @@ namespace polaris {
         POLARIS_API size_t load_delete_set(const std::string &filename);
 
     private:
+
+        IndexConfig _index_config;
         // Distance functions
-        MetricType _dist_metric = polaris::MetricType::METRIC_L2;
+        //MetricType _dist_metric = polaris::MetricType::METRIC_L2;
 
         // Data
         std::shared_ptr<AbstractDataStore<T>> _data_store;
@@ -355,7 +357,7 @@ namespace polaris {
         char *_opt_graph = nullptr;
 
         // Dimensions
-        size_t _dim = 0;
+        //size_t _dim = 0;
         size_t _nd = 0;         // number of active points i.e. existing in the graph
         size_t _max_points = 0; // total number of points in given data set
 
@@ -388,16 +390,16 @@ namespace polaris {
         bool _filtered_index = false;
         // Location to label is only updated during insert_point(), all other reads are protected by
         // default as a location can only be released at end of consolidate deletes
-        std::vector<std::vector<LabelT>> _location_to_labels;
-        turbo::flat_hash_set<LabelT> _labels;
+        std::vector<std::vector<labid_t>> _location_to_labels;
+        turbo::flat_hash_set<labid_t> _labels;
         std::string _labels_file;
-        std::unordered_map<LabelT, uint32_t> _label_to_start_id;
+        std::unordered_map<labid_t, uint32_t> _label_to_start_id;
         std::unordered_map<uint32_t, uint32_t> _medoid_counts;
 
         bool _use_universal_label = false;
-        LabelT _universal_label = 0;
+        labid_t _universal_label = 0;
         uint32_t _filterIndexingQueueSize;
-        std::unordered_map<std::string, LabelT> _label_map;
+        std::unordered_map<std::string, labid_t> _label_map;
 
         // Indexing parameters
         uint32_t _indexingQueueSize;

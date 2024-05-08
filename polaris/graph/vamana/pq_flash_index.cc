@@ -34,8 +34,8 @@
 
 namespace polaris {
 
-    template<typename T, typename LabelT>
-    PQFlashIndex<T, LabelT>::PQFlashIndex(std::shared_ptr<AlignedFileReader> &fileReader, polaris::MetricType m)
+    template<typename T>
+    PQFlashIndex<T>::PQFlashIndex(std::shared_ptr<AlignedFileReader> &fileReader, polaris::MetricType m)
             : reader(fileReader), metric(m), _thread_data(nullptr) {
         polaris::MetricType metric_to_invoke = m;
         if (m == polaris::MetricType::METRIC_COSINE || m == polaris::MetricType::METRIC_INNER_PRODUCT) {
@@ -56,8 +56,8 @@ namespace polaris {
         this->_dist_cmp_float.reset(polaris::get_distance_function<float>(metric_to_invoke));
     }
 
-    template<typename T, typename LabelT>
-    PQFlashIndex<T, LabelT>::~PQFlashIndex() {
+    template<typename T>
+    PQFlashIndex<T>::~PQFlashIndex() {
         if (data != nullptr) {
             delete[] data;
         }
@@ -91,29 +91,29 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename LabelT>
-    inline uint64_t PQFlashIndex<T, LabelT>::get_node_sector(uint64_t node_id) {
+    template<typename T>
+    inline uint64_t PQFlashIndex<T>::get_node_sector(uint64_t node_id) {
         return 1 + (_nnodes_per_sector > 0 ? node_id / _nnodes_per_sector
                                            : node_id * DIV_ROUND_UP(_max_node_len, defaults::SECTOR_LEN));
     }
 
-    template<typename T, typename LabelT>
-    inline char *PQFlashIndex<T, LabelT>::offset_to_node(char *sector_buf, uint64_t node_id) {
+    template<typename T>
+    inline char *PQFlashIndex<T>::offset_to_node(char *sector_buf, uint64_t node_id) {
         return sector_buf + (_nnodes_per_sector == 0 ? 0 : (node_id % _nnodes_per_sector) * _max_node_len);
     }
 
-    template<typename T, typename LabelT>
-    inline uint32_t *PQFlashIndex<T, LabelT>::offset_to_node_nhood(char *node_buf) {
+    template<typename T>
+    inline uint32_t *PQFlashIndex<T>::offset_to_node_nhood(char *node_buf) {
         return (unsigned *) (node_buf + _disk_bytes_per_point);
     }
 
-    template<typename T, typename LabelT>
-    inline T *PQFlashIndex<T, LabelT>::offset_to_node_coords(char *node_buf) {
+    template<typename T>
+    inline T *PQFlashIndex<T>::offset_to_node_coords(char *node_buf) {
         return (T *) (node_buf);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::setup_thread_data(uint64_t nthreads, uint64_t visited_reserve) {
+    template<typename T>
+    void PQFlashIndex<T>::setup_thread_data(uint64_t nthreads, uint64_t visited_reserve) {
         polaris::cout << "Setting up thread-specific contexts for nthreads: " << nthreads << std::endl;
 // omp parallel for to generate unique thread IDs
 #pragma omp parallel for num_threads((int)nthreads)
@@ -129,8 +129,8 @@ namespace polaris {
         _load_flag = true;
     }
 
-    template<typename T, typename LabelT>
-    std::vector<bool> PQFlashIndex<T, LabelT>::read_nodes(const std::vector<uint32_t> &node_ids,
+    template<typename T>
+    std::vector<bool> PQFlashIndex<T>::read_nodes(const std::vector<uint32_t> &node_ids,
                                                           std::vector<T *> &coord_buffers,
                                                           std::vector<std::pair<uint32_t, uint32_t *>> &nbr_buffers) {
         std::vector<AlignedRead> read_reqs;
@@ -188,8 +188,8 @@ continue;
         return retval;
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::load_cache_list(std::vector<uint32_t> &node_list) {
+    template<typename T>
+    void PQFlashIndex<T>::load_cache_list(std::vector<uint32_t> &node_list) {
         polaris::cout << "Loading the cache list into memory.." << std::flush;
         size_t num_cached_nodes = node_list.size();
 
@@ -237,8 +237,8 @@ continue;
         polaris::cout << "..done." << std::endl;
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::generate_cache_list_from_sample_queries(std::string sample_bin, uint64_t l_search,
+    template<typename T>
+    void PQFlashIndex<T>::generate_cache_list_from_sample_queries(std::string sample_bin, uint64_t l_search,
                                                                           uint64_t beamwidth,
                                                                           uint64_t num_nodes_to_cache,
                                                                           uint32_t nthreads,
@@ -274,7 +274,7 @@ continue;
         std::vector<float> tmp_result_dists(sample_num, 0);
 
         bool filtered_search = false;
-        std::vector<LabelT> random_query_filters(sample_num);
+        std::vector<labid_t> random_query_filters(sample_num);
         if (_filter_to_medoid_ids.size() != 0) {
             filtered_search = true;
             generate_random_labels(random_query_filters, (uint32_t) sample_num, nthreads);
@@ -306,8 +306,8 @@ continue;
         polaris::aligned_free(samples);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::cache_bfs_levels(uint64_t num_nodes_to_cache, std::vector<uint32_t> &node_list,
+    template<typename T>
+    void PQFlashIndex<T>::cache_bfs_levels(uint64_t num_nodes_to_cache, std::vector<uint32_t> &node_list,
                                                    const bool shuffle) {
         std::random_device rng;
         std::mt19937 urng(rng());
@@ -437,8 +437,8 @@ continue;
         polaris::cout << "done" << std::endl;
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::use_medoids_data_as_centroids() {
+    template<typename T>
+    void PQFlashIndex<T>::use_medoids_data_as_centroids() {
         if (_centroid_data != nullptr)
             aligned_free(_centroid_data);
         alloc_aligned(((void **) &_centroid_data), _num_medoids * _aligned_dim * sizeof(float), 32);
@@ -479,8 +479,8 @@ continue;
         }
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::generate_random_labels(std::vector<LabelT> &labels, const uint32_t num_labels,
+    template<typename T>
+    void PQFlashIndex<T>::generate_random_labels(std::vector<labid_t> &labels, const uint32_t num_labels,
                                                          const uint32_t nthreads) {
         std::random_device rd;
         labels.clear();
@@ -499,30 +499,30 @@ continue;
 #pragma omp parallel for schedule(dynamic, 1) num_threads(nthreads)
         for (int64_t i = 0; i < num_labels; i++) {
             uint64_t rnd_loc = dis(gen);
-            labels[i] = (LabelT) _pts_to_labels[rnd_loc];
+            labels[i] = (labid_t) _pts_to_labels[rnd_loc];
         }
     }
 
-    template<typename T, typename LabelT>
-    std::unordered_map<std::string, LabelT>
-    PQFlashIndex<T, LabelT>::load_label_map(std::basic_istream<char> &map_reader) {
-        std::unordered_map<std::string, LabelT> string_to_int_mp;
+    template<typename T>
+    std::unordered_map<std::string, labid_t>
+    PQFlashIndex<T>::load_label_map(std::basic_istream<char> &map_reader) {
+        std::unordered_map<std::string, labid_t> string_to_int_mp;
         std::string line, token;
-        LabelT token_as_num;
+        labid_t token_as_num;
         std::string label_str;
         while (std::getline(map_reader, line)) {
             std::istringstream iss(line);
             getline(iss, token, '\t');
             label_str = token;
             getline(iss, token, '\t');
-            token_as_num = (LabelT) std::stoul(token);
+            token_as_num = (labid_t) std::stoul(token);
             string_to_int_mp[label_str] = token_as_num;
         }
         return string_to_int_mp;
     }
 
-    template<typename T, typename LabelT>
-    LabelT PQFlashIndex<T, LabelT>::get_converted_label(const std::string &filter_label) {
+    template<typename T>
+    labid_t PQFlashIndex<T>::get_converted_label(const std::string &filter_label) {
         if (_label_map.find(filter_label) != _label_map.end()) {
             return _label_map[filter_label];
         }
@@ -535,14 +535,14 @@ continue;
         throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::reset_stream_for_reading(std::basic_istream<char> &infile) {
+    template<typename T>
+    void PQFlashIndex<T>::reset_stream_for_reading(std::basic_istream<char> &infile) {
         infile.clear();
         infile.seekg(0);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::get_label_file_metadata(const std::string &fileContent, uint32_t &num_pts,
+    template<typename T>
+    void PQFlashIndex<T>::get_label_file_metadata(const std::string &fileContent, uint32_t &num_pts,
                                                           uint32_t &num_total_labels) {
         num_pts = 0;
         num_total_labels = 0;
@@ -581,8 +581,8 @@ continue;
                       << std::endl;
     }
 
-    template<typename T, typename LabelT>
-    inline bool PQFlashIndex<T, LabelT>::point_has_label(uint32_t point_id, LabelT label_id) {
+    template<typename T>
+    inline bool PQFlashIndex<T>::point_has_label(uint32_t point_id, labid_t label_id) {
         uint32_t start_vec = _pts_to_label_offsets[point_id];
         uint32_t num_lbls = _pts_to_label_counts[point_id];
         bool ret_val = false;
@@ -595,8 +595,8 @@ continue;
         return ret_val;
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::parse_label_file(std::basic_istream<char> &infile, size_t &num_points_labels) {
+    template<typename T>
+    void PQFlashIndex<T>::parse_label_file(std::basic_istream<char> &infile, size_t &num_points_labels) {
         infile.seekg(0, std::ios::end);
         size_t file_size = infile.tellg();
 
@@ -614,7 +614,7 @@ continue;
 
         _pts_to_label_offsets = new uint32_t[num_pts_in_label_file];
         _pts_to_label_counts = new uint32_t[num_pts_in_label_file];
-        _pts_to_labels = new LabelT[num_total_labels];
+        _pts_to_labels = new labid_t[num_total_labels];
         uint32_t labels_seen_so_far = 0;
 
         std::string label_str;
@@ -650,8 +650,8 @@ continue;
                     label_str.erase(label_str.length() - 1);
                 }
 
-                LabelT token_as_num = (LabelT) std::stoul(label_str);
-                _pts_to_labels[labels_seen_so_far++] = (LabelT) token_as_num;
+                labid_t token_as_num = (labid_t) std::stoul(label_str);
+                _pts_to_labels[labels_seen_so_far++] = (labid_t) token_as_num;
                 num_lbls_in_cur_pt++;
 
                 // move to next label
@@ -673,14 +673,14 @@ continue;
         reset_stream_for_reading(infile);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::set_universal_label(const LabelT &label) {
+    template<typename T>
+    void PQFlashIndex<T>::set_universal_label(const labid_t &label) {
         _use_universal_label = true;
         _universal_filter_label = label;
     }
 
-    template<typename T, typename LabelT>
-    int PQFlashIndex<T, LabelT>::load(uint32_t num_threads, const char *index_prefix) {
+    template<typename T>
+    int PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
         std::string pq_table_bin = std::string(index_prefix) + "_pq_pivots.bin";
         std::string pq_compressed_vectors = std::string(index_prefix) + "_pq_compressed.bin";
         std::string _disk_index_file = std::string(index_prefix) + "_disk.index";
@@ -688,8 +688,8 @@ continue;
                                         pq_compressed_vectors.c_str());
     }
 
-    template<typename T, typename LabelT>
-    int PQFlashIndex<T, LabelT>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
+    template<typename T>
+    int PQFlashIndex<T>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
                                                           const char *pivots_filepath,
                                                           const char *compressed_filepath) {
         std::string pq_table_bin = pivots_filepath;
@@ -749,10 +749,10 @@ continue;
                         std::istringstream iss(line);
                         uint32_t cnt = 0;
                         std::vector<uint32_t> medoids;
-                        LabelT label;
+                        labid_t label;
                         while (std::getline(iss, token, ',')) {
                             if (cnt == 0)
-                                label = (LabelT) std::stoul(token);
+                                label = (labid_t) std::stoul(token);
                             else
                                 medoids.push_back((uint32_t) stoul(token));
                             cnt++;
@@ -772,7 +772,7 @@ continue;
                 std::string univ_label;
                 universal_label_reader >> univ_label;
                 universal_label_reader.close();
-                LabelT label_as_num = (LabelT) std::stoul(univ_label);
+                labid_t label_as_num = (labid_t) std::stoul(univ_label);
                 set_universal_label(label_as_num);
             }
 
@@ -953,8 +953,8 @@ continue;
         return 0;
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
+    template<typename T>
+    void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
                                                      uint64_t *indices, float *distances, const uint64_t beam_width,
                                                      const bool use_reorder_data, QueryStats *stats) {
         cached_beam_search(query1, k_search, l_search, indices, distances, beam_width,
@@ -962,29 +962,29 @@ continue;
                            use_reorder_data, stats);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
+    template<typename T>
+    void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
                                                      uint64_t *indices, float *distances, const uint64_t beam_width,
-                                                     const bool use_filter, const LabelT &filter_label,
+                                                     const bool use_filter, const labid_t &filter_label,
                                                      const bool use_reorder_data, QueryStats *stats) {
         cached_beam_search(query1, k_search, l_search, indices, distances, beam_width, use_filter, filter_label,
                            std::numeric_limits<uint32_t>::max(), use_reorder_data, stats);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
+    template<typename T>
+    void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
                                                      uint64_t *indices, float *distances, const uint64_t beam_width,
                                                      const uint32_t io_limit, const bool use_reorder_data,
                                                      QueryStats *stats) {
-        LabelT dummy_filter = 0;
+        labid_t dummy_filter = 0;
         cached_beam_search(query1, k_search, l_search, indices, distances, beam_width, false, dummy_filter, io_limit,
                            use_reorder_data, stats);
     }
 
-    template<typename T, typename LabelT>
-    void PQFlashIndex<T, LabelT>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
+    template<typename T>
+    void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
                                                      uint64_t *indices, float *distances, const uint64_t beam_width,
-                                                     const bool use_filter, const LabelT &filter_label,
+                                                     const bool use_filter, const labid_t &filter_label,
                                                      const uint32_t io_limit, const bool use_reorder_data,
                                                      QueryStats *stats) {
 
@@ -1367,11 +1367,11 @@ continue;
         }
     }
 
-// range search returns results of all neighbors within distance of range.
-// indices and distances need to be pre-allocated of size l_search and the
-// return value is the number of matching hits.
-    template<typename T, typename LabelT>
-    uint32_t PQFlashIndex<T, LabelT>::range_search(const T *query1, const double range, const uint64_t min_l_search,
+    // range search returns results of all neighbors within distance of range.
+    // indices and distances need to be pre-allocated of size l_search and the
+    // return value is the number of matching hits.
+    template<typename T>
+    uint32_t PQFlashIndex<T>::range_search(const T *query1, const double range, const uint64_t min_l_search,
                                                    const uint64_t max_l_search, std::vector<uint64_t> &indices,
                                                    std::vector<float> &distances, const uint64_t min_beam_width,
                                                    QueryStats *stats) {
@@ -1407,25 +1407,25 @@ continue;
         return res_count;
     }
 
-    template<typename T, typename LabelT>
-    uint64_t PQFlashIndex<T, LabelT>::get_data_dim() {
+    template<typename T>
+    uint64_t PQFlashIndex<T>::get_data_dim() {
         return _data_dim;
     }
 
-    template<typename T, typename LabelT>
-    polaris::MetricType PQFlashIndex<T, LabelT>::get_metric() {
+    template<typename T>
+    polaris::MetricType PQFlashIndex<T>::get_metric() {
         return this->metric;
     }
 
 
-    template<typename T, typename LabelT>
-    std::vector<std::uint8_t> PQFlashIndex<T, LabelT>::get_pq_vector(std::uint64_t vid) {
+    template<typename T>
+    std::vector<std::uint8_t> PQFlashIndex<T>::get_pq_vector(std::uint64_t vid) {
         std::uint8_t *pqVec = &this->data[vid * this->_n_chunks];
         return std::vector<std::uint8_t>(pqVec, pqVec + this->_n_chunks);
     }
 
-    template<typename T, typename LabelT>
-    std::uint64_t PQFlashIndex<T, LabelT>::get_num_points() {
+    template<typename T>
+    std::uint64_t PQFlashIndex<T>::get_num_points() {
         return _num_points;
     }
 
@@ -1438,14 +1438,5 @@ continue;
 
     template
     class PQFlashIndex<float>;
-
-    template
-    class PQFlashIndex<uint8_t, uint16_t>;
-
-    template
-    class PQFlashIndex<int8_t, uint16_t>;
-
-    template
-    class PQFlashIndex<float, uint16_t>;
 
 } // namespace polaris
