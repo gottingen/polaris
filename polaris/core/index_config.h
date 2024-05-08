@@ -16,6 +16,7 @@
 #include <polaris/utility/common_includes.h>
 #include <polaris/core/common.h>
 #include <polaris/core/vamana_parameters.h>
+#include <turbo/status/result_status.h>
 
 namespace polaris {
 
@@ -30,10 +31,10 @@ namespace polaris {
 
         IndexBasicConfig &operator=(const IndexBasicConfig &) = default;
 
-        MetricType metric;
-        ObjectType object_type;
-        size_t dimension;
-        size_t max_points;
+        MetricType metric{MetricType::METRIC_NONE};
+        ObjectType object_type{ObjectType::ObjectTypeNone};
+        size_t dimension{0};
+        size_t max_points{0};
     };
 
     struct IndexConfig {
@@ -157,6 +158,15 @@ namespace polaris {
         IndexConfig build_vamana() {
             if (_basic_config.object_type == ObjectType::ObjectTypeNone)
                 throw PolarisException("Error: data_type can not be empty", -1);
+
+            if (_basic_config.metric == MetricType::METRIC_NONE)
+                throw PolarisException("Error: metric can not be empty", -1);
+
+            if (_basic_config.dimension == 0)
+                throw PolarisException("Error: dimension can not be empty", -1);
+
+            if (_basic_config.max_points == 0)
+                throw PolarisException("Error: max_points can not be empty", -1);
 
             if (_vamana_config.dynamic_index && _vamana_config.num_frozen_pts == 0) {
                 _vamana_config.num_frozen_pts = 1;
