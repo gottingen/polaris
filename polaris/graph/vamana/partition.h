@@ -30,10 +30,10 @@
 
 namespace polaris {
     template<typename T>
-    void gen_random_slice(const std::string base_file, const std::string output_prefix, double sampling_rate);
+    void gen_random_slice(const std::string &base_file, const std::string &output_prefix, double sampling_rate);
 
     template<typename T>
-    void gen_random_slice(const std::string data_file, double p_val, float *&sampled_data, size_t &slice_size,
+    void gen_random_slice(const std::string &data_file, double p_val, float *&sampled_data, size_t &slice_size,
                           size_t &ndims);
 
     template<typename T>

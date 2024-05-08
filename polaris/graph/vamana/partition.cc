@@ -44,7 +44,7 @@
 // #define SAVE_INFLATED_PQ true
 namespace polaris {
     template<typename T>
-    void gen_random_slice(const std::string base_file, const std::string output_prefix, double sampling_rate) {
+    void gen_random_slice(const std::string &base_file, const std::string &output_prefix, double sampling_rate) {
         size_t read_blk_size = 64 * 1024 * 1024;
         cached_ifstream base_reader(base_file.c_str(), read_blk_size);
         std::ofstream sample_writer(std::string(output_prefix + "_data.bin").c_str(), std::ios::binary);
@@ -93,16 +93,16 @@ namespace polaris {
                       << std::endl;
     }
 
-// streams data from the file, and samples each vector with probability p_val
-// and returns a matrix of size slice_size* ndims as floating point type.
-// the slice_size and ndims are set inside the function.
+    // streams data from the file, and samples each vector with probability p_val
+    // and returns a matrix of size slice_size* ndims as floating point type.
+    // the slice_size and ndims are set inside the function.
 
-/***********************************
- * Reimplement using gen_random_slice(const T* inputdata,...)
- ************************************/
+    /***********************************
+     * Reimplement using gen_random_slice(const T* inputdata,...)
+     ************************************/
 
     template<typename T>
-    void gen_random_slice(const std::string data_file, double p_val, float *&sampled_data, size_t &slice_size,
+    void gen_random_slice(const std::string &data_file, double p_val, float *&sampled_data, size_t &slice_size,
                           size_t &ndims) {
         size_t npts;
         uint32_t npts32, ndims32;
@@ -309,8 +309,8 @@ namespace polaris {
         return 0;
     }
 
-// useful for partitioning large dataset. we first generate only the IDS for
-// each shard, and retrieve the actual vectors on demand.
+    // useful for partitioning large dataset. we first generate only the IDS for
+    // each shard, and retrieve the actual vectors on demand.
     template<typename T>
     int shard_data_into_clusters_only_ids(const std::string data_file, float *pivots, const size_t num_centers,
                                           const size_t dim, const size_t k_base, std::string prefix_path) {
@@ -574,15 +574,15 @@ namespace polaris {
         return num_parts;
     }
 
-// Instantations of supported templates
+    // Instantations of supported templates
 
-    template void POLARIS_API gen_random_slice<int8_t>(const std::string base_file, const std::string output_prefix,
+    template void POLARIS_API gen_random_slice<int8_t>(const std::string &base_file, const std::string &output_prefix,
                                                        double sampling_rate);
 
-    template void POLARIS_API gen_random_slice<uint8_t>(const std::string base_file, const std::string output_prefix,
+    template void POLARIS_API gen_random_slice<uint8_t>(const std::string &base_file, const std::string &output_prefix,
                                                         double sampling_rate);
 
-    template void POLARIS_API gen_random_slice<float>(const std::string base_file, const std::string output_prefix,
+    template void POLARIS_API gen_random_slice<float>(const std::string &base_file, const std::string &output_prefix,
                                                       double sampling_rate);
 
     template void POLARIS_API gen_random_slice<float>(const float *inputdata, size_t npts, size_t ndims, double p_val,
@@ -594,13 +594,13 @@ namespace polaris {
     template void POLARIS_API gen_random_slice<int8_t>(const int8_t *inputdata, size_t npts, size_t ndims,
                                                        double p_val, float *&sampled_data, size_t &slice_size);
 
-    template void POLARIS_API gen_random_slice<float>(const std::string data_file, double p_val, float *&sampled_data,
+    template void POLARIS_API gen_random_slice<float>(const std::string &data_file, double p_val, float *&sampled_data,
                                                       size_t &slice_size, size_t &ndims);
 
-    template void POLARIS_API gen_random_slice<uint8_t>(const std::string data_file, double p_val,
+    template void POLARIS_API gen_random_slice<uint8_t>(const std::string &data_file, double p_val,
                                                         float *&sampled_data, size_t &slice_size, size_t &ndims);
 
-    template void POLARIS_API gen_random_slice<int8_t>(const std::string data_file, double p_val,
+    template void POLARIS_API gen_random_slice<int8_t>(const std::string &data_file, double p_val,
                                                        float *&sampled_data, size_t &slice_size, size_t &ndims);
 
     template POLARIS_API int partition<int8_t>(const std::string data_file, const float sampling_rate,
