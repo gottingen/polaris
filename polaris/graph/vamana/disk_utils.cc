@@ -629,8 +629,7 @@ int build_merged_vamana_index(std::string base_file, polaris::MetricType compare
                                                   .with_saturate_graph(!use_filters)
                                                   .with_num_threads(num_threads)
                                                   .build();
-        using TagT = uint32_t;
-        polaris::VamanaIndex<T, TagT, LabelT> _index(compareMetric, base_dim, base_num,
+        polaris::VamanaIndex<T, LabelT> _index(compareMetric, base_dim, base_num,
                                                std::make_shared<polaris::IndexWriteParameters>(paras), nullptr,
                                                defaults::NUM_FROZEN_POINTS_STATIC, false, false, false,
                                                build_pq_bytes > 0, build_pq_bytes, use_opq, use_filters);

@@ -41,8 +41,8 @@
 namespace polaris {
     // Initialize an index with metric m, load the data of type T with filename
     // (bin), and initialize max_points
-    template<typename T, typename TagT, typename LabelT>
-    VamanaIndex<T, TagT, LabelT>::VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
+    template<typename T, typename LabelT>
+    VamanaIndex<T, LabelT>::VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
                                   std::unique_ptr<AbstractGraphStore> graph_store,
                                   std::shared_ptr<AbstractDataStore<T>> pq_data_store)
             : _dist_metric(index_config.metric), _dim(index_config.dimension), _max_points(index_config.max_points),
@@ -119,8 +119,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    VamanaIndex<T, TagT, LabelT>::VamanaIndex(MetricType m, const size_t dim, const size_t max_points,
+    template<typename T, typename LabelT>
+    VamanaIndex<T, LabelT>::VamanaIndex(MetricType m, const size_t dim, const size_t max_points,
                                   const std::shared_ptr<IndexWriteParameters> index_parameters,
                                   const std::shared_ptr<IndexSearchParams> index_search_params,
                                   const size_t num_frozen_pts,
@@ -163,8 +163,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    VamanaIndex<T, TagT, LabelT>::~VamanaIndex() {
+    template<typename T, typename LabelT>
+    VamanaIndex<T, LabelT>::~VamanaIndex() {
         // Ensure that no other activity is happening before dtor()
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> cl(_consolidate_lock);
@@ -185,8 +185,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
                                                           uint32_t r, uint32_t maxc, size_t dim) {
         for (uint32_t i = 0; i < num_threads; i++) {
             auto scratch = new InMemQueryScratch<T>(search_l, indexing_l, r, maxc, dim, _data_store->get_aligned_dim(),
@@ -195,29 +195,29 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::save_tags(std::string tags_file) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::save_tags(std::string tags_file) {
         if (!_enable_tags) {
             polaris::cout << "Not saving tags as they are not enabled." << std::endl;
             return 0;
         }
 
         size_t tag_bytes_written;
-        TagT *tag_data = new TagT[_nd + _num_frozen_pts];
+        vid_t *tag_data = new vid_t[_nd + _num_frozen_pts];
         for (uint32_t i = 0; i < _nd; i++) {
-            TagT tag;
+            vid_t tag;
             if (_location_to_tag.try_get(i, tag)) {
                 tag_data[i] = tag;
             } else {
                 // catering to future when tagT can be any type.
-                std::memset((char *) &tag_data[i], 0, sizeof(TagT));
+                std::memset((char *) &tag_data[i], 0, sizeof(vid_t));
             }
         }
         if (_num_frozen_pts > 0) {
-            std::memset((char *) &tag_data[_start], 0, sizeof(TagT) * _num_frozen_pts);
+            std::memset((char *) &tag_data[_start], 0, sizeof(vid_t) * _num_frozen_pts);
         }
         try {
-            tag_bytes_written = save_bin<TagT>(tags_file, tag_data, _nd + _num_frozen_pts, 1);
+            tag_bytes_written = save_bin<vid_t>(tags_file, tag_data, _nd + _num_frozen_pts, 1);
         }
         catch (std::system_error &e) {
             throw FileException(tags_file, e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
@@ -226,8 +226,8 @@ namespace polaris {
         return tag_bytes_written;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::save_data(std::string data_file) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::save_data(std::string data_file) {
         // Note: at this point, either _nd == _max_points or any frozen points have
         // been temporarily moved to _nd, so _nd + _num_frozen_pts is the valid
         // location limit.
@@ -237,13 +237,13 @@ namespace polaris {
     // save the graph index on a file as an adjacency list. For each point,
     // first store the number of neighbors, and then the neighbor list (each as
     // 4 byte uint32_t)
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::save_graph(std::string graph_file) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::save_graph(std::string graph_file) {
         return _graph_store->store(graph_file, _nd + _num_frozen_pts, _num_frozen_pts, _start);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::save_delete_list(const std::string &filename) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::save_delete_list(const std::string &filename) {
         if (_delete_set->size() == 0) {
             return 0;
         }
@@ -255,8 +255,8 @@ namespace polaris {
         return save_bin<uint32_t>(filename, delete_list.get(), _delete_set->size(), 1);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::save(const char *filename, bool compact_before_save) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::save(const char *filename, bool compact_before_save) {
         polaris::Timer timer;
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -367,8 +367,8 @@ namespace polaris {
         polaris::cout << "Time taken for save: " << timer.elapsed() / 1000000.0 << "s." << std::endl;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::load_tags(const std::string tag_filename) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::load_tags(const std::string tag_filename) {
         if (_enable_tags && !collie::filesystem::exists(tag_filename)) {
             polaris::cerr << "Tag file " << tag_filename << " does not exist!" << std::endl;
             throw polaris::PolarisException("Tag file " + tag_filename + " does not exist!", -1, __PRETTY_FUNCTION__,
@@ -381,8 +381,8 @@ namespace polaris {
         }
 
         size_t file_dim, file_num_points;
-        TagT *tag_data;
-        load_bin<TagT>(std::string(tag_filename), tag_data, file_num_points, file_dim);
+        vid_t *tag_data;
+        load_bin<vid_t>(std::string(tag_filename), tag_data, file_num_points, file_dim);
 
         if (file_dim != 1) {
             std::stringstream stream;
@@ -397,7 +397,7 @@ namespace polaris {
         _location_to_tag.reserve(num_data_points);
         _tag_to_location.reserve(num_data_points);
         for (uint32_t i = 0; i < (uint32_t) num_data_points; i++) {
-            TagT tag = *(tag_data + i);
+            vid_t tag = *(tag_data + i);
             if (_delete_set->find(i) == _delete_set->end()) {
                 _location_to_tag.set(i, tag);
                 _tag_to_location[tag] = i;
@@ -408,8 +408,8 @@ namespace polaris {
         return file_num_points;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::load_data(std::string filename) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::load_data(std::string filename) {
         size_t file_dim, file_num_points;
         if (!collie::filesystem::exists(filename)) {
             std::stringstream stream;
@@ -439,8 +439,8 @@ namespace polaris {
         return file_num_points;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::load_delete_set(const std::string &filename) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::load_delete_set(const std::string &filename) {
         std::unique_ptr<uint32_t[]> delete_list;
         size_t npts, ndim;
 
@@ -454,8 +454,8 @@ namespace polaris {
 
     // load the index from file and update the max_degree, cur (navigating
     // node loc), and _final_graph (adjacency list)
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::load(const char *filename, uint32_t num_threads, uint32_t search_l) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::load(const char *filename, uint32_t num_threads, uint32_t search_l) {
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> cl(_consolidate_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -565,8 +565,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::get_graph_num_frozen_points(const std::string &graph_file) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::get_graph_num_frozen_points(const std::string &graph_file) {
         size_t expected_file_size;
         uint32_t max_observed_degree, start;
         size_t file_frozen_pts;
@@ -584,18 +584,18 @@ namespace polaris {
     }
 
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::load_graph(std::string filename, size_t expected_num_points) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::load_graph(std::string filename, size_t expected_num_points) {
         auto res = _graph_store->load(filename, expected_num_points);
         _start = std::get<1>(res);
         _num_frozen_pts = std::get<2>(res);
         return std::get<0>(res);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::_get_vector_by_tag(TagType &tag, DataType &vec) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::_get_vector_by_tag(TagType &tag, DataType &vec) {
         try {
-            TagT tag_val = std::any_cast<TagT>(tag);
+            vid_t tag_val = std::any_cast<vid_t>(tag);
             T *vec_val = std::any_cast<T *>(vec);
             return this->get_vector_by_tag(tag_val, vec_val);
         }
@@ -608,8 +608,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::get_vector_by_tag(TagT &tag, T *vec) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::get_vector_by_tag(vid_t &tag, T *vec) {
         std::shared_lock<std::shared_timed_mutex> lock(_tag_lock);
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
             polaris::cout << "Tag " << get_tag_string(tag) << " does not exist" << std::endl;
@@ -622,15 +622,15 @@ namespace polaris {
         return 0;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    uint32_t VamanaIndex<T, TagT, LabelT>::calculate_entry_point() {
+    template<typename T, typename LabelT>
+    uint32_t VamanaIndex<T, LabelT>::calculate_entry_point() {
         // REFACTOR TODO: This function does not support multi-threaded calculation of medoid.
         // Must revisit if perf is a concern.
         return _data_store->calculate_medoid();
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    std::vector<uint32_t> VamanaIndex<T, TagT, LabelT>::get_init_ids() {
+    template<typename T, typename LabelT>
+    std::vector<uint32_t> VamanaIndex<T, LabelT>::get_init_ids() {
         std::vector<uint32_t> init_ids;
         init_ids.reserve(1 + _num_frozen_pts);
 
@@ -647,8 +647,8 @@ namespace polaris {
 
     // Find common filter between a node's labels and a given set of labels, while
     // taking into account universal label
-    template<typename T, typename TagT, typename LabelT>
-    bool VamanaIndex<T, TagT, LabelT>::detect_common_filters(uint32_t point_id, bool search_invocation,
+    template<typename T, typename LabelT>
+    bool VamanaIndex<T, LabelT>::detect_common_filters(uint32_t point_id, bool search_invocation,
                                                        const std::vector<LabelT> &incoming_labels) {
         auto &curr_node_labels = _location_to_labels[point_id];
         std::vector<LabelT> common_filters;
@@ -675,8 +675,8 @@ namespace polaris {
         return (common_filters.size() > 0);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T, TagT, LabelT>::iterate_to_fixed_point(
+    template<typename T, typename LabelT>
+    std::pair<uint32_t, uint32_t> VamanaIndex<T, LabelT>::iterate_to_fixed_point(
             InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids, bool use_filter,
             const std::vector<LabelT> &filter_labels, bool search_invocation) {
         std::vector<Neighbor> &expanded_nodes = scratch->pool();
@@ -835,8 +835,8 @@ namespace polaris {
         return std::make_pair(hops, cmps);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::search_for_point_and_prune(int location, uint32_t Lindex,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::search_for_point_and_prune(int location, uint32_t Lindex,
                                                             std::vector<uint32_t> &pruned_list,
                                                             InMemQueryScratch<T> *scratch, bool use_filter,
                                                             uint32_t filteredLindex) {
@@ -904,8 +904,8 @@ namespace polaris {
         assert(_graph_store->get_total_points() == _max_points + _num_frozen_pts);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::occlude_list(const uint32_t location, std::vector<Neighbor> &pool, const float alpha,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::occlude_list(const uint32_t location, std::vector<Neighbor> &pool, const float alpha,
                                               const uint32_t degree, const uint32_t maxc, std::vector<uint32_t> &result,
                                               InMemQueryScratch<T> *scratch,
                                               const turbo::flat_hash_set<uint32_t> *const delete_set_ptr) {
@@ -986,15 +986,15 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool,
                                                  std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch) {
         prune_neighbors(location, pool, _indexingRange, _indexingMaxC, _indexingAlpha, pruned_list, scratch);
     }
 
-    template<typename T, typename TagT, typename LabelT>
+    template<typename T, typename LabelT>
     void
-    VamanaIndex<T, TagT, LabelT>::prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool, const uint32_t range,
+    VamanaIndex<T, LabelT>::prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool, const uint32_t range,
                                             const uint32_t max_candidate_size, const float alpha,
                                             std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch) {
         if (pool.size() == 0) {
@@ -1029,8 +1029,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list, const uint32_t range,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list, const uint32_t range,
                                               InMemQueryScratch<T> *scratch) {
         const auto &src_pool = pruned_list;
 
@@ -1085,14 +1085,14 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list,
                                               InMemQueryScratch<T> *scratch) {
         inter_insert(n, pruned_list, _indexingRange, scratch);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::link() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::link() {
         uint32_t num_threads = _indexingThreads;
         if (num_threads != 0)
             omp_set_num_threads(num_threads);
@@ -1183,8 +1183,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::prune_all_neighbors(const uint32_t max_degree, const uint32_t max_occlusion_size,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::prune_all_neighbors(const uint32_t max_degree, const uint32_t max_occlusion_size,
                                                      const float alpha) {
         const uint32_t range = max_degree;
         const uint32_t maxc = max_occlusion_size;
@@ -1240,8 +1240,8 @@ namespace polaris {
     }
 
 // REFACTOR
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::set_start_points(const T *data, size_t data_count) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::set_start_points(const T *data, size_t data_count) {
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
         if (_nd > 0)
@@ -1260,8 +1260,8 @@ namespace polaris {
         polaris::cout << "VamanaIndex start points set: #" << _num_frozen_pts << std::endl;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::_set_start_points_at_random(DataType radius, uint32_t random_seed) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::_set_start_points_at_random(DataType radius, uint32_t random_seed) {
         try {
             T radius_to_use = std::any_cast<T>(radius);
             this->set_start_points_at_random(radius_to_use, random_seed);
@@ -1275,8 +1275,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::set_start_points_at_random(T radius, uint32_t random_seed) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::set_start_points_at_random(T radius, uint32_t random_seed) {
         std::mt19937 gen{random_seed};
         std::normal_distribution<> d{0.0, 1.0};
 
@@ -1300,8 +1300,8 @@ namespace polaris {
         set_start_points(points_data.data(), points_data.size());
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::build_with_data_populated(const std::vector<TagT> &tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::build_with_data_populated(const std::vector<vid_t> &tags) {
         polaris::cout << "Starting index build with " << _nd << " points... " << std::endl;
 
         if (_nd < 1)
@@ -1351,10 +1351,10 @@ namespace polaris {
         _has_built = true;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::_build(const DataType &data, const size_t num_points_to_load, TagVector &tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::_build(const DataType &data, const size_t num_points_to_load, TagVector &tags) {
         try {
-            this->build(std::any_cast<const T *>(data), num_points_to_load, tags.get<const std::vector<TagT>>());
+            this->build(std::any_cast<const T *>(data), num_points_to_load, tags.get<const std::vector<vid_t>>());
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException("Error: bad any cast in while building index. " + std::string(e.what()), -1);
@@ -1364,8 +1364,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::build(const T *data, const size_t num_points_to_load, const std::vector<TagT> &tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::build(const T *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) {
         if (num_points_to_load == 0) {
             throw PolarisException("Do not call build with 0 points", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
@@ -1387,9 +1387,9 @@ namespace polaris {
         build_with_data_populated(tags);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::build(const char *filename, const size_t num_points_to_load,
-                                       const std::vector<TagT> &tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::build(const char *filename, const size_t num_points_to_load,
+                                       const std::vector<vid_t> &tags) {
         // idealy this should call build_filtered_index based on params passed
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -1462,10 +1462,10 @@ namespace polaris {
         build_with_data_populated(tags);
     }
 
-    template<typename T, typename TagT, typename LabelT>
+    template<typename T, typename LabelT>
     void
-    VamanaIndex<T, TagT, LabelT>::build(const char *filename, const size_t num_points_to_load, const char *tag_filename) {
-        std::vector<TagT> tags;
+    VamanaIndex<T, LabelT>::build(const char *filename, const size_t num_points_to_load, const char *tag_filename) {
+        std::vector<vid_t> tags;
 
         if (_enable_tags) {
             std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -1475,7 +1475,7 @@ namespace polaris {
             } else {
                 if (collie::filesystem::exists(tag_filename)) {
                     polaris::cout << "Loading tags from " << tag_filename << " for vamana index build" << std::endl;
-                    TagT *tag_data = nullptr;
+                    vid_t *tag_data = nullptr;
                     size_t npts, ndim;
                     polaris::load_bin(tag_filename, tag_data, npts, ndim);
                     if (npts < num_points_to_load) {
@@ -1499,8 +1499,8 @@ namespace polaris {
         build(filename, num_points_to_load, tags);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::build(const std::string &data_file, const size_t num_points_to_load,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::build(const std::string &data_file, const size_t num_points_to_load,
                                        IndexFilterParams &filter_params) {
         size_t points_to_load = num_points_to_load == 0 ? _max_points : num_points_to_load;
 
@@ -1523,8 +1523,8 @@ namespace polaris {
         std::cout << "Indexing time: " << diff.count() << "\n";
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    std::unordered_map<std::string, LabelT> VamanaIndex<T, TagT, LabelT>::load_label_map(const std::string &labels_map_file) {
+    template<typename T, typename LabelT>
+    std::unordered_map<std::string, LabelT> VamanaIndex<T, LabelT>::load_label_map(const std::string &labels_map_file) {
         std::unordered_map<std::string, LabelT> string_to_int_mp;
         std::ifstream map_reader(labels_map_file);
         std::string line, token;
@@ -1541,8 +1541,8 @@ namespace polaris {
         return string_to_int_mp;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    LabelT VamanaIndex<T, TagT, LabelT>::get_converted_label(const std::string &raw_label) {
+    template<typename T, typename LabelT>
+    LabelT VamanaIndex<T, LabelT>::get_converted_label(const std::string &raw_label) {
         if (_label_map.find(raw_label) != _label_map.end()) {
             return _label_map[raw_label];
         }
@@ -1555,8 +1555,8 @@ namespace polaris {
         throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::parse_label_file(const std::string &label_file, size_t &num_points) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::parse_label_file(const std::string &label_file, size_t &num_points) {
         // Format of Label txt file: filters with comma separators
 
         std::ifstream infile(label_file);
@@ -1597,20 +1597,20 @@ namespace polaris {
         polaris::cout << "Identified " << _labels.size() << " distinct label(s)" << std::endl;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::_set_universal_label(const LabelType universal_label) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::_set_universal_label(const LabelType universal_label) {
         this->set_universal_label(std::any_cast<const LabelT>(universal_label));
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::set_universal_label(const LabelT &label) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::set_universal_label(const LabelT &label) {
         _use_universal_label = true;
         _universal_label = label;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::build_filtered_index(const char *filename, const std::string &label_file,
-                                                      const size_t num_points_to_load, const std::vector<TagT> &tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::build_filtered_index(const char *filename, const std::string &label_file,
+                                                      const size_t num_points_to_load, const std::vector<vid_t> &tags) {
         _filtered_index = true;
         _label_to_start_id.clear();
         size_t num_points_labels = 0;
@@ -1663,9 +1663,9 @@ namespace polaris {
         this->build(filename, num_points_to_load, tags);
     }
 
-    template<typename T, typename TagT, typename LabelT>
+    template<typename T, typename LabelT>
     std::pair<uint32_t, uint32_t>
-    VamanaIndex<T, TagT, LabelT>::_search(const DataType &query, const size_t K, const uint32_t L,
+    VamanaIndex<T, LabelT>::_search(const DataType &query, const size_t K, const uint32_t L,
                                     std::any &indices, float *distances) {
         try {
             auto typed_query = std::any_cast<const T *>(query);
@@ -1687,9 +1687,9 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
+    template<typename T, typename LabelT>
     template<typename IdType>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T, TagT, LabelT>::search(const T *query, const size_t K, const uint32_t L,
+    std::pair<uint32_t, uint32_t> VamanaIndex<T, LabelT>::search(const T *query, const size_t K, const uint32_t L,
                                                                  IdType *indices, float *distances) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
@@ -1738,8 +1738,8 @@ namespace polaris {
         return retval;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T, TagT, LabelT>::_search_with_filters(const DataType &query,
+    template<typename T, typename LabelT>
+    std::pair<uint32_t, uint32_t> VamanaIndex<T, LabelT>::_search_with_filters(const DataType &query,
                                                                                const std::string &raw_label,
                                                                                const size_t K,
                                                                                const uint32_t L, std::any &indices,
@@ -1756,10 +1756,10 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
+    template<typename T, typename LabelT>
     template<typename IdType>
     std::pair<uint32_t, uint32_t>
-    VamanaIndex<T, TagT, LabelT>::search_with_filters(const T *query, const LabelT &filter_label,
+    VamanaIndex<T, LabelT>::search_with_filters(const T *query, const LabelT &filter_label,
                                                 const size_t K, const uint32_t L,
                                                 IdType *indices, float *distances) {
         if (K > (uint64_t) L) {
@@ -1822,12 +1822,12 @@ namespace polaris {
         return retval;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::_search_with_tags(const DataType &query, const uint64_t K, const uint32_t L,
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::_search_with_tags(const DataType &query, const uint64_t K, const uint32_t L,
                                                      const TagType &tags, float *distances, DataVector &res_vectors,
                                                      bool use_filters, const std::string filter_label) {
         try {
-            return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<TagT *>(tags), distances,
+            return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<vid_t *>(tags), distances,
                                           res_vectors.get<std::vector<T *>>(), use_filters, filter_label);
         }
         catch (const std::bad_any_cast &e) {
@@ -1839,8 +1839,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::search_with_tags(const T *query, const uint64_t K, const uint32_t L, TagT *tags,
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
                                                     float *distances, std::vector<T *> &res_vectors, bool use_filters,
                                                     const std::string filter_label) {
         if (K > (uint64_t) L) {
@@ -1882,7 +1882,7 @@ namespace polaris {
         for (size_t i = 0; i < best_L_nodes.size(); ++i) {
             auto node = best_L_nodes[i];
 
-            TagT tag;
+            vid_t tag;
             if (_location_to_tag.try_get(node.id, tag)) {
                 tags[pos] = tag;
 
@@ -1903,20 +1903,20 @@ namespace polaris {
         return pos;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::get_num_points() {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::get_num_points() {
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
         return _nd;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::get_max_points() {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::get_max_points() {
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
         return _max_points;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::generate_frozen_point() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::generate_frozen_point() {
         if (_num_frozen_pts == 0)
             return;
 
@@ -1946,8 +1946,8 @@ namespace polaris {
         _frozen_pts_used++;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::enable_delete() {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::enable_delete() {
         assert(_enable_tags);
 
         if (!_enable_tags) {
@@ -1972,8 +1972,8 @@ namespace polaris {
         return 0;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    inline void VamanaIndex<T, TagT, LabelT>::process_delete(const turbo::flat_hash_set<uint32_t> &old_delete_set, size_t loc,
+    template<typename T, typename LabelT>
+    inline void VamanaIndex<T, LabelT>::process_delete(const turbo::flat_hash_set<uint32_t> &old_delete_set, size_t loc,
                                                        const uint32_t range, const uint32_t maxc, const float alpha,
                                                        InMemQueryScratch<T> *scratch) {
         turbo::flat_hash_set<uint32_t> &expanded_nodes_set = scratch->expanded_nodes_set();
@@ -2030,8 +2030,8 @@ namespace polaris {
     }
 
 // Returns number of live points left after consolidation
-    template<typename T, typename TagT, typename LabelT>
-    consolidation_report VamanaIndex<T, TagT, LabelT>::consolidate_deletes(const IndexWriteParameters &params) {
+    template<typename T, typename LabelT>
+    consolidation_report VamanaIndex<T, LabelT>::consolidate_deletes(const IndexWriteParameters &params) {
         if (!_enable_tags)
             throw polaris::PolarisException("Point tag array not instantiated", -1, __PRETTY_FUNCTION__, __FILE__,
                                             __LINE__);
@@ -2129,8 +2129,8 @@ namespace polaris {
                                     duration);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::compact_frozen_point() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::compact_frozen_point() {
         if (_nd < _max_points && _num_frozen_pts > 0) {
             reposition_points((uint32_t) _max_points, (uint32_t) _nd, (uint32_t) _num_frozen_pts);
             _start = (uint32_t) _nd;
@@ -2147,8 +2147,8 @@ namespace polaris {
     }
 
 // Should be called after acquiring _update_lock
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::compact_data() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::compact_data() {
         if (!_dynamic_index)
             throw PolarisException("Can not compact a non-dynamic index", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
 
@@ -2257,8 +2257,8 @@ namespace polaris {
     //
     // Caller must hold unique _tag_lock and _delete_lock before calling this
     //
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::reserve_location() {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::reserve_location() {
         if (_nd >= _max_points) {
             return -1;
         }
@@ -2280,8 +2280,8 @@ namespace polaris {
         return location;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::release_location(int location) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::release_location(int location) {
         if (_empty_slots.is_in_set(location))
             throw PolarisException("Trying to release location, but location already in empty slots", -1,
                                    __PRETTY_FUNCTION__, __FILE__,
@@ -2292,8 +2292,8 @@ namespace polaris {
         return _nd;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    size_t VamanaIndex<T, TagT, LabelT>::release_locations(const turbo::flat_hash_set<uint32_t> &locations) {
+    template<typename T, typename LabelT>
+    size_t VamanaIndex<T, LabelT>::release_locations(const turbo::flat_hash_set<uint32_t> &locations) {
         for (auto location: locations) {
             if (_empty_slots.is_in_set(location))
                 throw PolarisException("Trying to release location, but location "
@@ -2310,8 +2310,8 @@ namespace polaris {
         return _nd;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::reposition_points(uint32_t old_location_start, uint32_t new_location_start,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::reposition_points(uint32_t old_location_start, uint32_t new_location_start,
                                                    uint32_t num_locations) {
         if (num_locations == 0 || old_location_start == new_location_start) {
             return;
@@ -2380,8 +2380,8 @@ namespace polaris {
         _data_store->move_vectors(old_location_start, new_location_start, num_locations);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::reposition_frozen_point_to_end() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::reposition_frozen_point_to_end() {
         if (_num_frozen_pts == 0)
             return;
 
@@ -2403,8 +2403,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::resize(size_t new_max_points) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::resize(size_t new_max_points) {
         const size_t new_internal_points = new_max_points + _num_frozen_pts;
         auto start = std::chrono::high_resolution_clock::now();
         assert(_empty_slots.size() == 0); // should not resize if there are empty slots.
@@ -2428,10 +2428,10 @@ namespace polaris {
         polaris::cout << "Resizing took: " << std::chrono::duration<double>(stop - start).count() << "s" << std::endl;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::_insert_point(const DataType &point, const TagType tag) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::_insert_point(const DataType &point, const TagType tag) {
         try {
-            return this->insert_point(std::any_cast<const T *>(point), std::any_cast<const TagT>(tag));
+            return this->insert_point(std::any_cast<const T *>(point), std::any_cast<const vid_t>(tag));
         }
         catch (const std::bad_any_cast &anycast_e) {
             throw new PolarisException("Error:Trying to insert invalid data type" + std::string(anycast_e.what()), -1);
@@ -2441,10 +2441,10 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::_insert_point(const DataType &point, const TagType tag, Labelvector &labels) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::_insert_point(const DataType &point, const TagType tag, Labelvector &labels) {
         try {
-            return this->insert_point(std::any_cast<const T *>(point), std::any_cast<const TagT>(tag),
+            return this->insert_point(std::any_cast<const T *>(point), std::any_cast<const vid_t>(tag),
                                       labels.get<const std::vector<LabelT>>());
         }
         catch (const std::bad_any_cast &anycast_e) {
@@ -2455,14 +2455,14 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::insert_point(const T *point, const TagT tag) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::insert_point(const T *point, const vid_t tag) {
         std::vector<LabelT> no_labels{0};
         return insert_point(point, tag, no_labels);
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::insert_point(const T *point, const TagT tag, const std::vector<LabelT> &labels) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::insert_point(const T *point, const vid_t tag, const std::vector<LabelT> &labels) {
 
         assert(_has_built);
         if (tag == 0) {
@@ -2601,20 +2601,20 @@ namespace polaris {
         return 0;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::_lazy_delete(const TagType &tag) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::_lazy_delete(const TagType &tag) {
         try {
-            return lazy_delete(std::any_cast<const TagT>(tag));
+            return lazy_delete(std::any_cast<const vid_t>(tag));
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException(std::string("Error: ") + e.what(), -1);
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::_lazy_delete(TagVector &tags, TagVector &failed_tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::_lazy_delete(TagVector &tags, TagVector &failed_tags) {
         try {
-            this->lazy_delete(tags.get<const std::vector<TagT>>(), failed_tags.get<std::vector<TagT>>());
+            this->lazy_delete(tags.get<const std::vector<vid_t>>(), failed_tags.get<std::vector<vid_t>>());
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException("Error: bad any cast while performing _lazy_delete() " + std::string(e.what()), -1);
@@ -2624,8 +2624,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    int VamanaIndex<T, TagT, LabelT>::lazy_delete(const TagT &tag) {
+    template<typename T, typename LabelT>
+    int VamanaIndex<T, LabelT>::lazy_delete(const vid_t &tag) {
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
         std::unique_lock<std::shared_timed_mutex> dl(_delete_lock);
@@ -2644,8 +2644,8 @@ namespace polaris {
         return 0;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::lazy_delete(const std::vector<TagT> &tags, std::vector<TagT> &failed_tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) {
         if (failed_tags.size() > 0) {
             throw PolarisException("failed_tags should be passed as an empty list", -1, __PRETTY_FUNCTION__, __FILE__,
                                    __LINE__);
@@ -2667,15 +2667,15 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    bool VamanaIndex<T, TagT, LabelT>::is_index_saved() {
+    template<typename T, typename LabelT>
+    bool VamanaIndex<T, LabelT>::is_index_saved() {
         return _is_saved;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::_get_active_tags(TagRobinSet &active_tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::_get_active_tags(TagRobinSet &active_tags) {
         try {
-            this->get_active_tags(active_tags.get<turbo::flat_hash_set<TagT>>());
+            this->get_active_tags(active_tags.get<turbo::flat_hash_set<vid_t>>());
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException("Error: bad_any cast while performing _get_active_tags() " + std::string(e.what()),
@@ -2686,8 +2686,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::get_active_tags(turbo::flat_hash_set<TagT> &active_tags) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::get_active_tags(turbo::flat_hash_set<vid_t> &active_tags) {
         active_tags.clear();
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
         for (auto iter: _tag_to_location) {
@@ -2695,8 +2695,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::print_status() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::print_status() {
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::shared_lock<std::shared_timed_mutex> cl(_consolidate_lock);
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -2714,8 +2714,8 @@ namespace polaris {
                       << std::endl;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::count_nodes_at_bfs_levels() {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::count_nodes_at_bfs_levels() {
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
 
         collie::dynamic_bitset<> visited(_max_points + _num_frozen_pts);
@@ -2751,8 +2751,8 @@ namespace polaris {
     }
 
     // REFACTOR: This should be an OptimizedDataStore class
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::optimize_index_layout() { // use after build or load
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::optimize_index_layout() { // use after build or load
         if (_dynamic_index) {
             throw polaris::PolarisException("Optimize_index_layout not implemented for dyanmic indices", -1,
                                             __PRETTY_FUNCTION__,
@@ -2786,8 +2786,8 @@ namespace polaris {
         delete[] cur_vec;
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::_search_with_optimized_layout(const DataType &query, size_t K, size_t L,
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::_search_with_optimized_layout(const DataType &query, size_t K, size_t L,
                                                                uint32_t *indices) {
         try {
             return this->search_with_optimized_layout(std::any_cast<const T *>(query), K, L, indices);
@@ -2803,8 +2803,8 @@ namespace polaris {
         }
     }
 
-    template<typename T, typename TagT, typename LabelT>
-    void VamanaIndex<T, TagT, LabelT>::search_with_optimized_layout(const T *query, size_t K, size_t L, uint32_t *indices) {
+    template<typename T, typename LabelT>
+    void VamanaIndex<T, LabelT>::search_with_optimized_layout(const T *query, size_t K, size_t L, uint32_t *indices) {
         DistanceFastL2<T> *dist_fast = (DistanceFastL2<T> *) (_data_store->get_dist_fn());
 
         NeighborPriorityQueue retset(L);
@@ -2879,294 +2879,65 @@ namespace polaris {
     }
 
 /*  Internals of the library */
-    template<typename T, typename TagT, typename LabelT> const float VamanaIndex<T, TagT, LabelT>::INDEX_GROWTH_FACTOR = 1.5f;
+    template<typename T, typename LabelT> const float VamanaIndex<T, LabelT>::INDEX_GROWTH_FACTOR = 1.5f;
 
 // EXPORTS
     template POLARIS_API
-    class VamanaIndex<float, int32_t, uint32_t>;
+    class VamanaIndex<float, uint32_t>;
 
     template POLARIS_API
-    class VamanaIndex<int8_t, int32_t, uint32_t>;
+    class VamanaIndex<int8_t,  uint32_t>;
 
     template POLARIS_API
-    class VamanaIndex<uint8_t, int32_t, uint32_t>;
+    class VamanaIndex<uint8_t,  uint32_t>;
 
-    template POLARIS_API
-    class VamanaIndex<float, uint32_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, uint32_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, uint32_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<float, int64_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, int64_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, int64_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<float, uint64_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, uint64_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, uint64_t, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<float, tag_uint128, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, tag_uint128, uint32_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, tag_uint128, uint32_t>;
 
     // Label with short int 2 byte
     template POLARIS_API
-    class VamanaIndex<float, int32_t, uint16_t>;
+    class VamanaIndex<float, uint16_t>;
 
     template POLARIS_API
-    class VamanaIndex<int8_t, int32_t, uint16_t>;
+    class VamanaIndex<int8_t, uint16_t>;
 
     template POLARIS_API
-    class VamanaIndex<uint8_t, int32_t, uint16_t>;
+    class VamanaIndex<uint8_t, uint16_t>;
 
-    template POLARIS_API
-    class VamanaIndex<float, uint32_t, uint16_t>;
 
-    template POLARIS_API
-    class VamanaIndex<int8_t, uint32_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, uint32_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<float, int64_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, int64_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, int64_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<float, uint64_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, uint64_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, uint64_t, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<float, tag_uint128, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<int8_t, tag_uint128, uint16_t>;
-
-    template POLARIS_API
-    class VamanaIndex<uint8_t, tag_uint128, uint16_t>;
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint32_t>::search<uint64_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t>::search<uint64_t>(
             const float *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint32_t>::search<uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t>::search<uint32_t>(
             const float *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint32_t>::search<uint64_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t>::search<uint64_t>(
             const uint8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint32_t>::search<uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t>::search<uint32_t>(
             const uint8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint32_t>::search<uint64_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t>::search<uint64_t>(
             const int8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint32_t>::search<uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t>::search<uint32_t>(
             const int8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-// TagT==uint32_t
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint32_t>::search<uint64_t>(
+
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint16_t>::search<uint64_t>(
             const float *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint32_t>::search<uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint16_t>::search<uint32_t>(
             const float *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint32_t>::search<uint64_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint16_t>::search<uint64_t>(
             const uint8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint32_t>::search<uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint16_t>::search<uint32_t>(
             const uint8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint32_t>::search<uint64_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint16_t>::search<uint64_t>(
             const int8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
 
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint32_t>::search<uint32_t>(
+    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint16_t>::search<uint32_t>(
             const int8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint32_t>::search_with_filters<
-            uint64_t>(const float *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint32_t>::search_with_filters<
-            uint32_t>(const float *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint32_t>::search_with_filters<
-            uint64_t>(const uint8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint32_t>::search_with_filters<
-            uint32_t>(const uint8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint32_t>::search_with_filters<
-            uint64_t>(const int8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint32_t>::search_with_filters<
-            uint32_t>(const int8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-// TagT==uint32_t
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint32_t>::search_with_filters<
-            uint64_t>(const float *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint32_t>::search_with_filters<
-            uint32_t>(const float *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint32_t>::search_with_filters<
-            uint64_t>(const uint8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint32_t>::search_with_filters<
-            uint32_t>(const uint8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint32_t>::search_with_filters<
-            uint64_t>(const int8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint32_t>::search_with_filters<
-            uint32_t>(const int8_t *query, const uint32_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint16_t>::search<uint64_t>(
-            const float *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint16_t>::search<uint32_t>(
-            const float *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint16_t>::search<uint64_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint16_t>::search<uint32_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint16_t>::search<uint64_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint16_t>::search<uint32_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-// TagT==uint32_t
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint16_t>::search<uint64_t>(
-            const float *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint16_t>::search<uint32_t>(
-            const float *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint16_t>::search<uint64_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint16_t>::search<uint32_t>(
-            const uint8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint16_t>::search<uint64_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint64_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint16_t>::search<uint32_t>(
-            const int8_t *query, const size_t K, const uint32_t L, uint32_t *indices, float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint16_t>::search_with_filters<
-            uint64_t>(const float *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint64_t, uint16_t>::search_with_filters<
-            uint32_t>(const float *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint16_t>::search_with_filters<
-            uint64_t>(const uint8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint64_t, uint16_t>::search_with_filters<
-            uint32_t>(const uint8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint16_t>::search_with_filters<
-            uint64_t>(const int8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint64_t, uint16_t>::search_with_filters<
-            uint32_t>(const int8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-// TagT==uint32_t
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint16_t>::search_with_filters<
-            uint64_t>(const float *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<float, uint32_t, uint16_t>::search_with_filters<
-            uint32_t>(const float *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint16_t>::search_with_filters<
-            uint64_t>(const uint8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<uint8_t, uint32_t, uint16_t>::search_with_filters<
-            uint32_t>(const uint8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint16_t>::search_with_filters<
-            uint64_t>(const int8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint64_t *indices,
-                      float *distances);
-
-    template POLARIS_API std::pair<uint32_t, uint32_t> VamanaIndex<int8_t, uint32_t, uint16_t>::search_with_filters<
-            uint32_t>(const int8_t *query, const uint16_t &filter_label, const size_t K, const uint32_t L,
-                      uint32_t *indices,
-                      float *distances);
 
 } // namespace polaris

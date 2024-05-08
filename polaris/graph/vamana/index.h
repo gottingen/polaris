@@ -47,7 +47,7 @@ namespace polaris {
         return OVERHEAD_FACTOR * (size_of_data + size_of_graph + size_of_locks + size_of_outer_vector);
     }
 
-    template<typename T, typename TagT = uint32_t, typename LabelT = uint32_t>
+    template<typename T, typename LabelT = uint32_t>
     class VamanaIndex : public AbstractIndex {
         /**************************************************************************
          *
@@ -93,13 +93,13 @@ namespace polaris {
 
         // Batch build from a file. Optionally pass tags vector.
         POLARIS_API void build(const char *filename, const size_t num_points_to_load,
-                               const std::vector<TagT> &tags = std::vector<TagT>());
+                               const std::vector<vid_t> &tags = std::vector<vid_t>());
 
         // Batch build from a file. Optionally pass tags file.
         POLARIS_API void build(const char *filename, const size_t num_points_to_load, const char *tag_filename);
 
         // Batch build from a data array, which must pad vectors to aligned_dim
-        POLARIS_API void build(const T *data, const size_t num_points_to_load, const std::vector<TagT> &tags);
+        POLARIS_API void build(const T *data, const size_t num_points_to_load, const std::vector<vid_t> &tags);
 
         // Based on filter params builds a filtered or unfiltered index
         POLARIS_API void build(const std::string &data_file, const size_t num_points_to_load,
@@ -108,7 +108,7 @@ namespace polaris {
         // Filtered Support
         POLARIS_API void build_filtered_index(const char *filename, const std::string &label_file,
                                               const size_t num_points_to_load,
-                                              const std::vector<TagT> &tags = std::vector<TagT>());
+                                              const std::vector<vid_t> &tags = std::vector<vid_t>());
 
         POLARIS_API void set_universal_label(const LabelT &label);
 
@@ -136,7 +136,7 @@ namespace polaris {
                                                          IDType *indices, float *distances = nullptr);
 
         // Initialize space for res_vectors before calling.
-        POLARIS_API size_t search_with_tags(const T *query, const uint64_t K, const uint32_t L, TagT *tags,
+        POLARIS_API size_t search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
                                             float *distances, std::vector<T *> &res_vectors, bool use_filters = false,
                                             const std::string filter_label = "");
 
@@ -147,21 +147,21 @@ namespace polaris {
                                                                       IndexType *indices, float *distances);
 
         // Will fail if tag already in the index or if tag=0.
-        POLARIS_API int insert_point(const T *point, const TagT tag);
+        POLARIS_API int insert_point(const T *point, const vid_t tag);
 
         // Will fail if tag already in the index or if tag=0.
-        POLARIS_API int insert_point(const T *point, const TagT tag, const std::vector<LabelT> &label);
+        POLARIS_API int insert_point(const T *point, const vid_t tag, const std::vector<LabelT> &label);
 
         // call this before issuing deletions to sets relevant flags
         POLARIS_API int enable_delete();
 
         // Record deleted point now and restructure graph later. Return -1 if tag
         // not found, 0 if OK.
-        POLARIS_API int lazy_delete(const TagT &tag);
+        POLARIS_API int lazy_delete(const vid_t &tag);
 
         // Record deleted points now and restructure graph later. Add to failed_tags
         // if tag not found.
-        POLARIS_API void lazy_delete(const std::vector<TagT> &tags, std::vector<TagT> &failed_tags);
+        POLARIS_API void lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags);
 
         // Call after a series of lazy deletions
         // Returns number of live points left after consolidation
@@ -183,10 +183,10 @@ namespace polaris {
 
         // POLARIS_API void save_index_as_one_file(bool flag);
 
-        POLARIS_API void get_active_tags(turbo::flat_hash_set<TagT> &active_tags);
+        POLARIS_API void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags);
 
         // memory should be allocated for vec before calling this function
-        POLARIS_API int get_vector_by_tag(TagT &tag, T *vec);
+        POLARIS_API int get_vector_by_tag(vid_t &tag, T *vec);
 
         POLARIS_API void print_status();
 
@@ -238,13 +238,13 @@ namespace polaris {
         virtual void _set_universal_label(const LabelType universal_label) override;
 
         // No copy/assign.
-        VamanaIndex(const VamanaIndex<T, TagT, LabelT> &) = delete;
+        VamanaIndex(const VamanaIndex<T, LabelT> &) = delete;
 
-        VamanaIndex<T, TagT, LabelT> &operator=(const VamanaIndex<T, TagT, LabelT> &) = delete;
+        VamanaIndex<T, LabelT> &operator=(const VamanaIndex<T, LabelT> &) = delete;
 
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
-        void build_with_data_populated(const std::vector<TagT> &tags);
+        void build_with_data_populated(const std::vector<vid_t> &tags);
 
         // generates 1 frozen point that will never be deleted from the graph
         // This is not visible to the user
@@ -426,8 +426,8 @@ namespace polaris {
 
         // lazy_delete removes entry from _location_to_tag and _tag_to_location. If
         // _location_to_tag does not resolve a location, infer that it was deleted.
-        turbo::flat_hash_map<TagT, uint32_t> _tag_to_location;
-        natural_number_map<uint32_t, TagT> _location_to_tag;
+        turbo::flat_hash_map<vid_t, uint32_t> _tag_to_location;
+        natural_number_map<uint32_t, vid_t> _location_to_tag;
 
         // _empty_slots has unallocated slots and those freed by consolidate_delete.
         // _delete_set has locations marked deleted by lazy_delete. Will not be

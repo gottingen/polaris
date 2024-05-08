@@ -40,7 +40,6 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
                         const uint32_t recall_at, const bool print_all_recalls, const std::vector<uint32_t> &Lvec,
                         const bool dynamic, const bool tags, const bool show_qps_per_thread,
                         const std::vector<std::string> &query_filters, const float fail_if_recall_below) {
-    using TagT = uint32_t;
     // Load the query file
     T *query = nullptr;
     uint32_t *gt_ids = nullptr;
@@ -80,7 +79,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             .with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
             .with_data_type(diskann_type_to_name<T>())
             .with_label_type(diskann_type_to_name<LabelT>())
-            .with_tag_type(diskann_type_to_name<TagT>())
+            .with_tag_type(diskann_type_to_name<polaris::vid_t>())
             .is_dynamic_index(dynamic)
             .is_enable_tags(tags)
             .is_concurrent_consolidate(false)
@@ -132,7 +131,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
         cmp_stats = std::vector<uint32_t>(query_num, 0);
     }
 
-    std::vector<TagT> query_result_tags;
+    std::vector<polaris::vid_t> query_result_tags;
     if (tags) {
         query_result_tags.resize(recall_at * query_num);
     }
@@ -167,8 +166,8 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
                                                     query_result_ids[test_id].data() + i * recall_at);
             } else if (tags) {
                 if (!filtered_search) {
-                    index->search_with_tags(query + i * query_aligned_dim, recall_at, L,
-                                            query_result_tags.data() + i * recall_at, nullptr, res);
+                    index->search_with_tags(query + i * query_aligned_dim, (uint64_t)recall_at, (uint32_t)L,
+                                            (polaris::vid_t*) (query_result_tags.data() + i * recall_at), nullptr, res);
                 } else {
                     std::string raw_filter = query_filters.size() == 1 ? query_filters[0] : query_filters[i];
 

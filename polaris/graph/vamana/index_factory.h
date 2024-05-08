@@ -48,16 +48,12 @@ namespace polaris {
     private:
         void check_config();
 
-        template<typename data_type, typename tag_type, typename label_type>
+        template<typename data_type, typename label_type>
         std::unique_ptr<AbstractIndex> create_instance();
 
-        std::unique_ptr<AbstractIndex> create_instance(const std::string &data_type, const std::string &tag_type,
-                                                       const std::string &label_type);
+        std::unique_ptr<AbstractIndex> create_instance(const std::string &data_type, const std::string &label_type);
 
         template<typename data_type>
-        std::unique_ptr<AbstractIndex> create_instance(const std::string &tag_type, const std::string &label_type);
-
-        template<typename data_type, typename tag_type>
         std::unique_ptr<AbstractIndex> create_instance(const std::string &label_type);
 
         std::unique_ptr<IndexConfig> _config;

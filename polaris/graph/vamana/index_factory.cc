@@ -24,7 +24,7 @@ namespace polaris {
     }
 
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
-        return create_instance(_config->data_type, _config->tag_type, _config->label_type);
+        return create_instance(_config->data_type, _config->label_type);
     }
 
     void IndexFactory::check_config() {
@@ -118,7 +118,7 @@ namespace polaris {
         return nullptr;
     }
 
-    template<typename data_type, typename tag_type, typename label_type>
+    template<typename data_type, typename label_type>
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
         size_t num_points = _config->max_points + _config->num_frozen_pts;
         size_t dim = _config->dimension;
@@ -141,53 +141,31 @@ namespace polaris {
 
         // REFACTOR TODO: Must construct in-memory PQDatastore if strategy == ONDISK and must construct
         // in-mem and on-disk PQDataStore if strategy == ONDISK and diskPQ is required.
-        return std::make_unique<polaris::VamanaIndex<data_type, tag_type, label_type>>(*_config, data_store,
+        return std::make_unique<polaris::VamanaIndex<data_type, label_type>>(*_config, data_store,
                                                                                  std::move(graph_store), pq_data_store);
     }
 
     std::unique_ptr<AbstractIndex>
-    IndexFactory::create_instance(const std::string &data_type, const std::string &tag_type,
-                                  const std::string &label_type) {
+    IndexFactory::create_instance(const std::string &data_type, const std::string &label_type) {
         if (data_type == std::string("float")) {
-            return create_instance<float>(tag_type, label_type);
+            return create_instance<float>(label_type);
         } else if (data_type == std::string("uint8")) {
-            return create_instance<uint8_t>(tag_type, label_type);
+            return create_instance<uint8_t>(label_type);
         } else if (data_type == std::string("int8")) {
-            return create_instance<int8_t>(tag_type, label_type);
+            return create_instance<int8_t>(label_type);
         } else
             throw PolarisException("Error: unsupported data_type please choose from [float/int8/uint8]", -1);
     }
 
     template<typename data_type>
-    std::unique_ptr<AbstractIndex>
-    IndexFactory::create_instance(const std::string &tag_type, const std::string &label_type) {
-        if (tag_type == std::string("int32")) {
-            return create_instance<data_type, int32_t>(label_type);
-        } else if (tag_type == std::string("uint32")) {
-            return create_instance<data_type, uint32_t>(label_type);
-        } else if (tag_type == std::string("int64")) {
-            return create_instance<data_type, int64_t>(label_type);
-        } else if (tag_type == std::string("uint64")) {
-            return create_instance<data_type, uint64_t>(label_type);
-        } else
-            throw PolarisException("Error: unsupported tag_type please choose from [int32/uint32/int64/uint64]", -1);
-    }
-
-    template<typename data_type, typename tag_type>
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance(const std::string &label_type) {
         if (label_type == std::string("uint16") || label_type == std::string("ushort")) {
-            return create_instance<data_type, tag_type, uint16_t>();
+            return create_instance<data_type, uint16_t>();
         } else if (label_type == std::string("uint32") || label_type == std::string("uint")) {
-            return create_instance<data_type, tag_type, uint32_t>();
+            return create_instance<data_type, uint32_t>();
         } else
             throw PolarisException("Error: unsupported label_type please choose from [uint/ushort]", -1);
     }
 
-// template POLARIS_API std::shared_ptr<AbstractDataStore<uint8_t>> IndexFactory::construct_datastore(
-//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, MetricType m);
-// template POLARIS_API std::shared_ptr<AbstractDataStore<int8_t>> IndexFactory::construct_datastore(
-//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, MetricType m);
-// template POLARIS_API std::shared_ptr<AbstractDataStore<float>> IndexFactory::construct_datastore(
-//     DataStoreStrategy stratagy, size_t num_points, size_t dimension, MetricType m);
 
 } // namespace polaris
