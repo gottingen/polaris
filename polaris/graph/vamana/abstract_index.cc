@@ -67,8 +67,8 @@ namespace polaris {
         return this->_insert_point(any_point, any_tag);
     }
 
-    template<typename data_type,  typename label_type>
-    int AbstractIndex::insert_point(const data_type *point, const vid_t tag, const std::vector<label_type> &labels) {
+    template<typename data_type>
+    int AbstractIndex::insert_point(const data_type *point, const vid_t tag, const std::vector<labid_t> &labels) {
         auto any_point = std::any(point);
         auto any_tag = std::any(tag);
         auto any_labels = Labelvector(labels);
@@ -178,25 +178,14 @@ namespace polaris {
     template POLARIS_API int AbstractIndex::insert_point<int8_t>(const int8_t *point, const vid_t tag);
 
 
-    template POLARIS_API int AbstractIndex::insert_point<float, uint16_t>(
-            const float *point, const vid_t tag, const std::vector<uint16_t> &labels);
+    template POLARIS_API int AbstractIndex::insert_point<float>(
+            const float *point, const vid_t tag, const std::vector<labid_t> &labels);
 
-    template POLARIS_API int AbstractIndex::insert_point<uint8_t, uint16_t>(
-            const uint8_t *point, const vid_t tag, const std::vector<uint16_t> &labels);
+    template POLARIS_API int AbstractIndex::insert_point<uint8_t>(
+            const uint8_t *point, const vid_t tag, const std::vector<labid_t> &labels);
 
-    template POLARIS_API int AbstractIndex::insert_point<int8_t, uint16_t>(
-            const int8_t *point, const vid_t tag, const std::vector<uint16_t> &labels);
-
-
-
-    template POLARIS_API int AbstractIndex::insert_point<float, uint32_t>(
-            const float *point, const vid_t tag, const std::vector<uint32_t> &labels);
-
-    template POLARIS_API int AbstractIndex::insert_point<uint8_t, uint32_t>(
-            const uint8_t *point, const vid_t tag, const std::vector<uint32_t> &labels);
-
-    template POLARIS_API int AbstractIndex::insert_point<int8_t, uint32_t>(
-            const int8_t *point, const vid_t tag, const std::vector<uint32_t> &labels);
+    template POLARIS_API int AbstractIndex::insert_point<int8_t>(
+            const int8_t *point, const vid_t tag, const std::vector<labid_t> &labels);
 
 
     template POLARIS_API void AbstractIndex::set_start_points_at_random<float>(float radius, uint32_t random_seed);

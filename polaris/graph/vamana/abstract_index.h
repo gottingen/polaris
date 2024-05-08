@@ -89,8 +89,8 @@ namespace polaris {
                                                           float *distances);
 
         // insert points with labels, labels should be present for filtered index
-        template<typename data_type, typename label_type>
-        int insert_point(const data_type *point, const vid_t tag, const std::vector<label_type> &labels);
+        template<typename data_type>
+        int insert_point(const data_type *point, const vid_t tag, const std::vector<labid_t> &labels);
 
         // insert point for unfiltered index build. do not use with filtered index
         template<typename data_type>
