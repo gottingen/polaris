@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/graph/vamana/abstract_index.h>
 

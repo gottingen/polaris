@@ -171,8 +171,6 @@ set(POLARIS_SRC
 
 set(POLARIS_HEADERS
         core/common.h
-        core/common_includes.h
-        core/defaults.h
         core/defines.h
         core/executor.h
         core/index_build_params.h
@@ -369,6 +367,7 @@ set(POLARIS_HEADERS
         utility/args.h
         utility/bfloat.h
         utility/boolean_set.h
+        utility/common_includes.h
         utility/compact.h
         utility/concurrent_queue.h
         utility/doubly_buffered_data.h

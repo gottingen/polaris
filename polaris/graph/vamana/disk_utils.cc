@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
 #include <gperftools/malloc_extension.h>

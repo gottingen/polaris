@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 #include <polaris/distance/distance.h>
 #include <polaris/core/lock.h>
 #include <polaris/utility/natural_number_map.h>

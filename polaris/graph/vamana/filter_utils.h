@@ -40,7 +40,7 @@
 #include <sys/uio.h>
 
 #include <polaris/io/cached_io.h>
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 #include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/platform_macros.h>

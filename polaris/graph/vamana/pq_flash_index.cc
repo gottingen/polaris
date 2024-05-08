@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 
 #include <polaris/graph/vamana/timer.h>
 #include <polaris/graph/vamana/pq.h>

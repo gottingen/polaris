@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 #include <polaris/graph/vamana/utils.h>
 
 namespace math_utils

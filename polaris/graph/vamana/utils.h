@@ -17,7 +17,7 @@
 
 #include <errno.h>
 #include <polaris/utility/platform_macros.h>
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 #include <collie/filesystem/fs.h>
 
 #ifdef __APPLE__

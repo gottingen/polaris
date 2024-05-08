@@ -22,7 +22,7 @@
 #include <polaris/graph/vamana/index.h>
 #include <polaris/graph/vamana/partition.h>
 
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 #include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_flash_index.h>

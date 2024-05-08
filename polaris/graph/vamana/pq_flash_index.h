@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <polaris/core/common_includes.h>
+#include <polaris/utility/common_includes.h>
 
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/utility/concurrent_queue.h>
