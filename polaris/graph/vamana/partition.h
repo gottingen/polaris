@@ -22,7 +22,7 @@
 #include <unordered_map>
 
 #include <polaris/graph/vamana/neighbor.h>
-#include <polaris/graph/vamana/parameters.h>
+#include <polaris/core/parameters.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/graph/vamana/utils.h>
 

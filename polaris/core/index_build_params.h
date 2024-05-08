@@ -14,7 +14,7 @@
 //
 
 #include <polaris/core/common_includes.h>
-#include <polaris/graph/vamana/parameters.h>
+#include <polaris/core/parameters.h>
 
 namespace polaris {
     struct IndexFilterParams {

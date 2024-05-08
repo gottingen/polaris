@@ -45,17 +45,17 @@ namespace polaris {
     VamanaIndex<T, LabelT>::VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
                                   std::unique_ptr<AbstractGraphStore> graph_store,
                                   std::shared_ptr<AbstractDataStore<T>> pq_data_store)
-            : _dist_metric(index_config.metric), _dim(index_config.dimension), _max_points(index_config.max_points),
-              _num_frozen_pts(index_config.num_frozen_pts), _dynamic_index(index_config.dynamic_index),
-              _enable_tags(index_config.enable_tags),
-              _filtered_index(index_config.filtered_index),
+            : _dist_metric(index_config.basic_config.metric), _dim(index_config.basic_config.dimension), _max_points(index_config.basic_config.max_points),
+              _num_frozen_pts(index_config.vamana_config.num_frozen_pts), _dynamic_index(index_config.vamana_config.dynamic_index),
+              _enable_tags(index_config.vamana_config.enable_tags),
+              _filtered_index(index_config.vamana_config.filtered_index),
               _indexingMaxC(DEFAULT_MAXC),
               _query_scratch(nullptr),
-              _pq_dist(index_config.pq_dist_build),
-              _use_opq(index_config.use_opq),
-              _num_pq_chunks(index_config.num_pq_chunks),
+              _pq_dist(index_config.vamana_config.pq_dist_build),
+              _use_opq(index_config.vamana_config.use_opq),
+              _num_pq_chunks(index_config.vamana_config.num_pq_chunks),
               _delete_set(new turbo::flat_hash_set<uint32_t>),
-              _conc_consolidate(index_config.concurrent_consolidate) {
+              _conc_consolidate(index_config.vamana_config.concurrent_consolidate) {
         if (_dynamic_index && !_enable_tags) {
             throw PolarisException("ERROR: Dynamic Indexing must have tags enabled.", -1, __PRETTY_FUNCTION__, __FILE__,
                                    __LINE__);
@@ -102,18 +102,18 @@ namespace polaris {
             }
         }
 
-        if (index_config.index_write_params != nullptr) {
-            _indexingQueueSize = index_config.index_write_params->search_list_size;
-            _indexingRange = index_config.index_write_params->max_degree;
-            _indexingMaxC = index_config.index_write_params->max_occlusion_size;
-            _indexingAlpha = index_config.index_write_params->alpha;
-            _filterIndexingQueueSize = index_config.index_write_params->filter_list_size;
-            _indexingThreads = index_config.index_write_params->num_threads;
-            _saturate_graph = index_config.index_write_params->saturate_graph;
+        if (index_config.vamana_config.index_write_params != nullptr) {
+            _indexingQueueSize = index_config.vamana_config.index_write_params->search_list_size;
+            _indexingRange = index_config.vamana_config.index_write_params->max_degree;
+            _indexingMaxC = index_config.vamana_config.index_write_params->max_occlusion_size;
+            _indexingAlpha = index_config.vamana_config.index_write_params->alpha;
+            _filterIndexingQueueSize = index_config.vamana_config.index_write_params->filter_list_size;
+            _indexingThreads = index_config.vamana_config.index_write_params->num_threads;
+            _saturate_graph = index_config.vamana_config.index_write_params->saturate_graph;
 
-            if (index_config.index_search_params != nullptr) {
-                uint32_t num_scratch_spaces = index_config.index_search_params->num_search_threads + _indexingThreads;
-                initialize_query_scratch(num_scratch_spaces, index_config.index_search_params->initial_search_list_size,
+            if (index_config.vamana_config.index_search_params != nullptr) {
+                uint32_t num_scratch_spaces = index_config.vamana_config.index_search_params->num_search_threads + _indexingThreads;
+                initialize_query_scratch(num_scratch_spaces, index_config.vamana_config.index_search_params->initial_search_list_size,
                                          _indexingQueueSize, _indexingRange, _indexingMaxC, _data_store->get_dims());
             }
         }
@@ -132,18 +132,18 @@ namespace polaris {
                     .with_metric(m)
                     .with_dimension(dim)
                     .with_max_points(max_points)
-                    .with_index_write_params(index_parameters)
-                    .with_index_search_params(index_search_params)
-                    .with_num_frozen_pts(num_frozen_pts)
-                    .is_dynamic_index(dynamic_index)
-                    .is_enable_tags(enable_tags)
-                    .is_concurrent_consolidate(concurrent_consolidate)
-                    .is_pq_dist_build(pq_dist_build)
-                    .with_num_pq_chunks(num_pq_chunks)
-                    .is_use_opq(use_opq)
-                    .is_filtered(filtered_index)
-                    .with_data_type(diskann_type_to_name<T>())
-                    .build(),
+                    .vamana_with_index_write_params(index_parameters)
+                    .vamana_with_index_search_params(index_search_params)
+                    .vamana_with_num_frozen_pts(num_frozen_pts)
+                    .vamana_is_dynamic_index(dynamic_index)
+                    .vamana_is_enable_tags(enable_tags)
+                    .vamana_is_concurrent_consolidate(concurrent_consolidate)
+                    .vamana_is_pq_dist_build(pq_dist_build)
+                    .vamana_with_num_pq_chunks(num_pq_chunks)
+                    .vamana_is_use_opq(use_opq)
+                    .vamana_is_filtered(filtered_index)
+                    .with_data_type(polaris_type_to_name<T>())
+                    .build_vamana(),
             IndexFactory::construct_datastore<T>(DataStoreStrategy::MEMORY,
                                                  (max_points == 0 ? (size_t) 1 : max_points) +
                                                  (dynamic_index && num_frozen_pts == 0 ? (size_t) 1 : num_frozen_pts),

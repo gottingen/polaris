@@ -831,54 +831,6 @@ clean_up_artifacts(turbo::flat_hash_set<std::string> paths_to_clean, turbo::flat
     }
 }
 
-template<typename T>
-inline const char *diskann_type_to_name() = delete;
-
-template<>
-inline const char *diskann_type_to_name<float>() {
-    return "float";
-}
-
-template<>
-inline const char *diskann_type_to_name<uint8_t>() {
-    return "uint8";
-}
-
-template<>
-inline const char *diskann_type_to_name<int8_t>() {
-    return "int8";
-}
-
-template<>
-inline const char *diskann_type_to_name<uint16_t>() {
-    return "uint16";
-}
-
-template<>
-inline const char *diskann_type_to_name<int16_t>() {
-    return "int16";
-}
-
-template<>
-inline const char *diskann_type_to_name<uint32_t>() {
-    return "uint32";
-}
-
-template<>
-inline const char *diskann_type_to_name<int32_t>() {
-    return "int32";
-}
-
-template<>
-inline const char *diskann_type_to_name<uint64_t>() {
-    return "uint64";
-}
-
-template<>
-inline const char *diskann_type_to_name<int64_t>() {
-    return "int64";
-}
-
 #ifdef _WINDOWS
 #include <intrin.h>
 #include <Psapi.h>

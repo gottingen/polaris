@@ -15,11 +15,11 @@
 #pragma once
 
 #include <polaris/distance/distance.h>
-#include <polaris/graph/vamana/parameters.h>
+#include <polaris/core/parameters.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/types.h>
-#include <polaris/graph/vamana/index_config.h>
-#include <polaris/graph/vamana/index_build_params.h>
+#include <polaris/core/index_config.h>
+#include <polaris/core/index_build_params.h>
 #include <polaris/core/common.h>
 #include <any>
 

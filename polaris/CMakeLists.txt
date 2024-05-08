@@ -173,11 +173,14 @@ set(POLARIS_HEADERS
         core/aux_index_structures.h
         core/common.h
         core/common_includes.h
+        core/defaults.h
         core/defines.h
         core/executor.h
         core/heap.h
         core/id_selector.h
         core/index.h
+        core/index_build_params.h
+        core/index_config.h
         core/index_io.h
         core/lock.h
         core/log.h
@@ -185,6 +188,7 @@ set(POLARIS_HEADERS
         core/memory.h
         core/metric_type.h
         core/ordered_key_value.h
+        core/parameters.h
         core/random.h
         core/result_handler.h
         core/sorting.h
@@ -222,18 +226,14 @@ set(POLARIS_HEADERS
         graph/ngt/ngtq/quantizer.h
         graph/vamana/abstract_index.h
         graph/vamana/abstract_scratch.h
-        graph/vamana/defaults.h
         graph/vamana/disk_utils.h
         graph/vamana/filter_utils.h
         graph/vamana/index.h
-        graph/vamana/index_build_params.h
-        graph/vamana/index_config.h
         graph/vamana/index_factory.h
         graph/vamana/logger.h
         graph/vamana/logger_impl.h
         graph/vamana/math_utils.h
         graph/vamana/neighbor.h
-        graph/vamana/parameters.h
         graph/vamana/partition.h
         graph/vamana/percentile_stats.h
         graph/vamana/pq.h

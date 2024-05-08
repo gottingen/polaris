@@ -24,37 +24,31 @@ namespace polaris {
     }
 
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
-        return create_instance(_config->data_type, _config->label_type);
+        return create_instance(_config->basic_config.object_type, _config->vamana_config.label_type);
     }
 
     void IndexFactory::check_config() {
-        if (_config->dynamic_index && !_config->enable_tags) {
+        if (_config->vamana_config.dynamic_index && !_config->vamana_config.enable_tags) {
             throw PolarisException("ERROR: Dynamic Indexing must have tags enabled.", -1, __PRETTY_FUNCTION__, __FILE__,
                                    __LINE__);
         }
 
-        if (_config->pq_dist_build) {
-            if (_config->dynamic_index)
+        if (_config->vamana_config.pq_dist_build) {
+            if (_config->vamana_config.dynamic_index)
                 throw PolarisException("ERROR: Dynamic Indexing not supported with PQ distance based "
                                        "index construction",
                                        -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-            if (_config->metric == polaris::MetricType::METRIC_INNER_PRODUCT)
+            if (_config->basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT)
                 throw PolarisException("ERROR: Inner product metrics not yet supported "
                                        "with PQ distance "
                                        "base index",
                                        -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
 
-        if (_config->data_type != "float" && _config->data_type != "uint8" && _config->data_type != "int8") {
-            throw PolarisException("ERROR: invalid data type : + " + _config->data_type +
+        if (_config->basic_config.object_type != ObjectType::FLOAT &&
+            _config->basic_config.object_type != ObjectType::UINT8 && _config->basic_config.object_type != ObjectType::INT8) {
+            throw PolarisException("ERROR: invalid data type : + " + polaris_type_to_string(_config->basic_config.object_type) +
                                    " is not supported. please select from [float, int8, uint8]",
-                                   -1);
-        }
-
-        if (_config->tag_type != "int32" && _config->tag_type != "uint32" && _config->tag_type != "int64" &&
-            _config->tag_type != "uint64") {
-            throw PolarisException("ERROR: invalid data type : + " + _config->tag_type +
-                                   " is not supported. please select from [int32, uint32, int64, uint64]",
                                    -1);
         }
     }
@@ -120,24 +114,24 @@ namespace polaris {
 
     template<typename data_type, typename label_type>
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
-        size_t num_points = _config->max_points + _config->num_frozen_pts;
-        size_t dim = _config->dimension;
+        size_t num_points = _config->basic_config.max_points + _config->vamana_config.num_frozen_pts;
+        size_t dim = _config->basic_config.dimension;
         // auto graph_store = construct_graphstore(_config->graph_strategy, num_points);
-        auto data_store = construct_datastore<data_type>(_config->data_strategy, num_points, dim, _config->metric);
+        auto data_store = construct_datastore<data_type>(_config->vamana_config.data_strategy, num_points, dim, _config->basic_config.metric);
         std::shared_ptr<AbstractDataStore<data_type>> pq_data_store = nullptr;
 
-        if (_config->data_strategy == DataStoreStrategy::MEMORY && _config->pq_dist_build) {
+        if (_config->vamana_config.data_strategy == DataStoreStrategy::MEMORY && _config->vamana_config.pq_dist_build) {
             pq_data_store =
-                    construct_pq_datastore<data_type>(_config->data_strategy, num_points + _config->num_frozen_pts, dim,
-                                                      _config->metric, _config->num_pq_chunks, _config->use_opq);
+                    construct_pq_datastore<data_type>(_config->vamana_config.data_strategy, num_points + _config->vamana_config.num_frozen_pts, dim,
+                                                      _config->basic_config.metric, _config->vamana_config.num_pq_chunks, _config->vamana_config.use_opq);
         } else {
             pq_data_store = data_store;
         }
         size_t max_reserve_degree =
                 (size_t) (defaults::GRAPH_SLACK_FACTOR * 1.05 *
-                          (_config->index_write_params == nullptr ? 0 : _config->index_write_params->max_degree));
+                          (_config->vamana_config.index_write_params == nullptr ? 0 : _config->vamana_config.index_write_params->max_degree));
         std::unique_ptr<AbstractGraphStore> graph_store =
-                construct_graphstore(_config->graph_strategy, num_points + _config->num_frozen_pts, max_reserve_degree);
+                construct_graphstore(_config->vamana_config.graph_strategy, num_points + _config->vamana_config.num_frozen_pts, max_reserve_degree);
 
         // REFACTOR TODO: Must construct in-memory PQDatastore if strategy == ONDISK and must construct
         // in-mem and on-disk PQDataStore if strategy == ONDISK and diskPQ is required.
@@ -146,12 +140,12 @@ namespace polaris {
     }
 
     std::unique_ptr<AbstractIndex>
-    IndexFactory::create_instance(const std::string &data_type, const std::string &label_type) {
-        if (data_type == std::string("float")) {
+    IndexFactory::create_instance(ObjectType data_type, const std::string &label_type) {
+        if (data_type == ObjectType::FLOAT) {
             return create_instance<float>(label_type);
-        } else if (data_type == std::string("uint8")) {
+        } else if (data_type == ObjectType::UINT8) {
             return create_instance<uint8_t>(label_type);
-        } else if (data_type == std::string("int8")) {
+        } else if (data_type == ObjectType::INT8) {
             return create_instance<int8_t>(label_type);
         } else
             throw PolarisException("Error: unsupported data_type please choose from [float/int8/uint8]", -1);

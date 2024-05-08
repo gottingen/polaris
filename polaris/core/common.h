@@ -42,6 +42,7 @@
 #include <polaris/utility/polaris_exception.h>
 #include <polaris/utility/serialize.h>
 #include <polaris/distance/object_distance.h>
+#include <collie/strings/match.h>
 
 #define ADVANCED_USE_REMOVED_LIST
 #define    SHARED_REMOVED_LIST
@@ -68,6 +69,115 @@ namespace polaris {
         DOUBLE = 11,
         BFLOAT16 = 12
     };
+
+    inline std::string polaris_type_to_string(ObjectType type) {
+        switch (type) {
+            case UINT8:
+                return "UINT8";
+            case INT8:
+                return "INT8";
+            case UINT16:
+                return "UINT16";
+            case INT16:
+                return "INT16";
+            case UINT32:
+                return "UINT32";
+            case INT32:
+                return "INT32";
+            case UINT64:
+                return "UINT64";
+            case INT64:
+                return "INT64";
+            case FLOAT:
+                return "FLOAT";
+            case FLOAT16:
+                return "FLOAT16";
+            case DOUBLE:
+                return "DOUBLE";
+            case BFLOAT16:
+                return "BFLOAT16";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    inline ObjectType string_to_polaris_type(const std::string &type) {
+        if(collie::str_equals_ignore_case(type, "UINT8")) {
+            return UINT8;
+        } else if(collie::str_equals_ignore_case(type, "INT8")) {
+            return INT8;
+        } else if(collie::str_equals_ignore_case(type, "UINT16")) {
+            return UINT16;
+        } else if(collie::str_equals_ignore_case(type, "INT16")) {
+            return INT16;
+        } else if(collie::str_equals_ignore_case(type, "UINT32")) {
+            return UINT32;
+        } else if(collie::str_equals_ignore_case(type, "INT32")) {
+            return INT32;
+        } else if(collie::str_equals_ignore_case(type, "UINT64")) {
+            return UINT64;
+        } else if(collie::str_equals_ignore_case(type, "INT64")) {
+            return INT64;
+        } else if(collie::str_equals_ignore_case(type, "FLOAT")) {
+            return FLOAT;
+        } else if(collie::str_equals_ignore_case(type, "FLOAT16")) {
+            return FLOAT16;
+        } else if(collie::str_equals_ignore_case(type, "DOUBLE")) {
+            return DOUBLE;
+        } else if(collie::str_equals_ignore_case(type, "BFLOAT16")) {
+            return BFLOAT16;
+        } else {
+            return ObjectTypeNone;
+        }
+    }
+
+    template<typename T>
+    inline polaris::ObjectType polaris_type_to_name() = delete;
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<float>() {
+        return polaris::ObjectType::FLOAT;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<uint8_t>() {
+        return polaris::ObjectType::UINT8;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<int8_t>() {
+        return polaris::ObjectType::INT8;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<uint16_t>() {
+        return polaris::ObjectType::UINT16;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<int16_t>() {
+        return polaris::ObjectType::INT16;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<uint32_t>() {
+        return polaris::ObjectType::UINT32;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<int32_t>() {
+        return polaris::ObjectType::INT32;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<uint64_t>() {
+        return polaris::ObjectType::UINT64;
+    }
+
+    template<>
+    inline polaris::ObjectType polaris_type_to_name<int64_t>() {
+        return polaris::ObjectType::INT64;
+    }
 
     struct SpaceMeta {
         ObjectType object_type;

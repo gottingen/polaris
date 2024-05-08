@@ -24,7 +24,7 @@
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/graph/vamana/abstract_scratch.h>
 #include <polaris/graph/vamana/neighbor.h>
-#include <polaris/graph/vamana/defaults.h>
+#include <polaris/core/defaults.h>
 #include <polaris/utility/concurrent_queue.h>
 #include <collie/container/dynamic_bitset.h>
 

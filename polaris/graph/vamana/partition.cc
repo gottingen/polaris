@@ -30,7 +30,7 @@
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/graph/vamana/math_utils.h>
 #include <polaris/graph/vamana/index.h>
-#include <polaris/graph/vamana/parameters.h>
+#include <polaris/core/parameters.h>
 #include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/partition.h>
 

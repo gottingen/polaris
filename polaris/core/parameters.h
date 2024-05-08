@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 #include <omp.h>
-#include <polaris/graph/vamana/defaults.h>
+#include <polaris/core/defaults.h>
 
 namespace polaris {
 

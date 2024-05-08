@@ -75,19 +75,18 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             .with_metric(metric)
             .with_dimension(query_dim)
             .with_max_points(0)
-            .with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
-            .with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
-            .with_data_type(diskann_type_to_name<T>())
-            .with_label_type(diskann_type_to_name<LabelT>())
-            .with_tag_type(diskann_type_to_name<polaris::vid_t>())
-            .is_dynamic_index(dynamic)
-            .is_enable_tags(tags)
-            .is_concurrent_consolidate(false)
-            .is_pq_dist_build(false)
-            .is_use_opq(false)
-            .with_num_pq_chunks(0)
-            .with_num_frozen_pts(num_frozen_pts)
-            .build();
+            .vamana_with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
+            .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
+            .with_data_type(polaris::polaris_type_to_name<T>())
+            .vamana_with_label_type(polaris::polaris_type_to_string(polaris::polaris_type_to_name<LabelT>()))
+            .vamana_is_dynamic_index(dynamic)
+            .vamana_is_enable_tags(tags)
+            .vamana_is_concurrent_consolidate(false)
+            .vamana_is_pq_dist_build(false)
+            .vamana_is_use_opq(false)
+            .vamana_with_num_pq_chunks(0)
+            .vamana_with_num_frozen_pts(num_frozen_pts)
+            .build_vamana();
 
     auto index_factory = polaris::IndexFactory(config);
     auto index = index_factory.create_instance();

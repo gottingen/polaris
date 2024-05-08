@@ -110,17 +110,17 @@ namespace polaris {
                     .with_metric(metric)
                     .with_dimension(data_dim)
                     .with_max_points(data_num)
-                    .with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
-                    .with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
-                    .with_data_type(ctx.data_type)
-                    .with_label_type(ctx.label_type)
-                    .is_dynamic_index(false)
-                    .with_index_write_params(index_build_params)
-                    .is_enable_tags(false)
-                    .is_use_opq(ctx.use_opq)
-                    .is_pq_dist_build(use_pq_build)
-                    .with_num_pq_chunks(ctx.build_PQ_bytes)
-                    .build();
+                    .vamana_with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
+                    .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
+                    .with_data_type(polaris::string_to_polaris_type(ctx.data_type))
+                    .vamana_with_label_type(ctx.label_type)
+                    .vamana_is_dynamic_index(false)
+                    .vamana_with_index_write_params(index_build_params)
+                    .vamana_is_enable_tags(false)
+                    .vamana_is_use_opq(ctx.use_opq)
+                    .vamana_is_pq_dist_build(use_pq_build)
+                    .vamana_with_num_pq_chunks(ctx.build_PQ_bytes)
+                    .build_vamana();
 
             auto index_factory = polaris::IndexFactory(config);
             auto index = index_factory.create_instance();
