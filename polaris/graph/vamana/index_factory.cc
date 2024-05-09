@@ -24,7 +24,7 @@ namespace polaris {
     }
 
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
-        return create_instance(_config->basic_config.object_type, _config->vamana_config.label_type);
+        return create_instance(_config->basic_config.object_type);
     }
 
     void IndexFactory::check_config() {
@@ -112,7 +112,7 @@ namespace polaris {
         return nullptr;
     }
 
-    template<typename data_type, typename label_type>
+    template<typename data_type>
     std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
         size_t num_points = _config->basic_config.max_points + _config->vamana_config.num_frozen_pts;
         size_t dim = _config->basic_config.dimension;
@@ -140,26 +140,15 @@ namespace polaris {
     }
 
     std::unique_ptr<AbstractIndex>
-    IndexFactory::create_instance(ObjectType data_type, const std::string &label_type) {
+    IndexFactory::create_instance(ObjectType data_type) {
         if (data_type == ObjectType::FLOAT) {
-            return create_instance<float>(label_type);
+            return create_instance<float>();
         } else if (data_type == ObjectType::UINT8) {
-            return create_instance<uint8_t>(label_type);
+            return create_instance<uint8_t>();
         } else if (data_type == ObjectType::INT8) {
-            return create_instance<int8_t>(label_type);
+            return create_instance<int8_t>();
         } else
             throw PolarisException("Error: unsupported data_type please choose from [float/int8/uint8]", -1);
     }
-
-    template<typename data_type>
-    std::unique_ptr<AbstractIndex> IndexFactory::create_instance(const std::string &label_type) {
-        if (label_type == std::string("uint16") || label_type == std::string("ushort")) {
-            return create_instance<data_type, uint16_t>();
-        } else if (label_type == std::string("uint32") || label_type == std::string("uint")) {
-            return create_instance<data_type, uint32_t>();
-        } else
-            throw PolarisException("Error: unsupported label_type please choose from [uint/ushort]", -1);
-    }
-
 
 } // namespace polaris

@@ -18,7 +18,7 @@
 
 #include <fstream>
 #include <collie/filesystem/fs.h>
-#include <polaris/core/log.h>
+//#include <polaris/core/log.h>
 #include <polaris/utility/polaris_exception.h>
 
 namespace polaris {
@@ -35,7 +35,8 @@ namespace polaris {
             char buff[1024];
             auto ret = std::string(strerror_r(errno, buff, 1024));
             auto message = std::string("Failed to open file") + filename + " for write because " + buff + ", ret=" + ret;
-            POLARIS_LOG(FATAL)<< message;
+            //POLARIS_LOG(FATAL)<< message;
+            std::cerr << message << std::endl;
             throw polaris::PolarisException(message, -1);
         }
     }
@@ -57,7 +58,8 @@ namespace polaris {
             char buff[1024];
             auto ret = std::string(strerror_r(errno, buff, 1024));
             auto message = std::string("Failed to open file") + filename + " for write because " + buff + ", ret=" + ret;
-            POLARIS_LOG(FATAL)<< message;
+            //POLARIS_LOG(FATAL)<< message;
+            std::cerr << message << std::endl;
             throw polaris::PolarisException(message, -1);
         }
     }
@@ -69,7 +71,8 @@ namespace polaris {
             char buff[1024];
             auto ret = std::string(strerror_r(errno, buff, 1024));
             auto message = std::string("Failed to open file") + filename + " for read because " + buff + ", ret=" + ret;
-            POLARIS_LOG(FATAL)<< message;
+            //POLARIS_LOG(FATAL)<< message;
+            std::cerr << message << std::endl;
             throw polaris::PolarisException(message, -1);
         }
     }

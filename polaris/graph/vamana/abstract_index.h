@@ -16,6 +16,8 @@
 
 #include <polaris/distance/distance.h>
 #include <polaris/core/vamana_parameters.h>
+#include <polaris/core/search_context.h>
+#include <turbo/status/status.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/types.h>
 #include <polaris/core/index_config.h>
@@ -63,6 +65,7 @@ namespace polaris {
 
         virtual void load(const char *index_file, uint32_t num_threads, uint32_t search_l) = 0;
 
+        virtual turbo::Status search(SearchContext &search_context) = 0;
 
         // For FastL2 search on optimized layout
         template<typename data_type>

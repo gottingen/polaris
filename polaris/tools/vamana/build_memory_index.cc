@@ -40,7 +40,6 @@ namespace polaris {
         std::string label_file;
         std::string universal_label;
         uint32_t Lf;
-        std::string label_type;
     };
 
     BuildMemIndexContext ctx;
@@ -67,8 +66,6 @@ namespace polaris {
         app->add_option("--universal_label", ctx.universal_label, program_options_utils::UNIVERSAL_LABEL)->default_val(
                 "");
         app->add_option("--FilteredLbuild", ctx.Lf, program_options_utils::FILTERED_LBUILD)->default_val(0);
-        app->add_option("--label_type", ctx.label_type, program_options_utils::LABEL_TYPE_DESCRIPTION)->default_val(
-                "uint");
         app->callback(run_build_memory_index_cli);
     }
 
@@ -113,7 +110,6 @@ namespace polaris {
                     .vamana_with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
                     .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
                     .with_data_type(polaris::string_to_polaris_type(ctx.data_type))
-                    .vamana_with_label_type(ctx.label_type)
                     .vamana_is_dynamic_index(false)
                     .vamana_with_index_write_params(index_build_params)
                     .vamana_is_enable_tags(false)

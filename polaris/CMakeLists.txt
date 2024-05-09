@@ -35,6 +35,7 @@ set(POLARIS_SRC
         core/log.cc
         core/executor.cc
         core/random.cc
+        core/search_condition.cc
         distance/distance.cc
         distance/distance_impl.cc
         datasets/fvecs.cc
@@ -179,6 +180,7 @@ set(POLARIS_HEADERS
         core/log.h
         core/memory.h
         core/metric_type.h
+        core/search_condition.h
         core/vamana_parameters.h
         core/random.h
         distance/cosine_similarity.h
@@ -474,6 +476,7 @@ carbin_cc_binary(
         tools/vamana/build_memory_index.cc
         tools/vamana/search_disk_index.cc
         tools/vamana/search_memory_index.cc
+        tools/vamana/search2_memory_index.cc
         tools/vamana/merge_shards.cc
         DEFINES ${POLARIS_CXX_DEFINES}
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"

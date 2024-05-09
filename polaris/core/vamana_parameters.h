@@ -222,7 +222,6 @@ namespace polaris {
         size_t num_pq_chunks{0};
         size_t num_frozen_pts{defaults::NUM_FROZEN_POINTS_STATIC};
 
-        std::string label_type{"uint32"};
         // Params for building index
         std::shared_ptr<IndexWriteParameters> index_write_params;
         // Params for searching index

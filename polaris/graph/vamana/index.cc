@@ -16,7 +16,6 @@
 #include <omp.h>
 
 #include <type_traits>
-
 #include <polaris/graph/vamana/index_factory.h>
 #include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/timer.h>
@@ -25,6 +24,7 @@
 #include <polaris/utility/platform_macros.h>
 #include <polaris/utility/tag_uint128.h>
 #include <polaris/distance/distance_impl.h>
+#include <polaris/core/log.h>
 
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
 #include <gperftools/malloc_extension.h>
@@ -43,10 +43,11 @@ namespace polaris {
     // (bin), and initialize max_points
     template<typename T>
     VamanaIndex<T>::VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
-                                  std::unique_ptr<AbstractGraphStore> graph_store,
-                                  std::shared_ptr<AbstractDataStore<T>> pq_data_store)
+                                std::unique_ptr<AbstractGraphStore> graph_store,
+                                std::shared_ptr<AbstractDataStore<T>> pq_data_store)
             : _index_config(index_config), _max_points(index_config.basic_config.max_points),
-              _num_frozen_pts(index_config.vamana_config.num_frozen_pts), _dynamic_index(index_config.vamana_config.dynamic_index),
+              _num_frozen_pts(index_config.vamana_config.num_frozen_pts),
+              _dynamic_index(index_config.vamana_config.dynamic_index),
               _enable_tags(index_config.vamana_config.enable_tags),
               _filtered_index(index_config.vamana_config.filtered_index),
               _indexingMaxC(DEFAULT_MAXC),
@@ -112,8 +113,10 @@ namespace polaris {
             _saturate_graph = index_config.vamana_config.index_write_params->saturate_graph;
 
             if (index_config.vamana_config.index_search_params != nullptr) {
-                uint32_t num_scratch_spaces = index_config.vamana_config.index_search_params->num_search_threads + _indexingThreads;
-                initialize_query_scratch(num_scratch_spaces, index_config.vamana_config.index_search_params->initial_search_list_size,
+                uint32_t num_scratch_spaces =
+                        index_config.vamana_config.index_search_params->num_search_threads + _indexingThreads;
+                initialize_query_scratch(num_scratch_spaces,
+                                         index_config.vamana_config.index_search_params->initial_search_list_size,
                                          _indexingQueueSize, _indexingRange, _indexingMaxC, _data_store->get_dims());
             }
         }
@@ -121,12 +124,12 @@ namespace polaris {
 
     template<typename T>
     VamanaIndex<T>::VamanaIndex(MetricType m, const size_t dim, const size_t max_points,
-                                  const std::shared_ptr<IndexWriteParameters> index_parameters,
-                                  const std::shared_ptr<IndexSearchParams> index_search_params,
-                                  const size_t num_frozen_pts,
-                                  const bool dynamic_index, const bool enable_tags, const bool concurrent_consolidate,
-                                  const bool pq_dist_build, const size_t num_pq_chunks, const bool use_opq,
-                                  const bool filtered_index)
+                                const std::shared_ptr<IndexWriteParameters> index_parameters,
+                                const std::shared_ptr<IndexSearchParams> index_search_params,
+                                const size_t num_frozen_pts,
+                                const bool dynamic_index, const bool enable_tags, const bool concurrent_consolidate,
+                                const bool pq_dist_build, const size_t num_pq_chunks, const bool use_opq,
+                                const bool filtered_index)
             : VamanaIndex(
             IndexConfigBuilder()
                     .with_metric(m)
@@ -187,7 +190,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
-                                                          uint32_t r, uint32_t maxc, size_t dim) {
+                                                  uint32_t r, uint32_t maxc, size_t dim) {
         for (uint32_t i = 0; i < num_threads; i++) {
             auto scratch = new InMemQueryScratch<T>(search_l, indexing_l, r, maxc, dim, _data_store->get_aligned_dim(),
                                                     _data_store->get_alignment_factor(), _pq_dist);
@@ -649,7 +652,7 @@ namespace polaris {
     // taking into account universal label
     template<typename T>
     bool VamanaIndex<T>::detect_common_filters(uint32_t point_id, bool search_invocation,
-                                                       const std::vector<labid_t> &incoming_labels) {
+                                               const std::vector<labid_t> &incoming_labels) {
         auto &curr_node_labels = _location_to_labels[point_id];
         std::vector<labid_t> common_filters;
         std::set_intersection(incoming_labels.begin(), incoming_labels.end(), curr_node_labels.begin(),
@@ -673,6 +676,169 @@ namespace polaris {
             }
         }
         return (common_filters.size() > 0);
+    }
+
+    template<typename T>
+    turbo::ResultStatus<std::pair<uint32_t, uint32_t>>
+    VamanaIndex<T>::iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lsize,
+                                           const std::vector<uint32_t> &init_ids,
+                                           const BaseSearchCondition *condition,
+                                           bool search_invocation) {
+        std::vector<Neighbor> &expanded_nodes = scratch->pool();
+        NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
+        best_L_nodes.reserve(Lsize);
+        turbo::flat_hash_set<uint32_t> &inserted_into_pool_rs = scratch->inserted_into_pool_rs();
+        collie::dynamic_bitset<> &inserted_into_pool_bs = scratch->inserted_into_pool_bs();
+        std::vector<uint32_t> &id_scratch = scratch->id_scratch();
+        std::vector<float> &dist_scratch = scratch->dist_scratch();
+        if (!id_scratch.empty()) {
+            return turbo::make_status(turbo::kInvalidArgument,
+                                      "ERROR: Clear scratch space before passing [id_scratch.size()].");
+        }
+        if (!condition) {
+            return turbo::make_status(turbo::kInvalidArgument, "ERROR: Condition is not provided.");
+        }
+
+        T *aligned_query = scratch->aligned_query();
+
+        float *pq_dists = nullptr;
+
+        _pq_data_store->preprocess_query(aligned_query, scratch);
+
+        if (!expanded_nodes.empty() || !id_scratch.empty()) {
+            return turbo::make_status(turbo::kInvalidArgument, "ERROR: Clear scratch space before passing.");
+        }
+
+        // Decide whether to use bitset or robin set to mark visited nodes
+        auto total_num_points = _max_points + _num_frozen_pts;
+        bool fast_iterate = total_num_points <= MAX_POINTS_FOR_USING_BITSET;
+
+        if (fast_iterate) {
+            if (inserted_into_pool_bs.size() < total_num_points) {
+                // hopefully using 2X will reduce the number of allocations.
+                auto resize_size =
+                        2 * total_num_points > MAX_POINTS_FOR_USING_BITSET ? MAX_POINTS_FOR_USING_BITSET : 2 *
+                                                                                                           total_num_points;
+                inserted_into_pool_bs.resize(resize_size);
+            }
+        }
+
+        // Lambda to determine if a node has been visited
+        auto is_not_visited = [this, fast_iterate, &inserted_into_pool_bs, &inserted_into_pool_rs](const uint32_t id) {
+            return fast_iterate ? inserted_into_pool_bs[id] == 0
+                                : inserted_into_pool_rs.find(id) == inserted_into_pool_rs.end();
+        };
+
+        // Lambda to batch compute query<-> node distances in PQ space
+        auto compute_dists = [this, scratch, pq_dists](const std::vector<uint32_t> &ids,
+                                                       std::vector<float> &dists_out) {
+            _pq_data_store->get_distance(scratch->aligned_query(), ids, dists_out, scratch);
+        };
+
+        // Initialize the candidate pool with starting points
+        vid_t tmp_vid;
+        for (auto id: init_ids) {
+            if (id >= _max_points + _num_frozen_pts) {
+                polaris::cerr << "Out of range loc found as an edge : " << id << std::endl;
+                throw polaris::PolarisException(std::string("Wrong loc") + std::to_string(id), -1, __PRETTY_FUNCTION__,
+                                                __FILE__,
+                                                __LINE__);
+            }
+            if (!_location_to_tag.try_get(id, tmp_vid)) {
+                return turbo::make_status(turbo::kInvalidArgument, "ERROR: Tag not found for location.");
+            }
+            if (condition->is_in_blacklist(tmp_vid)) {
+                continue;
+            }
+
+            if (is_not_visited(id)) {
+                if (fast_iterate) {
+                    inserted_into_pool_bs[id] = 1;
+                } else {
+                    inserted_into_pool_rs.insert(id);
+                }
+
+                float distance;
+                uint32_t ids[] = {id};
+                float distances[] = {std::numeric_limits<float>::max()};
+                _pq_data_store->get_distance(aligned_query, ids, 1, distances, scratch);
+                distance = distances[0];
+
+                Neighbor nn = Neighbor(id, distance);
+                best_L_nodes.insert(nn);
+            }
+        }
+
+        uint32_t hops = 0;
+        uint32_t cmps = 0;
+
+        while (best_L_nodes.has_unexpanded_node()) {
+            auto nbr = best_L_nodes.closest_unexpanded();
+            auto n = nbr.id;
+
+            // Add node to expanded nodes to create pool for prune later
+            if (!search_invocation) {
+                expanded_nodes.emplace_back(nbr);
+            }
+
+            // Find which of the nodes in des have not been visited before
+            id_scratch.clear();
+            dist_scratch.clear();
+            if (_dynamic_index) {
+                LockGuard guard(_locks[n]);
+                for (auto id: _graph_store->get_neighbours(n)) {
+                    assert(id < _max_points + _num_frozen_pts);
+
+                    if (!_location_to_tag.try_get(id, tmp_vid)) {
+                        return turbo::make_status(turbo::kInvalidArgument, "ERROR: Tag not found for location.");
+                    }
+                    if (condition->is_in_blacklist(tmp_vid)) {
+                        continue;
+                    }
+
+                    if (is_not_visited(id)) {
+                        id_scratch.push_back(id);
+                    }
+                }
+            } else {
+                _locks[n].lock();
+                auto nbrs = _graph_store->get_neighbours(n);
+                _locks[n].unlock();
+                for (auto id: nbrs) {
+                    assert(id < _max_points + _num_frozen_pts);
+
+                    if (!_location_to_tag.try_get(id, tmp_vid)) {
+                        return turbo::make_status(turbo::kInvalidArgument, "ERROR: Tag not found for location.");
+                    }
+                    if (condition->is_in_blacklist(tmp_vid)) {
+                        continue;
+                    }
+
+                    if (is_not_visited(id)) {
+                        id_scratch.push_back(id);
+                    }
+                }
+            }
+
+            // Mark nodes visited
+            for (auto id: id_scratch) {
+                if (fast_iterate) {
+                    inserted_into_pool_bs[id] = 1;
+                } else {
+                    inserted_into_pool_rs.insert(id);
+                }
+            }
+
+            assert(dist_scratch.capacity() >= id_scratch.size());
+            compute_dists(id_scratch, dist_scratch);
+            cmps += (uint32_t) id_scratch.size();
+
+            // Insert <id, dist> pairs into the pool of candidates
+            for (size_t m = 0; m < id_scratch.size(); ++m) {
+                best_L_nodes.insert(Neighbor(id_scratch[m], dist_scratch[m]));
+            }
+        }
+        return std::make_pair(hops, cmps);
     }
 
     template<typename T>
@@ -837,9 +1003,9 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::search_for_point_and_prune(int location, uint32_t Lindex,
-                                                            std::vector<uint32_t> &pruned_list,
-                                                            InMemQueryScratch<T> *scratch, bool use_filter,
-                                                            uint32_t filteredLindex) {
+                                                    std::vector<uint32_t> &pruned_list,
+                                                    InMemQueryScratch<T> *scratch, bool use_filter,
+                                                    uint32_t filteredLindex) {
         const std::vector<uint32_t> init_ids = get_init_ids();
         const std::vector<labid_t> unused_filter_label;
 
@@ -906,9 +1072,9 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::occlude_list(const uint32_t location, std::vector<Neighbor> &pool, const float alpha,
-                                              const uint32_t degree, const uint32_t maxc, std::vector<uint32_t> &result,
-                                              InMemQueryScratch<T> *scratch,
-                                              const turbo::flat_hash_set<uint32_t> *const delete_set_ptr) {
+                                      const uint32_t degree, const uint32_t maxc, std::vector<uint32_t> &result,
+                                      InMemQueryScratch<T> *scratch,
+                                      const turbo::flat_hash_set<uint32_t> *const delete_set_ptr) {
         if (pool.size() == 0)
             return;
 
@@ -969,7 +1135,8 @@ namespace polaris {
                         continue;
 
                     float djk = _data_store->get_distance(iter2->id, iter->id);
-                    if (_index_config.basic_config.metric == polaris::MetricType::METRIC_L2 || _index_config.basic_config.metric == polaris::MetricType::METRIC_COSINE) {
+                    if (_index_config.basic_config.metric == polaris::MetricType::METRIC_L2 ||
+                        _index_config.basic_config.metric == polaris::MetricType::METRIC_COSINE) {
                         occlude_factor[t] = (djk == 0) ? std::numeric_limits<float>::max()
                                                        : std::max(occlude_factor[t], iter2->distance / djk);
                     } else if (_index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
@@ -988,15 +1155,15 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool,
-                                                 std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch) {
+                                         std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch) {
         prune_neighbors(location, pool, _indexingRange, _indexingMaxC, _indexingAlpha, pruned_list, scratch);
     }
 
     template<typename T>
     void
     VamanaIndex<T>::prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool, const uint32_t range,
-                                            const uint32_t max_candidate_size, const float alpha,
-                                            std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch) {
+                                    const uint32_t max_candidate_size, const float alpha,
+                                    std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch) {
         if (pool.size() == 0) {
             // if the pool is empty, behave like a noop
             pruned_list.clear();
@@ -1031,7 +1198,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list, const uint32_t range,
-                                              InMemQueryScratch<T> *scratch) {
+                                      InMemQueryScratch<T> *scratch) {
         const auto &src_pool = pruned_list;
 
         assert(!src_pool.empty());
@@ -1087,7 +1254,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list,
-                                              InMemQueryScratch<T> *scratch) {
+                                      InMemQueryScratch<T> *scratch) {
         inter_insert(n, pruned_list, _indexingRange, scratch);
     }
 
@@ -1185,7 +1352,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::prune_all_neighbors(const uint32_t max_degree, const uint32_t max_occlusion_size,
-                                                     const float alpha) {
+                                             const float alpha) {
         const uint32_t range = max_degree;
         const uint32_t maxc = max_occlusion_size;
 
@@ -1389,7 +1556,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::build(const char *filename, const size_t num_points_to_load,
-                                       const std::vector<vid_t> &tags) {
+                               const std::vector<vid_t> &tags) {
         // idealy this should call build_filtered_index based on params passed
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -1501,7 +1668,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::build(const std::string &data_file, const size_t num_points_to_load,
-                                       IndexFilterParams &filter_params) {
+                               IndexFilterParams &filter_params) {
         size_t points_to_load = num_points_to_load == 0 ? _max_points : num_points_to_load;
 
         auto s = std::chrono::high_resolution_clock::now();
@@ -1524,8 +1691,8 @@ namespace polaris {
     }
 
     template<typename T>
-    std::unordered_map<std::string,labid_t> VamanaIndex<T>::load_label_map(const std::string &labels_map_file) {
-        std::unordered_map<std::string,labid_t> string_to_int_mp;
+    std::unordered_map<std::string, labid_t> VamanaIndex<T>::load_label_map(const std::string &labels_map_file) {
+        std::unordered_map<std::string, labid_t> string_to_int_mp;
         std::ifstream map_reader(labels_map_file);
         std::string line, token;
         labid_t token_as_num;
@@ -1610,7 +1777,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::build_filtered_index(const char *filename, const std::string &label_file,
-                                                      const size_t num_points_to_load, const std::vector<vid_t> &tags) {
+                                              const size_t num_points_to_load, const std::vector<vid_t> &tags) {
         _filtered_index = true;
         _label_to_start_id.clear();
         size_t num_points_labels = 0;
@@ -1680,6 +1847,75 @@ namespace polaris {
     }
 
     template<typename T>
+    turbo::Status VamanaIndex<T>::search(SearchContext &ctx) {
+        if (ctx.top_k > ctx.search_list) {
+            return turbo::make_status(turbo::kInvalidArgument, "Top K cannot be greater than search list ({}:{})",
+                                      ctx.top_k, ctx.search_list);
+        }
+
+        ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
+        auto scratch = manager.scratch_space();
+
+        if (ctx.search_list > scratch->get_L()) {
+            POLARIS_LOG(INFO) << "Attempting to expand query scratch_space. Was created "<< "with Lsize: " << scratch->get_L() << " but search L is: " << ctx.search_list;
+            scratch->resize_for_new_L(ctx.search_list);
+            POLARIS_LOG(INFO) << "Resized scratch space to " << scratch->get_L();
+        }
+
+        std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
+
+        const std::vector<uint32_t> init_ids = get_init_ids();
+
+        _data_store->preprocess_query(reinterpret_cast<T *>(ctx.query.data()), scratch);
+        const std::vector<labid_t> unused_filter_label;
+        auto rs = iterate_to_fixed_point(scratch, ctx.search_list, init_ids, ctx.search_condition, true);
+        if (!rs.ok()) {
+            return rs.status();
+        }
+
+        NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
+        assert(best_L_nodes.size() <= ctx.search_list);
+
+        std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
+
+        size_t pos = 0;
+        ctx.top_k_queue.reserve(ctx.top_k);
+        if (ctx.with_local_ids) {
+            ctx.local_ids.reserve(ctx.top_k);
+        }
+        for (size_t i = 0; i < best_L_nodes.size(); ++i) {
+            auto node = best_L_nodes[i];
+
+            vid_t tag;
+            if (_location_to_tag.try_get(node.id, tag)) {
+                auto dis = _index_config.basic_config.metric == MetricType::METRIC_INNER_PRODUCT ? -1 * node.distance
+                                                                                                 : node.distance;
+                ctx.top_k_queue.emplace_back(tag, dis);
+                if (ctx.with_local_ids) {
+                    ctx.local_ids.emplace_back(node.id);
+                }
+                if (ctx.with_raw_vectors) {
+                    std::vector<uint8_t> raw_vector;
+                    raw_vector.resize(_data_store->get_aligned_dim() * sizeof(T));
+                    _data_store->get_vector(node.id, reinterpret_cast<T *>(raw_vector.data()));
+                    ctx.raw_vectors.push_back(std::move(raw_vector));
+                }
+
+                pos++;
+                // If res_vectors.size() < k, clip at the value.
+                if (pos == ctx.top_k) {
+                    break;
+                }
+            }
+        }
+
+        //return pos;
+        ctx.hops = rs.value().first;
+        ctx.cmps = rs.value().second;
+        return turbo::ok_status();
+    }
+
+    template<typename T>
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::search(const T *query, const size_t K, const uint32_t L,
                                                          localid_t *indices, float *distances) {
         if (K > (uint64_t) L) {
@@ -1714,8 +1950,10 @@ namespace polaris {
                 // and IDType will be uint32_t or uint64_t
                 indices[pos] = (localid_t) best_L_nodes[i].id;
                 if (distances != nullptr) {
-                    distances[pos] = _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 * best_L_nodes[i].distance
-                                                                                    : best_L_nodes[i].distance;
+                    distances[pos] =
+                            _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 *
+                                                                                                             best_L_nodes[i].distance
+                                                                                                           : best_L_nodes[i].distance;
                 }
                 pos++;
             }
@@ -1731,10 +1969,10 @@ namespace polaris {
 
     template<typename T>
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::_search_with_filters(const DataType &query,
-                                                                               const std::string &raw_label,
-                                                                               const size_t K,
-                                                                               const uint32_t L, localid_t *indices,
-                                                                               float *distances) {
+                                                                       const std::string &raw_label,
+                                                                       const size_t K,
+                                                                       const uint32_t L, localid_t *indices,
+                                                                       float *distances) {
         auto converted_label = this->get_converted_label(raw_label);
         return this->search_with_filters(std::any_cast<T *>(query), converted_label, K, L, indices, distances);
     }
@@ -1742,7 +1980,7 @@ namespace polaris {
     template<typename T>
     std::pair<uint32_t, uint32_t>
     VamanaIndex<T>::search_with_filters(const T *query, const labid_t &filter_label,
-                                                const size_t K, const uint32_t L,
+                                        const size_t K, const uint32_t L,
                                         localid_t *indices, float *distances) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
@@ -1789,8 +2027,10 @@ namespace polaris {
                 indices[pos] = (localid_t) best_L_nodes[i].id;
 
                 if (distances != nullptr) {
-                    distances[pos] = _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 * best_L_nodes[i].distance
-                                                                                    : best_L_nodes[i].distance;
+                    distances[pos] =
+                            _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 *
+                                                                                                             best_L_nodes[i].distance
+                                                                                                           : best_L_nodes[i].distance;
                 }
                 pos++;
             }
@@ -1806,10 +2046,11 @@ namespace polaris {
 
     template<typename T>
     size_t VamanaIndex<T>::_search_with_tags(const DataType &query, const uint64_t K, const uint32_t L,
-                                                     const TagType &tags, float *distances, DataVector &res_vectors,
-                                                     bool use_filters, const std::string filter_label) {
+                                             const TagType &tags, float *distances, DataVector &res_vectors,
+                                             bool use_filters, const std::string filter_label) {
         try {
-            return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<vid_t *>(tags), distances,
+            return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<vid_t *>(tags),
+                                          distances,
                                           res_vectors.get<std::vector<T *>>(), use_filters, filter_label);
         }
         catch (const std::bad_any_cast &e) {
@@ -1823,8 +2064,8 @@ namespace polaris {
 
     template<typename T>
     size_t VamanaIndex<T>::search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                                    float *distances, std::vector<T *> &res_vectors, bool use_filters,
-                                                    const std::string filter_label) {
+                                            float *distances, std::vector<T *> &res_vectors, bool use_filters,
+                                            const std::string filter_label) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
@@ -1873,7 +2114,9 @@ namespace polaris {
                 }
 
                 if (distances != nullptr) {
-                    distances[pos] = _index_config.basic_config.metric == MetricType::METRIC_INNER_PRODUCT ? -1 * node.distance : node.distance;
+                    distances[pos] =
+                            _index_config.basic_config.metric == MetricType::METRIC_INNER_PRODUCT ? -1 * node.distance
+                                                                                                  : node.distance;
                 }
                 pos++;
                 // If res_vectors.size() < k, clip at the value.
@@ -1956,8 +2199,8 @@ namespace polaris {
 
     template<typename T>
     inline void VamanaIndex<T>::process_delete(const turbo::flat_hash_set<uint32_t> &old_delete_set, size_t loc,
-                                                       const uint32_t range, const uint32_t maxc, const float alpha,
-                                                       InMemQueryScratch<T> *scratch) {
+                                               const uint32_t range, const uint32_t maxc, const float alpha,
+                                               InMemQueryScratch<T> *scratch) {
         turbo::flat_hash_set<uint32_t> &expanded_nodes_set = scratch->expanded_nodes_set();
         std::vector<Neighbor> &expanded_nghrs_vec = scratch->expanded_nodes_vec();
 
@@ -2294,7 +2537,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::reposition_points(uint32_t old_location_start, uint32_t new_location_start,
-                                                   uint32_t num_locations) {
+                                           uint32_t num_locations) {
         if (num_locations == 0 || old_location_start == new_location_start) {
             return;
         }
@@ -2684,7 +2927,8 @@ namespace polaris {
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
         std::shared_lock<std::shared_timed_mutex> dl(_delete_lock);
 
-        polaris::cout << "------------------- VamanaIndex object: " << (uint64_t) this << " -------------------" << std::endl;
+        polaris::cout << "------------------- VamanaIndex object: " << (uint64_t) this << " -------------------"
+                      << std::endl;
         polaris::cout << "Number of points: " << _nd << std::endl;
         polaris::cout << "Graph size: " << _graph_store->get_total_points() << std::endl;
         polaris::cout << "Location to tag size: " << _location_to_tag.size() << std::endl;
@@ -2770,7 +3014,7 @@ namespace polaris {
 
     template<typename T>
     void VamanaIndex<T>::_search_with_optimized_layout(const DataType &query, size_t K, size_t L,
-                                                               uint32_t *indices) {
+                                                       uint32_t *indices) {
         try {
             return this->search_with_optimized_layout(std::any_cast<const T *>(query), K, L, indices);
         }

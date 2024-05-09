@@ -129,6 +129,7 @@ namespace polaris {
         // For FastL2 search on optimized layout
         POLARIS_API void search_with_optimized_layout(const T *query, size_t K, size_t L, uint32_t *indices);
 
+        POLARIS_API turbo::Status search(SearchContext &ctx) override;
         // Added search overload that takes L as parameter, so that we
         // can customize L on a per-query basis without tampering with "Parameters"
         POLARIS_API std::pair<uint32_t, uint32_t> search(const T *query, const size_t K, const uint32_t L,
@@ -263,6 +264,11 @@ namespace polaris {
         std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids, bool use_filter,
                                                              const std::vector<labid_t> &filters,
+                                                             bool search_invocation);
+
+        turbo::ResultStatus<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
+                                                             const std::vector<uint32_t> &init_ids,
+                                                             const BaseSearchCondition *condition,
                                                              bool search_invocation);
 
         void search_for_point_and_prune(int location, uint32_t Lindex, std::vector<uint32_t> &pruned_list,

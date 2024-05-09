@@ -117,11 +117,6 @@ namespace polaris {
             return *this;
         }
 
-        IndexConfigBuilder &vamana_with_label_type(const std::string &label_type) {
-            this->_vamana_config.label_type = label_type;
-            return *this;
-        }
-
         IndexConfigBuilder &with_data_type(ObjectType data_type) {
             this->_basic_config.object_type = data_type;
             return *this;
@@ -165,8 +160,10 @@ namespace polaris {
             if (_basic_config.dimension == 0)
                 throw PolarisException("Error: dimension can not be empty", -1);
 
+            /*
             if (_basic_config.max_points == 0)
                 throw PolarisException("Error: max_points can not be empty", -1);
+                */
 
             if (_vamana_config.dynamic_index && _vamana_config.num_frozen_pts == 0) {
                 _vamana_config.num_frozen_pts = 1;

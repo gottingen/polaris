@@ -26,6 +26,8 @@ namespace polaris {
         setup_search_disk_index_cli(search_disk_index_cmd);
         auto search_memory_index_cmd = app->add_subcommand("search_memory_index", "Search a memory-based index.");
         setup_search_memory_index_cli(search_memory_index_cmd);
+        auto search2_memory_index_cmd = app->add_subcommand("search2_memory_index", "Search a memory-based index.");
+        setup_search2_memory_index_cli(search2_memory_index_cmd);
         auto merge_shards_cmd = app->add_subcommand("merge_shards", "Merge shards.");
         setup_merge_shards_cli(merge_shards_cmd);
         app->require_subcommand(1);
