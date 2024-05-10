@@ -102,11 +102,6 @@ namespace polaris {
             return *this;
         }
 
-        IndexConfigBuilder &vamana_is_filtered(bool is_filtered) {
-            this->_vamana_config.filtered_index = is_filtered;
-            return *this;
-        }
-
         IndexConfigBuilder &vamana_with_num_pq_chunks(size_t num_pq_chunks) {
             this->_vamana_config.num_pq_chunks = num_pq_chunks;
             return *this;

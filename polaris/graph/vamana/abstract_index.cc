@@ -35,20 +35,11 @@ namespace polaris {
 
     template<typename data_type>
     size_t AbstractIndex::search_with_tags(const data_type *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                           float *distances, std::vector<data_type *> &res_vectors, bool use_filters,
-                                           const std::string filter_label) {
+                                           float *distances, std::vector<data_type *> &res_vectors) {
         auto any_query = std::any(query);
         auto any_tags = std::any(tags);
         auto any_res_vectors = DataVector(res_vectors);
-        return this->_search_with_tags(any_query, K, L, any_tags, distances, any_res_vectors, use_filters,
-                                       filter_label);
-    }
-
-    std::pair<uint32_t, uint32_t>
-    AbstractIndex::search_with_filters(const DataType &query, const std::string &raw_label,
-                                       const size_t K, const uint32_t L, localid_t *indices,
-                                       float *distances) {
-        return _search_with_filters(query, raw_label, K, L, indices, distances);
+        return this->_search_with_tags(any_query, K, L, any_tags, distances, any_res_vectors);
     }
 
     template<typename data_type>
@@ -62,14 +53,6 @@ namespace polaris {
         auto any_point = std::any(point);
         auto any_tag = std::any(tag);
         return this->_insert_point(any_point, any_tag);
-    }
-
-    template<typename data_type>
-    int AbstractIndex::insert_point(const data_type *point, const vid_t tag, const std::vector<labid_t> &labels) {
-        auto any_point = std::any(point);
-        auto any_tag = std::any(tag);
-        auto any_labels = Labelvector(labels);
-        return this->_insert_point(any_point, any_tag, any_labels);
     }
 
     int AbstractIndex::lazy_delete(const vid_t &tag) {
@@ -101,12 +84,6 @@ namespace polaris {
         return this->_get_vector_by_tag(any_tag, any_data_ptr);
     }
 
-    template<typename label_type>
-    void AbstractIndex::set_universal_label(const label_type universal_label) {
-        auto any_label = std::any(universal_label);
-        this->_set_universal_label(any_label);
-    }
-
     // exports
     template POLARIS_API void AbstractIndex::build<float>(const float *data, const size_t num_points_to_load,
                                                                    const std::vector<vid_t> &tags);
@@ -131,15 +108,15 @@ namespace polaris {
 
     template POLARIS_API size_t AbstractIndex::search_with_tags<float>(
             const float *query, const uint64_t K, const uint32_t L, vid_t *tags, float *distances,
-            std::vector<float *> &res_vectors, bool use_filters, const std::string filter_label);
+            std::vector<float *> &res_vectors);
 
     template POLARIS_API size_t AbstractIndex::search_with_tags<uint8_t>(
             const uint8_t *query, const uint64_t K, const uint32_t L, vid_t *tags, float *distances,
-            std::vector<uint8_t *> &res_vectors, bool use_filters, const std::string filter_label);
+            std::vector<uint8_t *> &res_vectors);
 
     template POLARIS_API size_t AbstractIndex::search_with_tags<int8_t>(
             const int8_t *query, const uint64_t K, const uint32_t L, vid_t *tags, float *distances,
-            std::vector<int8_t *> &res_vectors, bool use_filters, const std::string filter_label);
+            std::vector<int8_t *> &res_vectors);
 
 
     template POLARIS_API void AbstractIndex::search_with_optimized_layout<float>(const float *query, size_t K,
@@ -158,16 +135,6 @@ namespace polaris {
     template POLARIS_API int AbstractIndex::insert_point<int8_t>(const int8_t *point, const vid_t tag);
 
 
-    template POLARIS_API int AbstractIndex::insert_point<float>(
-            const float *point, const vid_t tag, const std::vector<labid_t> &labels);
-
-    template POLARIS_API int AbstractIndex::insert_point<uint8_t>(
-            const uint8_t *point, const vid_t tag, const std::vector<labid_t> &labels);
-
-    template POLARIS_API int AbstractIndex::insert_point<int8_t>(
-            const int8_t *point, const vid_t tag, const std::vector<labid_t> &labels);
-
-
     template POLARIS_API void AbstractIndex::set_start_points_at_random<float>(float radius, uint32_t random_seed);
 
     template POLARIS_API void AbstractIndex::set_start_points_at_random<uint8_t>(uint8_t radius,
@@ -181,8 +148,5 @@ namespace polaris {
 
     template POLARIS_API int AbstractIndex::get_vector_by_tag<int8_t>(vid_t &tag, int8_t *vec);
 
-    template POLARIS_API void AbstractIndex::set_universal_label<uint16_t>(const uint16_t label);
-
-    template POLARIS_API void AbstractIndex::set_universal_label<uint32_t>(const uint32_t label);
 
 } // namespace polaris

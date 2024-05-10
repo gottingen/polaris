@@ -49,7 +49,6 @@ namespace polaris {
               _num_frozen_pts(index_config.vamana_config.num_frozen_pts),
               _dynamic_index(index_config.vamana_config.dynamic_index),
               _enable_tags(index_config.vamana_config.enable_tags),
-              _filtered_index(index_config.vamana_config.filtered_index),
               _indexingMaxC(DEFAULT_MAXC),
               _query_scratch(nullptr),
               _pq_dist(index_config.vamana_config.pq_dist_build),
@@ -98,9 +97,6 @@ namespace polaris {
 
         if (_dynamic_index) {
             this->enable_delete(); // enable delete by default for dynamic index
-            if (_filtered_index) {
-                _location_to_labels.resize(total_internal_points);
-            }
         }
 
         if (index_config.vamana_config.index_write_params != nullptr) {
@@ -108,7 +104,6 @@ namespace polaris {
             _indexingRange = index_config.vamana_config.index_write_params->max_degree;
             _indexingMaxC = index_config.vamana_config.index_write_params->max_occlusion_size;
             _indexingAlpha = index_config.vamana_config.index_write_params->alpha;
-            _filterIndexingQueueSize = index_config.vamana_config.index_write_params->filter_list_size;
             _indexingThreads = index_config.vamana_config.index_write_params->num_threads;
             _saturate_graph = index_config.vamana_config.index_write_params->saturate_graph;
 
@@ -128,8 +123,7 @@ namespace polaris {
                                 const std::shared_ptr<IndexSearchParams> index_search_params,
                                 const size_t num_frozen_pts,
                                 const bool dynamic_index, const bool enable_tags, const bool concurrent_consolidate,
-                                const bool pq_dist_build, const size_t num_pq_chunks, const bool use_opq,
-                                const bool filtered_index)
+                                const bool pq_dist_build, const size_t num_pq_chunks, const bool use_opq)
             : VamanaIndex(
             IndexConfigBuilder()
                     .with_metric(m)
@@ -144,7 +138,6 @@ namespace polaris {
                     .vamana_is_pq_dist_build(pq_dist_build)
                     .vamana_with_num_pq_chunks(num_pq_chunks)
                     .vamana_is_use_opq(use_opq)
-                    .vamana_is_filtered(filtered_index)
                     .with_data_type(polaris_type_to_name<T>())
                     .build_vamana(),
             IndexFactory::construct_datastore<T>(DataStoreStrategy::MEMORY,
@@ -279,67 +272,6 @@ namespace polaris {
         }
 
         if (!_save_as_one_file) {
-            if (_filtered_index) {
-                if (_label_to_start_id.size() > 0) {
-                    std::ofstream medoid_writer(std::string(filename) + "_labels_to_medoids.txt");
-                    if (medoid_writer.fail()) {
-                        throw polaris::PolarisException(std::string("Failed to open file ") + filename, -1);
-                    }
-                    for (auto iter: _label_to_start_id) {
-                        medoid_writer << iter.first << ", " << iter.second << std::endl;
-                    }
-                    medoid_writer.close();
-                }
-
-                if (_use_universal_label) {
-                    std::ofstream universal_label_writer(std::string(filename) + "_universal_label.txt");
-                    assert(universal_label_writer.is_open());
-                    universal_label_writer << _universal_label << std::endl;
-                    universal_label_writer.close();
-                }
-
-                if (_location_to_labels.size() > 0) {
-                    std::ofstream label_writer(std::string(filename) + "_labels.txt");
-                    assert(label_writer.is_open());
-                    for (uint32_t i = 0; i < _nd + _num_frozen_pts; i++) {
-                        for (uint32_t j = 0; j + 1 < _location_to_labels[i].size(); j++) {
-                            label_writer << _location_to_labels[i][j] << ",";
-                        }
-                        if (_location_to_labels[i].size() != 0)
-                            label_writer << _location_to_labels[i][_location_to_labels[i].size() - 1];
-
-                        label_writer << std::endl;
-                    }
-                    label_writer.close();
-
-                    // write compacted raw_labels if data hence _location_to_labels was also compacted
-                    if (compact_before_save && _dynamic_index) {
-                        _label_map = load_label_map(std::string(filename) + "_labels_map.txt");
-                        std::unordered_map<labid_t, std::string> mapped_to_raw_labels;
-                        // invert label map
-                        for (const auto &[key, value]: _label_map) {
-                            mapped_to_raw_labels.insert({value, key});
-                        }
-
-                        // write updated labels
-                        std::ofstream raw_label_writer(std::string(filename) + "_raw_labels.txt");
-                        assert(raw_label_writer.is_open());
-                        for (uint32_t i = 0; i < _nd + _num_frozen_pts; i++) {
-                            for (uint32_t j = 0; j + 1 < _location_to_labels[i].size(); j++) {
-                                raw_label_writer << mapped_to_raw_labels[_location_to_labels[i][j]] << ",";
-                            }
-                            if (_location_to_labels[i].size() != 0)
-                                raw_label_writer
-                                        << mapped_to_raw_labels[_location_to_labels[i][_location_to_labels[i].size() -
-                                                                                       1]];
-
-                            raw_label_writer << std::endl;
-                        }
-                        raw_label_writer.close();
-                    }
-                }
-            }
-
             std::string graph_file = std::string(filename);
             std::string tags_file = std::string(filename) + ".tags";
             std::string data_file = std::string(filename) + ".data";
@@ -469,9 +401,6 @@ namespace polaris {
         size_t tags_file_num_pts = 0, graph_num_pts = 0, data_file_num_pts = 0, label_num_pts = 0;
 
         std::string mem_index_file(filename);
-        std::string labels_file = mem_index_file + "_labels.txt";
-        std::string labels_to_medoids = mem_index_file + "_labels_to_medoids.txt";
-        std::string labels_map_file = mem_index_file + "_labels_map.txt";
 
         if (!_save_as_one_file) {
             // For DLVS Store, we will not support saving the index in multiple
@@ -502,47 +431,6 @@ namespace polaris {
                    << " tags, with num_frozen_pts being set to " << _num_frozen_pts << " in constructor." << std::endl;
             polaris::cerr << stream.str() << std::endl;
             throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-
-        if (collie::filesystem::exists(labels_file)) {
-            _label_map = load_label_map(labels_map_file);
-            parse_label_file(labels_file, label_num_pts);
-            assert(label_num_pts == data_file_num_pts - _num_frozen_pts);
-            if (collie::filesystem::exists(labels_to_medoids)) {
-                std::ifstream medoid_stream(labels_to_medoids);
-                std::string line, token;
-                uint32_t line_cnt = 0;
-
-                _label_to_start_id.clear();
-
-                while (std::getline(medoid_stream, line)) {
-                    std::istringstream iss(line);
-                    uint32_t cnt = 0;
-                    uint32_t medoid = 0;
-                    labid_t label;
-                    while (std::getline(iss, token, ',')) {
-                        token.erase(std::remove(token.begin(), token.end(), '\n'), token.end());
-                        token.erase(std::remove(token.begin(), token.end(), '\r'), token.end());
-                        labid_t token_as_num = (labid_t) std::stoul(token);
-                        if (cnt == 0)
-                            label = token_as_num;
-                        else
-                            medoid = token_as_num;
-                        cnt++;
-                    }
-                    _label_to_start_id[label] = medoid;
-                    line_cnt++;
-                }
-            }
-
-            std::string universal_label_file(filename);
-            universal_label_file += "_universal_label.txt";
-            if (collie::filesystem::exists(universal_label_file)) {
-                std::ifstream universal_label_reader(universal_label_file);
-                universal_label_reader >> _universal_label;
-                _use_universal_label = true;
-                universal_label_reader.close();
-            }
         }
 
         _nd = data_file_num_pts - _num_frozen_pts;
@@ -646,36 +534,6 @@ namespace polaris {
         }
 
         return init_ids;
-    }
-
-    // Find common filter between a node's labels and a given set of labels, while
-    // taking into account universal label
-    template<typename T>
-    bool VamanaIndex<T>::detect_common_filters(uint32_t point_id, bool search_invocation,
-                                               const std::vector<labid_t> &incoming_labels) {
-        auto &curr_node_labels = _location_to_labels[point_id];
-        std::vector<labid_t> common_filters;
-        std::set_intersection(incoming_labels.begin(), incoming_labels.end(), curr_node_labels.begin(),
-                              curr_node_labels.end(), std::back_inserter(common_filters));
-        if (common_filters.size() > 0) {
-            // This is to reduce the repetitive calls. If common_filters size is > 0 ,
-            // we dont need to check further for universal label
-            return true;
-        }
-        if (_use_universal_label) {
-            if (!search_invocation) {
-                if (std::find(incoming_labels.begin(), incoming_labels.end(), _universal_label) !=
-                    incoming_labels.end() ||
-                    std::find(curr_node_labels.begin(), curr_node_labels.end(), _universal_label) !=
-                    curr_node_labels.end())
-                    common_filters.push_back(_universal_label);
-            } else {
-                if (std::find(curr_node_labels.begin(), curr_node_labels.end(), _universal_label) !=
-                    curr_node_labels.end())
-                    common_filters.push_back(_universal_label);
-            }
-        }
-        return (common_filters.size() > 0);
     }
 
     template<typename T>
@@ -840,7 +698,7 @@ namespace polaris {
         }
         return std::make_pair(hops, cmps);
     }
-
+    /*
     template<typename T>
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::iterate_to_fixed_point(
             InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids, bool use_filter,
@@ -1000,55 +858,146 @@ namespace polaris {
         }
         return std::make_pair(hops, cmps);
     }
+    */
+    template<typename T>
+    std::pair<uint32_t, uint32_t> VamanaIndex<T>::iterate_to_fixed_point(
+            InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids, bool search_invocation) {
+        std::vector<Neighbor> &expanded_nodes = scratch->pool();
+        NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
+        best_L_nodes.reserve(Lsize);
+        turbo::flat_hash_set<uint32_t> &inserted_into_pool_rs = scratch->inserted_into_pool_rs();
+        collie::dynamic_bitset<> &inserted_into_pool_bs = scratch->inserted_into_pool_bs();
+        std::vector<uint32_t> &id_scratch = scratch->id_scratch();
+        std::vector<float> &dist_scratch = scratch->dist_scratch();
+        assert(id_scratch.size() == 0);
+
+        T *aligned_query = scratch->aligned_query();
+
+        float *pq_dists = nullptr;
+
+        _pq_data_store->preprocess_query(aligned_query, scratch);
+
+        if (expanded_nodes.size() > 0 || id_scratch.size() > 0) {
+            throw PolarisException("ERROR: Clear scratch space before passing.", -1, __PRETTY_FUNCTION__, __FILE__,
+                                   __LINE__);
+        }
+
+        // Decide whether to use bitset or robin set to mark visited nodes
+        auto total_num_points = _max_points + _num_frozen_pts;
+        bool fast_iterate = total_num_points <= MAX_POINTS_FOR_USING_BITSET;
+
+        if (fast_iterate) {
+            if (inserted_into_pool_bs.size() < total_num_points) {
+                // hopefully using 2X will reduce the number of allocations.
+                auto resize_size =
+                        2 * total_num_points > MAX_POINTS_FOR_USING_BITSET ? MAX_POINTS_FOR_USING_BITSET : 2 *
+                                                                                                           total_num_points;
+                inserted_into_pool_bs.resize(resize_size);
+            }
+        }
+
+        // Lambda to determine if a node has been visited
+        auto is_not_visited = [this, fast_iterate, &inserted_into_pool_bs, &inserted_into_pool_rs](const uint32_t id) {
+            return fast_iterate ? inserted_into_pool_bs[id] == 0
+                                : inserted_into_pool_rs.find(id) == inserted_into_pool_rs.end();
+        };
+
+        // Lambda to batch compute query<-> node distances in PQ space
+        auto compute_dists = [this, scratch, pq_dists](const std::vector<uint32_t> &ids,
+                                                       std::vector<float> &dists_out) {
+            _pq_data_store->get_distance(scratch->aligned_query(), ids, dists_out, scratch);
+        };
+
+        // Initialize the candidate pool with starting points
+        for (auto id: init_ids) {
+            if (id >= _max_points + _num_frozen_pts) {
+                polaris::cerr << "Out of range loc found as an edge : " << id << std::endl;
+                throw polaris::PolarisException(std::string("Wrong loc") + std::to_string(id), -1, __PRETTY_FUNCTION__,
+                                                __FILE__,
+                                                __LINE__);
+            }
+
+            if (is_not_visited(id)) {
+                if (fast_iterate) {
+                    inserted_into_pool_bs[id] = 1;
+                } else {
+                    inserted_into_pool_rs.insert(id);
+                }
+
+                float distance;
+                uint32_t ids[] = {id};
+                float distances[] = {std::numeric_limits<float>::max()};
+                _pq_data_store->get_distance(aligned_query, ids, 1, distances, scratch);
+                distance = distances[0];
+
+                Neighbor nn = Neighbor(id, distance);
+                best_L_nodes.insert(nn);
+            }
+        }
+
+        uint32_t hops = 0;
+        uint32_t cmps = 0;
+
+        while (best_L_nodes.has_unexpanded_node()) {
+            auto nbr = best_L_nodes.closest_unexpanded();
+            auto n = nbr.id;
+
+            // Add node to expanded nodes to create pool for prune later
+            if (!search_invocation) {
+                expanded_nodes.emplace_back(nbr);
+            }
+
+            // Find which of the nodes in des have not been visited before
+            id_scratch.clear();
+            dist_scratch.clear();
+            if (_dynamic_index) {
+                LockGuard guard(_locks[n]);
+                for (auto id: _graph_store->get_neighbours(n)) {
+                    assert(id < _max_points + _num_frozen_pts);
+                    if (is_not_visited(id)) {
+                        id_scratch.push_back(id);
+                    }
+                }
+            } else {
+                _locks[n].lock();
+                auto nbrs = _graph_store->get_neighbours(n);
+                _locks[n].unlock();
+                for (auto id: nbrs) {
+                    assert(id < _max_points + _num_frozen_pts);
+                    if (is_not_visited(id)) {
+                        id_scratch.push_back(id);
+                    }
+                }
+            }
+
+            // Mark nodes visited
+            for (auto id: id_scratch) {
+                if (fast_iterate) {
+                    inserted_into_pool_bs[id] = 1;
+                } else {
+                    inserted_into_pool_rs.insert(id);
+                }
+            }
+
+            assert(dist_scratch.capacity() >= id_scratch.size());
+            compute_dists(id_scratch, dist_scratch);
+            cmps += (uint32_t) id_scratch.size();
+
+            // Insert <id, dist> pairs into the pool of candidates
+            for (size_t m = 0; m < id_scratch.size(); ++m) {
+                best_L_nodes.insert(Neighbor(id_scratch[m], dist_scratch[m]));
+            }
+        }
+        return std::make_pair(hops, cmps);
+    }
 
     template<typename T>
     void VamanaIndex<T>::search_for_point_and_prune(int location, uint32_t Lindex,
                                                     std::vector<uint32_t> &pruned_list,
-                                                    InMemQueryScratch<T> *scratch, bool use_filter,
-                                                    uint32_t filteredLindex) {
+                                                    InMemQueryScratch<T> *scratch,uint32_t filteredLindex) {
         const std::vector<uint32_t> init_ids = get_init_ids();
-        const std::vector<labid_t> unused_filter_label;
-
-        if (!use_filter) {
-            _data_store->get_vector(location, scratch->aligned_query());
-            iterate_to_fixed_point(scratch, Lindex, init_ids, false, unused_filter_label, false);
-        } else {
-            std::shared_lock<std::shared_timed_mutex> tl(_tag_lock, std::defer_lock);
-            if (_dynamic_index)
-                tl.lock();
-            std::vector<uint32_t> filter_specific_start_nodes;
-            for (auto &x: _location_to_labels[location])
-                filter_specific_start_nodes.emplace_back(_label_to_start_id[x]);
-
-            if (_dynamic_index)
-                tl.unlock();
-
-            _data_store->get_vector(location, scratch->aligned_query());
-            iterate_to_fixed_point(scratch, filteredLindex, filter_specific_start_nodes, true,
-                                   _location_to_labels[location], false);
-
-            // combine candidate pools obtained with filter and unfiltered criteria.
-            std::set<Neighbor> best_candidate_pool;
-            for (auto filtered_neighbor: scratch->pool()) {
-                best_candidate_pool.insert(filtered_neighbor);
-            }
-
-            // clear scratch for finding unfiltered candidates
-            scratch->clear();
-
-            _data_store->get_vector(location, scratch->aligned_query());
-            iterate_to_fixed_point(scratch, Lindex, init_ids, false, unused_filter_label, false);
-
-            for (auto unfiltered_neighbour: scratch->pool()) {
-                // insert if this neighbour is not already in best_candidate_pool
-                if (best_candidate_pool.find(unfiltered_neighbour) == best_candidate_pool.end()) {
-                    best_candidate_pool.insert(unfiltered_neighbour);
-                }
-            }
-
-            scratch->pool().clear();
-            std::copy(best_candidate_pool.begin(), best_candidate_pool.end(), std::back_inserter(scratch->pool()));
-        }
+        _data_store->get_vector(location, scratch->aligned_query());
+        iterate_to_fixed_point(scratch, Lindex, init_ids, false);
 
         auto &pool = scratch->pool();
 
@@ -1114,24 +1063,6 @@ namespace polaris {
                 for (auto iter2 = iter + 1; iter2 != pool.end(); iter2++) {
                     auto t = iter2 - pool.begin();
                     if (occlude_factor[t] > alpha)
-                        continue;
-
-                    bool prune_allowed = true;
-                    if (_filtered_index) {
-                        uint32_t a = iter->id;
-                        uint32_t b = iter2->id;
-                        if (_location_to_labels.size() < b || _location_to_labels.size() < a)
-                            continue;
-                        for (auto &x: _location_to_labels[b]) {
-                            if (std::find(_location_to_labels[a].begin(), _location_to_labels[a].end(), x) ==
-                                _location_to_labels[a].end()) {
-                                prune_allowed = false;
-                            }
-                            if (!prune_allowed)
-                                break;
-                        }
-                    }
-                    if (!prune_allowed)
                         continue;
 
                     float djk = _data_store->get_distance(iter2->id, iter->id);
@@ -1294,12 +1225,7 @@ namespace polaris {
             ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
             auto scratch = manager.scratch_space();
             std::vector<uint32_t> pruned_list;
-            if (_filtered_index) {
-                search_for_point_and_prune(node, _indexingQueueSize, pruned_list, scratch, true,
-                                           _filterIndexingQueueSize);
-            } else {
-                search_for_point_and_prune(node, _indexingQueueSize, pruned_list, scratch);
-            }
+            search_for_point_and_prune(node, _indexingQueueSize, pruned_list, scratch);
             assert(pruned_list.size() > 0);
 
             {
@@ -1347,62 +1273,6 @@ namespace polaris {
         if (_nd > 0) {
             polaris::cout << "done. Link time: " << ((double) link_timer.elapsed() / (double) 1000000) << "s"
                           << std::endl;
-        }
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::prune_all_neighbors(const uint32_t max_degree, const uint32_t max_occlusion_size,
-                                             const float alpha) {
-        const uint32_t range = max_degree;
-        const uint32_t maxc = max_occlusion_size;
-
-        _filtered_index = true;
-
-        polaris::Timer timer;
-#pragma omp parallel for
-        for (int64_t node = 0; node < (int64_t) (_max_points + _num_frozen_pts); node++) {
-            if ((size_t) node < _nd || (size_t) node >= _max_points) {
-                if (_graph_store->get_neighbours((location_t) node).size() > range) {
-                    turbo::flat_hash_set<uint32_t> dummy_visited(0);
-                    std::vector<Neighbor> dummy_pool(0);
-                    std::vector<uint32_t> new_out_neighbors;
-
-                    ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
-                    auto scratch = manager.scratch_space();
-
-                    for (auto cur_nbr: _graph_store->get_neighbours((location_t) node)) {
-                        if (dummy_visited.find(cur_nbr) == dummy_visited.end() && cur_nbr != node) {
-                            float dist = _data_store->get_distance((location_t) node, (location_t) cur_nbr);
-                            dummy_pool.emplace_back(Neighbor(cur_nbr, dist));
-                            dummy_visited.insert(cur_nbr);
-                        }
-                    }
-
-                    prune_neighbors((uint32_t) node, dummy_pool, range, maxc, alpha, new_out_neighbors, scratch);
-                    _graph_store->clear_neighbours((location_t) node);
-                    _graph_store->set_neighbours((location_t) node, new_out_neighbors);
-                }
-            }
-        }
-
-        polaris::cout << "Prune time : " << timer.elapsed() / 1000 << "ms" << std::endl;
-        size_t max = 0, min = 1 << 30, total = 0, cnt = 0;
-        for (size_t i = 0; i < _max_points + _num_frozen_pts; i++) {
-            if (i < _nd || i >= _max_points) {
-                const std::vector<uint32_t> &pool = _graph_store->get_neighbours((location_t) i);
-                max = (std::max)(max, pool.size());
-                min = (std::min)(min, pool.size());
-                total += pool.size();
-                if (pool.size() < 2)
-                    cnt++;
-            }
-        }
-        if (min > max)
-            min = max;
-        if (_nd > 0) {
-            polaris::cout << "VamanaIndex built with degree: max:" << max
-                          << "  avg:" << (float) total / (float) (_nd + _num_frozen_pts) << "  min:" << min
-                          << "  count(deg<2):" << cnt << std::endl;
         }
     }
 
@@ -1667,167 +1537,13 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::build(const std::string &data_file, const size_t num_points_to_load,
-                               IndexFilterParams &filter_params) {
+    void VamanaIndex<T>::build(const std::string &data_file, const size_t num_points_to_load) {
         size_t points_to_load = num_points_to_load == 0 ? _max_points : num_points_to_load;
 
         auto s = std::chrono::high_resolution_clock::now();
-        if (filter_params.label_file == "") {
-            this->build(data_file.c_str(), points_to_load);
-        } else {
-            // TODO: this should ideally happen in save()
-            std::string labels_file_to_use = filter_params.save_path_prefix + "_label_formatted.txt";
-            std::string mem_labels_int_map_file = filter_params.save_path_prefix + "_labels_map.txt";
-            convert_labels_string_to_int(filter_params.label_file, labels_file_to_use, mem_labels_int_map_file,
-                                         filter_params.universal_label);
-            if (filter_params.universal_label != "") {
-                labid_t unv_label_as_num = 0;
-                this->set_universal_label(unv_label_as_num);
-            }
-            this->build_filtered_index(data_file.c_str(), labels_file_to_use, points_to_load);
-        }
+        this->build(data_file.c_str(), points_to_load);
         std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - s;
         std::cout << "Indexing time: " << diff.count() << "\n";
-    }
-
-    template<typename T>
-    std::unordered_map<std::string, labid_t> VamanaIndex<T>::load_label_map(const std::string &labels_map_file) {
-        std::unordered_map<std::string, labid_t> string_to_int_mp;
-        std::ifstream map_reader(labels_map_file);
-        std::string line, token;
-        labid_t token_as_num;
-        std::string label_str;
-        while (std::getline(map_reader, line)) {
-            std::istringstream iss(line);
-            getline(iss, token, '\t');
-            label_str = token;
-            getline(iss, token, '\t');
-            token_as_num = (labid_t) std::stoul(token);
-            string_to_int_mp[label_str] = token_as_num;
-        }
-        return string_to_int_mp;
-    }
-
-    template<typename T>
-    labid_t VamanaIndex<T>::get_converted_label(const std::string &raw_label) {
-        if (_label_map.find(raw_label) != _label_map.end()) {
-            return _label_map[raw_label];
-        }
-        if (_use_universal_label) {
-            return _universal_label;
-        }
-        std::stringstream stream;
-        stream << "Unable to find label in the Label Map";
-        polaris::cerr << stream.str() << std::endl;
-        throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::parse_label_file(const std::string &label_file, size_t &num_points) {
-        // Format of Label txt file: filters with comma separators
-
-        std::ifstream infile(label_file);
-        if (infile.fail()) {
-            throw polaris::PolarisException(std::string("Failed to open file ") + label_file, -1);
-        }
-
-        std::string line, token;
-        uint32_t line_cnt = 0;
-
-        while (std::getline(infile, line)) {
-            line_cnt++;
-        }
-        _location_to_labels.resize(line_cnt, std::vector<labid_t>());
-
-        infile.clear();
-        infile.seekg(0, std::ios::beg);
-        line_cnt = 0;
-
-        while (std::getline(infile, line)) {
-            std::istringstream iss(line);
-            std::vector<labid_t> lbls(0);
-            getline(iss, token, '\t');
-            std::istringstream new_iss(token);
-            while (getline(new_iss, token, ',')) {
-                token.erase(std::remove(token.begin(), token.end(), '\n'), token.end());
-                token.erase(std::remove(token.begin(), token.end(), '\r'), token.end());
-                labid_t token_as_num = (labid_t) std::stoul(token);
-                lbls.push_back(token_as_num);
-                _labels.insert(token_as_num);
-            }
-
-            std::sort(lbls.begin(), lbls.end());
-            _location_to_labels[line_cnt] = lbls;
-            line_cnt++;
-        }
-        num_points = (size_t) line_cnt;
-        polaris::cout << "Identified " << _labels.size() << " distinct label(s)" << std::endl;
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::_set_universal_label(const LabelType universal_label) {
-        this->set_universal_label(std::any_cast<const labid_t>(universal_label));
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::set_universal_label(const labid_t &label) {
-        _use_universal_label = true;
-        _universal_label = label;
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::build_filtered_index(const char *filename, const std::string &label_file,
-                                              const size_t num_points_to_load, const std::vector<vid_t> &tags) {
-        _filtered_index = true;
-        _label_to_start_id.clear();
-        size_t num_points_labels = 0;
-
-        parse_label_file(label_file,
-                         num_points_labels); // determines medoid for each label and identifies
-        // the points to label mapping
-
-        std::unordered_map<labid_t, std::vector<uint32_t>> label_to_points;
-
-        for (uint32_t point_id = 0; point_id < num_points_to_load; point_id++) {
-            for (auto label: _location_to_labels[point_id]) {
-                if (label != _universal_label) {
-                    label_to_points[label].emplace_back(point_id);
-                } else {
-                    for (typename turbo::flat_hash_set<labid_t>::size_type lbl = 0; lbl < _labels.size(); lbl++) {
-                        auto itr = _labels.begin();
-                        std::advance(itr, lbl);
-                        auto &x = *itr;
-                        label_to_points[x].emplace_back(point_id);
-                    }
-                }
-            }
-        }
-
-        uint32_t num_cands = 25;
-        for (auto itr = _labels.begin(); itr != _labels.end(); itr++) {
-            uint32_t best_medoid_count = std::numeric_limits<uint32_t>::max();
-            auto &curr_label = *itr;
-            uint32_t best_medoid;
-            auto labeled_points = label_to_points[curr_label];
-            for (uint32_t cnd = 0; cnd < num_cands; cnd++) {
-                uint32_t cur_cnd = labeled_points[rand() % labeled_points.size()];
-                uint32_t cur_cnt = std::numeric_limits<uint32_t>::max();
-                if (_medoid_counts.find(cur_cnd) == _medoid_counts.end()) {
-                    _medoid_counts[cur_cnd] = 0;
-                    cur_cnt = 0;
-                } else {
-                    cur_cnt = _medoid_counts[cur_cnd];
-                }
-                if (cur_cnt < best_medoid_count) {
-                    best_medoid_count = cur_cnt;
-                    best_medoid = cur_cnd;
-                }
-            }
-            _label_to_start_id[curr_label] = best_medoid;
-            _medoid_counts[best_medoid]++;
-        }
-
-        this->build(filename, num_points_to_load, tags);
     }
 
     template<typename T>
@@ -1867,7 +1583,6 @@ namespace polaris {
         const std::vector<uint32_t> init_ids = get_init_ids();
 
         _data_store->preprocess_query(reinterpret_cast<T *>(ctx.query.data()), scratch);
-        const std::vector<labid_t> unused_filter_label;
         auto rs = iterate_to_fixed_point(scratch, ctx.search_list, init_ids, ctx.search_condition, true);
         if (!rs.ok()) {
             return rs.status();
@@ -1932,14 +1647,13 @@ namespace polaris {
             polaris::cout << "Resize completed. New scratch->L is " << scratch->get_L() << std::endl;
         }
 
-        const std::vector<labid_t> unused_filter_label;
         const std::vector<uint32_t> init_ids = get_init_ids();
 
         std::shared_lock<std::shared_timed_mutex> lock(_update_lock);
 
         _data_store->preprocess_query(query, scratch);
 
-        auto retval = iterate_to_fixed_point(scratch, L, init_ids, false, unused_filter_label, true);
+        auto retval = iterate_to_fixed_point(scratch, L, init_ids, true);
 
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
 
@@ -1968,90 +1682,11 @@ namespace polaris {
     }
 
     template<typename T>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T>::_search_with_filters(const DataType &query,
-                                                                       const std::string &raw_label,
-                                                                       const size_t K,
-                                                                       const uint32_t L, localid_t *indices,
-                                                                       float *distances) {
-        auto converted_label = this->get_converted_label(raw_label);
-        return this->search_with_filters(std::any_cast<T *>(query), converted_label, K, L, indices, distances);
-    }
-
-    template<typename T>
-    std::pair<uint32_t, uint32_t>
-    VamanaIndex<T>::search_with_filters(const T *query, const labid_t &filter_label,
-                                        const size_t K, const uint32_t L,
-                                        localid_t *indices, float *distances) {
-        if (K > (uint64_t) L) {
-            throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-
-        ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
-        auto scratch = manager.scratch_space();
-
-        if (L > scratch->get_L()) {
-            polaris::cout << "Attempting to expand query scratch_space. Was created "
-                          << "with Lsize: " << scratch->get_L() << " but search L is: " << L << std::endl;
-            scratch->resize_for_new_L(L);
-            polaris::cout << "Resize completed. New scratch->L is " << scratch->get_L() << std::endl;
-        }
-
-        std::vector<labid_t> filter_vec;
-        std::vector<uint32_t> init_ids = get_init_ids();
-
-        std::shared_lock<std::shared_timed_mutex> lock(_update_lock);
-        std::shared_lock<std::shared_timed_mutex> tl(_tag_lock, std::defer_lock);
-        if (_dynamic_index)
-            tl.lock();
-
-        if (_label_to_start_id.find(filter_label) != _label_to_start_id.end()) {
-            init_ids.emplace_back(_label_to_start_id[filter_label]);
-        } else {
-            polaris::cout << "No filtered medoid found. exitting "
-                          << std::endl; // RKNOTE: If universal label found start there
-            throw polaris::PolarisException("No filtered medoid found. exitting ", -1);
-        }
-        if (_dynamic_index)
-            tl.unlock();
-
-        filter_vec.emplace_back(filter_label);
-
-        _data_store->preprocess_query(query, scratch);
-        auto retval = iterate_to_fixed_point(scratch, L, init_ids, true, filter_vec, true);
-
-        auto best_L_nodes = scratch->best_l_nodes();
-
-        size_t pos = 0;
-        for (size_t i = 0; i < best_L_nodes.size(); ++i) {
-            if (best_L_nodes[i].id < _max_points) {
-                indices[pos] = (localid_t) best_L_nodes[i].id;
-
-                if (distances != nullptr) {
-                    distances[pos] =
-                            _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 *
-                                                                                                             best_L_nodes[i].distance
-                                                                                                           : best_L_nodes[i].distance;
-                }
-                pos++;
-            }
-            if (pos == K)
-                break;
-        }
-        if (pos < K) {
-            polaris::cerr << "Found fewer than K elements for query" << std::endl;
-        }
-
-        return retval;
-    }
-
-    template<typename T>
     size_t VamanaIndex<T>::_search_with_tags(const DataType &query, const uint64_t K, const uint32_t L,
-                                             const TagType &tags, float *distances, DataVector &res_vectors,
-                                             bool use_filters, const std::string filter_label) {
+                                             const TagType &tags, float *distances, DataVector &res_vectors) {
         try {
             return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<vid_t *>(tags),
-                                          distances,
-                                          res_vectors.get<std::vector<T *>>(), use_filters, filter_label);
+                                          distances,res_vectors.get<std::vector<T *>>());
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException("Error: bad any cast while performing _search_with_tags() " + std::string(e.what()),
@@ -2064,8 +1699,7 @@ namespace polaris {
 
     template<typename T>
     size_t VamanaIndex<T>::search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                            float *distances, std::vector<T *> &res_vectors, bool use_filters,
-                                            const std::string filter_label) {
+                                            float *distances, std::vector<T *> &res_vectors) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
@@ -2086,15 +1720,7 @@ namespace polaris {
         //_distance->preprocess_query(query, _data_store->get_dims(),
         // scratch->aligned_query());
         _data_store->preprocess_query(query, scratch);
-        if (!use_filters) {
-            const std::vector<labid_t> unused_filter_label;
-            iterate_to_fixed_point(scratch, L, init_ids, false, unused_filter_label, true);
-        } else {
-            std::vector<labid_t> filter_vec;
-            auto converted_label = this->get_converted_label(filter_label);
-            filter_vec.push_back(converted_label);
-            iterate_to_fixed_point(scratch, L, init_ids, true, filter_vec, true);
-        }
+        iterate_to_fixed_point(scratch, L, init_ids,true);
 
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
         assert(best_L_nodes.size() <= L);
@@ -2359,15 +1985,6 @@ namespace polaris {
         if (_nd < _max_points && _num_frozen_pts > 0) {
             reposition_points((uint32_t) _max_points, (uint32_t) _nd, (uint32_t) _num_frozen_pts);
             _start = (uint32_t) _nd;
-
-            if (_filtered_index && _dynamic_index) {
-                //  update medoid id's as frozen points are treated as medoid
-                for (auto &[label, medoid_id]: _label_to_start_id) {
-                    /*  if (label == _universal_label)
-                      continue;*/
-                    _label_to_start_id[label] = (uint32_t) _nd + (medoid_id - (uint32_t) _max_points);
-                }
-            }
         }
     }
 
@@ -2438,11 +2055,6 @@ namespace polaris {
                 if (new_location[old] != old) {
                     assert(new_location[old] < old);
                     _graph_store->swap_neighbours(new_location[old], (location_t) old);
-
-                    if (_filtered_index) {
-                        _location_to_labels[new_location[old]].swap(_location_to_labels[old]);
-                    }
-
                     _data_store->copy_vectors(old, new_location[old], 1);
                 }
             } else {
@@ -2463,11 +2075,6 @@ namespace polaris {
         // remove all cleared up old
         for (size_t old = _nd; old < _max_points; ++old) {
             _graph_store->clear_neighbours((location_t) old);
-        }
-        if (_filtered_index) {
-            for (size_t old = _nd; old < _max_points; old++) {
-                _location_to_labels[old].clear();
-            }
         }
 
         _empty_slots.clear();
@@ -2571,10 +2178,6 @@ namespace polaris {
             for (uint32_t loc_offset = 0; loc_offset < num_locations; loc_offset++) {
                 assert(_graph_store->get_neighbours(new_location_start + loc_offset).empty());
                 _graph_store->swap_neighbours(new_location_start + loc_offset, old_location_start + loc_offset);
-                if (_dynamic_index && _filtered_index) {
-                    _location_to_labels[new_location_start + loc_offset].swap(
-                            _location_to_labels[old_location_start + loc_offset]);
-                }
             }
             // If ranges are overlapping, make sure not to clear the newly copied
             // data.
@@ -2589,10 +2192,6 @@ namespace polaris {
                 assert(_graph_store->get_neighbours(new_location_start + loc_offset - 1u).empty());
                 _graph_store->swap_neighbours(new_location_start + loc_offset - 1u,
                                               old_location_start + loc_offset - 1u);
-                if (_dynamic_index && _filtered_index) {
-                    _location_to_labels[new_location_start + loc_offset - 1u].swap(
-                            _location_to_labels[old_location_start + loc_offset - 1u]);
-                }
             }
 
             // If ranges are overlapping, make sure not to clear the newly copied
@@ -2617,15 +2216,6 @@ namespace polaris {
 
         reposition_points((uint32_t) _nd, (uint32_t) _max_points, (uint32_t) _num_frozen_pts);
         _start = (uint32_t) _max_points;
-
-        // update medoid id's as frozen points are treated as medoid
-        if (_filtered_index && _dynamic_index) {
-            for (auto &[label, medoid_id]: _label_to_start_id) {
-                /*if (label == _universal_label)
-                continue;*/
-                _label_to_start_id[label] = (uint32_t) _max_points + (medoid_id - (uint32_t) _nd);
-            }
-        }
     }
 
     template<typename T>
@@ -2667,27 +2257,7 @@ namespace polaris {
     }
 
     template<typename T>
-    int VamanaIndex<T>::_insert_point(const DataType &point, const TagType tag, Labelvector &labels) {
-        try {
-            return this->insert_point(std::any_cast<const T *>(point), std::any_cast<const vid_t>(tag),
-                                      labels.get<const std::vector<labid_t>>());
-        }
-        catch (const std::bad_any_cast &anycast_e) {
-            throw new PolarisException("Error:Trying to insert invalid data type" + std::string(anycast_e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw new PolarisException("Error:" + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
     int VamanaIndex<T>::insert_point(const T *point, const vid_t tag) {
-        std::vector<labid_t> no_labels{0};
-        return insert_point(point, tag, no_labels);
-    }
-
-    template<typename T>
-    int VamanaIndex<T>::insert_point(const T *point, const vid_t tag, const std::vector<labid_t> &labels) {
 
         assert(_has_built);
         if (tag == 0) {
@@ -2702,36 +2272,6 @@ namespace polaris {
         std::unique_lock<std::shared_timed_mutex> dl(_delete_lock);
 
         auto location = reserve_location();
-        if (_filtered_index) {
-            if (labels.empty()) {
-                release_location(location);
-                std::cerr << "Error: Can't insert point with tag " + get_tag_string(tag) +
-                             " . there are no labels for the point."
-                          << std::endl;
-                return -1;
-            }
-
-            _location_to_labels[location] = labels;
-
-            for (labid_t label: labels) {
-                if (_labels.find(label) == _labels.end()) {
-                    if (_frozen_pts_used >= _num_frozen_pts) {
-                        throw PolarisException(
-                                "Error: For dynamic filtered index, the number of frozen points should be atleast equal "
-                                "to number of unique labels.",
-                                -1);
-                    }
-
-                    auto fz_location = (int) (_max_points) + _frozen_pts_used; // as first _fz_point
-                    _labels.insert(label);
-                    _label_to_start_id[label] = (uint32_t) fz_location;
-                    _location_to_labels[fz_location] = {label};
-                    _data_store->set_vector((location_t) fz_location, point);
-                    _frozen_pts_used++;
-                }
-            }
-        }
-
         if (location == -1) {
 #if EXPAND_IF_FULL
                                                                                                                                     dl.unlock();
@@ -2790,13 +2330,7 @@ namespace polaris {
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
         auto scratch = manager.scratch_space();
         std::vector<uint32_t> pruned_list; // it is the set best candidates to connect to this point
-        if (_filtered_index) {
-            // when filtered the best_candidates will share the same label ( label_present > distance)
-            search_for_point_and_prune(location, _indexingQueueSize, pruned_list, scratch, true,
-                                       _filterIndexingQueueSize);
-        } else {
-            search_for_point_and_prune(location, _indexingQueueSize, pruned_list, scratch);
-        }
+        search_for_point_and_prune(location, _indexingQueueSize, pruned_list, scratch);
         assert(pruned_list.size() > 0); // should find atleast one neighbour (i.e frozen point acting as medoid)
 
         {

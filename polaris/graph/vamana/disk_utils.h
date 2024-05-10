@@ -88,10 +88,7 @@ namespace polaris {
                                               uint32_t R, double sampling_rate, double ram_budget,
                                               std::string mem_index_path, std::string medoids_file,
                                               std::string centroids_file, size_t build_pq_bytes, bool use_opq,
-                                              uint32_t num_threads, bool use_filters = false,
-                                              const std::string &label_file = std::string(""),
-                                              const std::string &labels_to_medoids_file = std::string(""),
-                                              const std::string &universal_label = "", const uint32_t Lf = 0);
+                                              uint32_t num_threads);
 
     template<typename T>
     POLARIS_API uint32_t optimize_beamwidth(std::unique_ptr<polaris::PQFlashIndex<T>> &_pFlashIndex,

@@ -83,9 +83,6 @@ namespace polaris {
         if (_pts_to_label_counts != nullptr) {
             delete[] _pts_to_label_counts;
         }
-        if (_pts_to_labels != nullptr) {
-            delete[] _pts_to_labels;
-        }
         if (_medoids != nullptr) {
             delete[] _medoids;
         }
@@ -273,21 +270,13 @@ continue;
         std::vector<uint64_t> tmp_result_ids_64(sample_num, 0);
         std::vector<float> tmp_result_dists(sample_num, 0);
 
-        bool filtered_search = false;
-        std::vector<labid_t> random_query_filters(sample_num);
-        if (_filter_to_medoid_ids.size() != 0) {
-            filtered_search = true;
-            generate_random_labels(random_query_filters, (uint32_t) sample_num, nthreads);
-        }
-
 #pragma omp parallel for schedule(dynamic, 1) num_threads(nthreads)
         for (int64_t i = 0; i < (int64_t) sample_num; i++) {
-            auto &label_for_search = random_query_filters[i];
             // run a search on the sample query with a random label (sampled from base label distribution), and it will
             // concurrently update the node_visit_counter to track most visited nodes. The last false is to not use the
             // "use_reorder_data" option which enables a final reranking if the disk index itself contains only PQ data.
             cached_beam_search(samples + (i * sample_aligned_dim), 1, l_search, tmp_result_ids_64.data() + i,
-                               tmp_result_dists.data() + i, beamwidth, filtered_search, label_for_search, false);
+                               tmp_result_dists.data() + i, beamwidth, false);
         }
 
         std::sort(this->_node_visit_counter.begin(), _node_visit_counter.end(),
@@ -334,18 +323,6 @@ continue;
 
         for (uint64_t miter = 0; miter < _num_medoids && cur_level->size() < num_nodes_to_cache; miter++) {
             cur_level->insert(_medoids[miter]);
-        }
-
-        if ((_filter_to_medoid_ids.size() > 0) && (cur_level->size() < num_nodes_to_cache)) {
-            for (auto &x: _filter_to_medoid_ids) {
-                for (auto &y: x.second) {
-                    cur_level->insert(y);
-                    if (cur_level->size() == num_nodes_to_cache)
-                        break;
-                }
-                if (cur_level->size() == num_nodes_to_cache)
-                    break;
-            }
         }
 
         uint64_t lvl = 1;
@@ -480,62 +457,6 @@ continue;
     }
 
     template<typename T>
-    void PQFlashIndex<T>::generate_random_labels(std::vector<labid_t> &labels, const uint32_t num_labels,
-                                                         const uint32_t nthreads) {
-        std::random_device rd;
-        labels.clear();
-        labels.resize(num_labels);
-
-        uint64_t num_total_labels = _pts_to_label_offsets[_num_points - 1] + _pts_to_label_counts[_num_points - 1];
-        std::mt19937 gen(rd());
-        if (num_total_labels == 0) {
-            std::stringstream stream;
-            stream << "No labels found in data. Not sampling random labels ";
-            polaris::cerr << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-        std::uniform_int_distribution<uint64_t> dis(0, num_total_labels - 1);
-
-#pragma omp parallel for schedule(dynamic, 1) num_threads(nthreads)
-        for (int64_t i = 0; i < num_labels; i++) {
-            uint64_t rnd_loc = dis(gen);
-            labels[i] = (labid_t) _pts_to_labels[rnd_loc];
-        }
-    }
-
-    template<typename T>
-    std::unordered_map<std::string, labid_t>
-    PQFlashIndex<T>::load_label_map(std::basic_istream<char> &map_reader) {
-        std::unordered_map<std::string, labid_t> string_to_int_mp;
-        std::string line, token;
-        labid_t token_as_num;
-        std::string label_str;
-        while (std::getline(map_reader, line)) {
-            std::istringstream iss(line);
-            getline(iss, token, '\t');
-            label_str = token;
-            getline(iss, token, '\t');
-            token_as_num = (labid_t) std::stoul(token);
-            string_to_int_mp[label_str] = token_as_num;
-        }
-        return string_to_int_mp;
-    }
-
-    template<typename T>
-    labid_t PQFlashIndex<T>::get_converted_label(const std::string &filter_label) {
-        if (_label_map.find(filter_label) != _label_map.end()) {
-            return _label_map[filter_label];
-        }
-        if (_use_universal_label) {
-            return _universal_filter_label;
-        }
-        std::stringstream stream;
-        stream << "Unable to find label in the Label Map";
-        polaris::cerr << stream.str() << std::endl;
-        throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-    }
-
-    template<typename T>
     void PQFlashIndex<T>::reset_stream_for_reading(std::basic_istream<char> &infile) {
         infile.clear();
         infile.seekg(0);
@@ -582,104 +503,6 @@ continue;
     }
 
     template<typename T>
-    inline bool PQFlashIndex<T>::point_has_label(uint32_t point_id, labid_t label_id) {
-        uint32_t start_vec = _pts_to_label_offsets[point_id];
-        uint32_t num_lbls = _pts_to_label_counts[point_id];
-        bool ret_val = false;
-        for (uint32_t i = 0; i < num_lbls; i++) {
-            if (_pts_to_labels[start_vec + i] == label_id) {
-                ret_val = true;
-                break;
-            }
-        }
-        return ret_val;
-    }
-
-    template<typename T>
-    void PQFlashIndex<T>::parse_label_file(std::basic_istream<char> &infile, size_t &num_points_labels) {
-        infile.seekg(0, std::ios::end);
-        size_t file_size = infile.tellg();
-
-        std::string buffer(file_size, ' ');
-
-        infile.seekg(0, std::ios::beg);
-        infile.read(&buffer[0], file_size);
-
-        std::string line;
-        uint32_t line_cnt = 0;
-
-        uint32_t num_pts_in_label_file;
-        uint32_t num_total_labels;
-        get_label_file_metadata(buffer, num_pts_in_label_file, num_total_labels);
-
-        _pts_to_label_offsets = new uint32_t[num_pts_in_label_file];
-        _pts_to_label_counts = new uint32_t[num_pts_in_label_file];
-        _pts_to_labels = new labid_t[num_total_labels];
-        uint32_t labels_seen_so_far = 0;
-
-        std::string label_str;
-        size_t cur_pos = 0;
-        size_t next_pos = 0;
-        while (cur_pos < file_size && cur_pos != std::string::npos) {
-            next_pos = buffer.find('\n', cur_pos);
-            if (next_pos == std::string::npos) {
-                break;
-            }
-
-            _pts_to_label_offsets[line_cnt] = labels_seen_so_far;
-            uint32_t &num_lbls_in_cur_pt = _pts_to_label_counts[line_cnt];
-            num_lbls_in_cur_pt = 0;
-
-            size_t lbl_pos = cur_pos;
-            size_t next_lbl_pos = 0;
-            while (lbl_pos < next_pos && lbl_pos != std::string::npos) {
-                next_lbl_pos = buffer.find(',', lbl_pos);
-                if (next_lbl_pos == std::string::npos) // the last label in the whole file
-                {
-                    next_lbl_pos = next_pos;
-                }
-
-                if (next_lbl_pos > next_pos) // the last label in one line, just read to the end
-                {
-                    next_lbl_pos = next_pos;
-                }
-
-                label_str.assign(buffer.c_str() + lbl_pos, next_lbl_pos - lbl_pos);
-                if (label_str[label_str.length() - 1] == '\t') // '\t' won't exist in label file?
-                {
-                    label_str.erase(label_str.length() - 1);
-                }
-
-                labid_t token_as_num = (labid_t) std::stoul(label_str);
-                _pts_to_labels[labels_seen_so_far++] = (labid_t) token_as_num;
-                num_lbls_in_cur_pt++;
-
-                // move to next label
-                lbl_pos = next_lbl_pos + 1;
-            }
-
-            // move to next line
-            cur_pos = next_pos + 1;
-
-            if (num_lbls_in_cur_pt == 0) {
-                polaris::cout << "No label found for point " << line_cnt << std::endl;
-                exit(-1);
-            }
-
-            line_cnt++;
-        }
-
-        num_points_labels = line_cnt;
-        reset_stream_for_reading(infile);
-    }
-
-    template<typename T>
-    void PQFlashIndex<T>::set_universal_label(const labid_t &label) {
-        _use_universal_label = true;
-        _universal_filter_label = label;
-    }
-
-    template<typename T>
     int PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
         std::string pq_table_bin = std::string(index_prefix) + "_pq_pivots.bin";
         std::string pq_compressed_vectors = std::string(index_prefix) + "_pq_compressed.bin";
@@ -698,10 +521,7 @@ continue;
         std::string medoids_file = std::string(_disk_index_file) + "_medoids.bin";
         std::string centroids_file = std::string(_disk_index_file) + "_centroids.bin";
 
-        std::string labels_file = std::string(_disk_index_file) + "_labels.txt";
-        std::string labels_to_medoids = std::string(_disk_index_file) + "_labels_to_medoids.txt";
         std::string dummy_map_file = std::string(_disk_index_file) + "_dummy_map.txt";
-        std::string labels_map_file = std::string(_disk_index_file) + "_labels_map.txt";
         size_t num_pts_in_label_file = 0;
 
         size_t pq_file_dim, pq_file_num_centroids;
@@ -725,88 +545,6 @@ continue;
 
         this->_num_points = npts_u64;
         this->_n_chunks = nchunks_u64;
-        if (collie::filesystem::exists(labels_file)) {
-            std::ifstream infile(labels_file, std::ios::binary);
-            if (infile.fail()) {
-                throw polaris::PolarisException(std::string("Failed to open file ") + labels_file, -1);
-            }
-            parse_label_file(infile, num_pts_in_label_file);
-            assert(num_pts_in_label_file == this->_num_points);
-
-            infile.close();
-            std::ifstream map_reader(labels_map_file);
-            _label_map = load_label_map(map_reader);
-            map_reader.close();
-
-            if (collie::filesystem::exists(labels_to_medoids)) {
-                std::ifstream medoid_stream(labels_to_medoids);
-                assert(medoid_stream.is_open());
-                std::string line, token;
-
-                _filter_to_medoid_ids.clear();
-                try {
-                    while (std::getline(medoid_stream, line)) {
-                        std::istringstream iss(line);
-                        uint32_t cnt = 0;
-                        std::vector<uint32_t> medoids;
-                        labid_t label;
-                        while (std::getline(iss, token, ',')) {
-                            if (cnt == 0)
-                                label = (labid_t) std::stoul(token);
-                            else
-                                medoids.push_back((uint32_t) stoul(token));
-                            cnt++;
-                        }
-                        _filter_to_medoid_ids[label].swap(medoids);
-                    }
-                }
-                catch (std::system_error &e) {
-                    throw FileException(labels_to_medoids, e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-                }
-            }
-            std::string univ_label_file = std::string(_disk_index_file) + "_universal_label.txt";
-
-            if (collie::filesystem::exists(univ_label_file)) {
-                std::ifstream universal_label_reader(univ_label_file);
-                assert(universal_label_reader.is_open());
-                std::string univ_label;
-                universal_label_reader >> univ_label;
-                universal_label_reader.close();
-                labid_t label_as_num = (labid_t) std::stoul(univ_label);
-                set_universal_label(label_as_num);
-            }
-
-            if (collie::filesystem::exists(dummy_map_file)) {
-                std::ifstream dummy_map_stream(dummy_map_file);
-                assert(dummy_map_stream.is_open());
-                std::string line, token;
-
-                while (std::getline(dummy_map_stream, line)) {
-                    std::istringstream iss(line);
-                    uint32_t cnt = 0;
-                    uint32_t dummy_id;
-                    uint32_t real_id;
-                    while (std::getline(iss, token, ',')) {
-                        if (cnt == 0)
-                            dummy_id = (uint32_t) stoul(token);
-                        else
-                            real_id = (uint32_t) stoul(token);
-                        cnt++;
-                    }
-                    _dummy_pts.insert(dummy_id);
-                    _has_dummy_pts.insert(real_id);
-                    _dummy_to_real_map[dummy_id] = real_id;
-
-                    if (_real_to_dummy_map.find(real_id) == _real_to_dummy_map.end())
-                        _real_to_dummy_map[real_id] = std::vector<uint32_t>();
-
-                    _real_to_dummy_map[real_id].emplace_back(dummy_id);
-                }
-                dummy_map_stream.close();
-                polaris::cout << "Loaded dummy map" << std::endl;
-            }
-        }
-
         _pq_table.load_pq_centroid_bin(pq_table_bin.c_str(), nchunks_u64);
 
         polaris::cout << "Loaded PQ centroids and in-memory compressed vectors. #points: " << _num_points
@@ -961,7 +699,7 @@ continue;
                            std::numeric_limits<uint32_t>::max(),
                            use_reorder_data, stats);
     }
-
+    /*
     template<typename T>
     void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
                                                      uint64_t *indices, float *distances, const uint64_t beam_width,
@@ -980,11 +718,11 @@ continue;
         cached_beam_search(query1, k_search, l_search, indices, distances, beam_width, false, dummy_filter, io_limit,
                            use_reorder_data, stats);
     }
+    */
 
     template<typename T>
     void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
                                                      uint64_t *indices, float *distances, const uint64_t beam_width,
-                                                     const bool use_filter, const labid_t &filter_label,
                                                      const uint32_t io_limit, const bool use_reorder_data,
                                                      QueryStats *stats) {
 
@@ -1071,32 +809,13 @@ continue;
 
         uint32_t best_medoid = 0;
         float best_dist = (std::numeric_limits<float>::max)();
-        if (!use_filter) {
-            for (uint64_t cur_m = 0; cur_m < _num_medoids; cur_m++) {
-                float cur_expanded_dist =
-                        _dist_cmp_float->compare(query_float, _centroid_data + _aligned_dim * cur_m,
-                                                 (uint32_t) _aligned_dim);
-                if (cur_expanded_dist < best_dist) {
-                    best_medoid = _medoids[cur_m];
-                    best_dist = cur_expanded_dist;
-                }
-            }
-        } else {
-            if (_filter_to_medoid_ids.find(filter_label) != _filter_to_medoid_ids.end()) {
-                const auto &medoid_ids = _filter_to_medoid_ids[filter_label];
-                for (uint64_t cur_m = 0; cur_m < medoid_ids.size(); cur_m++) {
-                    // for filtered index, we dont store global centroid data as for unfiltered index, so we use PQ distance
-                    // as approximation to decide closest medoid matching the query filter.
-                    compute_dists(&medoid_ids[cur_m], 1, dist_scratch);
-                    float cur_expanded_dist = dist_scratch[0];
-                    if (cur_expanded_dist < best_dist) {
-                        best_medoid = medoid_ids[cur_m];
-                        best_dist = cur_expanded_dist;
-                    }
-                }
-            } else {
-                throw PolarisException("Cannot find medoid for specified filter.", -1, __PRETTY_FUNCTION__, __FILE__,
-                                       __LINE__);
+        for (uint64_t cur_m = 0; cur_m < _num_medoids; cur_m++) {
+            float cur_expanded_dist =
+                    _dist_cmp_float->compare(query_float, _centroid_data + _aligned_dim * cur_m,
+                                             (uint32_t) _aligned_dim);
+            if (cur_expanded_dist < best_dist) {
+                best_medoid = _medoids[cur_m];
+                best_dist = cur_expanded_dist;
             }
         }
 
@@ -1207,11 +926,7 @@ continue;
                 for (uint64_t m = 0; m < nnbrs; ++m) {
                     uint32_t id = node_nbrs[m];
                     if (visited.insert(id).second) {
-                        if (!use_filter && _dummy_pts.find(id) != _dummy_pts.end())
-                            continue;
-
-                        if (use_filter && !(point_has_label(id, filter_label)) &&
-                            (!_use_universal_label || !point_has_label(id, _universal_filter_label)))
+                        if (_dummy_pts.find(id) != _dummy_pts.end())
                             continue;
                         cmps++;
                         float dist = dist_scratch[m];
@@ -1263,11 +978,7 @@ continue;
                 for (uint64_t m = 0; m < nnbrs; ++m) {
                     uint32_t id = node_nbrs[m];
                     if (visited.insert(id).second) {
-                        if (!use_filter && _dummy_pts.find(id) != _dummy_pts.end())
-                            continue;
-
-                        if (use_filter && !(point_has_label(id, filter_label)) &&
-                            (!_use_universal_label || !point_has_label(id, _universal_filter_label)))
+                        if (_dummy_pts.find(id) != _dummy_pts.end())
                             continue;
                         cmps++;
                         float dist = dist_scratch[m];
@@ -1366,6 +1077,7 @@ continue;
             stats->total_us = (float) query_timer.elapsed();
         }
     }
+
 
     // range search returns results of all neighbors within distance of range.
     // indices and distances need to be pre-allocated of size l_search and the

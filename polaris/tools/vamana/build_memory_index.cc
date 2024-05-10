@@ -39,7 +39,6 @@ namespace polaris {
         bool use_opq;
         std::string label_file;
         std::string universal_label;
-        uint32_t Lf;
     };
 
     BuildMemIndexContext ctx;
@@ -65,7 +64,6 @@ namespace polaris {
         app->add_option("--label_file", ctx.label_file, program_options_utils::LABEL_FILE)->default_val("");
         app->add_option("--universal_label", ctx.universal_label, program_options_utils::UNIVERSAL_LABEL)->default_val(
                 "");
-        app->add_option("--FilteredLbuild", ctx.Lf, program_options_utils::FILTERED_LBUILD)->default_val(0);
         app->callback(run_build_memory_index_cli);
     }
 
@@ -92,17 +90,11 @@ namespace polaris {
             polaris::get_bin_metadata(ctx.data_path, data_num, data_dim);
 
             auto index_build_params = polaris::IndexWriteParametersBuilder(ctx.L,ctx.R)
-                    .with_filter_list_size(ctx.Lf)
                     .with_alpha(ctx.alpha)
                     .with_saturate_graph(false)
                     .with_num_threads(ctx.num_threads)
                     .build();
 
-            auto filter_params = polaris::IndexFilterParamsBuilder()
-                    .with_universal_label(ctx.universal_label)
-                    .with_label_file(ctx.label_file)
-                    .with_save_path_prefix(ctx.index_path_prefix)
-                    .build();
             auto config = polaris::IndexConfigBuilder()
                     .with_metric(metric)
                     .with_dimension(data_dim)
@@ -120,7 +112,7 @@ namespace polaris {
 
             auto index_factory = polaris::IndexFactory(config);
             auto index = index_factory.create_instance();
-            index->build(ctx.data_path, data_num, filter_params);
+            index->build(ctx.data_path, data_num);
             index->save(ctx.index_path_prefix.c_str());
             index.reset();
         }

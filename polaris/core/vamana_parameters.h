@@ -27,8 +27,6 @@ namespace polaris {
         const float ALPHA = 1.2f;
         const uint32_t NUM_THREADS = 0;
         const uint32_t MAX_OCCLUSION_SIZE = 750;
-        const bool HAS_LABELS = false;
-        const uint32_t FILTER_LIST_SIZE = 0;
         const uint32_t NUM_FROZEN_POINTS_STATIC = 0;
         const uint32_t NUM_FROZEN_POINTS_DYNAMIC = 1;
 
@@ -56,14 +54,11 @@ namespace polaris {
         const uint32_t max_occlusion_size; // C
         const float alpha;
         const uint32_t num_threads;
-        const uint32_t filter_list_size; // Lf
 
         IndexWriteParameters(const uint32_t search_list_size, const uint32_t max_degree, const bool saturate_graph,
-                             const uint32_t max_occlusion_size, const float alpha, const uint32_t num_threads,
-                             const uint32_t filter_list_size)
+                             const uint32_t max_occlusion_size, const float alpha, const uint32_t num_threads)
                 : search_list_size(search_list_size), max_degree(max_degree), saturate_graph(saturate_graph),
-                  max_occlusion_size(max_occlusion_size), alpha(alpha), num_threads(num_threads),
-                  filter_list_size(filter_list_size) {
+                  max_occlusion_size(max_occlusion_size), alpha(alpha), num_threads(num_threads) {
         }
 
         friend class IndexWriteParametersBuilder;
@@ -111,20 +106,14 @@ namespace polaris {
             return *this;
         }
 
-        IndexWriteParametersBuilder &with_filter_list_size(const uint32_t filter_list_size) {
-            _filter_list_size = filter_list_size == 0 ? _search_list_size : filter_list_size;
-            return *this;
-        }
-
         IndexWriteParameters build() const {
             return IndexWriteParameters(_search_list_size, _max_degree, _saturate_graph, _max_occlusion_size, _alpha,
-                                        _num_threads, _filter_list_size);
+                                        _num_threads);
         }
 
         IndexWriteParametersBuilder(const IndexWriteParameters &wp)
                 : _search_list_size(wp.search_list_size), _max_degree(wp.max_degree),
-                  _max_occlusion_size(wp.max_occlusion_size), _saturate_graph(wp.saturate_graph), _alpha(wp.alpha),
-                  _filter_list_size(wp.filter_list_size) {
+                  _max_occlusion_size(wp.max_occlusion_size), _saturate_graph(wp.saturate_graph), _alpha(wp.alpha) {
         }
 
         IndexWriteParametersBuilder(const IndexWriteParametersBuilder &) = delete;
@@ -138,67 +127,6 @@ namespace polaris {
         bool _saturate_graph{defaults::SATURATE_GRAPH};
         float _alpha{defaults::ALPHA};
         uint32_t _num_threads{defaults::NUM_THREADS};
-        uint32_t _filter_list_size{defaults::FILTER_LIST_SIZE};
-    };
-
-    struct IndexFilterParams {
-    public:
-        std::string save_path_prefix;
-        std::string label_file;
-        std::string tags_file;
-        std::string universal_label;
-        uint32_t filter_threshold = 0;
-
-    private:
-        IndexFilterParams(const std::string &save_path_prefix, const std::string &label_file,
-                          const std::string &universal_label, uint32_t filter_threshold)
-                : save_path_prefix(save_path_prefix), label_file(label_file), universal_label(universal_label),
-                  filter_threshold(filter_threshold) {
-        }
-
-        friend class IndexFilterParamsBuilder;
-    };
-
-    class IndexFilterParamsBuilder {
-    public:
-        IndexFilterParamsBuilder() = default;
-
-        IndexFilterParamsBuilder &with_save_path_prefix(const std::string &save_path_prefix) {
-            if (save_path_prefix.empty() || save_path_prefix == "")
-                throw PolarisException("Error: save_path_prefix can't be empty", -1);
-            this->_save_path_prefix = save_path_prefix;
-            return *this;
-        }
-
-        IndexFilterParamsBuilder &with_label_file(const std::string &label_file) {
-            this->_label_file = label_file;
-            return *this;
-        }
-
-        IndexFilterParamsBuilder &with_universal_label(const std::string &univeral_label) {
-            this->_universal_label = univeral_label;
-            return *this;
-        }
-
-        IndexFilterParamsBuilder &with_filter_threshold(const std::uint32_t &filter_threshold) {
-            this->_filter_threshold = filter_threshold;
-            return *this;
-        }
-
-        IndexFilterParams build() {
-            return IndexFilterParams(_save_path_prefix, _label_file, _universal_label, _filter_threshold);
-        }
-
-        IndexFilterParamsBuilder(const IndexFilterParamsBuilder &) = delete;
-
-        IndexFilterParamsBuilder &operator=(const IndexFilterParamsBuilder &) = delete;
-
-    private:
-        std::string _save_path_prefix;
-        std::string _label_file;
-        std::string _tags_file;
-        std::string _universal_label;
-        uint32_t _filter_threshold = 0;
     };
 
     enum class DataStoreStrategy {
@@ -217,8 +145,6 @@ namespace polaris {
         bool pq_dist_build{false};
         bool concurrent_consolidate{false};
         bool use_opq{false};
-        bool filtered_index{defaults::HAS_LABELS};
-
         size_t num_pq_chunks{0};
         size_t num_frozen_pts{defaults::NUM_FROZEN_POINTS_STATIC};
 

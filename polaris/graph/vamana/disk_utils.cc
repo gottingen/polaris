@@ -550,9 +550,7 @@ namespace polaris {
                                   double sampling_rate, double ram_budget, std::string mem_index_path,
                                   std::string medoids_file, std::string centroids_file, size_t build_pq_bytes,
                                   bool use_opq,
-                                  uint32_t num_threads, bool use_filters, const std::string &label_file,
-                                  const std::string &labels_to_medoids_file, const std::string &universal_label,
-                                  const uint32_t Lf) {
+                                  uint32_t num_threads) {
         size_t base_num, base_dim;
         polaris::get_bin_metadata(base_file, base_num, base_dim);
 
@@ -564,34 +562,15 @@ namespace polaris {
                           << full_index_ram / (1024 * 1024 * 1024) << "GiBs, so building in one shot" << std::endl;
 
             polaris::IndexWriteParameters paras = polaris::IndexWriteParametersBuilder(L, R)
-                    .with_filter_list_size(Lf)
-                    .with_saturate_graph(!use_filters)
+                    .with_saturate_graph(true)
                     .with_num_threads(num_threads)
                     .build();
             polaris::VamanaIndex<T> _index(compareMetric, base_dim, base_num,
                                            std::make_shared<polaris::IndexWriteParameters>(paras), nullptr,
                                            defaults::NUM_FROZEN_POINTS_STATIC, false, false, false,
-                                           build_pq_bytes > 0, build_pq_bytes, use_opq, use_filters);
-            if (!use_filters)
-                _index.build(base_file.c_str(), base_num);
-            else {
-                if (universal_label != "") { //  indicates no universal label
-                    labid_t unv_label_as_num = 0;
-                    _index.set_universal_label(unv_label_as_num);
-                }
-                _index.build_filtered_index(base_file.c_str(), label_file, base_num);
-            }
+                                           build_pq_bytes > 0, build_pq_bytes, use_opq);
+            _index.build(base_file.c_str(), base_num);
             _index.save(mem_index_path.c_str());
-
-            if (use_filters) {
-                // need to copy the labels_to_medoids file to the specified input
-                // file
-                std::remove(labels_to_medoids_file.c_str());
-                std::string mem_labels_to_medoid_file = mem_index_path + "_labels_to_medoids.txt";
-                copy_file(mem_labels_to_medoid_file, labels_to_medoids_file);
-                std::remove(mem_labels_to_medoid_file.c_str());
-            }
-
             std::remove(medoids_file.c_str());
             std::remove(centroids_file.c_str());
             return 0;
@@ -627,7 +606,6 @@ namespace polaris {
             std::string shard_index_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_mem.index";
 
             polaris::IndexWriteParameters low_degree_params = polaris::IndexWriteParametersBuilder(L, 2 * R / 3)
-                    .with_filter_list_size(Lf)
                     .with_saturate_graph(false)
                     .with_num_threads(num_threads)
                     .build();
@@ -639,34 +617,15 @@ namespace polaris {
                                            std::make_shared<polaris::IndexWriteParameters>(low_degree_params), nullptr,
                                            defaults::NUM_FROZEN_POINTS_STATIC, false, false, false, build_pq_bytes > 0,
                                            build_pq_bytes, use_opq);
-            if (!use_filters) {
-                _index.build(shard_base_file.c_str(), shard_base_pts);
-            } else {
-                polaris::extract_shard_labels(label_file, shard_ids_file, shard_labels_file);
-                if (universal_label != "") { //  indicates no universal label
-                    labid_t unv_label_as_num = 0;
-                    _index.set_universal_label(unv_label_as_num);
-                }
-                _index.build_filtered_index(shard_base_file.c_str(), shard_labels_file, shard_base_pts);
-            }
+            _index.build(shard_base_file.c_str(), shard_base_pts);
             _index.save(shard_index_file.c_str());
-            // copy universal label file from first shard to the final destination
-            // index, since all shards anyway share the universal label
-            if (p == 0) {
-                std::string shard_universal_label_file = shard_index_file + "_universal_label.txt";
-                if (universal_label != "") {
-                    copy_file(shard_universal_label_file, final_index_universal_label_file);
-                }
-            }
-
             std::remove(shard_base_file.c_str());
         }
         polaris::cout << timer.elapsed_seconds_for_step("building indices on shards") << std::endl;
 
         timer.reset();
         polaris::merge_shards(merged_index_prefix + "_subshard-", "_mem.index", merged_index_prefix + "_subshard-",
-                              "_ids_uint32.bin", num_parts, R, mem_index_path, medoids_file, use_filters,
-                              labels_to_medoids_file);
+                              "_ids_uint32.bin", num_parts, R, mem_index_path, medoids_file);
         polaris::cout << timer.elapsed_seconds_for_step("merging indices") << std::endl;
 
         // delete tempFiles
@@ -681,15 +640,6 @@ namespace polaris {
             std::remove(shard_id_file.c_str());
             std::remove(shard_index_file.c_str());
             std::remove(shard_index_file_data.c_str());
-            if (use_filters) {
-                std::string shard_index_label_file = shard_index_file + "_labels.txt";
-                std::string shard_index_univ_label_file = shard_index_file + "_universal_label.txt";
-                std::string shard_index_label_map_file = shard_index_file + "_labels_to_medoids.txt";
-                std::remove(shard_labels_file.c_str());
-                std::remove(shard_index_label_file.c_str());
-                std::remove(shard_index_label_map_file.c_str());
-                std::remove(shard_index_univ_label_file.c_str());
-            }
         }
         return 0;
     }
@@ -1198,8 +1148,7 @@ namespace polaris {
         timer.reset();
         polaris::build_merged_vamana_index<T>(data_file_to_use.c_str(), polaris::MetricType::METRIC_L2, L, R, p_val,
                                               indexing_ram_budget, mem_index_path, medoids_path, centroids_path,
-                                              build_pq_bytes, use_opq, num_threads, use_filters, labels_file_to_use,
-                                              labels_to_medoids_path, universal_label, Lf);
+                                              build_pq_bytes, use_opq, num_threads);
         polaris::cout << timer.elapsed_seconds_for_step("building merged vamana index") << std::endl;
 
         timer.reset();
@@ -1310,18 +1259,15 @@ namespace polaris {
     template POLARIS_API int build_merged_vamana_index<int8_t>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
             double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
-            size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
-            const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
+            size_t build_pq_bytes, bool use_opq, uint32_t num_threads);
 
     template POLARIS_API int build_merged_vamana_index<float>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
             double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
-            size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
-            const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
+            size_t build_pq_bytes, bool use_opq, uint32_t num_threads);
 
     template POLARIS_API int build_merged_vamana_index<uint8_t>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
             double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
-            size_t build_pq_bytes, bool use_opq, uint32_t num_threads, bool use_filters, const std::string &label_file,
-            const std::string &labels_to_medoids_file, const std::string &universal_label, const uint32_t Lf);
+            size_t build_pq_bytes, bool use_opq, uint32_t num_threads);
 }; // namespace polaris

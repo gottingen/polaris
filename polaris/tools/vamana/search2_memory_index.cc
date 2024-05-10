@@ -39,8 +39,7 @@ int
 search2_memory_index(polaris::MetricType &metric, const std::string &index_path, const std::string &result_path_prefix,
                      const std::string &query_file, const std::string &truthset_file, const uint32_t num_threads,
                      const uint32_t recall_at, const bool print_all_recalls, const std::vector<uint32_t> &Lvec,
-                     const bool dynamic, const bool tags, const bool show_qps_per_thread,
-                     const std::vector<std::string> &query_filters, const float fail_if_recall_below) {
+                     const bool dynamic, const bool tags, const bool show_qps_per_thread, const float fail_if_recall_below) {
     // Load the query file
     T *query = nullptr;
     uint32_t *gt_ids = nullptr;
@@ -57,17 +56,6 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
         calc_recall_flag = true;
     } else {
         polaris::cout << " Truthset file " << truthset_file << " not found. Not computing recall." << std::endl;
-    }
-
-    bool filtered_search = false;
-    if (!query_filters.empty()) {
-        filtered_search = true;
-        if (query_filters.size() != 1 && query_filters.size() != query_num) {
-            std::cout << "Error. Mismatch in number of queries and size of query "
-                         "filters file"
-                      << std::endl;
-            return -1; // To return -1 or some other error handling?
-        }
     }
 
     const size_t num_frozen_pts = polaris::get_graph_num_frozen_points(index_path);
@@ -126,7 +114,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
     std::vector<std::vector<float>> query_result_dists(Lvec.size());
     std::vector<float> latency_stats(query_num, 0);
     std::vector<uint32_t> cmp_stats;
-    if (not tags || filtered_search) {
+    if (not tags) {
         cmp_stats = std::vector<uint32_t>(query_num, 0);
     }
 
@@ -157,31 +145,16 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
             ctx.set_query(query + i * query_aligned_dim, query_aligned_dim * sizeof(T))
                     .set_top_k(recall_at)
                     .set_search_list(L);
-            if (filtered_search && !tags) {/*
-                std::string raw_filter = query_filters.size() == 1 ? query_filters[0] : query_filters[i];
-
-                auto retval = index->search_with_filters(query + i * query_aligned_dim, raw_filter, recall_at, L,
-                                                         query_result_ids[test_id].data() + i * recall_at,
-                                                         query_result_dists[test_id].data() + i * recall_at);
-                cmp_stats[i] = retval.second;
-                */
-            } else if (metric == polaris::MetricType::METRIC_FAST_L2) {
+            if (metric == polaris::MetricType::METRIC_FAST_L2) {
                 ctx.vamana_optimized_layout = true;
                 /*
                 index->search_with_optimized_layout(query + i * query_aligned_dim, recall_at, L,
                                                     query_result_ids[test_id].data() + i * recall_at);
                                                     */
             } else if (tags) {
-                if (!filtered_search) {
-                    index->search_with_tags(query + i * query_aligned_dim, (uint64_t) recall_at, (uint32_t) L,
-                                            (polaris::vid_t *) (query_result_tags.data() + i * recall_at), nullptr,
-                                            res);
-                } else {
-                    std::string raw_filter = query_filters.size() == 1 ? query_filters[0] : query_filters[i];
-
-                    index->search_with_tags(query + i * query_aligned_dim, recall_at, L,
-                                            query_result_tags.data() + i * recall_at, nullptr, res, true, raw_filter);
-                }
+                index->search_with_tags(query + i * query_aligned_dim, (uint64_t) recall_at, (uint32_t) L,
+                                        (polaris::vid_t *) (query_result_tags.data() + i * recall_at), nullptr,
+                                        res);
 
                 for (int64_t r = 0; r < (int64_t) recall_at; r++) {
                     query_result_ids[test_id][recall_at * i + r] = query_result_tags[recall_at * i + r];
@@ -218,7 +191,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
 
         float avg_cmps = (float) std::accumulate(cmp_stats.begin(), cmp_stats.end(), 0) / (float) query_num;
 
-        if (tags && !filtered_search) {
+        if (tags) {
             std::cout << std::setw(4) << L << std::setw(12) << displayed_qps << std::setw(20) << (float) mean_latency
                       << std::setw(15) << (float) latency_stats[(uint64_t) (0.999 * query_num)];
         } else {
@@ -263,16 +236,14 @@ namespace polaris {
         std::string result_path;
         std::string query_file;
         std::string gt_file;
-        std::string filter_label;
-        std::string query_filters_file;
-        uint32_t num_threads;
-        uint32_t K;
+        uint32_t num_threads{0};
+        uint32_t K{0};
         std::vector<uint32_t> Lvec;
-        bool print_all_recalls;
-        bool dynamic;
-        bool tags;
-        bool show_qps_per_thread;
-        float fail_if_recall_below;
+        bool print_all_recalls{true};
+        bool dynamic{false};
+        bool tags{true};
+        bool show_qps_per_thread{true};
+        float fail_if_recall_below{false};
     };
     static Search2MemoryIndexContext ctx;
 
@@ -288,11 +259,6 @@ namespace polaris {
         app->add_option("--query_file", ctx.query_file, program_options_utils::QUERY_FILE_DESCRIPTION)->required();
         app->add_option("-K,--recall_at", ctx.K, program_options_utils::NUMBER_OF_RESULTS_DESCRIPTION)->required();
         app->add_option("-L, --search_list", ctx.Lvec, program_options_utils::SEARCH_LIST_DESCRIPTION)->required();
-        app->add_option("--filter_label", ctx.filter_label,
-                        program_options_utils::FILTER_LABEL_DESCRIPTION)->default_val(
-                "");
-        app->add_option("--query_filters_file", ctx.query_filters_file,
-                        program_options_utils::FILTERS_FILE_DESCRIPTION)->default_val("");
         app->add_option("--gt_file", ctx.gt_file, program_options_utils::GROUND_TRUTH_FILE_DESCRIPTION)->default_val(
                 "null");
         app->add_option("-T, --num_threads", ctx.num_threads,
@@ -337,18 +303,6 @@ namespace polaris {
             exit(-1);
         }
 
-        if (ctx.filter_label != "" && ctx.query_filters_file != "") {
-            std::cerr << "Only one of filter_label and query_filters_file should be provided" << std::endl;
-            exit(-1);
-        }
-
-        std::vector<std::string> query_filters;
-        if (ctx.filter_label != "") {
-            query_filters.push_back(ctx.filter_label);
-        } else if (ctx.query_filters_file != "") {
-            query_filters = read_file_to_vector_of_strings(ctx.query_filters_file);
-        }
-
         int r = 0;
         try {
             if (ctx.data_type == std::string("int8")) {
@@ -356,14 +310,14 @@ namespace polaris {
                         metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
                         ctx.num_threads, ctx.K,
                         ctx.print_all_recalls,
-                        ctx.Lvec, ctx.dynamic, ctx.tags, ctx.show_qps_per_thread, query_filters,
+                        ctx.Lvec, ctx.dynamic, ctx.tags, ctx.show_qps_per_thread,
                         ctx.fail_if_recall_below);
             } else if (ctx.data_type == std::string("uint8")) {
                 r = search2_memory_index<uint8_t>(
                         metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
                         ctx.num_threads, ctx.K,
                         ctx.print_all_recalls,
-                        ctx.Lvec, ctx.dynamic, ctx.tags, ctx.show_qps_per_thread, query_filters,
+                        ctx.Lvec, ctx.dynamic, ctx.tags, ctx.show_qps_per_thread,
                         ctx.fail_if_recall_below);
             } else if (ctx.data_type == std::string("float")) {
                 r = search2_memory_index<float>(metric, ctx.index_path_prefix, ctx.result_path,
@@ -371,7 +325,7 @@ namespace polaris {
                                                 ctx.gt_file,
                                                 ctx.num_threads, ctx.K, ctx.print_all_recalls, ctx.Lvec,
                                                 ctx.dynamic, ctx.tags,
-                                                ctx.show_qps_per_thread, query_filters,
+                                                ctx.show_qps_per_thread,
                                                 ctx.fail_if_recall_below);
             } else {
                 std::cout << "Unsupported type. Use float/int8/uint8" << std::endl;

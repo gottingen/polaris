@@ -54,7 +54,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
                       const uint32_t num_threads, const uint32_t recall_at, const uint32_t beamwidth,
                       const uint32_t num_nodes_to_cache, const uint32_t search_io_limit,
                       const std::vector<uint32_t> &Lvec, const float fail_if_recall_below,
-                      const std::vector<std::string> &query_filters, const bool use_reorder_data = false) {
+                      const bool use_reorder_data = false) {
     polaris::cout << "Search parameters: #threads: " << num_threads << ", ";
     if (beamwidth <= 0)
         polaris::cout << "beamwidth to be optimized for each L value" << std::flush;
@@ -73,17 +73,6 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     float *gt_dists = nullptr;
     size_t query_num, query_dim, query_aligned_dim, gt_num, gt_dim;
     polaris::load_aligned_bin<T>(query_file, query, query_num, query_dim, query_aligned_dim);
-
-    bool filtered_search = false;
-    if (!query_filters.empty()) {
-        filtered_search = true;
-        if (query_filters.size() != 1 && query_filters.size() != query_num) {
-            std::cout << "Error. Mismatch in number of queries and size of query "
-                         "filters file"
-                      << std::endl;
-            return -1; // To return -1 or some other error handling?
-        }
-    }
 
     bool calc_recall_flag = false;
     if (gt_file != std::string("null") && gt_file != std::string("NULL") && collie::filesystem::exists(gt_file)) {
@@ -200,24 +189,10 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
 
 #pragma omp parallel for schedule(dynamic, 1)
         for (int64_t i = 0; i < (int64_t) query_num; i++) {
-            if (!filtered_search) {
-                _pFlashIndex->cached_beam_search(query + (i * query_aligned_dim), recall_at, L,
-                                                 query_result_ids_64.data() + (i * recall_at),
-                                                 query_result_dists[test_id].data() + (i * recall_at),
-                                                 optimized_beamwidth, use_reorder_data, stats + i);
-            } else {
-                polaris::labid_t label_for_search;
-                if (query_filters.size() == 1) { // one label for all queries
-                    label_for_search = _pFlashIndex->get_converted_label(query_filters[0]);
-                } else { // one label for each query
-                    label_for_search = _pFlashIndex->get_converted_label(query_filters[i]);
-                }
-                _pFlashIndex->cached_beam_search(
-                        query + (i * query_aligned_dim), recall_at, L, query_result_ids_64.data() + (i * recall_at),
-                        query_result_dists[test_id].data() + (i * recall_at), optimized_beamwidth, true,
-                        label_for_search,
-                        use_reorder_data, stats + i);
-            }
+            _pFlashIndex->cached_beam_search(query + (i * query_aligned_dim), recall_at, L,
+                                             query_result_ids_64.data() + (i * recall_at),
+                                             query_result_dists[test_id].data() + (i * recall_at),
+                                             optimized_beamwidth, use_reorder_data, stats + i);
         }
         auto e = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> diff = e - s;
@@ -273,6 +248,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
         polaris::aligned_free(warmup);
     return best_recall >= fail_if_recall_below ? 0 : -1;
 }
+
 namespace polaris {
     struct SearchDiskIndexContext {
         std::string data_type;
@@ -281,9 +257,6 @@ namespace polaris {
         std::string result_path_prefix;
         std::string query_file;
         std::string gt_file;
-        std::string filter_label;
-        std::string label_type;
-        std::string query_filters_file;
         uint32_t num_threads;
         uint32_t K;
         uint32_t W;
@@ -324,13 +297,6 @@ namespace polaris {
                 omp_get_num_procs());
         app->add_flag("--use_reorder_data", ctx.use_reorder_data,
                       "Include full precision data in the index. Use only in conjuction with compressed data on SSD.  Default value: false");
-        app->add_option("--filter_label", ctx.filter_label,
-                        program_options_utils::FILTER_LABEL_DESCRIPTION)->default_val(
-                "");
-        app->add_option("--query_filters_file", ctx.query_filters_file,
-                        program_options_utils::FILTERS_FILE_DESCRIPTION)->default_val("");
-        app->add_option("--label_type", ctx.label_type, program_options_utils::LABEL_TYPE_DESCRIPTION)->default_val(
-                "uint");
         app->add_option("--fail_if_recall_below", ctx.fail_if_recall_below,
                         program_options_utils::FAIL_IF_RECALL_BELOW)->default_val(0.0f);
         app->callback(run_search_disk_index_cli);
@@ -364,73 +330,34 @@ namespace polaris {
             exit(-1);
         }
 
-        if (ctx.filter_label != "" && ctx.query_filters_file != "") {
-            std::cerr << "Only one of filter_label and query_filters_file should be provided" << std::endl;
-            exit(-1);
-        }
-
-        std::vector<std::string> query_filters;
-        if (ctx.filter_label != "") {
-            query_filters.push_back(ctx.filter_label);
-        } else if (ctx.query_filters_file != "") {
-            query_filters = read_file_to_vector_of_strings(ctx.query_filters_file);
-        }
 
         try {
             int r;
-            if (!query_filters.empty() && ctx.label_type == "ushort") {
-                if (ctx.data_type == std::string("float"))
-                    r = search_disk_index<float>(
-                            metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file, ctx.gt_file,
-                            ctx.num_threads, ctx.K, ctx.W,
-                            ctx.num_nodes_to_cache, ctx.search_io_limit, ctx.Lvec, ctx.fail_if_recall_below,
-                            query_filters,
-                            ctx.use_reorder_data);
-                else if (ctx.data_type == std::string("int8"))
-                    r = search_disk_index<int8_t>(
-                            metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file, ctx.gt_file,
-                            ctx.num_threads, ctx.K, ctx.W,
-                            ctx.num_nodes_to_cache, ctx.search_io_limit, ctx.Lvec, ctx.fail_if_recall_below,
-                            query_filters,
-                            ctx.use_reorder_data);
-                else if (ctx.data_type == std::string("uint8"))
-                    r = search_disk_index<uint8_t>(
-                            metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file, ctx.gt_file,
-                            ctx.num_threads, ctx.K, ctx.W,
-                            ctx.num_nodes_to_cache, ctx.search_io_limit, ctx.Lvec, ctx.fail_if_recall_below,
-                            query_filters,
-                            ctx.use_reorder_data);
-                else {
-                    std::cerr << "Unsupported data type. Use float or int8 or uint8" << std::endl;
-                    r = -1;
-                }
-            } else {
-                if (ctx.data_type == std::string("float"))
-                    r = search_disk_index<float>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
-                                                 ctx.gt_file,
-                                                 ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
-                                                 ctx.search_io_limit,
-                                                 ctx.Lvec,
-                                                 ctx.fail_if_recall_below, query_filters, ctx.use_reorder_data);
-                else if (ctx.data_type == std::string("int8"))
-                    r = search_disk_index<int8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
-                                                  ctx.gt_file,
-                                                  ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
-                                                  ctx.search_io_limit, ctx.Lvec,
-                                                  ctx.fail_if_recall_below, query_filters, ctx.use_reorder_data);
-                else if (ctx.data_type == std::string("uint8"))
-                    r = search_disk_index<uint8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix,
-                                                   ctx.query_file,
-                                                   ctx.gt_file,
-                                                   ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
-                                                   ctx.search_io_limit, ctx.Lvec,
-                                                   ctx.fail_if_recall_below, query_filters, ctx.use_reorder_data);
-                else {
-                    std::cerr << "Unsupported data type. Use float or int8 or uint8" << std::endl;
-                    r = -1;
-                }
-
+            if (ctx.data_type == std::string("float"))
+                r = search_disk_index<float>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
+                                             ctx.gt_file,
+                                             ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
+                                             ctx.search_io_limit,
+                                             ctx.Lvec,
+                                             ctx.fail_if_recall_below, ctx.use_reorder_data);
+            else if (ctx.data_type == std::string("int8"))
+                r = search_disk_index<int8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
+                                              ctx.gt_file,
+                                              ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
+                                              ctx.search_io_limit, ctx.Lvec,
+                                              ctx.fail_if_recall_below, ctx.use_reorder_data);
+            else if (ctx.data_type == std::string("uint8"))
+                r = search_disk_index<uint8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix,
+                                               ctx.query_file,
+                                               ctx.gt_file,
+                                               ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
+                                               ctx.search_io_limit, ctx.Lvec,
+                                               ctx.fail_if_recall_below, ctx.use_reorder_data);
+            else {
+                std::cerr << "Unsupported data type. Use float or int8 or uint8" << std::endl;
+                r = -1;
             }
+
             if (r != 0) {
                 exit(-1);
             }
