@@ -252,7 +252,7 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::save(const char *filename, bool compact_before_save) {
+    turbo::Status VamanaIndex<T>::save(const char *filename, bool compact_before_save) {
         polaris::Timer timer;
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -265,9 +265,7 @@ namespace polaris {
             compact_frozen_point();
         } else {
             if (!_data_compacted) {
-                throw PolarisException("VamanaIndex save for non-compacted index is not yet implemented", -1,
-                                       __PRETTY_FUNCTION__, __FILE__,
-                                       __LINE__);
+                return turbo::make_status(turbo::kInternal, "VamanaIndex save for non-compacted index is not yet implemented");
             }
         }
 
@@ -300,6 +298,7 @@ namespace polaris {
         reposition_frozen_point_to_end();
 
         polaris::cout << "Time taken for save: " << timer.elapsed() / 1000000.0 << "s." << std::endl;
+        return turbo::ok_status();
     }
 
     template<typename T>
@@ -484,23 +483,7 @@ namespace polaris {
     }
 
     template<typename T>
-    int VamanaIndex<T>::_get_vector_by_tag(TagType &tag, DataType &vec) {
-        try {
-            vid_t tag_val = std::any_cast<vid_t>(tag);
-            T *vec_val = std::any_cast<T *>(vec);
-            return this->get_vector_by_tag(tag_val, vec_val);
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException(
-                    "Error: bad any cast while performing _get_vector_by_tags() " + std::string(e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error: " + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
-    int VamanaIndex<T>::get_vector_by_tag(vid_t &tag, T *vec) {
+    int VamanaIndex<T>::get_vector_by_tag(vid_t &tag, void *vec) {
         std::shared_lock<std::shared_timed_mutex> lock(_tag_lock);
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
             polaris::cout << "Tag " << get_tag_string(tag) << " does not exist" << std::endl;
@@ -508,7 +491,7 @@ namespace polaris {
         }
 
         location_t location = _tag_to_location[tag];
-        _data_store->get_vector(location, vec);
+        _data_store->get_vector(location, static_cast<T*>(vec));
 
         return 0;
     }
@@ -985,7 +968,7 @@ namespace polaris {
                 LockGuard guard(_locks[des]);
                 auto &des_pool = _graph_store->get_neighbours(des);
                 if (std::find(des_pool.begin(), des_pool.end(), n) == des_pool.end()) {
-                    if (des_pool.size() < (uint64_t) (defaults::GRAPH_SLACK_FACTOR * range)) {
+                    if (des_pool.size() < (uint64_t)(defaults::GRAPH_SLACK_FACTOR * range)) {
                         // des_pool.emplace_back(n);
                         _graph_store->add_neighbour(des, n);
                         prune_needed = false;
@@ -1046,7 +1029,7 @@ namespace polaris {
         }
 
         // If there are any frozen points, add them all.
-        for (uint32_t frozen = (uint32_t) _max_points; frozen < _max_points + _num_frozen_pts; frozen++) {
+        for (auto frozen = (uint32_t) _max_points; frozen < _max_points + _num_frozen_pts; frozen++) {
             visit_order.emplace_back(frozen);
         }
 
@@ -1059,7 +1042,7 @@ namespace polaris {
         polaris::Timer link_timer;
 
 #pragma omp parallel for schedule(dynamic, 2048)
-        for (int64_t node_ctr = 0; node_ctr < (int64_t) (visit_order.size()); node_ctr++) {
+        for (int64_t node_ctr = 0; node_ctr < (int64_t)(visit_order.size()); node_ctr++) {
             auto node = visit_order[node_ctr];
 
             // Find and add appropriate graph edges
@@ -1085,10 +1068,10 @@ namespace polaris {
         }
 
         if (_nd > 0) {
-            polaris::cout << "Starting final cleanup.." << std::flush;
+            POLARIS_LOG(INFO) << "Starting final cleanup..";
         }
 #pragma omp parallel for schedule(dynamic, 2048)
-        for (int64_t node_ctr = 0; node_ctr < (int64_t) (visit_order.size()); node_ctr++) {
+        for (int64_t node_ctr = 0; node_ctr < (int64_t)(visit_order.size()); node_ctr++) {
             auto node = visit_order[node_ctr];
             if (_graph_store->get_neighbours((location_t) node).size() > _indexingRange) {
                 ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
@@ -1138,11 +1121,68 @@ namespace polaris {
         polaris::cout << "VamanaIndex start points set: #" << _num_frozen_pts << std::endl;
     }
 
+    /*
     template<typename T>
     void VamanaIndex<T>::_set_start_points_at_random(DataType radius, uint32_t random_seed) {
         try {
             T radius_to_use = std::any_cast<T>(radius);
-            this->set_start_points_at_random(radius_to_use, random_seed);
+            //this->set_start_points_at_random(radius_to_use, random_seed);
+            std::mt19937 gen{random_seed};
+            std::normal_distribution<> d{0.0, 1.0};
+
+            std::vector<T> points_data;
+            points_data.reserve(_index_config.basic_config.dimension * _num_frozen_pts);
+            std::vector<double> real_vec(_index_config.basic_config.dimension);
+
+            for (size_t frozen_point = 0; frozen_point < _num_frozen_pts; frozen_point++) {
+                double norm_sq = 0.0;
+                for (size_t i = 0; i < _index_config.basic_config.dimension; ++i) {
+                    auto r = d(gen);
+                    real_vec[i] = r;
+                    norm_sq += r * r;
+                }
+
+                const double norm = std::sqrt(norm_sq);
+                for (auto iter: real_vec)
+                    points_data.push_back(static_cast<T>(iter * radius_to_use / norm));
+            }
+
+            set_start_points(points_data.data(), points_data.size());
+        }
+        catch (const std::bad_any_cast &e) {
+            throw PolarisException(
+                    "Error: bad any cast while performing _set_start_points_at_random() " + std::string(e.what()), -1);
+        }
+        catch (const std::exception &e) {
+            throw PolarisException("Error: " + std::string(e.what()), -1);
+        }
+    }
+    */
+    template<typename T>
+    void VamanaIndex<T>::set_start_points_at_random(std::any radius, uint32_t random_seed) {
+        try {
+            T radius_to_use = std::any_cast<T>(radius);
+            std::mt19937 gen{random_seed};
+            std::normal_distribution<> d{0.0, 1.0};
+
+            std::vector<T> points_data;
+            points_data.reserve(_index_config.basic_config.dimension * _num_frozen_pts);
+            std::vector<double> real_vec(_index_config.basic_config.dimension);
+
+            for (size_t frozen_point = 0; frozen_point < _num_frozen_pts; frozen_point++) {
+                double norm_sq = 0.0;
+                for (size_t i = 0; i < _index_config.basic_config.dimension; ++i) {
+                    auto r = d(gen);
+                    real_vec[i] = r;
+                    norm_sq += r * r;
+                }
+
+                const double norm = std::sqrt(norm_sq);
+                for (auto iter: real_vec)
+                    points_data.push_back(static_cast<T>(iter * radius_to_use / norm));
+            }
+
+            set_start_points(points_data.data(), points_data.size());
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException(
@@ -1154,44 +1194,19 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::set_start_points_at_random(T radius, uint32_t random_seed) {
-        std::mt19937 gen{random_seed};
-        std::normal_distribution<> d{0.0, 1.0};
-
-        std::vector<T> points_data;
-        points_data.reserve(_index_config.basic_config.dimension * _num_frozen_pts);
-        std::vector<double> real_vec(_index_config.basic_config.dimension);
-
-        for (size_t frozen_point = 0; frozen_point < _num_frozen_pts; frozen_point++) {
-            double norm_sq = 0.0;
-            for (size_t i = 0; i < _index_config.basic_config.dimension; ++i) {
-                auto r = d(gen);
-                real_vec[i] = r;
-                norm_sq += r * r;
-            }
-
-            const double norm = std::sqrt(norm_sq);
-            for (auto iter: real_vec)
-                points_data.push_back(static_cast<T>(iter * radius / norm));
-        }
-
-        set_start_points(points_data.data(), points_data.size());
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::build_with_data_populated(const std::vector<vid_t> &tags) {
+    turbo::Status VamanaIndex<T>::build_with_data_populated(const std::vector<vid_t> &tags) {
         polaris::cout << "Starting index build with " << _nd << " points... " << std::endl;
 
-        if (_nd < 1)
-            throw PolarisException("Error: Trying to build an index with 0 points", -1, __PRETTY_FUNCTION__, __FILE__,
-                                   __LINE__);
+        if (_nd < 1) {
+            return turbo::make_status(turbo::kDataLoss, "Error: Trying to build an index with 0 points");
+        }
 
         if (_enable_tags && tags.size() != _nd) {
             std::stringstream stream;
             stream << "ERROR: Driver requests loading " << _nd << " points from file,"
                    << "but tags vector is of size " << tags.size() << "." << std::endl;
             polaris::cerr << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kDataLoss, stream.str());
         }
         if (_enable_tags) {
             for (size_t i = 0; i < tags.size(); ++i) {
@@ -1227,30 +1242,17 @@ namespace polaris {
                       << "  min:" << min << "  count(deg<2):" << cnt << std::endl;
 
         _has_built = true;
+        return turbo::ok_status();
     }
 
     template<typename T>
-    void VamanaIndex<T>::_build(const DataType &data, const size_t num_points_to_load, TagVector &tags) {
-        try {
-            this->build(std::any_cast<const T *>(data), num_points_to_load, tags.get<const std::vector<vid_t>>());
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException("Error: bad any cast in while building index. " + std::string(e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error" + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::build(const T *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) {
+    turbo::Status
+    VamanaIndex<T>::build(const void *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) {
         if (num_points_to_load == 0) {
-            throw PolarisException("Do not call build with 0 points", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Do not call build with 0 points");
         }
         if (_pq_dist) {
-            throw PolarisException("ERROR: DO not use this build interface with PQ distance", -1, __PRETTY_FUNCTION__,
-                                   __FILE__,
-                                   __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Do not use this build interface with PQ distance");
         }
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -1259,34 +1261,34 @@ namespace polaris {
             std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
             _nd = num_points_to_load;
 
-            _data_store->populate_data(data, (location_t) num_points_to_load);
+            _data_store->populate_data(reinterpret_cast<const T*>(data), (location_t) num_points_to_load);
         }
 
-        build_with_data_populated(tags);
+        return build_with_data_populated(tags);
     }
 
     template<typename T>
-    void VamanaIndex<T>::build(const char *filename, const size_t num_points_to_load,
-                               const std::vector<vid_t> &tags) {
+    turbo::Status VamanaIndex<T>::build(const char *filename, const size_t num_points_to_load,
+                                        const std::vector<vid_t> &tags) {
         // idealy this should call build_filtered_index based on params passed
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
 
         // error checks
-        if (num_points_to_load == 0)
-            throw PolarisException("Do not call build with 0 points", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+        if (num_points_to_load == 0) {
+            return turbo::make_status(turbo::kInvalidArgument, "Do not call build with 0 points");
+        }
 
         if (!collie::filesystem::exists(filename)) {
             std::stringstream stream;
             stream << "ERROR: Data file " << filename << " does not exist." << std::endl;
             polaris::cerr << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, stream.str());
         }
 
         size_t file_num_points, file_dim;
         if (filename == nullptr) {
-            throw polaris::PolarisException("Can not build with an empty file", -1, __PRETTY_FUNCTION__, __FILE__,
-                                            __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Can not build with an empty file");
         }
 
         polaris::get_bin_metadata(filename, file_num_points, file_dim);
@@ -1296,16 +1298,14 @@ namespace polaris {
                    << file_num_points
                    << " points, but "
                    << "index can support only " << _max_points << " points as specified in constructor." << std::endl;
-
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, stream.str());
         }
 
         if (num_points_to_load > file_num_points) {
             std::stringstream stream;
             stream << "ERROR: Driver requests loading " << num_points_to_load << " points and file has only "
                    << file_num_points << " points." << std::endl;
-
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, stream.str());
         }
 
         if (file_dim != _index_config.basic_config.dimension) {
@@ -1313,8 +1313,7 @@ namespace polaris {
             stream << "ERROR: Driver requests loading " << _index_config.basic_config.dimension << " dimension,"
                    << "but file has " << file_dim << " dimension." << std::endl;
             polaris::cerr << stream.str() << std::endl;
-
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, stream.str());
         }
 
         // REFACTOR PQ TODO: We can remove this if and add a check in the InMemDataStore
@@ -1337,19 +1336,18 @@ namespace polaris {
             std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
             _nd = num_points_to_load;
         }
-        build_with_data_populated(tags);
+        return build_with_data_populated(tags);
     }
 
     template<typename T>
-    void
+    turbo::Status
     VamanaIndex<T>::build(const char *filename, const size_t num_points_to_load, const char *tag_filename) {
         std::vector<vid_t> tags;
 
         if (_enable_tags) {
             std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
             if (tag_filename == nullptr) {
-                throw PolarisException("Tag filename is null, while _enable_tags is set", -1, __PRETTY_FUNCTION__,
-                                       __FILE__, __LINE__);
+                return turbo::make_status(turbo::kInvalidArgument, "Tag filename is null, while _enable_tags is set");
             } else {
                 if (collie::filesystem::exists(tag_filename)) {
                     polaris::cout << "Loading tags from " << tag_filename << " for vamana index build" << std::endl;
@@ -1361,47 +1359,26 @@ namespace polaris {
                         sstream << "Loaded " << npts << " tags, insufficient to populate tags for "
                                 << num_points_to_load
                                 << "  points to load";
-                        throw polaris::PolarisException(sstream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+                        return turbo::make_status(turbo::kInvalidArgument, sstream.str());
                     }
                     for (size_t i = 0; i < num_points_to_load; i++) {
                         tags.push_back(tag_data[i]);
                     }
                     delete[] tag_data;
                 } else {
-                    throw polaris::PolarisException(std::string("Tag file") + tag_filename + " does not exist", -1,
-                                                    __PRETTY_FUNCTION__,
-                                                    __FILE__, __LINE__);
+                    return turbo::make_status(turbo::kInvalidArgument, "Tag file: {} does not exist", tag_filename);
                 }
             }
         }
-        build(filename, num_points_to_load, tags);
+        return build(filename, num_points_to_load, tags);
     }
 
     template<typename T>
-    void VamanaIndex<T>::build(const std::string &data_file, const size_t num_points_to_load) {
+    turbo::Status VamanaIndex<T>::build(const std::string &data_file, const size_t num_points_to_load) {
         size_t points_to_load = num_points_to_load == 0 ? _max_points : num_points_to_load;
-
-        auto s = std::chrono::high_resolution_clock::now();
-        this->build(data_file.c_str(), points_to_load);
-        std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - s;
-        std::cout << "Indexing time: " << diff.count() << "\n";
+        return this->build(data_file.c_str(), points_to_load);
     }
 
-    template<typename T>
-    std::pair<uint32_t, uint32_t>
-    VamanaIndex<T>::_search(const DataType &query, const size_t K, const uint32_t L,
-                            localid_t *indices, float *distances) {
-        try {
-            auto typed_query = std::any_cast<const T *>(query);
-            return this->search(typed_query, K, L, indices, distances);
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException("Error: bad any cast while searching. " + std::string(e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error: " + std::string(e.what()), -1);
-        }
-    }
 
     template<typename T>
     turbo::Status VamanaIndex<T>::search(SearchContext &ctx) {
@@ -1474,7 +1451,7 @@ namespace polaris {
     }
 
     template<typename T>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T>::search(const T *query, const size_t K, const uint32_t L,
+    turbo::ResultStatus<std::pair<uint32_t, uint32_t>> VamanaIndex<T>::search(const void *query, const size_t K, const uint32_t L,
                                                          localid_t *indices, float *distances) {
         if (K > (uint64_t) L) {
             throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
@@ -1494,7 +1471,7 @@ namespace polaris {
 
         std::shared_lock<std::shared_timed_mutex> lock(_update_lock);
 
-        _data_store->preprocess_query(query, scratch);
+        _data_store->preprocess_query(static_cast<const T*>(query), scratch);
 
         auto retval = iterate_to_fixed_point(scratch, L, init_ids, true);
 
@@ -1525,26 +1502,10 @@ namespace polaris {
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::_search_with_tags(const DataType &query, const uint64_t K, const uint32_t L,
-                                             const TagType &tags, float *distances, DataVector &res_vectors) {
-        try {
-            return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<vid_t *>(tags),
-                                          distances, res_vectors.get<std::vector<T *>>());
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException("Error: bad any cast while performing _search_with_tags() " + std::string(e.what()),
-                                   -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error: " + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
-    size_t VamanaIndex<T>::search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                            float *distances, std::vector<T *> &res_vectors) {
+    turbo::ResultStatus<size_t> VamanaIndex<T>::search_with_tags(const void *query, const uint64_t K, const uint32_t L, vid_t *tags,
+                                            float *distances, std::vector<void *> &res_vectors) {
         if (K > (uint64_t) L) {
-            throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Set L to a value of at least K");
         }
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
         auto scratch = manager.scratch_space();
@@ -1562,7 +1523,7 @@ namespace polaris {
 
         //_distance->preprocess_query(query, _data_store->get_dims(),
         // scratch->aligned_query());
-        _data_store->preprocess_query(query, scratch);
+        _data_store->preprocess_query(static_cast<const T*>(query), scratch);
         iterate_to_fixed_point(scratch, L, init_ids, true);
 
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
@@ -1579,7 +1540,7 @@ namespace polaris {
                 tags[pos] = tag;
 
                 if (res_vectors.size() > 0) {
-                    _data_store->get_vector(node.id, res_vectors[pos]);
+                    _data_store->get_vector(node.id, static_cast<T*>(res_vectors[pos]));
                 }
 
                 if (distances != nullptr) {
@@ -1796,7 +1757,7 @@ namespace polaris {
                 num_calls_to_process_delete += 1;
             }
         }
-        for (int64_t loc = _max_points; loc < (int64_t) (_max_points + _num_frozen_pts); loc++) {
+        for (int64_t loc = _max_points; loc < (int64_t)(_max_points + _num_frozen_pts); loc++) {
             ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
             auto scratch = manager.scratch_space();
             process_delete(*old_delete_set, loc, range, maxc, alpha, scratch);
@@ -2087,27 +2048,11 @@ namespace polaris {
     }
 
     template<typename T>
-    int VamanaIndex<T>::_insert_point(const DataType &point, const TagType tag) {
-        try {
-            return this->insert_point(std::any_cast<const T *>(point), std::any_cast<const vid_t>(tag));
-        }
-        catch (const std::bad_any_cast &anycast_e) {
-            throw new PolarisException("Error:Trying to insert invalid data type" + std::string(anycast_e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw new PolarisException("Error:" + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
-    int VamanaIndex<T>::insert_point(const T *point, const vid_t tag) {
+    turbo::Status VamanaIndex<T>::insert_point(const void *point, const vid_t tag) {
 
         assert(_has_built);
         if (tag == 0) {
-            throw polaris::PolarisException("Do not insert point with tag 0. That is "
-                                            "reserved for points hidden "
-                                            "from the user.",
-                                            -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInternal, "Do not insert point with tag 0. That is reserved for points hidden from the user.");
         }
 
         std::shared_lock<std::shared_timed_mutex> shared_ul(_update_lock);
@@ -2149,7 +2094,7 @@ namespace polaris {
                                         -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
 #else
-            return -1;
+            return turbo::make_status(turbo::kInternal, "Cannot reserve location. Index is full.");
 #endif
         } // cant insert as active pts >= max_pts
         dl.unlock();
@@ -2159,7 +2104,7 @@ namespace polaris {
             // if tags are enabled and tag is already inserted. so we can't reuse that tag.
             if (_tag_to_location.find(tag) != _tag_to_location.end()) {
                 release_location(location);
-                return -1;
+                return turbo::make_status(turbo::kInternal, "Tag already exists");
             }
 
             _tag_to_location[tag] = location;
@@ -2167,7 +2112,7 @@ namespace polaris {
         }
         tl.unlock();
 
-        _data_store->set_vector(location, point); // update datastore
+        _data_store->set_vector(location, static_cast<const T*>(point)); // update datastore
 
         // Find and add appropriate graph edges
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
@@ -2200,34 +2145,11 @@ namespace polaris {
 
         inter_insert(location, pruned_list, scratch);
 
-        return 0;
+        return turbo::ok_status();
     }
 
     template<typename T>
-    int VamanaIndex<T>::_lazy_delete(const TagType &tag) {
-        try {
-            return lazy_delete(std::any_cast<const vid_t>(tag));
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException(std::string("Error: ") + e.what(), -1);
-        }
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::_lazy_delete(TagVector &tags, TagVector &failed_tags) {
-        try {
-            this->lazy_delete(tags.get<const std::vector<vid_t>>(), failed_tags.get<std::vector<vid_t>>());
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException("Error: bad any cast while performing _lazy_delete() " + std::string(e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error: " + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
-    int VamanaIndex<T>::lazy_delete(const vid_t &tag) {
+    turbo::Status VamanaIndex<T>::lazy_delete(const vid_t &tag) {
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
         std::unique_lock<std::shared_timed_mutex> dl(_delete_lock);
@@ -2235,7 +2157,7 @@ namespace polaris {
 
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
             polaris::cerr << "Delete tag not found " << get_tag_string(tag) << std::endl;
-            return -1;
+            return turbo::make_status(turbo::kNotFound, "Tag not found");
         }
         assert(_tag_to_location[tag] < _max_points);
 
@@ -2243,14 +2165,13 @@ namespace polaris {
         _delete_set->insert(location);
         _location_to_tag.erase(location);
         _tag_to_location.erase(tag);
-        return 0;
+        return turbo::ok_status();
     }
 
     template<typename T>
-    void VamanaIndex<T>::lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) {
+    turbo::Status VamanaIndex<T>::lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) {
         if (failed_tags.size() > 0) {
-            throw PolarisException("failed_tags should be passed as an empty list", -1, __PRETTY_FUNCTION__, __FILE__,
-                                   __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "failed_tags should be passed as an empty list");
         }
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -2267,25 +2188,12 @@ namespace polaris {
                 _tag_to_location.erase(tag);
             }
         }
+        return turbo::ok_status();
     }
 
     template<typename T>
     bool VamanaIndex<T>::is_index_saved() {
         return _is_saved;
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::_get_active_tags(TagRobinSet &active_tags) {
-        try {
-            this->get_active_tags(active_tags.get<turbo::flat_hash_set<vid_t>>());
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException("Error: bad_any cast while performing _get_active_tags() " + std::string(e.what()),
-                                   -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error :" + std::string(e.what()), -1);
-        }
     }
 
     template<typename T>
@@ -2304,8 +2212,9 @@ namespace polaris {
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
         std::shared_lock<std::shared_timed_mutex> dl(_delete_lock);
 
-        polaris::cout << "------------------- VamanaIndex object: " << (uint64_t) this << " -------------------"
-                      << std::endl;
+        polaris::cout << "------------------- VamanaIndex object: " << (uint64_t)
+        this << " -------------------"
+             << std::endl;
         polaris::cout << "Number of points: " << _nd << std::endl;
         polaris::cout << "Graph size: " << _graph_store->get_total_points() << std::endl;
         polaris::cout << "Location to tag size: " << _location_to_tag.size() << std::endl;
@@ -2390,32 +2299,15 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::_search_with_optimized_layout(const DataType &query, size_t K, size_t L,
-                                                       uint32_t *indices) {
-        try {
-            return this->search_with_optimized_layout(std::any_cast<const T *>(query), K, L, indices);
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException("Error: bad any cast while performing "
-                                   "_search_with_optimized_layout() " +
-                                   std::string(e.what()),
-                                   -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error: " + std::string(e.what()), -1);
-        }
-    }
-
-    template<typename T>
-    void VamanaIndex<T>::search_with_optimized_layout(const T *query, size_t K, size_t L, uint32_t *indices) {
+    turbo::Status VamanaIndex<T>::search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) {
         DistanceFastL2<T> *dist_fast = (DistanceFastL2<T> *) (_data_store->get_dist_fn());
-
+        auto tquery = static_cast<const T*>(query);
         NeighborPriorityQueue retset(L);
         std::vector<uint32_t> init_ids(L);
 
         collie::dynamic_bitset<> flags{_nd, 0};
         uint32_t tmp_l = 0;
-        uint32_t *neighbors = (uint32_t *) (_opt_graph + _node_size * _start + _data_len);
+        uint32_t *neighbors = (uint32_t * )(_opt_graph + _node_size * _start + _data_len);
         uint32_t MaxM_ep = *neighbors;
         neighbors++;
 
@@ -2447,7 +2339,7 @@ namespace polaris {
             T *x = (T *) (_opt_graph + _node_size * id);
             float norm_x = *x;
             x++;
-            float dist = dist_fast->compare(x, query, norm_x, (uint32_t) _data_store->get_aligned_dim());
+            float dist = dist_fast->compare(x, tquery, norm_x, (uint32_t) _data_store->get_aligned_dim());
             retset.insert(Neighbor(id, dist));
             flags[id] = true;
             L++;
@@ -2457,7 +2349,7 @@ namespace polaris {
             auto nbr = retset.closest_unexpanded();
             auto n = nbr.id;
             _mm_prefetch(_opt_graph + _node_size * n + _data_len, _MM_HINT_T0);
-            neighbors = (uint32_t *) (_opt_graph + _node_size * n + _data_len);
+            neighbors = (uint32_t * )(_opt_graph + _node_size * n + _data_len);
             uint32_t MaxM = *neighbors;
             neighbors++;
             for (uint32_t m = 0; m < MaxM; ++m)
@@ -2470,7 +2362,7 @@ namespace polaris {
                 T *data = (T *) (_opt_graph + _node_size * id);
                 float norm = *data;
                 data++;
-                float dist = dist_fast->compare(query, data, norm, (uint32_t) _data_store->get_aligned_dim());
+                float dist = dist_fast->compare(tquery, data, norm, (uint32_t) _data_store->get_aligned_dim());
                 Neighbor nn(id, dist);
                 retset.insert(nn);
             }
@@ -2479,6 +2371,7 @@ namespace polaris {
         for (size_t i = 0; i < K; i++) {
             indices[i] = retset[i].id;
         }
+        return turbo::ok_status();
     }
 
     /*  Internals of the library */

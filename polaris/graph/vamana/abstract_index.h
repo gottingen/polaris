@@ -54,12 +54,10 @@ namespace polaris {
 
         virtual ~AbstractIndex() = default;
 
-        virtual void build(const std::string &data_file, const size_t num_points_to_load) = 0;
+        virtual turbo::Status build(const std::string &data_file, const size_t num_points_to_load) = 0;
+        virtual turbo::Status build(const void *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) = 0;
 
-        template<typename data_type>
-        void build(const data_type *data, const size_t num_points_to_load, const std::vector<vid_t> &tags);
-
-        virtual void save(const char *filename, bool compact_before_save = false) = 0;
+        virtual turbo::Status save(const char *filename, bool compact_before_save = false) = 0;
 
 
         virtual void load(const char *index_file, uint32_t num_threads, uint32_t search_l) = 0;
@@ -67,66 +65,37 @@ namespace polaris {
         virtual turbo::Status search(SearchContext &search_context) = 0;
 
         // For FastL2 search on optimized layout
-        template<typename data_type>
-        void search_with_optimized_layout(const data_type *query, size_t K, size_t L, uint32_t *indices);
+        virtual turbo::Status search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) = 0;
 
         // Initialize space for res_vectors before calling.
-        template<typename data_type>
-        size_t search_with_tags(const data_type *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                float *distances, std::vector<data_type *> &res_vectors);
+        virtual turbo::ResultStatus<size_t> search_with_tags(const void *query, const uint64_t K, const uint32_t L, vid_t *tags,
+                                float *distances, std::vector<void *> &res_vectors) = 0;
 
         // Added search overload that takes L as parameter, so that we
         // can customize L on a per-query basis without tampering with "Parameters"
         // IDtype is either uint32_t or uint64_t
-        template<typename data_type>
-        std::pair<uint32_t, uint32_t> search(const data_type *query, const size_t K, const uint32_t L, localid_t *indices,
-                                             float *distances = nullptr);
+        virtual turbo::ResultStatus<std::pair<uint32_t, uint32_t>> search(const void *query, const size_t K, const uint32_t L, localid_t *indices,
+                                             float *distances = nullptr) = 0;
 
         // insert point for unfiltered index build. do not use with filtered index
-        template<typename data_type>
-        int insert_point(const data_type *point, const vid_t tag);
+        virtual turbo::Status insert_point(const void *point, const vid_t tag) = 0;
 
         // delete point with tag, or return -1 if point can not be deleted
-        int lazy_delete(const vid_t &tag);
+        virtual turbo::Status lazy_delete(const vid_t &tag) = 0;
 
         // batch delete tags and populates failed tags if unabke to delete given tags.
-        void lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags);
+        virtual turbo::Status lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) = 0;
 
-        void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags);
+        virtual void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags) = 0;
 
-        template<typename data_type>
-        void set_start_points_at_random(data_type radius, uint32_t random_seed = 0);
+        //template<typename data_type>
+        virtual void set_start_points_at_random(std::any radius, uint32_t random_seed = 0) = 0;
 
         virtual consolidation_report consolidate_deletes(const IndexWriteParameters &parameters) = 0;
 
         virtual void optimize_index_layout() = 0;
 
         // memory should be allocated for vec before calling this function
-        template<typename data_type>
-        int get_vector_by_tag(vid_t &tag, data_type *vec);
-
-    private:
-        virtual void _build(const DataType &data, const size_t num_points_to_load, TagVector &tags) = 0;
-
-        virtual std::pair<uint32_t, uint32_t> _search(const DataType &query, const size_t K, const uint32_t L,
-                                                      localid_t* indices, float *distances = nullptr) = 0;
-
-        virtual int _insert_point(const DataType &data_point, const TagType tag) = 0;
-
-        virtual int _lazy_delete(const TagType &tag) = 0;
-
-        virtual void _lazy_delete(TagVector &tags, TagVector &failed_tags) = 0;
-
-        virtual void _get_active_tags(TagRobinSet &active_tags) = 0;
-
-        virtual void _set_start_points_at_random(DataType radius, uint32_t random_seed = 0) = 0;
-
-        virtual int _get_vector_by_tag(TagType &tag, DataType &vec) = 0;
-
-        virtual size_t _search_with_tags(const DataType &query, const uint64_t K, const uint32_t L, const TagType &tags,
-                                         float *distances, DataVector &res_vectors) = 0;
-
-        virtual void _search_with_optimized_layout(const DataType &query, size_t K, size_t L, uint32_t *indices) = 0;
-
+        virtual int get_vector_by_tag(vid_t &tag, void *vec) = 0;
     };
 } // namespace polaris

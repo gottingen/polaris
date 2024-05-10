@@ -135,7 +135,7 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
 
         query_result_ids[test_id].resize(recall_at * query_num);
         query_result_dists[test_id].resize(recall_at * query_num);
-        std::vector<T *> res = std::vector<T *>();
+        std::vector<void *> res = std::vector<void *>();
 
         auto s = std::chrono::high_resolution_clock::now();
         omp_set_num_threads(num_threads);
@@ -146,18 +146,26 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
                 index->search_with_optimized_layout(query + i * query_aligned_dim, recall_at, L,
                                                     query_result_ids[test_id].data() + i * recall_at);
             } else if (tags) {
-                index->search_with_tags(query + i * query_aligned_dim, (uint64_t) recall_at, (uint32_t) L,
+                auto rs = index->search_with_tags(query + i * query_aligned_dim, (uint64_t) recall_at, (uint32_t) L,
                                         (polaris::vid_t *) (query_result_tags.data() + i * recall_at), nullptr,
                                         res);
+                if (!rs.ok()) {
+                    std::cerr << "Search failed with error: " << rs.status().message() << std::endl;
+                    exit(-1);
+                }
 
                 for (int64_t r = 0; r < (int64_t) recall_at; r++) {
                     query_result_ids[test_id][recall_at * i + r] = query_result_tags[recall_at * i + r];
                 }
             } else {
-                cmp_stats[i] = index
+                auto rs  =  index
                         ->search(query + i * query_aligned_dim, recall_at, L,
-                                 query_result_ids[test_id].data() + i * recall_at)
-                        .second;
+                                 query_result_ids[test_id].data() + i * recall_at);
+                if(!rs.ok()){
+                    std::cerr << "Search failed with error: " << rs.status().message() << std::endl;
+                    exit(-1);
+                }
+                cmp_stats[i] =rs.value().second;
             }
             auto qe = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = qe - qs;

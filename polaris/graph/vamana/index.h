@@ -73,33 +73,32 @@ namespace polaris {
                           const bool pq_dist_build = false, const size_t num_pq_chunks = 0,
                           const bool use_opq = false);
 
-        POLARIS_API ~VamanaIndex();
+        POLARIS_API ~VamanaIndex() override;
 
         // Saves graph, data, metadata and associated tags.
-        POLARIS_API void save(const char *filename, bool compact_before_save = false);
+        POLARIS_API turbo::Status save(const char *filename, bool compact_before_save = false) override;
 
         // Load functions
         // Reads the number of frozen points from graph's metadata file section.
         POLARIS_API static size_t get_graph_num_frozen_points(const std::string &graph_file);
 
-        POLARIS_API void load(const char *index_file, uint32_t num_threads, uint32_t search_l);
+        POLARIS_API void load(const char *index_file, uint32_t num_threads, uint32_t search_l) override;
         // get some private variables
         POLARIS_API size_t get_num_points();
 
         POLARIS_API size_t get_max_points();
 
         // Batch build from a file. Optionally pass tags vector.
-        POLARIS_API void build(const char *filename, const size_t num_points_to_load,
-                               const std::vector<vid_t> &tags = std::vector<vid_t>());
+        POLARIS_API turbo::Status build(const char *filename, const size_t num_points_to_load, const std::vector<vid_t> &tags = std::vector<vid_t>());
 
         // Batch build from a file. Optionally pass tags file.
-        POLARIS_API void build(const char *filename, const size_t num_points_to_load, const char *tag_filename);
+        POLARIS_API turbo::Status build(const char *filename, const size_t num_points_to_load, const char *tag_filename);
 
         // Batch build from a data array, which must pad vectors to aligned_dim
-        POLARIS_API void build(const T *data, const size_t num_points_to_load, const std::vector<vid_t> &tags);
+        POLARIS_API turbo::Status build(const void *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) override;
 
         // Based on filter params builds a filtered or unfiltered index
-        POLARIS_API void build(const std::string &data_file, const size_t num_points_to_load) override;
+        POLARIS_API turbo::Status build(const std::string &data_file, const size_t num_points_to_load) override;
 
         // Set starting point of an index before inserting any points incrementally.
         // The data count should be equal to _num_frozen_pts * _aligned_dim.
@@ -107,38 +106,38 @@ namespace polaris {
         // Set starting points to random points on a sphere of certain radius.
         // A fixed random seed can be specified for scenarios where it's important
         // to have higher consistency between index builds.
-        POLARIS_API void set_start_points_at_random(T radius, uint32_t random_seed = 0);
+        POLARIS_API void set_start_points_at_random(std::any radius, uint32_t random_seed = 0) override;
 
         // For FastL2 search on a static index, we interleave the data with graph
         POLARIS_API void optimize_index_layout();
 
         // For FastL2 search on optimized layout
-        POLARIS_API void search_with_optimized_layout(const T *query, size_t K, size_t L, uint32_t *indices);
+        POLARIS_API turbo::Status search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) override;
 
         POLARIS_API turbo::Status search(SearchContext &ctx) override;
         // Added search overload that takes L as parameter, so that we
         // can customize L on a per-query basis without tampering with "Parameters"
-        POLARIS_API std::pair<uint32_t, uint32_t> search(const T *query, const size_t K, const uint32_t L,
-                                                         localid_t *indices, float *distances = nullptr);
+        POLARIS_API turbo::ResultStatus<std::pair<uint32_t, uint32_t>> search(const void *query, const size_t K, const uint32_t L,
+                                                         localid_t *indices, float *distances = nullptr) override;
 
         // Initialize space for res_vectors before calling.
-        POLARIS_API size_t search_with_tags(const T *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                            float *distances, std::vector<T *> &res_vectors);
+        POLARIS_API turbo::ResultStatus<size_t> search_with_tags(const void *query, const uint64_t K, const uint32_t L, vid_t *tags,
+                                            float *distances, std::vector<void *> &res_vectors) override;
 
 
         // Will fail if tag already in the index or if tag=0.
-        POLARIS_API int insert_point(const T *point, const vid_t tag);
+        POLARIS_API turbo::Status insert_point(const void *point, const vid_t tag) override;
 
         // call this before issuing deletions to sets relevant flags
         POLARIS_API int enable_delete();
 
         // Record deleted point now and restructure graph later. Return -1 if tag
         // not found, 0 if OK.
-        POLARIS_API int lazy_delete(const vid_t &tag);
+        POLARIS_API turbo::Status lazy_delete(const vid_t &tag) override;
 
         // Record deleted points now and restructure graph later. Add to failed_tags
         // if tag not found.
-        POLARIS_API void lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags);
+        POLARIS_API turbo::Status lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) override;
 
         // Call after a series of lazy deletions
         // Returns number of live points left after consolidation
@@ -157,10 +156,10 @@ namespace polaris {
 
         // POLARIS_API void save_index_as_one_file(bool flag);
 
-        POLARIS_API void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags);
+        POLARIS_API void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags) override;
 
         // memory should be allocated for vec before calling this function
-        POLARIS_API int get_vector_by_tag(vid_t &tag, T *vec);
+        POLARIS_API int get_vector_by_tag(vid_t &tag, void *vec) override;
 
         POLARIS_API void print_status();
 
@@ -177,30 +176,6 @@ namespace polaris {
         // ********************************
 
     protected:
-        // overload of abstract index virtual methods
-        virtual void _build(const DataType &data, const size_t num_points_to_load, TagVector &tags) override;
-
-        virtual std::pair<uint32_t, uint32_t> _search(const DataType &query, const size_t K, const uint32_t L,
-                                                      localid_t *indices, float *distances = nullptr) override;
-
-        virtual int _insert_point(const DataType &data_point, const TagType tag) override;
-
-        virtual int _lazy_delete(const TagType &tag) override;
-
-        virtual void _lazy_delete(TagVector &tags, TagVector &failed_tags) override;
-
-        virtual void _get_active_tags(TagRobinSet &active_tags) override;
-
-        virtual void _set_start_points_at_random(DataType radius, uint32_t random_seed = 0) override;
-
-        virtual int _get_vector_by_tag(TagType &tag, DataType &vec) override;
-
-        virtual void
-        _search_with_optimized_layout(const DataType &query, size_t K, size_t L, uint32_t *indices) override;
-
-        virtual size_t _search_with_tags(const DataType &query, const uint64_t K, const uint32_t L, const TagType &tags,
-                                         float *distances, DataVector &res_vectors) override;
-
         // No copy/assign.
         VamanaIndex(const VamanaIndex<T> &) = delete;
 
@@ -208,7 +183,7 @@ namespace polaris {
 
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
-        void build_with_data_populated(const std::vector<vid_t> &tags);
+        turbo::Status build_with_data_populated(const std::vector<vid_t> &tags);
 
         // generates 1 frozen point that will never be deleted from the graph
         // This is not visible to the user
