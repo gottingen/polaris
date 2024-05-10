@@ -23,6 +23,7 @@
 #include <polaris/graph/vamana/partition.h>
 
 #include <polaris/utility/common_includes.h>
+#include <polaris/utility/recall.h>
 #include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_flash_index.h>
@@ -39,7 +40,7 @@ int
 search_memory_index(polaris::MetricType &metric, const std::string &index_path, const std::string &result_path_prefix,
                     const std::string &query_file, const std::string &truthset_file, const uint32_t num_threads,
                     const uint32_t recall_at, const bool print_all_recalls, const std::vector<uint32_t> &Lvec,
-                    const bool dynamic, const bool tags, const bool show_qps_per_thread,
+                    const bool dynamic, const bool show_qps_per_thread,
                     const float fail_if_recall_below) {
     // Load the query file
     T *query = nullptr;
@@ -69,7 +70,6 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
             .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
             .with_data_type(polaris::polaris_type_to_name<T>())
             .vamana_is_dynamic_index(dynamic)
-            .vamana_is_enable_tags(tags)
             .vamana_is_concurrent_consolidate(false)
             .vamana_is_pq_dist_build(false)
             .vamana_is_use_opq(false)
@@ -90,15 +90,9 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
     std::cout.precision(2);
     const std::string qps_title = show_qps_per_thread ? "QPS/thread" : "QPS";
     uint32_t table_width = 0;
-    if (tags) {
-        std::cout << std::setw(4) << "Ls" << std::setw(12) << qps_title << std::setw(20) << "Mean Latency (mus)"
-                  << std::setw(15) << "99.9 Latency";
-        table_width += 4 + 12 + 20 + 15;
-    } else {
-        std::cout << std::setw(4) << "Ls" << std::setw(12) << qps_title << std::setw(18) << "Avg dist cmps"
-                  << std::setw(20) << "Mean Latency (mus)" << std::setw(15) << "99.9 Latency";
-        table_width += 4 + 12 + 18 + 20 + 15;
-    }
+    std::cout << std::setw(4) << "Ls" << std::setw(12) << qps_title << std::setw(18) << "Avg dist cmps"
+              << std::setw(20) << "Mean Latency (mus)" << std::setw(15) << "99.9 Latency";
+    table_width += 4 + 12 + 18 + 20 + 15;
     uint32_t recalls_to_print = 0;
     const uint32_t first_recall = print_all_recalls ? 1 : recall_at;
     if (calc_recall_flag) {
@@ -115,15 +109,9 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
     std::vector<std::vector<float>> query_result_dists(Lvec.size());
     std::vector<float> latency_stats(query_num, 0);
     std::vector<uint32_t> cmp_stats;
-    if (not tags) {
-        cmp_stats = std::vector<uint32_t>(query_num, 0);
-    }
+    cmp_stats = std::vector<uint32_t>(query_num, 0);
 
     std::vector<polaris::vid_t> query_result_tags;
-    if (tags) {
-        query_result_tags.resize(recall_at * query_num);
-    }
-
     double best_recall = 0.0;
 
     for (uint32_t test_id = 0; test_id < Lvec.size(); test_id++) {
@@ -145,27 +133,15 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
             if (metric == polaris::MetricType::METRIC_FAST_L2) {
                 index->search_with_optimized_layout(query + i * query_aligned_dim, recall_at, L,
                                                     query_result_ids[test_id].data() + i * recall_at);
-            } else if (tags) {
-                auto rs = index->search_with_tags(query + i * query_aligned_dim, (uint64_t) recall_at, (uint32_t) L,
-                                        (polaris::vid_t *) (query_result_tags.data() + i * recall_at), nullptr,
-                                        res);
+            }  else {
+                auto rs = index
+                        ->search(query + i * query_aligned_dim, recall_at, L,
+                                 query_result_ids[test_id].data() + i * recall_at);
                 if (!rs.ok()) {
                     std::cerr << "Search failed with error: " << rs.status().message() << std::endl;
                     exit(-1);
                 }
-
-                for (int64_t r = 0; r < (int64_t) recall_at; r++) {
-                    query_result_ids[test_id][recall_at * i + r] = query_result_tags[recall_at * i + r];
-                }
-            } else {
-                auto rs  =  index
-                        ->search(query + i * query_aligned_dim, recall_at, L,
-                                 query_result_ids[test_id].data() + i * recall_at);
-                if(!rs.ok()){
-                    std::cerr << "Search failed with error: " << rs.status().message() << std::endl;
-                    exit(-1);
-                }
-                cmp_stats[i] =rs.value().second;
+                cmp_stats[i] = rs.value().second;
             }
             auto qe = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = qe - qs;
@@ -193,14 +169,9 @@ search_memory_index(polaris::MetricType &metric, const std::string &index_path, 
 
         float avg_cmps = (float) std::accumulate(cmp_stats.begin(), cmp_stats.end(), 0) / (float) query_num;
 
-        if (tags) {
-            std::cout << std::setw(4) << L << std::setw(12) << displayed_qps << std::setw(20) << (float) mean_latency
-                      << std::setw(15) << (float) latency_stats[(uint64_t) (0.999 * query_num)];
-        } else {
-            std::cout << std::setw(4) << L << std::setw(12) << displayed_qps << std::setw(18) << avg_cmps
-                      << std::setw(20) << (float) mean_latency << std::setw(15)
-                      << (float) latency_stats[(uint64_t) (0.999 * query_num)];
-        }
+        std::cout << std::setw(4) << L << std::setw(12) << displayed_qps << std::setw(18) << avg_cmps
+                  << std::setw(20) << (float) mean_latency << std::setw(15)
+                  << (float) latency_stats[(uint64_t) (0.999 * query_num)];
         for (double recall: recalls) {
             std::cout << std::setw(12) << recall;
             best_recall = std::max(recall, best_recall);
@@ -243,7 +214,6 @@ namespace polaris {
         std::vector<uint32_t> Lvec;
         bool print_all_recalls;
         bool dynamic;
-        bool tags;
         bool show_qps_per_thread;
         float fail_if_recall_below;
     };
@@ -267,7 +237,6 @@ namespace polaris {
                         program_options_utils::NUMBER_THREADS_DESCRIPTION)->default_val(omp_get_num_procs());
         app->add_flag("--dynamic", ctx.dynamic,
                       "Whether the index is dynamic. Dynamic indices must have associated tags.  Default false.");
-        app->add_flag("--tags", ctx.tags, "Whether to search with external identifiers (tags). Default false.");
         app->add_option("--fail_if_recall_below", ctx.fail_if_recall_below,
                         program_options_utils::FAIL_IF_RECALL_BELOW)->default_val(0.0f);
         app->add_flag("--print_all_recalls", ctx.print_all_recalls,
@@ -295,11 +264,6 @@ namespace polaris {
             exit(-1);
         }
 
-        if (ctx.dynamic && !ctx.tags) {
-            std::cerr << "Tags must be enabled while searching dynamically built indices" << std::endl;
-            exit(-1);
-        }
-
         if (ctx.fail_if_recall_below < 0.0 || ctx.fail_if_recall_below >= 100.0) {
             std::cerr << "fail_if_recall_below parameter must be between 0 and 100%" << std::endl;
             exit(-1);
@@ -312,21 +276,21 @@ namespace polaris {
                         metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
                         ctx.num_threads, ctx.K,
                         ctx.print_all_recalls,
-                        ctx.Lvec, ctx.dynamic, ctx.tags, ctx.show_qps_per_thread,
+                        ctx.Lvec, ctx.dynamic, ctx.show_qps_per_thread,
                         ctx.fail_if_recall_below);
             } else if (ctx.data_type == std::string("uint8")) {
                 r = search_memory_index<uint8_t>(
                         metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
                         ctx.num_threads, ctx.K,
                         ctx.print_all_recalls,
-                        ctx.Lvec, ctx.dynamic, ctx.tags, ctx.show_qps_per_thread,
+                        ctx.Lvec, ctx.dynamic, ctx.show_qps_per_thread,
                         ctx.fail_if_recall_below);
             } else if (ctx.data_type == std::string("float")) {
                 r = search_memory_index<float>(metric, ctx.index_path_prefix, ctx.result_path,
                                                ctx.query_file,
                                                ctx.gt_file,
                                                ctx.num_threads, ctx.K, ctx.print_all_recalls, ctx.Lvec,
-                                               ctx.dynamic, ctx.tags,
+                                               ctx.dynamic,
                                                ctx.show_qps_per_thread,
                                                ctx.fail_if_recall_below);
             } else {

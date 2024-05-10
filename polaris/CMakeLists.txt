@@ -160,11 +160,12 @@ set(POLARIS_SRC
         graph/vamana/pq_l2_distance.cc
         graph/vamana/scratch.cc
         graph/vamana/utils.cc
-        utility/polaris_exception.cc
         utility/memory_mapper.cc
+        utility/mmap_manager.cc
         utility/natural_number_map.cc
         utility/natural_number_set.cc
-        utility/mmap_manager.cc
+        utility/polaris_exception.cc
+        utility/recall.cc
         utility/shared_memory_allocator.cc
         unified_index.cc
 )
@@ -387,6 +388,7 @@ set(POLARIS_HEADERS
         utility/polaris_exception.h
         utility/prefetch.h
         utility/property_set.h
+        utility/recall.h
         utility/serialize.h
         utility/shared_memory_allocator.h
         utility/tag_uint128.h

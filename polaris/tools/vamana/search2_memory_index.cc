@@ -23,6 +23,7 @@
 #include <polaris/graph/vamana/partition.h>
 
 #include <polaris/utility/common_includes.h>
+#include <polaris/utility/recall.h>
 #include <polaris/utility/memory_mapper.h>
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_flash_index.h>
@@ -68,7 +69,6 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
             .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
             .with_data_type(polaris::polaris_type_to_name<T>())
             .vamana_is_dynamic_index(dynamic)
-            .vamana_is_enable_tags(tags)
             .vamana_is_concurrent_consolidate(false)
             .vamana_is_pq_dist_build(false)
             .vamana_is_use_opq(false)
@@ -110,8 +110,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
     std::cout << std::endl;
     std::cout << std::string(table_width, '=') << std::endl;
 
-    std::vector<std::vector<uint32_t>> query_result_ids(Lvec.size());
-    std::vector<std::vector<float>> query_result_dists(Lvec.size());
+    std::vector<std::vector<std::unique_ptr<polaris::SearchContext>>> search_contexts(Lvec.size());
     std::vector<float> latency_stats(query_num, 0);
     std::vector<uint32_t> cmp_stats;
     if (not tags) {
@@ -131,9 +130,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
             polaris::cout << "Ignoring search with L:" << L << " since it's smaller than K:" << recall_at << std::endl;
             continue;
         }
-
-        query_result_ids[test_id].resize(recall_at * query_num);
-        query_result_dists[test_id].resize(recall_at * query_num);
+        search_contexts[test_id].resize(query_num);
         std::vector<void *> res = std::vector<void *>();
 
         auto s = std::chrono::high_resolution_clock::now();
@@ -141,38 +138,21 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
 #pragma omp parallel for schedule(dynamic, 1)
         for (int64_t i = 0; i < (int64_t) query_num; i++) {
             auto qs = std::chrono::high_resolution_clock::now();
-            polaris::SearchContext ctx;
+            search_contexts[test_id][i] = std::make_unique<polaris::SearchContext>();
+            auto &ctx = *search_contexts[test_id][i];
             ctx.set_query(query + i * query_aligned_dim, query_aligned_dim * sizeof(T))
                     .set_top_k(recall_at)
-                    .set_search_list(L);
+                    .set_search_list(L)
+                    .set_with_local_ids(true);
             if (metric == polaris::MetricType::METRIC_FAST_L2) {
                 ctx.vamana_optimized_layout = true;
-                /*
-                index->search_with_optimized_layout(query + i * query_aligned_dim, recall_at, L,
-                                                    query_result_ids[test_id].data() + i * recall_at);
-                                                    */
-            } else if (tags) {
-                auto rs = index->search_with_tags(query + i * query_aligned_dim, (uint64_t) recall_at, (uint32_t) L,
-                                        (polaris::vid_t *) (query_result_tags.data() + i * recall_at), nullptr,
-                                        res);
-                if (!rs.ok()) {
-                    std::cerr << "Search failed with error: " << rs.status().message() << std::endl;
-                    exit(-1);
-                }
-
-                for (int64_t r = 0; r < (int64_t) recall_at; r++) {
-                    query_result_ids[test_id][recall_at * i + r] = query_result_tags[recall_at * i + r];
-                }
-            } else {
-                auto rs  =  index
-                        ->search(query + i * query_aligned_dim, recall_at, L,
-                                 query_result_ids[test_id].data() + i * recall_at);
-                if(!rs.ok()){
-                    std::cerr << "Search failed with error: " << rs.status().message() << std::endl;
-                    exit(-1);
-                }
-                cmp_stats[i] =rs.value().second;
             }
+            auto rs = index->search(ctx);
+            if(!rs.ok()) {
+                std::cerr << "Search failed for query " << i <<" error: "<<rs.message()<< std::endl;
+                exit(-1);
+            }
+            cmp_stats[i] = ctx.cmps;
             auto qe = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = qe - qs;
             latency_stats[i] = (float) (diff.count() * 1000000);
@@ -189,7 +169,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
             recalls.reserve(recalls_to_print);
             for (uint32_t curr_recall = first_recall; curr_recall <= recall_at; curr_recall++) {
                 recalls.push_back(polaris::calculate_recall((uint32_t) query_num, gt_ids, gt_dists, (uint32_t) gt_dim,
-                                                            query_result_ids[test_id].data(), recall_at, curr_recall));
+                                                            search_contexts[test_id], recall_at, curr_recall));
             }
         }
 
@@ -216,6 +196,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
 
     std::cout << "Done searching. Now saving results " << std::endl;
     uint64_t test_id = 0;
+    /*
     for (auto L: Lvec) {
         if (L < recall_at) {
             polaris::cout << "Ignoring search with L:" << L << " since it's smaller than K:" << recall_at << std::endl;
@@ -230,7 +211,7 @@ search2_memory_index(polaris::MetricType &metric, const std::string &index_path,
         polaris::save_bin<float>(cur_result_path, query_result_dists[test_id].data(), query_num, recall_at);
 
         test_id++;
-    }
+    }*/
 
     polaris::aligned_free(query);
     return best_recall >= fail_if_recall_below ? 0 : -1;
@@ -249,7 +230,7 @@ namespace polaris {
         std::vector<uint32_t> Lvec;
         bool print_all_recalls{true};
         bool dynamic{false};
-        bool tags{true};
+        bool tags{false};
         bool show_qps_per_thread{true};
         float fail_if_recall_below{false};
     };

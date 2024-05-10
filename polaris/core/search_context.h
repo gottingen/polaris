@@ -42,6 +42,11 @@ namespace polaris {
             return *this;
         }
 
+        SearchContext &set_with_local_ids(bool with) {
+            with_local_ids = with;
+            return *this;
+        }
+
         SearchContext &set_search_condition(BaseSearchCondition *condition) {
             search_condition = condition;
             return *this;

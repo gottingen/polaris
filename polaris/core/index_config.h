@@ -82,11 +82,6 @@ namespace polaris {
             return *this;
         }
 
-        IndexConfigBuilder &vamana_is_enable_tags(bool enable_tags) {
-            this->_vamana_config.enable_tags = enable_tags;
-            return *this;
-        }
-
         IndexConfigBuilder &vamana_is_pq_dist_build(bool pq_dist_build) {
             this->_vamana_config.pq_dist_build = pq_dist_build;
             return *this;

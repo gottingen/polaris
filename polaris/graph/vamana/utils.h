@@ -422,13 +422,6 @@ namespace polaris {
         dest.close();
     }
 
-    POLARIS_API double calculate_recall(unsigned num_queries, unsigned *gold_std, float *gs_dist, unsigned dim_gs,
-                                        unsigned *our_results, unsigned dim_or, unsigned recall_at);
-
-    POLARIS_API double calculate_recall(unsigned num_queries, unsigned *gold_std, float *gs_dist, unsigned dim_gs,
-                                        unsigned *our_results, unsigned dim_or, unsigned recall_at,
-                                        const turbo::flat_hash_set<unsigned> &active_tags);
-
     POLARIS_API double calculate_range_search_recall(unsigned num_queries,
                                                      std::vector<std::vector<uint32_t>> &groundtruth,
                                                      std::vector<std::vector<uint32_t>> &our_results);

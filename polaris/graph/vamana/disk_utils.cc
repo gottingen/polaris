@@ -567,7 +567,7 @@ namespace polaris {
                     .build();
             polaris::VamanaIndex<T> _index(compareMetric, base_dim, base_num,
                                            std::make_shared<polaris::IndexWriteParameters>(paras), nullptr,
-                                           defaults::NUM_FROZEN_POINTS_STATIC, false, false, false,
+                                           defaults::NUM_FROZEN_POINTS_STATIC, false, false,
                                            build_pq_bytes > 0, build_pq_bytes, use_opq);
             _index.build(base_file.c_str(), base_num);
             _index.save(mem_index_path.c_str());
@@ -615,7 +615,7 @@ namespace polaris {
 
             polaris::VamanaIndex<T> _index(compareMetric, shard_base_dim, shard_base_pts,
                                            std::make_shared<polaris::IndexWriteParameters>(low_degree_params), nullptr,
-                                           defaults::NUM_FROZEN_POINTS_STATIC, false, false, false, build_pq_bytes > 0,
+                                           defaults::NUM_FROZEN_POINTS_STATIC, false, false, build_pq_bytes > 0,
                                            build_pq_bytes, use_opq);
             _index.build(shard_base_file.c_str(), shard_base_pts);
             _index.save(shard_index_file.c_str());

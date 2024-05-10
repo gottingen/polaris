@@ -69,7 +69,7 @@ namespace polaris {
                           const std::shared_ptr<IndexWriteParameters> index_parameters,
                           const std::shared_ptr<IndexSearchParams> index_search_params,
                           const size_t num_frozen_pts = 0, const bool dynamic_index = false,
-                          const bool enable_tags = false, const bool concurrent_consolidate = false,
+                          const bool concurrent_consolidate = false,
                           const bool pq_dist_build = false, const size_t num_pq_chunks = 0,
                           const bool use_opq = false);
 
@@ -89,7 +89,7 @@ namespace polaris {
         POLARIS_API size_t get_max_points();
 
         // Batch build from a file. Optionally pass tags vector.
-        POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const std::vector<vid_t> &tags = std::vector<vid_t>());
+        POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const std::vector<vid_t> &tags);
 
         // Batch build from a file. Optionally pass tags file.
         POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const char *tag_filename);
@@ -316,7 +316,6 @@ namespace polaris {
         bool _saturate_graph = false;
         bool _save_as_one_file = false; // plan to support in next version
         bool _dynamic_index = false;
-        bool _enable_tags = false;
         bool _normalize_vecs = false; // Using normalied L2 for cosine.
         bool _deletes_enabled = false;
 

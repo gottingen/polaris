@@ -28,10 +28,6 @@ namespace polaris {
     }
 
     void IndexFactory::check_config() {
-        if (_config->vamana_config.dynamic_index && !_config->vamana_config.enable_tags) {
-            throw PolarisException("ERROR: Dynamic Indexing must have tags enabled.", -1, __PRETTY_FUNCTION__, __FILE__,
-                                   __LINE__);
-        }
 
         if (_config->vamana_config.pq_dist_build) {
             if (_config->vamana_config.dynamic_index)

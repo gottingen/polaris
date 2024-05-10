@@ -37,7 +37,6 @@ namespace polaris {
         uint32_t build_PQ_bytes;
         std::string codebook_prefix;
         bool use_opq;
-        std::string label_file;
         std::string universal_label;
     };
 
@@ -61,7 +60,6 @@ namespace polaris {
         app->add_option("--build_PQ_bytes", ctx.build_PQ_bytes,
                         program_options_utils::BUIlD_GRAPH_PQ_BYTES)->default_val(0);
         app->add_flag("--use_opq", ctx.use_opq, program_options_utils::USE_OPQ);
-        app->add_option("--label_file", ctx.label_file, program_options_utils::LABEL_FILE)->default_val("");
         app->add_option("--universal_label", ctx.universal_label, program_options_utils::UNIVERSAL_LABEL)->default_val(
                 "");
         app->callback(run_build_memory_index_cli);
@@ -104,7 +102,6 @@ namespace polaris {
                     .with_data_type(polaris::string_to_polaris_type(ctx.data_type))
                     .vamana_is_dynamic_index(false)
                     .vamana_with_index_write_params(index_build_params)
-                    .vamana_is_enable_tags(false)
                     .vamana_is_use_opq(ctx.use_opq)
                     .vamana_is_pq_dist_build(use_pq_build)
                     .vamana_with_num_pq_chunks(ctx.build_PQ_bytes)

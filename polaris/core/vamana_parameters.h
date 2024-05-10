@@ -141,7 +141,6 @@ namespace polaris {
         DataStoreStrategy data_strategy;
         GraphStoreStrategy graph_strategy;
         bool dynamic_index{false};
-        bool enable_tags{false};
         bool pq_dist_build{false};
         bool concurrent_consolidate{false};
         bool use_opq{false};
