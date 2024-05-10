@@ -398,7 +398,7 @@ namespace polaris {
 
         _has_built = true;
 
-        size_t tags_file_num_pts = 0, graph_num_pts = 0, data_file_num_pts = 0, label_num_pts = 0;
+        size_t tags_file_num_pts = 0, graph_num_pts = 0, data_file_num_pts = 0;
 
         std::string mem_index_file(filename);
 
@@ -698,170 +698,11 @@ namespace polaris {
         }
         return std::make_pair(hops, cmps);
     }
-    /*
+
     template<typename T>
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::iterate_to_fixed_point(
-            InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids, bool use_filter,
-            const std::vector<labid_t> &filter_labels, bool search_invocation) {
-        std::vector<Neighbor> &expanded_nodes = scratch->pool();
-        NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
-        best_L_nodes.reserve(Lsize);
-        turbo::flat_hash_set<uint32_t> &inserted_into_pool_rs = scratch->inserted_into_pool_rs();
-        collie::dynamic_bitset<> &inserted_into_pool_bs = scratch->inserted_into_pool_bs();
-        std::vector<uint32_t> &id_scratch = scratch->id_scratch();
-        std::vector<float> &dist_scratch = scratch->dist_scratch();
-        assert(id_scratch.size() == 0);
-
-        T *aligned_query = scratch->aligned_query();
-
-        float *pq_dists = nullptr;
-
-        _pq_data_store->preprocess_query(aligned_query, scratch);
-
-        if (expanded_nodes.size() > 0 || id_scratch.size() > 0) {
-            throw PolarisException("ERROR: Clear scratch space before passing.", -1, __PRETTY_FUNCTION__, __FILE__,
-                                   __LINE__);
-        }
-
-        // Decide whether to use bitset or robin set to mark visited nodes
-        auto total_num_points = _max_points + _num_frozen_pts;
-        bool fast_iterate = total_num_points <= MAX_POINTS_FOR_USING_BITSET;
-
-        if (fast_iterate) {
-            if (inserted_into_pool_bs.size() < total_num_points) {
-                // hopefully using 2X will reduce the number of allocations.
-                auto resize_size =
-                        2 * total_num_points > MAX_POINTS_FOR_USING_BITSET ? MAX_POINTS_FOR_USING_BITSET : 2 *
-                                                                                                           total_num_points;
-                inserted_into_pool_bs.resize(resize_size);
-            }
-        }
-
-        // Lambda to determine if a node has been visited
-        auto is_not_visited = [this, fast_iterate, &inserted_into_pool_bs, &inserted_into_pool_rs](const uint32_t id) {
-            return fast_iterate ? inserted_into_pool_bs[id] == 0
-                                : inserted_into_pool_rs.find(id) == inserted_into_pool_rs.end();
-        };
-
-        // Lambda to batch compute query<-> node distances in PQ space
-        auto compute_dists = [this, scratch, pq_dists](const std::vector<uint32_t> &ids,
-                                                       std::vector<float> &dists_out) {
-            _pq_data_store->get_distance(scratch->aligned_query(), ids, dists_out, scratch);
-        };
-
-        // Initialize the candidate pool with starting points
-        for (auto id: init_ids) {
-            if (id >= _max_points + _num_frozen_pts) {
-                polaris::cerr << "Out of range loc found as an edge : " << id << std::endl;
-                throw polaris::PolarisException(std::string("Wrong loc") + std::to_string(id), -1, __PRETTY_FUNCTION__,
-                                                __FILE__,
-                                                __LINE__);
-            }
-
-            if (use_filter) {
-                if (!detect_common_filters(id, search_invocation, filter_labels))
-                    continue;
-            }
-
-            if (is_not_visited(id)) {
-                if (fast_iterate) {
-                    inserted_into_pool_bs[id] = 1;
-                } else {
-                    inserted_into_pool_rs.insert(id);
-                }
-
-                float distance;
-                uint32_t ids[] = {id};
-                float distances[] = {std::numeric_limits<float>::max()};
-                _pq_data_store->get_distance(aligned_query, ids, 1, distances, scratch);
-                distance = distances[0];
-
-                Neighbor nn = Neighbor(id, distance);
-                best_L_nodes.insert(nn);
-            }
-        }
-
-        uint32_t hops = 0;
-        uint32_t cmps = 0;
-
-        while (best_L_nodes.has_unexpanded_node()) {
-            auto nbr = best_L_nodes.closest_unexpanded();
-            auto n = nbr.id;
-
-            // Add node to expanded nodes to create pool for prune later
-            if (!search_invocation) {
-                if (!use_filter) {
-                    expanded_nodes.emplace_back(nbr);
-                } else { // in filter based indexing, the same point might invoke
-                    // multiple iterate_to_fixed_points, so need to be careful
-                    // not to add the same item to pool multiple times.
-                    if (std::find(expanded_nodes.begin(), expanded_nodes.end(), nbr) == expanded_nodes.end()) {
-                        expanded_nodes.emplace_back(nbr);
-                    }
-                }
-            }
-
-            // Find which of the nodes in des have not been visited before
-            id_scratch.clear();
-            dist_scratch.clear();
-            if (_dynamic_index) {
-                LockGuard guard(_locks[n]);
-                for (auto id: _graph_store->get_neighbours(n)) {
-                    assert(id < _max_points + _num_frozen_pts);
-
-                    if (use_filter) {
-                        // NOTE: NEED TO CHECK IF THIS CORRECT WITH NEW LOCKS.
-                        if (!detect_common_filters(id, search_invocation, filter_labels))
-                            continue;
-                    }
-
-                    if (is_not_visited(id)) {
-                        id_scratch.push_back(id);
-                    }
-                }
-            } else {
-                _locks[n].lock();
-                auto nbrs = _graph_store->get_neighbours(n);
-                _locks[n].unlock();
-                for (auto id: nbrs) {
-                    assert(id < _max_points + _num_frozen_pts);
-
-                    if (use_filter) {
-                        // NOTE: NEED TO CHECK IF THIS CORRECT WITH NEW LOCKS.
-                        if (!detect_common_filters(id, search_invocation, filter_labels))
-                            continue;
-                    }
-
-                    if (is_not_visited(id)) {
-                        id_scratch.push_back(id);
-                    }
-                }
-            }
-
-            // Mark nodes visited
-            for (auto id: id_scratch) {
-                if (fast_iterate) {
-                    inserted_into_pool_bs[id] = 1;
-                } else {
-                    inserted_into_pool_rs.insert(id);
-                }
-            }
-
-            assert(dist_scratch.capacity() >= id_scratch.size());
-            compute_dists(id_scratch, dist_scratch);
-            cmps += (uint32_t) id_scratch.size();
-
-            // Insert <id, dist> pairs into the pool of candidates
-            for (size_t m = 0; m < id_scratch.size(); ++m) {
-                best_L_nodes.insert(Neighbor(id_scratch[m], dist_scratch[m]));
-            }
-        }
-        return std::make_pair(hops, cmps);
-    }
-    */
-    template<typename T>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T>::iterate_to_fixed_point(
-            InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids, bool search_invocation) {
+            InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids,
+            bool search_invocation) {
         std::vector<Neighbor> &expanded_nodes = scratch->pool();
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
         best_L_nodes.reserve(Lsize);
@@ -994,7 +835,7 @@ namespace polaris {
     template<typename T>
     void VamanaIndex<T>::search_for_point_and_prune(int location, uint32_t Lindex,
                                                     std::vector<uint32_t> &pruned_list,
-                                                    InMemQueryScratch<T> *scratch,uint32_t filteredLindex) {
+                                                    InMemQueryScratch<T> *scratch, uint32_t filteredLindex) {
         const std::vector<uint32_t> init_ids = get_init_ids();
         _data_store->get_vector(location, scratch->aligned_query());
         iterate_to_fixed_point(scratch, Lindex, init_ids, false);
@@ -1573,7 +1414,9 @@ namespace polaris {
         auto scratch = manager.scratch_space();
 
         if (ctx.search_list > scratch->get_L()) {
-            POLARIS_LOG(INFO) << "Attempting to expand query scratch_space. Was created "<< "with Lsize: " << scratch->get_L() << " but search L is: " << ctx.search_list;
+            POLARIS_LOG(INFO)
+            << "Attempting to expand query scratch_space. Was created " << "with Lsize: " << scratch->get_L()
+            << " but search L is: " << ctx.search_list;
             scratch->resize_for_new_L(ctx.search_list);
             POLARIS_LOG(INFO) << "Resized scratch space to " << scratch->get_L();
         }
@@ -1686,7 +1529,7 @@ namespace polaris {
                                              const TagType &tags, float *distances, DataVector &res_vectors) {
         try {
             return this->search_with_tags(std::any_cast<const T *>(query), K, L, std::any_cast<vid_t *>(tags),
-                                          distances,res_vectors.get<std::vector<T *>>());
+                                          distances, res_vectors.get<std::vector<T *>>());
         }
         catch (const std::bad_any_cast &e) {
             throw PolarisException("Error: bad any cast while performing _search_with_tags() " + std::string(e.what()),
@@ -1720,7 +1563,7 @@ namespace polaris {
         //_distance->preprocess_query(query, _data_store->get_dims(),
         // scratch->aligned_query());
         _data_store->preprocess_query(query, scratch);
-        iterate_to_fixed_point(scratch, L, init_ids,true);
+        iterate_to_fixed_point(scratch, L, init_ids, true);
 
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
         assert(best_L_nodes.size() <= L);

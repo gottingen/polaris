@@ -463,46 +463,6 @@ continue;
     }
 
     template<typename T>
-    void PQFlashIndex<T>::get_label_file_metadata(const std::string &fileContent, uint32_t &num_pts,
-                                                          uint32_t &num_total_labels) {
-        num_pts = 0;
-        num_total_labels = 0;
-
-        size_t file_size = fileContent.length();
-
-        std::string label_str;
-        size_t cur_pos = 0;
-        size_t next_pos = 0;
-        while (cur_pos < file_size && cur_pos != std::string::npos) {
-            next_pos = fileContent.find('\n', cur_pos);
-            if (next_pos == std::string::npos) {
-                break;
-            }
-
-            size_t lbl_pos = cur_pos;
-            size_t next_lbl_pos = 0;
-            while (lbl_pos < next_pos && lbl_pos != std::string::npos) {
-                next_lbl_pos = fileContent.find(',', lbl_pos);
-                if (next_lbl_pos == std::string::npos) // the last label
-                {
-                    next_lbl_pos = next_pos;
-                }
-
-                num_total_labels++;
-
-                lbl_pos = next_lbl_pos + 1;
-            }
-
-            cur_pos = next_pos + 1;
-
-            num_pts++;
-        }
-
-        polaris::cout << "Labels file metadata: num_points: " << num_pts << ", #total_labels: " << num_total_labels
-                      << std::endl;
-    }
-
-    template<typename T>
     int PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
         std::string pq_table_bin = std::string(index_prefix) + "_pq_pivots.bin";
         std::string pq_compressed_vectors = std::string(index_prefix) + "_pq_compressed.bin";
@@ -522,7 +482,6 @@ continue;
         std::string centroids_file = std::string(_disk_index_file) + "_centroids.bin";
 
         std::string dummy_map_file = std::string(_disk_index_file) + "_dummy_map.txt";
-        size_t num_pts_in_label_file = 0;
 
         size_t pq_file_dim, pq_file_num_centroids;
         get_bin_metadata(pq_table_bin, pq_file_num_centroids, pq_file_dim, METADATA_SIZE);
@@ -699,26 +658,6 @@ continue;
                            std::numeric_limits<uint32_t>::max(),
                            use_reorder_data, stats);
     }
-    /*
-    template<typename T>
-    void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
-                                                     uint64_t *indices, float *distances, const uint64_t beam_width,
-                                                     const bool use_filter, const labid_t &filter_label,
-                                                     const bool use_reorder_data, QueryStats *stats) {
-        cached_beam_search(query1, k_search, l_search, indices, distances, beam_width, use_filter, filter_label,
-                           std::numeric_limits<uint32_t>::max(), use_reorder_data, stats);
-    }
-
-    template<typename T>
-    void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,
-                                                     uint64_t *indices, float *distances, const uint64_t beam_width,
-                                                     const uint32_t io_limit, const bool use_reorder_data,
-                                                     QueryStats *stats) {
-        labid_t dummy_filter = 0;
-        cached_beam_search(query1, k_search, l_search, indices, distances, beam_width, false, dummy_filter, io_limit,
-                           use_reorder_data, stats);
-    }
-    */
 
     template<typename T>
     void PQFlashIndex<T>::cached_beam_search(const T *query1, const uint64_t k_search, const uint64_t l_search,

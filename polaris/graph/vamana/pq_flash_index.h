@@ -66,15 +66,6 @@ namespace polaris {
                                             const uint32_t io_limit, const bool use_reorder_data = false,
                                             QueryStats *stats = nullptr);
 
-        /*
-        POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
-                                            uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
-                                            const bool use_filter, const labid_t &filter_label,
-                                            const uint32_t io_limit, const bool use_reorder_data = false,
-                                            QueryStats *stats = nullptr);
-                                            */
-
-
 
         POLARIS_API uint32_t range_search(const T *query1, const double range, const uint64_t min_l_search,
                                           const uint64_t max_l_search, std::vector<uint64_t> &indices,
@@ -108,9 +99,6 @@ namespace polaris {
         POLARIS_API void setup_thread_data(uint64_t nthreads, uint64_t visited_reserve = 4096);
 
     private:
-
-        POLARIS_API void get_label_file_metadata(const std::string &fileContent, uint32_t &num_pts,
-                                                 uint32_t &num_total_labels);
 
         void reset_stream_for_reading(std::basic_istream<char> &infile);
 

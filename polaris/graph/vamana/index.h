@@ -221,14 +221,6 @@ namespace polaris {
         // with iterate_to_fixed_point.
         std::vector<uint32_t> get_init_ids();
 
-        // The query to use is placed in scratch->aligned_query
-        /*
-        std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
-                                                             const std::vector<uint32_t> &init_ids, bool use_filter,
-                                                             const std::vector<labid_t> &filters,
-                                                             bool search_invocation);
-                                                             */
-
         std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids,bool search_invocation);
 
@@ -353,23 +345,6 @@ namespace polaris {
         bool _enable_tags = false;
         bool _normalize_vecs = false; // Using normalied L2 for cosine.
         bool _deletes_enabled = false;
-
-        // Filter Support
-        /*
-        bool _filtered_index = false;
-        // Location to label is only updated during insert_point(), all other reads are protected by
-        // default as a location can only be released at end of consolidate deletes
-        std::vector<std::vector<labid_t>> _location_to_labels;
-        turbo::flat_hash_set<labid_t> _labels;
-        std::string _labels_file;
-        std::unordered_map<labid_t, uint32_t> _label_to_start_id;
-        std::unordered_map<uint32_t, uint32_t> _medoid_counts;
-
-        bool _use_universal_label = false;
-        labid_t _universal_label = 0;
-        uint32_t _filterIndexingQueueSize;
-        std::unordered_map<std::string, labid_t> _label_map;
-         */
 
         // Indexing parameters
         uint32_t _indexingQueueSize;

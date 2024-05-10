@@ -51,7 +51,6 @@ namespace polaris {
     typedef unsigned int ObjectID;
     typedef float distance_t;
     typedef uint64_t vid_t;
-    //typedef uint32_t labid_t;
     typedef uint32_t localid_t;
     typedef half_float::half float16;
     typedef polaris::bfloat16 bfloat16;
