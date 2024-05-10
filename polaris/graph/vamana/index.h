@@ -76,8 +76,8 @@ namespace polaris {
         POLARIS_API ~VamanaIndex() override;
 
         // Saves graph, data, metadata and associated tags.
-        POLARIS_API turbo::Status save(const char *filename, bool compact_before_save = false) override;
-
+        POLARIS_API turbo::Status save(const char *filename, bool compact_before_save) override;
+        using AbstractIndex::save;
         // Load functions
         // Reads the number of frozen points from graph's metadata file section.
         POLARIS_API static size_t get_graph_num_frozen_points(const std::string &graph_file);
@@ -89,16 +89,16 @@ namespace polaris {
         POLARIS_API size_t get_max_points();
 
         // Batch build from a file. Optionally pass tags vector.
-        POLARIS_API turbo::Status build(const char *filename, const size_t num_points_to_load, const std::vector<vid_t> &tags = std::vector<vid_t>());
+        POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const std::vector<vid_t> &tags = std::vector<vid_t>());
 
         // Batch build from a file. Optionally pass tags file.
-        POLARIS_API turbo::Status build(const char *filename, const size_t num_points_to_load, const char *tag_filename);
+        POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const char *tag_filename);
 
         // Batch build from a data array, which must pad vectors to aligned_dim
-        POLARIS_API turbo::Status build(const void *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) override;
+        POLARIS_API turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
 
         // Based on filter params builds a filtered or unfiltered index
-        POLARIS_API turbo::Status build(const std::string &data_file, const size_t num_points_to_load) override;
+        POLARIS_API turbo::Status build(const std::string &data_file, size_t num_points_to_load) override;
 
         // Set starting point of an index before inserting any points incrementally.
         // The data count should be equal to _num_frozen_pts * _aligned_dim.
@@ -106,10 +106,10 @@ namespace polaris {
         // Set starting points to random points on a sphere of certain radius.
         // A fixed random seed can be specified for scenarios where it's important
         // to have higher consistency between index builds.
-        POLARIS_API void set_start_points_at_random(std::any radius, uint32_t random_seed = 0) override;
+        POLARIS_API void set_start_points_at_random(const std::any &radius, uint32_t random_seed) override;
 
         // For FastL2 search on a static index, we interleave the data with graph
-        POLARIS_API void optimize_index_layout();
+        POLARIS_API void optimize_index_layout() override;
 
         // For FastL2 search on optimized layout
         POLARIS_API turbo::Status search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) override;
@@ -143,7 +143,7 @@ namespace polaris {
         // Returns number of live points left after consolidation
         // If _conc_consolidates is set in the ctor, then this call can be invoked
         // alongside inserts and lazy deletes, else it acquires _update_lock
-        POLARIS_API consolidation_report consolidate_deletes(const IndexWriteParameters &parameters);
+        POLARIS_API consolidation_report consolidate_deletes(const IndexWriteParameters &parameters) override;
 
         POLARIS_API bool is_index_saved();
 
@@ -174,12 +174,11 @@ namespace polaris {
         // Internals of the library
         //
         // ********************************
-
-    protected:
         // No copy/assign.
         VamanaIndex(const VamanaIndex<T> &) = delete;
 
         VamanaIndex<T> &operator=(const VamanaIndex<T> &) = delete;
+    protected:
 
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
@@ -196,10 +195,10 @@ namespace polaris {
         // with iterate_to_fixed_point.
         std::vector<uint32_t> get_init_ids();
 
-        std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
+        std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids,bool search_invocation);
 
-        turbo::ResultStatus<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lindex,
+        turbo::ResultStatus<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids,
                                                              const BaseSearchCondition *condition,
                                                              bool search_invocation);

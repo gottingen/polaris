@@ -54,11 +54,14 @@ namespace polaris {
 
         virtual ~AbstractIndex() = default;
 
-        virtual turbo::Status build(const std::string &data_file, const size_t num_points_to_load) = 0;
-        virtual turbo::Status build(const void *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) = 0;
+        virtual turbo::Status build(const std::string &data_file, size_t num_points_to_load) = 0;
+        virtual turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) = 0;
 
-        virtual turbo::Status save(const char *filename, bool compact_before_save = false) = 0;
 
+        virtual turbo::Status save(const char *filename, bool compact_before_save) = 0;
+        virtual turbo::Status save(const std::string &filename) {
+            return save(filename.c_str(), false);
+        }
 
         virtual void load(const char *index_file, uint32_t num_threads, uint32_t search_l) = 0;
 
@@ -88,8 +91,11 @@ namespace polaris {
 
         virtual void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags) = 0;
 
-        //template<typename data_type>
-        virtual void set_start_points_at_random(std::any radius, uint32_t random_seed = 0) = 0;
+        virtual void set_start_points_at_random(const std::any &radius, uint32_t random_seed) = 0;
+
+        void set_start_points_at_random(const std::any &radius) {
+            set_start_points_at_random(radius, 0);
+        }
 
         virtual consolidation_report consolidate_deletes(const IndexWriteParameters &parameters) = 0;
 

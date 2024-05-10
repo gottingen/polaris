@@ -521,7 +521,7 @@ namespace polaris {
 
     template<typename T>
     turbo::ResultStatus<std::pair<uint32_t, uint32_t>>
-    VamanaIndex<T>::iterate_to_fixed_point(InMemQueryScratch<T> *scratch, const uint32_t Lsize,
+    VamanaIndex<T>::iterate_to_fixed_point(InMemQueryScratch<T> *scratch,  uint32_t Lsize,
                                            const std::vector<uint32_t> &init_ids,
                                            const BaseSearchCondition *condition,
                                            bool search_invocation) {
@@ -684,7 +684,7 @@ namespace polaris {
 
     template<typename T>
     std::pair<uint32_t, uint32_t> VamanaIndex<T>::iterate_to_fixed_point(
-            InMemQueryScratch<T> *scratch, const uint32_t Lsize, const std::vector<uint32_t> &init_ids,
+            InMemQueryScratch<T> *scratch, uint32_t Lsize, const std::vector<uint32_t> &init_ids,
             bool search_invocation) {
         std::vector<Neighbor> &expanded_nodes = scratch->pool();
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
@@ -1121,45 +1121,8 @@ namespace polaris {
         polaris::cout << "VamanaIndex start points set: #" << _num_frozen_pts << std::endl;
     }
 
-    /*
     template<typename T>
-    void VamanaIndex<T>::_set_start_points_at_random(DataType radius, uint32_t random_seed) {
-        try {
-            T radius_to_use = std::any_cast<T>(radius);
-            //this->set_start_points_at_random(radius_to_use, random_seed);
-            std::mt19937 gen{random_seed};
-            std::normal_distribution<> d{0.0, 1.0};
-
-            std::vector<T> points_data;
-            points_data.reserve(_index_config.basic_config.dimension * _num_frozen_pts);
-            std::vector<double> real_vec(_index_config.basic_config.dimension);
-
-            for (size_t frozen_point = 0; frozen_point < _num_frozen_pts; frozen_point++) {
-                double norm_sq = 0.0;
-                for (size_t i = 0; i < _index_config.basic_config.dimension; ++i) {
-                    auto r = d(gen);
-                    real_vec[i] = r;
-                    norm_sq += r * r;
-                }
-
-                const double norm = std::sqrt(norm_sq);
-                for (auto iter: real_vec)
-                    points_data.push_back(static_cast<T>(iter * radius_to_use / norm));
-            }
-
-            set_start_points(points_data.data(), points_data.size());
-        }
-        catch (const std::bad_any_cast &e) {
-            throw PolarisException(
-                    "Error: bad any cast while performing _set_start_points_at_random() " + std::string(e.what()), -1);
-        }
-        catch (const std::exception &e) {
-            throw PolarisException("Error: " + std::string(e.what()), -1);
-        }
-    }
-    */
-    template<typename T>
-    void VamanaIndex<T>::set_start_points_at_random(std::any radius, uint32_t random_seed) {
+    void VamanaIndex<T>::set_start_points_at_random(const std::any &radius, uint32_t random_seed) {
         try {
             T radius_to_use = std::any_cast<T>(radius);
             std::mt19937 gen{random_seed};
@@ -1247,7 +1210,7 @@ namespace polaris {
 
     template<typename T>
     turbo::Status
-    VamanaIndex<T>::build(const void *data, const size_t num_points_to_load, const std::vector<vid_t> &tags) {
+    VamanaIndex<T>::build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) {
         if (num_points_to_load == 0) {
             return turbo::make_status(turbo::kInvalidArgument, "Do not call build with 0 points");
         }
@@ -1268,7 +1231,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::build(const char *filename, const size_t num_points_to_load,
+    turbo::Status VamanaIndex<T>::build(const char *filename, size_t num_points_to_load,
                                         const std::vector<vid_t> &tags) {
         // idealy this should call build_filtered_index based on params passed
 
@@ -1341,7 +1304,7 @@ namespace polaris {
 
     template<typename T>
     turbo::Status
-    VamanaIndex<T>::build(const char *filename, const size_t num_points_to_load, const char *tag_filename) {
+    VamanaIndex<T>::build(const char *filename, size_t num_points_to_load, const char *tag_filename) {
         std::vector<vid_t> tags;
 
         if (_enable_tags) {
@@ -1374,7 +1337,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::build(const std::string &data_file, const size_t num_points_to_load) {
+    turbo::Status VamanaIndex<T>::build(const std::string &data_file, size_t num_points_to_load) {
         size_t points_to_load = num_points_to_load == 0 ? _max_points : num_points_to_load;
         return this->build(data_file.c_str(), points_to_load);
     }
