@@ -180,6 +180,7 @@ namespace polaris {
         std::ifstream reader(bin_file.c_str(), std::ios::binary);
         get_bin_metadata_impl(reader, nrows, ncols, offset);
     }
+
     // get_bin_metadata functions END
 
     inline size_t get_graph_num_frozen_points(const std::string &graph_file) {
@@ -245,6 +246,32 @@ namespace polaris {
             throw FileException(bin_file, e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
         polaris::cout << "done." << std::endl;
+    }
+    inline std::vector<uint32_t> load_tags(const std::string &tags_file, const std::string &base_file) {
+        const bool tags_enabled = tags_file.empty() ? false : true;
+        std::vector<uint32_t> location_to_tag;
+        if (tags_enabled) {
+            size_t tag_file_ndims, tag_file_npts;
+            std::uint32_t *tag_data;
+            polaris::load_bin<std::uint32_t>(tags_file, tag_data, tag_file_npts, tag_file_ndims);
+            if (tag_file_ndims != 1) {
+                polaris::cerr << "tags file error" << std::endl;
+                throw polaris::PolarisException("tag file error", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            }
+
+            // check if the point count match
+            size_t base_file_npts, base_file_ndims;
+            polaris::get_bin_metadata(base_file, base_file_npts, base_file_ndims);
+            if (base_file_npts != tag_file_npts) {
+                polaris::cerr << "point num in tags file mismatch" << std::endl;
+                throw polaris::PolarisException("point num in tags file mismatch", -1, __PRETTY_FUNCTION__, __FILE__,
+                                                __LINE__);
+            }
+
+            location_to_tag.assign(tag_data, tag_data + tag_file_npts);
+            delete[] tag_data;
+        }
+        return location_to_tag;
     }
 
     inline void wait_for_keystroke() {

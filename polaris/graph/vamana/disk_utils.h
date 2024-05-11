@@ -75,9 +75,6 @@ namespace polaris {
                                  const uint64_t nshards, uint32_t max_degree, const std::string &output_vamana,
                                  const std::string &medoids_file);
 
-    POLARIS_API void extract_shard_labels(const std::string &in_label_file, const std::string &shard_ids_bin,
-                                          const std::string &shard_label_file);
-
     template<typename T>
     POLARIS_API std::string preprocess_base_file(const std::string &infile, const std::string &indexPrefix,
                                                  polaris::MetricType &distMetric);

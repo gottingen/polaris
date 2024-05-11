@@ -148,7 +148,7 @@ set(POLARIS_SRC
         graph/ngt/ngtq/quantized_graph.cc
         graph/vamana/abstract_index.cc
         graph/vamana/disk_utils.cc
-        graph/vamana/filter_utils.cc
+        #graph/vamana/filter_utils.cc
         graph/vamana/index.cc
         graph/vamana/index_factory.cc
         graph/vamana/logger.cc
@@ -218,7 +218,7 @@ set(POLARIS_HEADERS
         graph/vamana/abstract_index.h
         graph/vamana/abstract_scratch.h
         graph/vamana/disk_utils.h
-        graph/vamana/filter_utils.h
+        #graph/vamana/filter_utils.h
         graph/vamana/index.h
         graph/vamana/index_factory.h
         graph/vamana/logger.h

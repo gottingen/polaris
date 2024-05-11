@@ -77,12 +77,7 @@ namespace polaris {
             this->reader->deregister_all_threads();
             reader->close();
         }
-        if (_pts_to_label_offsets != nullptr) {
-            delete[] _pts_to_label_offsets;
-        }
-        if (_pts_to_label_counts != nullptr) {
-            delete[] _pts_to_label_counts;
-        }
+
         if (_medoids != nullptr) {
             delete[] _medoids;
         }
@@ -156,14 +151,6 @@ namespace polaris {
 
         // copy reads into buffers
         for (uint32_t i = 0; i < read_reqs.size(); i++) {
-#if defined(_WINDOWS) && defined(USE_BING_INFRA) // this block is to handle failed reads in
-            // production settings
-if ((*ctx.m_pRequestsStatus)[i] != IOContext::READ_SUCCESS)
-{
-retval[i] = false;
-continue;
-}
-#endif
 
             char *node_buf = offset_to_node((char *) read_reqs[i].buf, node_ids[i]);
 
@@ -192,8 +179,8 @@ continue;
 
         // borrow thread data
         ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
-        auto this_thread_data = manager.scratch_space();
-        IOContext &ctx = this_thread_data->ctx;
+        //auto this_thread_data = manager.scratch_space();
+        //IOContext &ctx = this_thread_data->ctx;
 
         // Allocate space for neighborhood cache
         _nhood_cache_buf = new uint32_t[num_cached_nodes * (_max_degree + 1)];
@@ -314,8 +301,8 @@ continue;
 
         // borrow thread data
         ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
-        auto this_thread_data = manager.scratch_space();
-        IOContext &ctx = this_thread_data->ctx;
+        //auto this_thread_data = manager.scratch_space();
+        //IOContext &ctx = this_thread_data->ctx;
 
         std::unique_ptr<turbo::flat_hash_set<uint32_t>> cur_level, prev_level;
         cur_level = std::make_unique<turbo::flat_hash_set<uint32_t>>();
@@ -423,8 +410,8 @@ continue;
 
         // borrow ctx
         ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
-        auto data = manager.scratch_space();
-        IOContext &ctx = data->ctx;
+        //auto data = manager.scratch_space();
+        //IOContext &ctx = data->ctx;
         polaris::cout << "Loading centroid data from medoids vector data of " << _num_medoids << " medoid(s)"
                       << std::endl;
 
@@ -480,8 +467,6 @@ continue;
         std::string _disk_index_file = index_filepath;
         std::string medoids_file = std::string(_disk_index_file) + "_medoids.bin";
         std::string centroids_file = std::string(_disk_index_file) + "_centroids.bin";
-
-        std::string dummy_map_file = std::string(_disk_index_file) + "_dummy_map.txt";
 
         size_t pq_file_dim, pq_file_num_centroids;
         get_bin_metadata(pq_table_bin, pq_file_num_centroids, pq_file_dim, METADATA_SIZE);
@@ -822,12 +807,7 @@ continue;
                     num_ios++;
                 }
                 io_timer.reset();
-#ifdef USE_BING_INFRA
-                reader->read(frontier_read_reqs, ctx,
-                             true); // asynhronous reader for Bing.
-#else
                 reader->read(frontier_read_reqs, ctx); // synchronous IO linux
-#endif
                 if (stats != nullptr) {
                     stats->io_us += (float) io_timer.elapsed();
                 }
@@ -865,8 +845,6 @@ continue;
                 for (uint64_t m = 0; m < nnbrs; ++m) {
                     uint32_t id = node_nbrs[m];
                     if (visited.insert(id).second) {
-                        if (_dummy_pts.find(id) != _dummy_pts.end())
-                            continue;
                         cmps++;
                         float dist = dist_scratch[m];
                         Neighbor nn(id, dist);
@@ -874,20 +852,7 @@ continue;
                     }
                 }
             }
-#ifdef USE_BING_INFRA
-            // process each frontier nhood - compute distances to unvisited nodes
-            int completedIndex = -1;
-            long requestCount = static_cast<long>(frontier_read_reqs.size());
-            // If we issued read requests and if a read is complete or there are
-            // reads in wait state, then enter the while loop.
-            while (requestCount > 0 && getNextCompletedRequest(reader, ctx, requestCount, completedIndex))
-            {
-                assert(completedIndex >= 0);
-                auto &frontier_nhood = frontier_nhoods[completedIndex];
-                (*ctx.m_pRequestsStatus)[completedIndex] = IOContext::PROCESS_COMPLETE;
-#else
             for (auto &frontier_nhood: frontier_nhoods) {
-#endif
                 char *node_disk_buf = offset_to_node(frontier_nhood.second, frontier_nhood.first);
                 uint32_t *node_buf = offset_to_node_nhood(node_disk_buf);
                 uint64_t nnbrs = (uint64_t) (*node_buf);
@@ -917,8 +882,6 @@ continue;
                 for (uint64_t m = 0; m < nnbrs; ++m) {
                     uint32_t id = node_nbrs[m];
                     if (visited.insert(id).second) {
-                        if (_dummy_pts.find(id) != _dummy_pts.end())
-                            continue;
                         cmps++;
                         float dist = dist_scratch[m];
                         if (stats != nullptr) {
@@ -967,11 +930,7 @@ continue;
             }
 
             io_timer.reset();
-#ifdef USE_BING_INFRA
-            reader->read(vec_read_reqs, ctx, true); // async reader windows.
-#else
             reader->read(vec_read_reqs, ctx); // synchronous IO linux
-#endif
             if (stats != nullptr) {
                 stats->io_us += io_timer.elapsed();
             }
@@ -990,11 +949,6 @@ continue;
         // copy k_search values
         for (uint64_t i = 0; i < k_search; i++) {
             indices[i] = full_retset[i].id;
-            auto key = (uint32_t) indices[i];
-            if (_dummy_pts.find(key) != _dummy_pts.end()) {
-                indices[i] = _dummy_to_real_map[key];
-            }
-
             if (distances != nullptr) {
                 distances[i] = full_retset[i].distance;
                 if (metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
@@ -1007,10 +961,6 @@ continue;
                 }
             }
         }
-
-#ifdef USE_BING_INFRA
-        ctx.m_completeCount = 0;
-#endif
 
         if (stats != nullptr) {
             stats->total_us = (float) query_timer.elapsed();

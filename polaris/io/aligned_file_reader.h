@@ -79,8 +79,4 @@ class AlignedFileReader
     // NOTE :: blocking call
     virtual void read(std::vector<AlignedRead> &read_reqs, IOContext &ctx, bool async = false) = 0;
 
-#ifdef USE_BING_INFRA
-    // wait for completion of one request in a batch of requests
-    virtual void wait(IOContext &ctx, int &completedIndex) = 0;
-#endif
 };

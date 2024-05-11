@@ -367,134 +367,6 @@ namespace polaris {
         return 0;
     }
 
-// TODO: Make this a streaming implementation to avoid exceeding the memory
-// budget
-/* If the number of filters per point N exceeds the graph degree R,
-  then it is difficult to have edges to all labels from this point.
-  This function break up such dense points to have only a threshold of maximum
-  T labels per point  It divides one graph nodes to multiple nodes and append
-  the new nodes at the end. The dummy map contains the real graph id of the
-  new nodes added to the graph */
-    template<typename T>
-    void breakup_dense_points(const std::string data_file, const std::string labels_file, uint32_t density,
-                              const std::string out_data_file, const std::string out_labels_file,
-                              const std::string out_metadata_file) {
-        std::string token, line;
-        std::ifstream labels_stream(labels_file);
-        T *data;
-        uint64_t npts, ndims;
-        polaris::load_bin<T>(data_file, data, npts, ndims);
-
-        std::unordered_map<uint32_t, uint32_t> dummy_pt_ids;
-        uint32_t next_dummy_id = (uint32_t) npts;
-
-        uint32_t point_cnt = 0;
-
-        std::vector<std::vector<uint32_t>> labels_per_point;
-        labels_per_point.resize(npts);
-
-        uint32_t dense_pts = 0;
-        if (labels_stream.is_open()) {
-            while (getline(labels_stream, line)) {
-                std::stringstream iss(line);
-                uint32_t lbl_cnt = 0;
-                uint32_t label_host = point_cnt;
-                while (getline(iss, token, ',')) {
-                    if (lbl_cnt == density) {
-                        if (label_host == point_cnt)
-                            dense_pts++;
-                        label_host = next_dummy_id;
-                        labels_per_point.resize(next_dummy_id + 1);
-                        dummy_pt_ids[next_dummy_id] = (uint32_t) point_cnt;
-                        next_dummy_id++;
-                        lbl_cnt = 0;
-                    }
-                    token.erase(std::remove(token.begin(), token.end(), '\n'), token.end());
-                    token.erase(std::remove(token.begin(), token.end(), '\r'), token.end());
-                    uint32_t token_as_num = std::stoul(token);
-                    labels_per_point[label_host].push_back(token_as_num);
-                    lbl_cnt++;
-                }
-                point_cnt++;
-            }
-        }
-        polaris::cout << "fraction of dense points with >= " << density << " labels = "
-                      << (float) dense_pts / (float) npts
-                      << std::endl;
-
-        if (labels_per_point.size() != 0) {
-            polaris::cout << labels_per_point.size() << " is the new number of points" << std::endl;
-            std::ofstream label_writer(out_labels_file);
-            assert(label_writer.is_open());
-            for (uint32_t i = 0; i < labels_per_point.size(); i++) {
-                for (uint32_t j = 0; j < (labels_per_point[i].size() - 1); j++) {
-                    label_writer << labels_per_point[i][j] << ",";
-                }
-                if (labels_per_point[i].size() != 0)
-                    label_writer << labels_per_point[i][labels_per_point[i].size() - 1];
-                label_writer << std::endl;
-            }
-            label_writer.close();
-        }
-
-        if (dummy_pt_ids.size() != 0) {
-            polaris::cout << dummy_pt_ids.size() << " is the number of dummy points created" << std::endl;
-
-            T *ptr = (T *) std::realloc((void *) data, labels_per_point.size() * ndims * sizeof(T));
-            if (ptr == nullptr) {
-                polaris::cerr << "Realloc failed while creating dummy points" << std::endl;
-                free(data);
-                data = nullptr;
-                throw new polaris::PolarisException("Realloc failed while expanding data.", -1, __FUNCTION__, __FILE__,
-                                                    __LINE__);
-            } else {
-                data = ptr;
-            }
-
-            std::ofstream dummy_writer(out_metadata_file);
-            assert(dummy_writer.is_open());
-            for (auto i = dummy_pt_ids.begin(); i != dummy_pt_ids.end(); i++) {
-                dummy_writer << i->first << "," << i->second << std::endl;
-                std::memcpy(data + i->first * ndims, data + i->second * ndims, ndims * sizeof(T));
-            }
-            dummy_writer.close();
-        }
-
-        polaris::save_bin<T>(out_data_file, data, labels_per_point.size(), ndims);
-    }
-
-    void extract_shard_labels(const std::string &in_label_file, const std::string &shard_ids_bin,
-                              const std::string &shard_label_file) { // assumes ith row is for ith
-        // point in labels file
-        polaris::cout << "Extracting labels for shard" << std::endl;
-
-        uint32_t *ids = nullptr;
-        uint64_t num_ids, tmp_dim;
-        polaris::load_bin(shard_ids_bin, ids, num_ids, tmp_dim);
-
-        uint32_t counter = 0, shard_counter = 0;
-        std::string cur_line;
-
-        std::ifstream label_reader(in_label_file);
-        std::ofstream label_writer(shard_label_file);
-        assert(label_reader.is_open());
-        assert(label_reader.is_open());
-        if (label_reader && label_writer) {
-            while (std::getline(label_reader, cur_line)) {
-                if (shard_counter >= num_ids) {
-                    break;
-                }
-                if (counter == ids[shard_counter]) {
-                    label_writer << cur_line << "\n";
-                    shard_counter++;
-                }
-                counter++;
-            }
-        }
-        if (ids != nullptr)
-            delete[] ids;
-    }
-
     template<typename T>
     int build_merged_vamana_index(std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R,
                                   double sampling_rate, double ram_budget, std::string mem_index_path,
@@ -526,9 +398,6 @@ namespace polaris {
             return 0;
         }
 
-        // where the universal label is to be saved in the final graph
-        std::string final_index_universal_label_file = mem_index_path + "_universal_label.txt";
-
         std::string merged_index_prefix = mem_index_path + "_tempFiles";
 
         Timer timer;
@@ -548,8 +417,6 @@ namespace polaris {
             std::string shard_base_file = merged_index_prefix + "_subshard-" + std::to_string(p) + ".bin";
 
             std::string shard_ids_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_ids_uint32.bin";
-
-            std::string shard_labels_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_labels.txt";
 
             retrieve_shard_data_from_ids<T>(base_file, shard_ids_file, shard_base_file);
 
@@ -582,7 +449,6 @@ namespace polaris {
         for (int p = 0; p < num_parts; p++) {
             std::string shard_base_file = merged_index_prefix + "_subshard-" + std::to_string(p) + ".bin";
             std::string shard_id_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_ids_uint32.bin";
-            std::string shard_labels_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_labels.txt";
             std::string shard_index_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_mem.index";
             std::string shard_index_file_data = shard_index_file + ".data";
 

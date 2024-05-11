@@ -28,6 +28,7 @@
 #include <polaris/graph/vamana/scratch.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
+#include <polaris/utility/natural_number_map.h>
 
 #define FULL_PRECISION_REORDER_MULTIPLIER 3
 
@@ -130,7 +131,8 @@ namespace polaris {
         uint64_t _max_node_len = 0;
         uint64_t _nnodes_per_sector = 0; // 0 for multi-sector nodes, >0 for multi-node sectors
         uint64_t _max_degree = 0;
-
+        // tag
+        natural_number_map<uint32_t, vid_t> _location_to_tag;
         // Data used for searching with re-order vectors
         uint64_t _ndims_reorder_vecs = 0;
         uint64_t _reorder_data_start_sector = 0;
@@ -198,14 +200,6 @@ namespace polaris {
         bool _count_visited_nodes = false;
         bool _reorder_data_exists = false;
         uint64_t _reoreder_data_offset = 0;
-
-        // filter support
-        uint32_t *_pts_to_label_offsets = nullptr;
-        uint32_t *_pts_to_label_counts = nullptr;
-        turbo::flat_hash_set<uint32_t> _dummy_pts;
-        turbo::flat_hash_set<uint32_t> _has_dummy_pts;
-        turbo::flat_hash_map<uint32_t, uint32_t> _dummy_to_real_map;
-        turbo::flat_hash_map<uint32_t, std::vector<uint32_t>> _real_to_dummy_map;
 
     };
 } // namespace polaris
