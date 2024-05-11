@@ -111,19 +111,7 @@ namespace polaris {
         // For FastL2 search on a static index, we interleave the data with graph
         POLARIS_API void optimize_index_layout() override;
 
-        // For FastL2 search on optimized layout
-        POLARIS_API turbo::Status search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) override;
-
         POLARIS_API turbo::Status search(SearchContext &ctx) override;
-        // Added search overload that takes L as parameter, so that we
-        // can customize L on a per-query basis without tampering with "Parameters"
-        POLARIS_API turbo::ResultStatus<std::pair<uint32_t, uint32_t>> search(const void *query, const size_t K, const uint32_t L,
-                                                         localid_t *indices, float *distances = nullptr) override;
-
-        // Initialize space for res_vectors before calling.
-        POLARIS_API turbo::ResultStatus<size_t> search_with_tags(const void *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                            float *distances, std::vector<void *> &res_vectors) override;
-
 
         // Will fail if tag already in the index or if tag=0.
         POLARIS_API turbo::Status insert_point(const void *point, const vid_t tag) override;
@@ -179,7 +167,7 @@ namespace polaris {
 
         VamanaIndex<T> &operator=(const VamanaIndex<T> &) = delete;
     protected:
-
+        POLARIS_API turbo::Status search_with_optimized_layout(SearchContext &ctx);
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
         turbo::Status build_with_data_populated(const std::vector<vid_t> &tags);

@@ -26,6 +26,5 @@ namespace polaris {
     void setup_build_memory_index_cli(collie::App *app);
     void setup_search_disk_index_cli(collie::App *app);
     void setup_search_memory_index_cli(collie::App *app);
-    void setup_search2_memory_index_cli(collie::App *app);
     void setup_merge_shards_cli(collie::App *app);
 }  // namespace polaris

@@ -67,19 +67,6 @@ namespace polaris {
 
         virtual turbo::Status search(SearchContext &search_context) = 0;
 
-        // For FastL2 search on optimized layout
-        virtual turbo::Status search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) = 0;
-
-        // Initialize space for res_vectors before calling.
-        virtual turbo::ResultStatus<size_t> search_with_tags(const void *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                float *distances, std::vector<void *> &res_vectors) = 0;
-
-        // Added search overload that takes L as parameter, so that we
-        // can customize L on a per-query basis without tampering with "Parameters"
-        // IDtype is either uint32_t or uint64_t
-        virtual turbo::ResultStatus<std::pair<uint32_t, uint32_t>> search(const void *query, const size_t K, const uint32_t L, localid_t *indices,
-                                             float *distances = nullptr) = 0;
-
         // insert point for unfiltered index build. do not use with filtered index
         virtual turbo::Status insert_point(const void *point, const vid_t tag) = 0;
 

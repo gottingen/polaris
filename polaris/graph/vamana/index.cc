@@ -1338,6 +1338,10 @@ namespace polaris {
                                       ctx.top_k, ctx.search_list);
         }
 
+        if(ctx.vamana_optimized_layout) {
+            return search_with_optimized_layout(ctx);
+        }
+
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
         auto scratch = manager.scratch_space();
 
@@ -1399,116 +1403,6 @@ namespace polaris {
         ctx.hops = rs.value().first;
         ctx.cmps = rs.value().second;
         return turbo::ok_status();
-    }
-
-    template<typename T>
-    turbo::ResultStatus<std::pair<uint32_t, uint32_t>>
-    VamanaIndex<T>::search(const void *query, const size_t K, const uint32_t L,
-                           localid_t *indices, float *distances) {
-        if (K > (uint64_t) L) {
-            throw PolarisException("Set L to a value of at least K", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-
-        ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
-        auto scratch = manager.scratch_space();
-
-        if (L > scratch->get_L()) {
-            polaris::cout << "Attempting to expand query scratch_space. Was created "
-                          << "with Lsize: " << scratch->get_L() << " but search L is: " << L << std::endl;
-            scratch->resize_for_new_L(L);
-            polaris::cout << "Resize completed. New scratch->L is " << scratch->get_L() << std::endl;
-        }
-
-        const std::vector<uint32_t> init_ids = get_init_ids();
-
-        std::shared_lock<std::shared_timed_mutex> lock(_update_lock);
-
-        _data_store->preprocess_query(static_cast<const T *>(query), scratch);
-
-        auto retval = iterate_to_fixed_point(scratch, L, init_ids, true);
-
-        NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
-
-        size_t pos = 0;
-        for (size_t i = 0; i < best_L_nodes.size(); ++i) {
-            if (best_L_nodes[i].id < _max_points) {
-                // safe because VamanaIndex uses uint32_t ids internally
-                // and IDType will be uint32_t or uint64_t
-                indices[pos] = (localid_t) best_L_nodes[i].id;
-                if (distances != nullptr) {
-                    distances[pos] =
-                            _index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ? -1 *
-                                                                                                             best_L_nodes[i].distance
-                                                                                                           : best_L_nodes[i].distance;
-                }
-                pos++;
-            }
-            if (pos == K)
-                break;
-        }
-        if (pos < K) {
-            polaris::cerr << "Found pos: " << pos << "fewer than K elements " << K << " for query" << std::endl;
-        }
-
-        return retval;
-    }
-
-    template<typename T>
-    turbo::ResultStatus<size_t>
-    VamanaIndex<T>::search_with_tags(const void *query, const uint64_t K, const uint32_t L, vid_t *tags,
-                                     float *distances, std::vector<void *> &res_vectors) {
-        if (K > (uint64_t) L) {
-            return turbo::make_status(turbo::kInvalidArgument, "Set L to a value of at least K");
-        }
-        ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
-        auto scratch = manager.scratch_space();
-
-        if (L > scratch->get_L()) {
-            polaris::cout << "Attempting to expand query scratch_space. Was created "
-                          << "with Lsize: " << scratch->get_L() << " but search L is: " << L << std::endl;
-            scratch->resize_for_new_L(L);
-            polaris::cout << "Resize completed. New scratch->L is " << scratch->get_L() << std::endl;
-        }
-
-        std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
-
-        const std::vector<uint32_t> init_ids = get_init_ids();
-
-        //_distance->preprocess_query(query, _data_store->get_dims(),
-        // scratch->aligned_query());
-        _data_store->preprocess_query(static_cast<const T *>(query), scratch);
-        iterate_to_fixed_point(scratch, L, init_ids, true);
-
-        NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
-        assert(best_L_nodes.size() <= L);
-
-        std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
-
-        size_t pos = 0;
-        for (size_t i = 0; i < best_L_nodes.size(); ++i) {
-            auto node = best_L_nodes[i];
-
-            vid_t tag;
-            if (_location_to_tag.try_get(node.id, tag)) {
-                tags[pos] = tag;
-
-                if (res_vectors.size() > 0) {
-                    _data_store->get_vector(node.id, static_cast<T *>(res_vectors[pos]));
-                }
-
-                if (distances != nullptr) {
-                    distances[pos] =
-                            _index_config.basic_config.metric == MetricType::METRIC_INNER_PRODUCT ? -1 * node.distance
-                                                                                                  : node.distance;
-                }
-                pos++;
-                // If res_vectors.size() < k, clip at the value.
-                if (pos == K || pos == res_vectors.size())
-                    break;
-            }
-        }
-
-        return pos;
     }
 
     template<typename T>
@@ -1736,7 +1630,7 @@ namespace polaris {
         }
     }
 
-// Should be called after acquiring _update_lock
+    // Should be called after acquiring _update_lock
     template<typename T>
     void VamanaIndex<T>::compact_data() {
         if (!_dynamic_index)
@@ -2242,11 +2136,11 @@ namespace polaris {
 
     template<typename T>
     turbo::Status
-    VamanaIndex<T>::search_with_optimized_layout(const void *query, size_t K, size_t L, uint32_t *indices) {
+    VamanaIndex<T>::search_with_optimized_layout(SearchContext &ctx) {
         DistanceFastL2<T> *dist_fast = (DistanceFastL2<T> *) (_data_store->get_dist_fn());
-        auto tquery = static_cast<const T *>(query);
-        NeighborPriorityQueue retset(L);
-        std::vector<uint32_t> init_ids(L);
+        auto tquery = reinterpret_cast<const T *>(ctx.query.data());
+        NeighborPriorityQueue retset(ctx.search_list);
+        std::vector<uint32_t> init_ids(ctx.search_list);
 
         collie::dynamic_bitset<> flags{_nd, 0};
         uint32_t tmp_l = 0;
@@ -2254,12 +2148,12 @@ namespace polaris {
         uint32_t MaxM_ep = *neighbors;
         neighbors++;
 
-        for (; tmp_l < L && tmp_l < MaxM_ep; tmp_l++) {
+        for (; tmp_l < ctx.search_list && tmp_l < MaxM_ep; tmp_l++) {
             init_ids[tmp_l] = neighbors[tmp_l];
             flags[init_ids[tmp_l]] = true;
         }
 
-        while (tmp_l < L) {
+        while (tmp_l < ctx.search_list) {
             uint32_t id = rand() % _nd;
             if (flags[id])
                 continue;
@@ -2274,7 +2168,7 @@ namespace polaris {
                 continue;
             _mm_prefetch(_opt_graph + _node_size * id, _MM_HINT_T0);
         }
-        L = 0;
+        auto L = 0;
         for (uint32_t i = 0; i < init_ids.size(); i++) {
             uint32_t id = init_ids[i];
             if (id >= _nd)
@@ -2287,7 +2181,7 @@ namespace polaris {
             flags[id] = true;
             L++;
         }
-
+        vid_t tmp_vid;
         while (retset.has_unexpanded_node()) {
             auto nbr = retset.closest_unexpanded();
             auto n = nbr.id;
@@ -2302,6 +2196,10 @@ namespace polaris {
                 if (flags[id])
                     continue;
                 flags[id] = 1;
+                if(!_location_to_tag.try_get(id, tmp_vid))
+                    return turbo::make_status(turbo::kInternal, "Error in getting tag from location");
+                if(ctx.search_condition->is_in_blacklist(tmp_vid))
+                    continue;
                 T *data = (T *) (_opt_graph + _node_size * id);
                 float norm = *data;
                 data++;
@@ -2311,8 +2209,13 @@ namespace polaris {
             }
         }
 
-        for (size_t i = 0; i < K; i++) {
-            indices[i] = retset[i].id;
+        for (size_t i = 0; i < ctx.top_k; i++) {
+            if(!_location_to_tag.try_get(retset[i].id, tmp_vid))
+                 return turbo::make_status(turbo::kInternal, "Error in getting tag from location");
+            ctx.top_k_queue.emplace_back(tmp_vid, retset[i].distance);
+            if (ctx.with_local_ids) {
+                ctx.local_ids.emplace_back(retset[i].id);
+            }
         }
         return turbo::ok_status();
     }
