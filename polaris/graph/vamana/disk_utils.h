@@ -73,8 +73,7 @@ namespace polaris {
     POLARIS_API int merge_shards(const std::string &vamana_prefix, const std::string &vamana_suffix,
                                  const std::string &idmaps_prefix, const std::string &idmaps_suffix,
                                  const uint64_t nshards, uint32_t max_degree, const std::string &output_vamana,
-                                 const std::string &medoids_file, bool use_filters = false,
-                                 const std::string &labels_to_medoids_file = std::string(""));
+                                 const std::string &medoids_file);
 
     POLARIS_API void extract_shard_labels(const std::string &in_label_file, const std::string &shard_ids_bin,
                                           const std::string &shard_label_file);
@@ -100,11 +99,8 @@ namespace polaris {
     POLARIS_API int build_disk_index(
             const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
             polaris::MetricType _compareMetric, bool use_opq = false,
-            const std::string &codebook_prefix = "", // default is empty for no codebook pass in
-            bool use_filters = false,
-            const std::string &label_file = std::string(""), // default is empty string for no label_file
-            const std::string &universal_label = "", const uint32_t filter_threshold = 0,
-            const uint32_t Lf = 0); // default is empty string for no universal label
+            const std::string &codebook_prefix = "" // default is empty for no codebook pass in
+            ); // default is empty string for no universal label
 
     template<typename T>
     POLARIS_API void create_disk_layout(const std::string base_file, const std::string mem_index_file,

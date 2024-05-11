@@ -39,11 +39,6 @@ namespace polaris {
         bool append_reorder_data;
         uint32_t build_PQ;
         bool use_opq;
-        std::string label_file;
-        std::string universal_label;
-        uint32_t Lf;
-        uint32_t filter_threshold;
-        std::string label_type;
     };
     BuildDiskIndexContext build_disk_index_context;
 
@@ -99,25 +94,10 @@ namespace polaris {
         app->add_flag("--use_opq", build_disk_index_context.use_opq,
                       program_options_utils::USE_OPQ);
 
-        app->add_option("--label_file", build_disk_index_context.label_file,
-                        program_options_utils::LABEL_FILE)->default_val("");
-
-        app->add_option("--universal_label", build_disk_index_context.universal_label,
-                        program_options_utils::UNIVERSAL_LABEL)->default_val("");
-
-        app->add_option("--FilteredLbuild", build_disk_index_context.Lf,
-                        program_options_utils::FILTERED_LBUILD)->default_val(0);
-        app->add_option("--filter_threshold", build_disk_index_context.filter_threshold,
-                        "Threshold to break up the existing nodes to generate new graph "
-                        "internally where each node has a maximum F labels.")->default_val(0);
-
-        app->add_option("--label_type", build_disk_index_context.label_type,
-                        program_options_utils::LABEL_TYPE_DESCRIPTION)->default_val("uint");
         app->callback(run_build_disk_index);
     }
 
     void run_build_disk_index() {
-        bool use_filters = (build_disk_index_context.label_file != "") ? true : false;
         polaris::MetricType metric;
         if (build_disk_index_context.dist_fn == std::string("l2"))
             metric = polaris::MetricType::METRIC_L2;
@@ -156,80 +136,33 @@ namespace polaris {
                              std::string(std::to_string(build_disk_index_context.QD));
 
         try {
-            if (build_disk_index_context.label_file != "" && build_disk_index_context.label_type == "ushort") {
-                int  r;
-                if (build_disk_index_context.data_type == std::string("int8"))
-                    r = polaris::build_disk_index<int8_t>(build_disk_index_context.data_path.c_str(),
-                                                          build_disk_index_context.index_path_prefix.c_str(),
-                                                          params.c_str(),
-                                                          metric, build_disk_index_context.use_opq,
-                                                          build_disk_index_context.codebook_prefix, use_filters,
-                                                          build_disk_index_context.label_file,
-                                                          build_disk_index_context.universal_label,
-                                                          build_disk_index_context.filter_threshold,
-                                                          build_disk_index_context.Lf);
-                else if (build_disk_index_context.data_type == std::string("uint8"))
-                    r = polaris::build_disk_index<uint8_t>(
-                            build_disk_index_context.data_path.c_str(),
-                            build_disk_index_context.index_path_prefix.c_str(), params.c_str(), metric,
-                            build_disk_index_context.use_opq, build_disk_index_context.codebook_prefix,
-                            use_filters, build_disk_index_context.label_file, build_disk_index_context.universal_label,
-                            build_disk_index_context.filter_threshold, build_disk_index_context.Lf);
-                else if (build_disk_index_context.data_type == std::string("float"))
-                    r = polaris::build_disk_index<float>(
-                            build_disk_index_context.data_path.c_str(),
-                            build_disk_index_context.index_path_prefix.c_str(), params.c_str(), metric,
-                            build_disk_index_context.use_opq, build_disk_index_context.codebook_prefix,
-                            use_filters, build_disk_index_context.label_file, build_disk_index_context.universal_label,
-                            build_disk_index_context.filter_threshold, build_disk_index_context.Lf);
-                else {
-                    polaris::cerr << "Error. Unsupported data type" << std::endl;
-                    exit(-1);
-                }
-                if (r != 0) {
-                    polaris::cerr << "VamanaIndex build failed." << std::endl;
-                    exit(-1);
-                }
-            } else {
-                int  r;
-                if (build_disk_index_context.data_type == std::string("int8"))
-                    r= polaris::build_disk_index<int8_t>(build_disk_index_context.data_path.c_str(),
-                                                             build_disk_index_context.index_path_prefix.c_str(),
-                                                             params.c_str(),
-                                                             metric, build_disk_index_context.use_opq,
-                                                             build_disk_index_context.codebook_prefix, use_filters,
-                                                             build_disk_index_context.label_file,
-                                                             build_disk_index_context.universal_label,
-                                                             build_disk_index_context.filter_threshold,
-                                                             build_disk_index_context.Lf);
-                else if (build_disk_index_context.data_type == std::string("uint8"))
-                    r= polaris::build_disk_index<uint8_t>(build_disk_index_context.data_path.c_str(),
-                                                              build_disk_index_context.index_path_prefix.c_str(),
-                                                              params.c_str(),
-                                                              metric, build_disk_index_context.use_opq,
-                                                              build_disk_index_context.codebook_prefix, use_filters,
-                                                              build_disk_index_context.label_file,
-                                                              build_disk_index_context.universal_label,
-                                                              build_disk_index_context.filter_threshold,
-                                                              build_disk_index_context.Lf);
-                else if (build_disk_index_context.data_type == std::string("float"))
-                    r= polaris::build_disk_index<float>(build_disk_index_context.data_path.c_str(),
-                                                            build_disk_index_context.index_path_prefix.c_str(),
-                                                            params.c_str(),
-                                                            metric, build_disk_index_context.use_opq,
-                                                            build_disk_index_context.codebook_prefix, use_filters,
-                                                            build_disk_index_context.label_file,
-                                                            build_disk_index_context.universal_label,
-                                                            build_disk_index_context.filter_threshold,
-                                                            build_disk_index_context.Lf);
-                else {
-                    polaris::cerr << "Error. Unsupported data type" << std::endl;
-                    exit(-1);
-                }
-                if (r != 0) {
-                    polaris::cerr << "VamanaIndex build failed." << std::endl;
-                    exit(-1);
-                }
+
+            int r;
+            if (build_disk_index_context.data_type == std::string("int8"))
+                r = polaris::build_disk_index<int8_t>(build_disk_index_context.data_path.c_str(),
+                                                      build_disk_index_context.index_path_prefix.c_str(),
+                                                      params.c_str(),
+                                                      metric, build_disk_index_context.use_opq,
+                                                      build_disk_index_context.codebook_prefix);
+            else if (build_disk_index_context.data_type == std::string("uint8"))
+                r = polaris::build_disk_index<uint8_t>(build_disk_index_context.data_path.c_str(),
+                                                       build_disk_index_context.index_path_prefix.c_str(),
+                                                       params.c_str(),
+                                                       metric, build_disk_index_context.use_opq,
+                                                       build_disk_index_context.codebook_prefix);
+            else if (build_disk_index_context.data_type == std::string("float"))
+                r = polaris::build_disk_index<float>(build_disk_index_context.data_path.c_str(),
+                                                     build_disk_index_context.index_path_prefix.c_str(),
+                                                     params.c_str(),
+                                                     metric, build_disk_index_context.use_opq,
+                                                     build_disk_index_context.codebook_prefix);
+            else {
+                polaris::cerr << "Error. Unsupported data type" << std::endl;
+                exit(-1);
+            }
+            if (r != 0) {
+                polaris::cerr << "VamanaIndex build failed." << std::endl;
+                exit(-1);
             }
         }
         catch (const std::exception &e) {

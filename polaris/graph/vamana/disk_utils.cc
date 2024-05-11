@@ -198,8 +198,7 @@ namespace polaris {
     int
     merge_shards(const std::string &vamana_prefix, const std::string &vamana_suffix, const std::string &idmaps_prefix,
                  const std::string &idmaps_suffix, const uint64_t nshards, uint32_t max_degree,
-                 const std::string &output_vamana, const std::string &medoids_file, bool use_filters,
-                 const std::string &labels_to_medoids_file) {
+                 const std::string &output_vamana, const std::string &medoids_file) {
         // Read ID maps
         std::vector<std::string> vamana_names(nshards);
         std::vector<std::vector<uint32_t>> idmaps(nshards);
@@ -234,55 +233,6 @@ namespace polaris {
             return left.first < right.first || (left.first == right.first && left.second < right.second);
         });
         polaris::cout << "Finished computing node -> shards map" << std::endl;
-
-        // will merge all the labels to medoids files of each shard into one
-        // combined file
-        if (use_filters) {
-            std::unordered_map<uint32_t, std::vector<uint32_t>> global_label_to_medoids;
-
-            for (size_t i = 0; i < nshards; i++) {
-                std::ifstream mapping_reader;
-                std::string map_file = vamana_names[i] + "_labels_to_medoids.txt";
-                mapping_reader.open(map_file);
-
-                std::string line, token;
-                uint32_t line_cnt = 0;
-
-                while (std::getline(mapping_reader, line)) {
-                    std::istringstream iss(line);
-                    uint32_t cnt = 0;
-                    uint32_t medoid = 0;
-                    uint32_t label = 0;
-                    while (std::getline(iss, token, ',')) {
-                        token.erase(std::remove(token.begin(), token.end(), '\n'), token.end());
-                        token.erase(std::remove(token.begin(), token.end(), '\r'), token.end());
-
-                        uint32_t token_as_num = std::stoul(token);
-
-                        if (cnt == 0)
-                            label = token_as_num;
-                        else
-                            medoid = token_as_num;
-                        cnt++;
-                    }
-                    global_label_to_medoids[label].push_back(idmaps[i][medoid]);
-                    line_cnt++;
-                }
-                mapping_reader.close();
-            }
-
-            std::ofstream mapping_writer(labels_to_medoids_file);
-            assert(mapping_writer.is_open());
-            for (auto iter: global_label_to_medoids) {
-                mapping_writer << iter.first << ", ";
-                auto &vec = iter.second;
-                for (uint32_t idx = 0; idx < vec.size() - 1; idx++) {
-                    mapping_writer << vec[idx] << ", ";
-                }
-                mapping_writer << vec[vec.size() - 1] << std::endl;
-            }
-            mapping_writer.close();
-        }
 
         // create cached vamana readers
         std::vector<cached_ifstream> vamana_readers(nshards);
@@ -695,8 +645,7 @@ namespace polaris {
     }
 
     template<typename T>
-    void
-    create_disk_layout(const std::string base_file, const std::string mem_index_file, const std::string output_file,
+    void  create_disk_layout(const std::string base_file, const std::string mem_index_file, const std::string output_file,
                        const std::string reorder_data_file) {
         uint32_t npts, ndims;
 
@@ -934,11 +883,7 @@ namespace polaris {
 
     template<typename T>
     int build_disk_index(const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
-                         polaris::MetricType compareMetric, bool use_opq, const std::string &codebook_prefix,
-                         bool use_filters,
-                         const std::string &label_file, const std::string &universal_label,
-                         const uint32_t filter_threshold,
-                         const uint32_t Lf) {
+                         polaris::MetricType compareMetric, bool use_opq, const std::string &codebook_prefix) {
         std::stringstream parser;
         parser << std::string(indexBuildParameters);
         std::string cur_param;
@@ -1000,9 +945,7 @@ namespace polaris {
 
         std::string base_file(dataFilePath);
         std::string data_file_to_use = base_file;
-        std::string labels_file_original = label_file;
         std::string index_prefix_path(indexFilePath);
-        std::string labels_file_to_use = index_prefix_path + "_label_formatted.txt";
         std::string pq_pivots_path_base = codebook_prefix;
         std::string pq_pivots_path = collie::filesystem::exists(pq_pivots_path_base) ? pq_pivots_path_base +
                                                                                        "_pq_pivots.bin"
@@ -1014,15 +957,6 @@ namespace polaris {
         std::string medoids_path = disk_index_path + "_medoids.bin";
         std::string centroids_path = disk_index_path + "_centroids.bin";
 
-        std::string labels_to_medoids_path = disk_index_path + "_labels_to_medoids.txt";
-        std::string mem_labels_file = mem_index_path + "_labels.txt";
-        std::string disk_labels_file = disk_index_path + "_labels.txt";
-        std::string mem_univ_label_file = mem_index_path + "_universal_label.txt";
-        std::string disk_univ_label_file = disk_index_path + "_universal_label.txt";
-        std::string disk_labels_int_map_file = disk_index_path + "_labels_map.txt";
-        std::string dummy_remap_file =
-                disk_index_path + "_dummy_remap.txt"; // remap will be used if we break-up points of
-        // high label-density to create copies
 
         std::string sample_base_prefix = index_prefix_path + "_sample";
         // optional, used if disk index file must store pq data
@@ -1088,29 +1022,7 @@ namespace polaris {
                       << " Indexing ram budget: " << indexing_ram_budget << " T: " << num_threads << std::endl;
 
         auto s = std::chrono::high_resolution_clock::now();
-
-        // If there is filter support, we break-up points which have too many labels
-        // into replica dummy points which evenly distribute the filters. The rest
-        // of index build happens on the augmented base and labels
-        std::string augmented_data_file, augmented_labels_file;
-        if (use_filters) {
-            convert_labels_string_to_int(labels_file_original, labels_file_to_use, disk_labels_int_map_file,
-                                         universal_label);
-            augmented_data_file = index_prefix_path + "_augmented_data.bin";
-            augmented_labels_file = index_prefix_path + "_augmented_labels.txt";
-            if (filter_threshold != 0) {
-                dummy_remap_file = index_prefix_path + "_dummy_remap.txt";
-                breakup_dense_points<T>(data_file_to_use, labels_file_to_use, filter_threshold, augmented_data_file,
-                                        augmented_labels_file,
-                                        dummy_remap_file); // RKNOTE: This has large memory footprint,
-                // need to make this streaming
-                data_file_to_use = augmented_data_file;
-                labels_file_to_use = augmented_labels_file;
-            }
-        }
-
         size_t points_num, dim;
-
         Timer timer;
         polaris::get_bin_metadata(data_file_to_use.c_str(), points_num, dim);
         const double p_val = ((double) MAX_PQ_TRAINING_SET_SIZE / (double) points_num);
@@ -1168,17 +1080,6 @@ namespace polaris {
                 ten_percent_points > MAX_SAMPLE_POINTS_FOR_WARMUP ? MAX_SAMPLE_POINTS_FOR_WARMUP : ten_percent_points;
         double sample_sampling_rate = num_sample_points / points_num;
         gen_random_slice<T>(data_file_to_use.c_str(), sample_base_prefix, sample_sampling_rate);
-        if (use_filters) {
-            copy_file(labels_file_to_use, disk_labels_file);
-            std::remove(mem_labels_file.c_str());
-            if (universal_label != "") {
-                copy_file(mem_univ_label_file, disk_univ_label_file);
-                std::remove(mem_univ_label_file.c_str());
-            }
-            std::remove(augmented_data_file.c_str());
-            std::remove(augmented_labels_file.c_str());
-            std::remove(labels_file_to_use.c_str());
-        }
         if (created_temp_file_for_processed_data)
             std::remove(prepped_base.c_str());
         std::remove(mem_index_path.c_str());
@@ -1235,26 +1136,17 @@ namespace polaris {
     template POLARIS_API int build_disk_index<int8_t>(const char *dataFilePath, const char *indexFilePath,
                                                       const char *indexBuildParameters,
                                                       polaris::MetricType compareMetric, bool use_opq,
-                                                      const std::string &codebook_prefix, bool use_filters,
-                                                      const std::string &label_file,
-                                                      const std::string &universal_label,
-                                                      const uint32_t filter_threshold, const uint32_t Lf);
+                                                      const std::string &codebook_prefix);
 
     template POLARIS_API int build_disk_index<uint8_t>(const char *dataFilePath, const char *indexFilePath,
                                                        const char *indexBuildParameters,
                                                        polaris::MetricType compareMetric, bool use_opq,
-                                                       const std::string &codebook_prefix, bool use_filters,
-                                                       const std::string &label_file,
-                                                       const std::string &universal_label,
-                                                       const uint32_t filter_threshold, const uint32_t Lf);
+                                                       const std::string &codebook_prefix);
 
     template POLARIS_API int build_disk_index<float>(const char *dataFilePath, const char *indexFilePath,
                                                      const char *indexBuildParameters,
                                                      polaris::MetricType compareMetric, bool use_opq,
-                                                     const std::string &codebook_prefix, bool use_filters,
-                                                     const std::string &label_file,
-                                                     const std::string &universal_label,
-                                                     const uint32_t filter_threshold, const uint32_t Lf);
+                                                     const std::string &codebook_prefix);
 
     template POLARIS_API int build_merged_vamana_index<int8_t>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
