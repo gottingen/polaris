@@ -24,15 +24,15 @@
 
 #include <polaris/utility/common_includes.h>
 #include <polaris/utility/recall.h>
-#include <polaris/utility/memory_mapper.h>
-#include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_flash_index.h>
 #include <polaris/graph/vamana/timer.h>
-#include <polaris/graph/vamana/percentile_stats.h>
+#include <polaris/core/percentile_stats.h>
+#include <polaris/datasets/bin.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <polaris/io/linux_aligned_file_reader.h>
+#include <polaris/unified_index.h>
 
 #define WARMUP false
 
@@ -87,25 +87,19 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     std::shared_ptr<AlignedFileReader> reader = nullptr;
     reader.reset(new LinuxAlignedFileReader());
 
-    std::unique_ptr<polaris::PQFlashIndex<T>> _pFlashIndex(
-            new polaris::PQFlashIndex<T>(reader, metric));
-
-    auto res = _pFlashIndex->load(num_threads, index_path_prefix.c_str());
-
+    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA_DISK));
+    polaris::IndexConfig config = polaris::IndexConfigBuilder()
+            .with_load_threads(num_threads)
+            .with_metric(metric)
+            .with_data_type(polaris::polaris_type_to_name<T>())
+            .vdisk_with_num_nodes_to_cache(num_nodes_to_cache)
+            .build_vdisk();
+    unified_index->initialize(config);
+    auto res = unified_index->load(index_path_prefix.c_str());
     if (!res.ok()) {
         POLARIS_LOG(ERROR) << "Failed to load index: " << res.message();
         return -1;
     }
-
-    std::vector<uint32_t> node_list;
-    polaris::cout << "Caching " << num_nodes_to_cache << " nodes around medoid(s)" << std::endl;
-    _pFlashIndex->cache_bfs_levels(num_nodes_to_cache, node_list);
-    // if (num_nodes_to_cache > 0)
-    //     _pFlashIndex->generate_cache_list_from_sample_queries(warmup_query_file, 15, 6, num_nodes_to_cache,
-    //     num_threads, node_list);
-    _pFlashIndex->load_cache_list(node_list);
-    node_list.clear();
-    node_list.shrink_to_fit();
 
     omp_set_num_threads(num_threads);
 
@@ -177,8 +171,13 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
 
         if (beamwidth <= 0) {
             polaris::cout << "Tuning beamwidth.." << std::endl;
-            optimized_beamwidth =
-                    _pFlashIndex->optimize_beamwidth(warmup, warmup_num, warmup_aligned_dim, L, optimized_beamwidth);
+            auto rs = unified_index->optimize_beam_width(warmup, warmup_num, warmup_aligned_dim, L, optimized_beamwidth);
+            if(!rs.ok()) {
+                POLARIS_LOG(ERROR) << "Failed to optimize beamwidth";
+                exit(-1);
+            }
+            optimized_beamwidth = rs.value();
+
         } else
             optimized_beamwidth = beamwidth;
 
@@ -196,7 +195,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
                     .set_beam_width(optimized_beamwidth)
                     .set_with_local_ids(true)
                     .set_use_reorder_data(use_reorder_data);
-            auto rs = _pFlashIndex->search(ctx, stats + i);
+            auto rs = unified_index->search(ctx, stats + i);
             if (!rs.ok()) {
                 polaris::cerr << "Search failed for query " << i << std::endl;
                 exit(-1);

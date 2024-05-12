@@ -164,5 +164,6 @@ namespace polaris {
         uint32_t  build_pq_bytes{0};
         uint32_t pq_chunks{0};
         bool use_opq{false};
+        uint32_t num_nodes_to_cache{0};
     };
 } // namespace polaris

@@ -16,6 +16,7 @@
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
 #include <polaris/graph/vamana/utils.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/graph/vamana/disk_utils.h>
 #include <polaris/graph/vamana/math_utils.h>
 #include <polaris/graph/vamana/index.h>

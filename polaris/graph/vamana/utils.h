@@ -30,6 +30,7 @@
 #include <polaris/distance/distance.h>
 #include <polaris/graph/vamana/logger.h>
 #include <polaris/io/cached_io.h>
+#include <polaris/io/utils.h>
 #include <polaris/utility/polaris_exception.h>
 #include <polaris/utility/platform_macros.h>
 #include <turbo/container/flat_hash_set.h>
@@ -164,23 +165,6 @@ namespace polaris {
         }
     }
 
-    // get_bin_metadata functions START
-    inline void
-    get_bin_metadata_impl(std::basic_istream<char> &reader, size_t &nrows, size_t &ncols, size_t offset = 0) {
-        int nrows_32, ncols_32;
-        reader.seekg(offset, reader.beg);
-        reader.read((char *) &nrows_32, sizeof(int));
-        reader.read((char *) &ncols_32, sizeof(int));
-        nrows = nrows_32;
-        ncols = ncols_32;
-    }
-
-
-    inline void get_bin_metadata(const std::string &bin_file, size_t &nrows, size_t &ncols, size_t offset = 0) {
-        std::ifstream reader(bin_file.c_str(), std::ios::binary);
-        get_bin_metadata_impl(reader, nrows, ncols, offset);
-    }
-
     // get_bin_metadata functions END
 
     inline size_t get_graph_num_frozen_points(const std::string &graph_file) {
@@ -212,74 +196,13 @@ namespace polaris {
         return stream.str();
     }
 
-// load_bin functions START
-    template<typename T>
-    inline void
-    load_bin_impl(std::basic_istream<char> &reader, T *&data, size_t &npts, size_t &dim, size_t file_offset = 0) {
-        int npts_i32, dim_i32;
-
-        reader.seekg(file_offset, reader.beg);
-        reader.read((char *) &npts_i32, sizeof(int));
-        reader.read((char *) &dim_i32, sizeof(int));
-        npts = (unsigned) npts_i32;
-        dim = (unsigned) dim_i32;
-
-        std::cout << "Metadata: #pts = " << npts << ", #dims = " << dim << "..." << std::endl;
-
-        data = new T[npts * dim];
-        reader.read((char *) data, npts * dim * sizeof(T));
-    }
-
-    template<typename T>
-    inline void load_bin(const std::string &bin_file, T *&data, size_t &npts, size_t &dim, size_t offset = 0) {
-        polaris::cout << "Reading bin file " << bin_file.c_str() << " ..." << std::endl;
-        std::ifstream reader;
-        reader.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-        try {
-            polaris::cout << "Opening bin file " << bin_file.c_str() << "... " << std::endl;
-            reader.open(bin_file, std::ios::binary | std::ios::ate);
-            reader.seekg(0);
-            load_bin_impl<T>(reader, data, npts, dim, offset);
-        }
-        catch (std::system_error &e) {
-            throw FileException(bin_file, e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-        polaris::cout << "done." << std::endl;
-    }
-    inline std::vector<uint32_t> load_tags(const std::string &tags_file, const std::string &base_file) {
-        const bool tags_enabled = tags_file.empty() ? false : true;
-        std::vector<uint32_t> location_to_tag;
-        if (tags_enabled) {
-            size_t tag_file_ndims, tag_file_npts;
-            std::uint32_t *tag_data;
-            polaris::load_bin<std::uint32_t>(tags_file, tag_data, tag_file_npts, tag_file_ndims);
-            if (tag_file_ndims != 1) {
-                polaris::cerr << "tags file error" << std::endl;
-                throw polaris::PolarisException("tag file error", -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-            }
-
-            // check if the point count match
-            size_t base_file_npts, base_file_ndims;
-            polaris::get_bin_metadata(base_file, base_file_npts, base_file_ndims);
-            if (base_file_npts != tag_file_npts) {
-                polaris::cerr << "point num in tags file mismatch" << std::endl;
-                throw polaris::PolarisException("point num in tags file mismatch", -1, __PRETTY_FUNCTION__, __FILE__,
-                                                __LINE__);
-            }
-
-            location_to_tag.assign(tag_data, tag_data + tag_file_npts);
-            delete[] tag_data;
-        }
-        return location_to_tag;
-    }
 
     inline void wait_for_keystroke() {
         int a;
         std::cout << "Press any number to continue.." << std::endl;
         std::cin >> a;
     }
-// load_bin functions END
+    // load_bin functions END
 
     inline void load_truthset(const std::string &bin_file, uint32_t *&ids, float *&dists, size_t &npts, size_t &dim) {
         size_t read_blk_size = 64 * 1024 * 1024;
@@ -453,56 +376,6 @@ namespace polaris {
                                                      std::vector<std::vector<uint32_t>> &groundtruth,
                                                      std::vector<std::vector<uint32_t>> &our_results);
 
-    template<typename T>
-    inline void load_bin(const std::string &bin_file, std::unique_ptr<T[]> &data, size_t &npts, size_t &dim,
-                         size_t offset = 0) {
-        T *ptr;
-        load_bin<T>(bin_file, ptr, npts, dim, offset);
-        data.reset(ptr);
-    }
-
-    inline void open_file_to_write(std::ofstream &writer, const std::string &filename) {
-        writer.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-        std::error_code ec;
-        if (!collie::filesystem::exists(filename, ec))
-            writer.open(filename, std::ios::binary | std::ios::out);
-        else
-            writer.open(filename, std::ios::binary | std::ios::in | std::ios::out);
-
-        if (writer.fail()) {
-            char buff[1024];
-#ifdef _WINDOWS
-            auto ret = std::to_string(strerror_s(buff, 1024, errno));
-#else
-            auto ret = std::string(strerror_r(errno, buff, 1024));
-#endif
-            std::string error_message =
-                    std::string("Failed to open file") + filename + " for write because " + buff + ", ret=" + ret;
-            polaris::cerr << error_message << std::endl;
-            throw polaris::PolarisException(error_message, -1);
-        }
-    }
-
-    template<typename T>
-    inline size_t save_bin(const std::string &filename, T *data, size_t npts, size_t ndims, size_t offset = 0) {
-        std::ofstream writer;
-        open_file_to_write(writer, filename);
-
-        polaris::cout << "Writing bin: " << filename.c_str() << std::endl;
-        writer.seekp(offset, writer.beg);
-        int npts_i32 = (int) npts, ndims_i32 = (int) ndims;
-        size_t bytes_written = npts * ndims * sizeof(T) + 2 * sizeof(uint32_t);
-        writer.write((char *) &npts_i32, sizeof(int));
-        writer.write((char *) &ndims_i32, sizeof(int));
-        polaris::cout << "bin: #pts = " << npts << ", #dims = " << ndims << ", size = " << bytes_written << "B"
-                      << std::endl;
-
-        writer.write((char *) data, npts * ndims * sizeof(T));
-        writer.close();
-        polaris::cout << "Finished writing bin." << std::endl;
-        return bytes_written;
-    }
-
     inline void print_progress(double percentage) {
         int val = (int) (percentage * 100);
         int lpad = (int) (percentage * PBWIDTH);
@@ -511,79 +384,13 @@ namespace polaris {
         fflush(stdout);
     }
 
-// load_aligned_bin functions START
-
-    template<typename T>
-    inline void load_aligned_bin_impl(std::basic_istream<char> &reader, size_t actual_file_size, T *&data, size_t &npts,
-                                      size_t &dim, size_t &rounded_dim) {
-        int npts_i32, dim_i32;
-        reader.read((char *) &npts_i32, sizeof(int));
-        reader.read((char *) &dim_i32, sizeof(int));
-        npts = (unsigned) npts_i32;
-        dim = (unsigned) dim_i32;
-
-        size_t expected_actual_file_size = npts * dim * sizeof(T) + 2 * sizeof(uint32_t);
-        if (actual_file_size != expected_actual_file_size) {
-            std::stringstream stream;
-            stream << "Error. File size mismatch. Actual size is " << actual_file_size << " while expected size is  "
-                   << expected_actual_file_size << " npts = " << npts << " dim = " << dim << " size of <T>= "
-                   << sizeof(T)
-                   << std::endl;
-            polaris::cout << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-        rounded_dim = ROUND_UP(dim, 8);
-        polaris::cout << "Metadata: #pts = " << npts << ", #dims = " << dim << ", aligned_dim = " << rounded_dim
-                      << "... "
-                      << std::flush;
-        size_t allocSize = npts * rounded_dim * sizeof(T);
-        polaris::cout << "allocating aligned memory of " << allocSize << " bytes... " << std::flush;
-        alloc_aligned(((void **) &data), allocSize, 8 * sizeof(T));
-        polaris::cout << "done. Copying data to mem_aligned buffer..." << std::flush;
-
-        for (size_t i = 0; i < npts; i++) {
-            reader.read((char *) (data + i * rounded_dim), dim * sizeof(T));
-            memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
-        }
-        polaris::cout << " done." << std::endl;
-    }
-
-    template<typename T>
-    inline void
-    load_aligned_bin(const std::string &bin_file, T *&data, size_t &npts, size_t &dim, size_t &rounded_dim) {
-        std::ifstream reader;
-        reader.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-        try {
-            polaris::cout << "Reading (with alignment) bin file " << bin_file << " ..." << std::flush;
-            reader.open(bin_file, std::ios::binary | std::ios::ate);
-
-            uint64_t fsize = reader.tellg();
-            reader.seekg(0);
-            load_aligned_bin_impl(reader, fsize, data, npts, dim, rounded_dim);
-        }
-        catch (std::system_error &e) {
-            throw FileException(bin_file, e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-    }
-
-    template<typename InType, typename OutType>
-    void convert_types(const InType *srcmat, OutType *destmat, size_t npts, size_t dim) {
-#pragma omp parallel for schedule(static, 65536)
-        for (int64_t i = 0; i < (int64_t) npts; i++) {
-            for (uint64_t j = 0; j < dim; j++) {
-                destmat[i * dim + j] = (OutType) srcmat[i * dim + j];
-            }
-        }
-    }
-
-// this function will take in_file of n*d dimensions and save the output as a
-// floating point matrix
-// with n*(d+1) dimensions. All vectors are scaled by a large value M so that
-// the norms are <=1 and the final coordinate is set so that the resulting
-// norm (in d+1 coordinates) is equal to 1 this is a classical transformation
-// from MIPS to L2 search from "On Symmetric and Asymmetric LSHs for Inner
-// Product Search" by Neyshabur and Srebro
+    // this function will take in_file of n*d dimensions and save the output as a
+    // floating point matrix
+    // with n*(d+1) dimensions. All vectors are scaled by a large value M so that
+    // the norms are <=1 and the final coordinate is set so that the resulting
+    // norm (in d+1 coordinates) is equal to 1 this is a classical transformation
+    // from MIPS to L2 search from "On Symmetric and Asymmetric LSHs for Inner
+    // Product Search" by Neyshabur and Srebro
 
     template<typename T>
     float prepare_base_for_inner_products(const std::string in_file, const std::string out_file) {

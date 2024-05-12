@@ -14,16 +14,28 @@
 //
 //
 
+#pragma once
+
 #include <polaris/unified_index.h>
-#include <polaris/unified/vamana_disk.h>
+
 namespace polaris {
 
-    UnifiedIndex *UnifiedIndex::create_index(IndexType type) {
-        switch (type) {
-            case IndexType::IT_VAMANA_DISK:
-                return new VamanaDisk();
-            default:
-                return nullptr;
-        }
-    }
+    class Vamana : public UnifiedIndex {
+    public:
+        Vamana() = default;
+
+        ~Vamana() override = default;
+
+        turbo::Status initialize(const IndexBasicConfig &config) override;
+
+        turbo::Status load(const IndexConfig &config, const std::string &index_path) override;
+
+        turbo::Status save(const std::string &index_path) override;
+
+        turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) override;
+
+        turbo::Status remove(vid_t vid) override;
+
+        turbo::Status search(const std::vector<uint8_t> &query, const SearchContext &context) override;
+    };
 }  // namespace polaris

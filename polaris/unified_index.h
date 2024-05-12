@@ -18,95 +18,45 @@
 #include <vector>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/core/lock.h>
+#include <polaris/core/search_context.h>
+#include <turbo/status/status.h>
+#include <polaris/core/index_config.h>
+#include <polaris/core/percentile_stats.h>
 
 namespace polaris {
 
-    struct SearchOptions {
-        int64_t n;
-        int64_t k;
-        std::vector<float> query;
-        uint32_t nprobe;
-        float radius;
+    enum class IndexType {
+        IT_NONE,
+        IT_FLAT,
+        IT_FLATIP,
+        IT_FLATL2,
+        IT_LSH,
+        IT_IVFFLAT,
+        IT_VAMANA_DISK,
+        IT_VAMANA
     };
 
-    struct EngineConfig {
-        size_t max_elements;
-        size_t batch_size;
-        uint32_t dimension;
-    };
-
-    /**
-     * UnifiedImpl is the base class for all index implementations.
-     * It provides the basic interface for all index implementations.
-     * The UnifiedIndex create a UnifiedImpl instance by follow steps:
-     * @code
-     * UnifiedImpl* impl = UnifiedImpl::create("index_type");
-     * impl->set_conf(config);
-     * impl->init();
-     * @endcode
-     */
-
-    class UnifiedImpl {
-    public:
-        static const size_t DEFAULT_MAX_ELEMENTS = 1000000;
-        static const size_t DEFAULT_BATCH_SIZE = 1000;
-    public:
-        UnifiedImpl();
-
-        virtual ~UnifiedImpl();
-
-        virtual int init() = 0;
-
-        virtual size_t size() = 0;
-
-        virtual bool support_update() = 0;
-
-        virtual bool support_delete() = 0;
-
-        virtual bool need_model() = 0;
-
-        virtual void add_with_ids(const std::vector<int64_t> &ids, std::vector<float> &vecs) = 0;
-
-        virtual void search(
-                SearchOptions &option, std::vector<float> &distances, std::vector<int64_t> &labels) = 0;
-
-        // do not using template to avoid c api compatibility
-        virtual void remove(const turbo::flat_hash_set<uint64_t> &delete_ids) = 0;
-
-        virtual void remove(const std::vector<uint64_t> &delete_ids) = 0;
-
-        virtual void update(const std::vector<int64_t> &ids, std::vector<float> &vecs) = 0;
-
-        virtual int load(const std::string &file, WriteLock &index_wlock) = 0;
-
-        virtual int save(const std::string &file) = 0;
-
-        void set_max_elements(size_t max_elements) {
-            if (max_elements > max_elements_) {
-                max_elements_ = max_elements;
-            }
-        }
-
-        void set_conf(const EngineConfig &conf) {
-            config_ = conf;
-        }
-
-        virtual int build_batch_size() {
-            return DEFAULT_BATCH_SIZE;
-        }
-
-        virtual void shrink_to_fit() {
-        }
-
-    protected:
-        EngineConfig config_;
-        size_t max_elements_ = DEFAULT_MAX_ELEMENTS;
-    };
-
-    using UnifiedImplPtr = std::shared_ptr<UnifiedImpl>;
 
     class UnifiedIndex {
     public:
-        UnifiedIndex();
+        virtual ~UnifiedIndex() = default;
+
+        virtual turbo::Status initialize(const IndexConfig &config) = 0;
+
+        virtual turbo::Status load(const std::string &index_path) = 0;
+
+        virtual turbo::Status save(const std::string &index_path) = 0;
+
+        virtual turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) = 0;
+
+        virtual turbo::Status remove(vid_t vid) = 0;
+
+        virtual turbo::Status search(SearchContext &context, polaris::QueryStats *stats) = 0;
+
+        /// @brief Optimize the beam width for the index
+        virtual turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
+                                                uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
+                                                uint32_t start_bw = 2) = 0;
+        static UnifiedIndex *create_index(IndexType type);
     };
 }  // namespace polaris

@@ -46,7 +46,7 @@ namespace polaris {
         // file_prefix.
         //  Currently, the plan is to save the quantized vectors to the quantized
         //  vectors file.
-        virtual size_t save(const std::string &file_prefix, const location_t num_points) override;
+        virtual turbo::ResultStatus<size_t> save(const std::string &file_prefix, const location_t num_points) override;
 
         // Since base class function is pure virtual, we need to declare it here, even though alignent concept is not needed
         // for Quantized data stores.

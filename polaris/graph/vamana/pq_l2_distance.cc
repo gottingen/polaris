@@ -15,6 +15,7 @@
 #include <polaris/graph/vamana/pq.h>
 #include <polaris/graph/vamana/pq_l2_distance.h>
 #include <polaris/graph/vamana/pq_scratch.h>
+#include <polaris/datasets/bin.h>
 
 // block size for reading/processing large files and matrices in blocks
 #define BLOCK_SIZE 5000000

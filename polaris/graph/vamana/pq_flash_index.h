@@ -22,7 +22,7 @@
 #include <polaris/graph/vamana/neighbor.h>
 #include <polaris/core/vamana_parameters.h>
 #include <polaris/core/search_context.h>
-#include <polaris/graph/vamana/percentile_stats.h>
+#include <polaris/core/percentile_stats.h>
 #include <polaris/graph/vamana/pq.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/platform_macros.h>

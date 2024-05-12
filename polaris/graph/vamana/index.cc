@@ -23,6 +23,7 @@
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/utility/tag_uint128.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/distance/distance_impl.h>
 #include <polaris/core/log.h>
 
@@ -182,7 +183,7 @@ namespace polaris {
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::save_tags(std::string tags_file) {
+    turbo::ResultStatus<size_t> VamanaIndex<T>::save_tags(std::string tags_file) {
         size_t tag_bytes_written;
         vid_t *tag_data = new vid_t[_nd + _num_frozen_pts];
         for (uint32_t i = 0; i < _nd; i++) {
@@ -197,18 +198,17 @@ namespace polaris {
         if (_num_frozen_pts > 0) {
             std::memset((char *) &tag_data[_start], 0, sizeof(vid_t) * _num_frozen_pts);
         }
-        try {
-            tag_bytes_written = save_bin<vid_t>(tags_file, tag_data, _nd + _num_frozen_pts, 1);
+        auto rs = save_bin<vid_t>(tags_file, tag_data, _nd + _num_frozen_pts, 1);
+        if(!rs.ok()) {
+            return rs.status();
         }
-        catch (std::system_error &e) {
-            throw FileException(tags_file, e, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
+        tag_bytes_written = rs.value();
         delete[] tag_data;
         return tag_bytes_written;
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::save_data(std::string data_file) {
+    turbo::ResultStatus<size_t> VamanaIndex<T>::save_data(std::string data_file) {
         // Note: at this point, either _nd == _max_points or any frozen points have
         // been temporarily moved to _nd, so _nd + _num_frozen_pts is the valid
         // location limit.
@@ -224,7 +224,7 @@ namespace polaris {
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::save_delete_list(const std::string &filename) {
+    turbo::ResultStatus<size_t> VamanaIndex<T>::save_delete_list(const std::string &filename) {
         if (_delete_set->size() == 0) {
             return 0;
         }
@@ -268,11 +268,20 @@ namespace polaris {
             collie::filesystem::remove(graph_file);
             save_graph(graph_file);
             collie::filesystem::remove(data_file);
-            save_data(data_file);
+            auto rs = save_data(data_file);
+            if(!rs.ok()) {
+                return rs.status();
+            }
             collie::filesystem::remove(tags_file);
-            save_tags(tags_file);
+            rs = save_tags(tags_file);
+            if(!rs.ok()) {
+                return rs.status();
+            }
             collie::filesystem::remove(delete_list_file);
-            save_delete_list(delete_list_file);
+            rs = save_delete_list(delete_list_file);
+            if(!rs.ok()) {
+                return rs.status();
+            }
         } else {
             polaris::cout << "Save index in a single file currently not supported. "
                              "Not saving the index."

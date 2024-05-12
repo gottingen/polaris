@@ -18,12 +18,13 @@
 
 #include <fstream>
 #include <collie/filesystem/fs.h>
-//#include <polaris/core/log.h>
+#include <polaris/core/log.h>
 #include <polaris/utility/polaris_exception.h>
+#include <turbo/status/status.h>
 
 namespace polaris {
 
-    inline void open_file_to_write(std::ofstream &writer, const std::string &filename) {
+    inline turbo::Status open_file_to_write(std::ofstream &writer, const std::string &filename) {
         writer.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         std::error_code ec;
         if (!collie::filesystem::exists(filename, ec))
@@ -35,10 +36,10 @@ namespace polaris {
             char buff[1024];
             auto ret = std::string(strerror_r(errno, buff, 1024));
             auto message = std::string("Failed to open file") + filename + " for write because " + buff + ", ret=" + ret;
-            //POLARIS_LOG(FATAL)<< message;
-            std::cerr << message << std::endl;
-            throw polaris::PolarisException(message, -1);
+            POLARIS_LOG(ERROR)<< message;
+            return turbo::make_status(errno, message);
         }
+        return turbo::ok_status();
     }
 
     inline void open_to_write(std::ofstream &writer, const std::string &filename, bool truncate = false) {

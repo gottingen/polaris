@@ -36,7 +36,7 @@ namespace polaris {
 
         virtual location_t load(const std::string &filename) override;
 
-        virtual size_t save(const std::string &filename, const location_t num_points) override;
+        virtual turbo::ResultStatus<size_t> save(const std::string &filename, const location_t num_points) override;
 
         virtual size_t get_aligned_dim() const override;
 

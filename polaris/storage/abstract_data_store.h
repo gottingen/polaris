@@ -21,6 +21,7 @@
 #include <polaris/utility/types.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/distance/distance.h>
+#include <turbo/status/result_status.h>
 
 namespace polaris {
 
@@ -41,7 +42,7 @@ namespace polaris {
         // resizing we can end up in a situation where the store has spare capacity.
         // To optimize disk utilization, we pass the number of points that are "true"
         // points, so that the store can discard the empty locations before saving.
-        virtual size_t save(const std::string &filename, const location_t num_pts) = 0;
+        virtual turbo::ResultStatus<size_t> save(const std::string &filename, const location_t num_pts) = 0;
 
         POLARIS_API virtual location_t capacity() const;
 

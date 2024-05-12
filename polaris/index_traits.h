@@ -17,6 +17,7 @@
 #pragma once
 
 #include <collie/base/engine_registry.h>
+#include <polaris/unified_index.h>
 #include <vector>
 #include <string>
 
@@ -36,14 +37,6 @@ namespace polaris {
         static constexpr char const *name() noexcept { return "<none>"; }
     };
      */
-    enum class IndexType {
-        IT_NONE,
-        IT_FLAT,
-        IT_FLATIP,
-        IT_FLATL2,
-        IT_LSH,
-        IT_IVFFLAT,
-    };
 
     struct IndexFlatTraits {
         static constexpr bool supported() noexcept { return true; }
@@ -114,10 +107,40 @@ namespace polaris {
         static constexpr char const *name() noexcept { return "IndexIVFFlat"; }
     };
 
+    struct IndexDvPQTraits {
+        static constexpr bool supported() noexcept { return true; }
+
+        static constexpr bool available() noexcept { return true; }
+
+        static constexpr unsigned version() noexcept { return static_cast<int>(IndexType::IT_VAMANA_DISK); }
+
+        static constexpr std::size_t alignment() noexcept { return 0; }
+
+        static constexpr bool requires_alignment() noexcept { return false; }
+
+        static constexpr char const *name() noexcept { return "IndexDVPQ"; }
+    };
+
+    struct IndexVamanaTraits {
+        static constexpr bool supported() noexcept { return true; }
+
+        static constexpr bool available() noexcept { return true; }
+
+        static constexpr unsigned version() noexcept { return static_cast<int>(IndexType::IT_VAMANA); }
+
+        static constexpr std::size_t alignment() noexcept { return 0; }
+
+        static constexpr bool requires_alignment() noexcept { return false; }
+
+        static constexpr char const *name() noexcept { return "IndexVamana"; }
+    };
+
 }  // namespace polaris
 
 namespace polaris {
-    using all_rt_index = collie::engine_list<IndexLshTraits, IndexFlatL2Traits, IndexFlatIPTraits, IndexFlatTraits>;
+    using all_rt_index = collie::engine_list<IndexVamanaTraits,IndexLshTraits, IndexFlatL2Traits, IndexFlatIPTraits, IndexFlatTraits>;
+
+    using all_static_index = collie::engine_list<IndexDvPQTraits>;
 
     using all_model_index = collie::engine_list<IndexIvfFlatTraits>;
 

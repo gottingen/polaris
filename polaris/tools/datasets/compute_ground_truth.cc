@@ -34,7 +34,9 @@
 #include <collie/cli/cli.h>
 #include <stdlib.h>
 //#include <polaris/graph/vamana/filter_utils.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/graph/vamana/utils.h>
+#include <polaris/core/common.h>
 
 // WORKS FOR UPTO 2 BILLION POINTS (as we use INT INSTEAD OF UNSIGNED)
 
@@ -371,8 +373,12 @@ int aux_main(const std::string &base_file, const std::string &query_file, const 
 
     // load tags
     const bool tags_enabled = tags_file.empty() ? false : true;
-    std::vector<uint32_t> location_to_tag = polaris::load_tags(tags_file, base_file);
-
+    std::vector<uint32_t> location_to_tag;
+    auto rs = polaris::load_tags(tags_file, base_file, location_to_tag);
+    if(!rs.ok()) {
+        std::cerr << "Error loading tags: " << rs.message() << std::endl;
+        return -1;
+    }
     int *closest_points = new int[nqueries * k];
     float *dist_closest_points = new float[nqueries * k];
 

@@ -14,8 +14,8 @@
 //
 
 #include <polaris/datasets/ivecs.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/utility/platform_macros.h>
-#include <polaris/graph/vamana/utils.h>
 #include <iostream>
 
 namespace polaris {
@@ -69,12 +69,15 @@ namespace polaris {
     turbo::Status uint32_to_uint8_bin(const std::string &vecs_file, const std::string &bin_file) {
         uint32_t *input;
         size_t npts, nd;
-        polaris::load_bin<uint32_t>(vecs_file, input, npts, nd);
+        auto s = polaris::load_bin<uint32_t>(vecs_file, input, npts, nd);
+        if (!s.ok()) {
+            return s;
+        }
         uint8_t *output = new uint8_t[npts * nd];
         polaris::convert_types<uint32_t, uint8_t>(input, output, npts, nd);
-        polaris::save_bin<uint8_t>(bin_file, output, npts, nd);
+        auto rs = polaris::save_bin<uint8_t>(bin_file, output, npts, nd);
         delete[] output;
         delete[] input;
-        return turbo::ok_status();
+        return rs.status();
     }
 }  // namespace polaris

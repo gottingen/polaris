@@ -23,6 +23,7 @@
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/math_utils.h>
 #include <turbo/container/flat_hash_map.h>
+#include <polaris/datasets/bin.h>
 
 // block size for reading/processing large files and matrices in blocks
 #define BLOCK_SIZE 5000000
@@ -463,13 +464,27 @@ namespace polaris {
 
         std::vector<size_t> cumul_bytes(4, 0);
         cumul_bytes[0] = METADATA_SIZE;
-        cumul_bytes[1] = cumul_bytes[0] + polaris::save_bin<float>(pq_pivots_path.c_str(), full_pivot_data.get(),
-                                                                   (size_t) num_centers, dim, cumul_bytes[0]);
-        cumul_bytes[2] = cumul_bytes[1] +
-                         polaris::save_bin<float>(pq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
-                                                  cumul_bytes[1]);
-        cumul_bytes[3] = cumul_bytes[2] + polaris::save_bin<uint32_t>(pq_pivots_path.c_str(), chunk_offsets.data(),
-                                                                      chunk_offsets.size(), 1, cumul_bytes[2]);
+        auto rs = polaris::save_bin<float>(pq_pivots_path.c_str(), full_pivot_data.get(),
+                                           (size_t) num_centers, dim, cumul_bytes[0]);
+        if (!rs.ok()) {
+            polaris::cerr << "Error saving PQ pivots to " << pq_pivots_path << std::endl;
+            return -1;
+        }
+        cumul_bytes[1] = cumul_bytes[0] + rs.value();
+        rs = polaris::save_bin<float>(pq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
+                                      cumul_bytes[1]);
+        if (!rs.ok()) {
+            polaris::cerr << "Error saving PQ pivots to " << pq_pivots_path << std::endl;
+            return -1;
+        }
+        cumul_bytes[2] = cumul_bytes[1] + rs.value();
+        rs = polaris::save_bin<uint32_t>(pq_pivots_path.c_str(), chunk_offsets.data(),
+                                         chunk_offsets.size(), 1, cumul_bytes[2]);
+        if (!rs.ok()) {
+            polaris::cerr << "Error saving PQ pivots to " << pq_pivots_path << std::endl;
+            return -1;
+        }
+        cumul_bytes[3] = cumul_bytes[2] + rs.value();
         polaris::save_bin<size_t>(pq_pivots_path.c_str(), cumul_bytes.data(), cumul_bytes.size(), 1, 0);
 
         polaris::cout << "Saved pq pivot data to " << pq_pivots_path << " of size "
@@ -653,13 +668,27 @@ namespace polaris {
 
         std::vector<size_t> cumul_bytes(4, 0);
         cumul_bytes[0] = METADATA_SIZE;
-        cumul_bytes[1] = cumul_bytes[0] + polaris::save_bin<float>(opq_pivots_path.c_str(), full_pivot_data.get(),
-                                                                   (size_t) num_centers, dim, cumul_bytes[0]);
-        cumul_bytes[2] = cumul_bytes[1] +
-                         polaris::save_bin<float>(opq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
-                                                  cumul_bytes[1]);
-        cumul_bytes[3] = cumul_bytes[2] + polaris::save_bin<uint32_t>(opq_pivots_path.c_str(), chunk_offsets.data(),
-                                                                      chunk_offsets.size(), 1, cumul_bytes[2]);
+        auto rs = polaris::save_bin<float>(opq_pivots_path.c_str(), full_pivot_data.get(),
+                                           (size_t) num_centers, dim, cumul_bytes[0]);
+        if (!rs.ok()) {
+            std::cout << "Error saving file" << std::endl;
+            return -1;
+        }
+        cumul_bytes[1] = cumul_bytes[0] + rs.value();
+        rs = polaris::save_bin<float>(opq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
+                                      cumul_bytes[1]);
+        if (!rs.ok()) {
+            std::cout << "Error saving file" << std::endl;
+            return -1;
+        }
+        cumul_bytes[2] = cumul_bytes[1] + rs.value();
+        rs = polaris::save_bin<uint32_t>(opq_pivots_path.c_str(), chunk_offsets.data(),
+                                         chunk_offsets.size(), 1, cumul_bytes[2]);
+        if (!rs.ok()) {
+            std::cout << "Error saving file" << std::endl;
+            return -1;
+        }
+        cumul_bytes[3] = cumul_bytes[2] + rs.value();
         polaris::save_bin<size_t>(opq_pivots_path.c_str(), cumul_bytes.data(), cumul_bytes.size(), 1, 0);
 
         polaris::cout << "Saved opq pivot data to " << opq_pivots_path << " of size "
@@ -942,7 +971,8 @@ namespace polaris {
 
     template<typename T>
     void generate_disk_quantized_data(const std::string &data_file_to_use, const std::string &disk_pq_pivots_path,
-                                      const std::string &disk_pq_compressed_vectors_path, polaris::MetricType compareMetric,
+                                      const std::string &disk_pq_compressed_vectors_path,
+                                      polaris::MetricType compareMetric,
                                       const double p_val, size_t &disk_pq_dims) {
         size_t train_size, train_dim;
         float *train_data;
@@ -1026,7 +1056,8 @@ namespace polaris {
     template POLARIS_API void generate_disk_quantized_data<int8_t>(const std::string &data_file_to_use,
                                                                    const std::string &disk_pq_pivots_path,
                                                                    const std::string &disk_pq_compressed_vectors_path,
-                                                                   polaris::MetricType compareMetric, const double p_val,
+                                                                   polaris::MetricType compareMetric,
+                                                                   const double p_val,
                                                                    size_t &disk_pq_dims);
 
     template POLARIS_API void generate_disk_quantized_data<uint8_t>(

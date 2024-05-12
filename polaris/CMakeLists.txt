@@ -160,6 +160,7 @@ set(POLARIS_SRC
         graph/vamana/pq_l2_distance.cc
         graph/vamana/scratch.cc
         graph/vamana/utils.cc
+        unified/vamana_disk.cc
         utility/memory_mapper.cc
         utility/mmap_manager.cc
         utility/natural_number_map.cc

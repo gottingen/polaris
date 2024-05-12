@@ -27,7 +27,7 @@
 #include <gperftools/malloc_extension.h>
 #endif
 
-#include <polaris/graph/vamana/utils.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/graph/vamana/math_utils.h>
 #include <polaris/graph/vamana/index.h>
 #include <polaris/core/vamana_parameters.h>

@@ -17,7 +17,7 @@
 #include <polaris/graph/vamana/abstract_scratch.h>
 #include <polaris/storage/in_mem_data_store.h>
 
-#include <polaris/graph/vamana/utils.h>
+#include <polaris/datasets/bin.h>
 
 namespace polaris {
 
@@ -84,7 +84,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    size_t InMemDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
+    turbo::ResultStatus<size_t> InMemDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
         return save_data_in_base_dimensions(filename, _data, num_points, this->get_dims(), this->get_aligned_dim(), 0U);
     }
 

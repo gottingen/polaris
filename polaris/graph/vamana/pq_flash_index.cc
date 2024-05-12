@@ -17,6 +17,7 @@
 #include <polaris/core/log.h>
 #include <polaris/graph/vamana/timer.h>
 #include <polaris/graph/vamana/pq.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/graph/vamana/disk_utils.h>
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_scratch.h>
@@ -75,7 +76,7 @@ namespace polaris {
         }
 
         if (_load_flag) {
-            polaris::cout << "Clearing scratch" << std::endl;
+            POLARIS_LOG(INFO) << "Clearing scratch";
             ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
             manager.destroy();
             this->reader->deregister_all_threads();
@@ -110,7 +111,7 @@ namespace polaris {
 
     template<typename T>
     void PQFlashIndex<T>::setup_thread_data(uint64_t nthreads, uint64_t visited_reserve) {
-        polaris::cout << "Setting up thread-specific contexts for nthreads: " << nthreads << std::endl;
+        POLARIS_LOG(INFO)<< "Setting up thread-specific contexts for nthreads: " << nthreads;
 // omp parallel for to generate unique thread IDs
 #pragma omp parallel for num_threads((int)nthreads)
         for (int64_t thread = 0; thread < (int64_t) nthreads; thread++) {
@@ -232,26 +233,27 @@ namespace polaris {
         // disk needed!
         if (config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
             Timer timer;
-            std::cout << "Using Inner Product search, so need to pre-process base "
+            POLARIS_LOG(INFO) << "Using Inner Product search, so need to pre-process base "
                          "data into temp file. Please ensure there is additional "
                          "(n*(d+1)*4) bytes for storing pre-processed base vectors, "
-                         "apart from the interim indices created by DiskANN and the final index."
-                      << std::endl;
+                         "apart from the interim indices created by DiskANN and the final index.";
             data_file_to_use = prepped_base;
             float max_norm_of_base = polaris::prepare_base_for_inner_products<T>(base_file, prepped_base);
             std::string norm_file = disk_index_path + "_max_base_norm.bin";
-            polaris::save_bin<float>(norm_file, &max_norm_of_base, 1, 1);
-            polaris::cout << timer.elapsed_seconds_for_step("preprocessing data for inner product") << std::endl;
+            auto rs = polaris::save_bin<float>(norm_file, &max_norm_of_base, 1, 1);
+            if (!rs.ok()) {
+                return rs.status();
+            }
+            POLARIS_LOG(INFO) << timer.elapsed_seconds_for_step("preprocessing data for inner product");
             created_temp_file_for_processed_data = true;
         } else if (config.basic_config.metric == polaris::MetricType::METRIC_COSINE) {
             Timer timer;
-            std::cout << "Normalizing data for cosine to temporary file, please ensure there is additional "
+            POLARIS_LOG(INFO) << "Normalizing data for cosine to temporary file, please ensure there is additional "
                          "(n*d*4) bytes for storing normalized base vectors, "
-                         "apart from the interim indices created by DiskANN and the final index."
-                      << std::endl;
+                         "apart from the interim indices created by DiskANN and the final index.";
             data_file_to_use = prepped_base;
             polaris::normalize_data_file(base_file, prepped_base);
-            polaris::cout << timer.elapsed_seconds_for_step("preprocessing data for cosine") << std::endl;
+            POLARIS_LOG(INFO) << timer.elapsed_seconds_for_step("preprocessing data for cosine");
             created_temp_file_for_processed_data = true;
         }
         uint32_t R = config.disk_config.R;
@@ -295,9 +297,8 @@ namespace polaris {
         num_pq_chunks = num_pq_chunks > MAX_PQ_CHUNKS ? MAX_PQ_CHUNKS : num_pq_chunks;
 
         if (config.disk_config.pq_chunks <= MAX_PQ_CHUNKS && config.disk_config.pq_chunks > 0) {
-            std::cout << "Use quantized dimension (QD) to overwrite derived quantized "
-                         "dimension from search_DRAM_budget (B)"
-                      << std::endl;
+            POLARIS_LOG(INFO)<< "Use quantized dimension (QD) to overwrite derived quantized "
+                         "dimension from search_DRAM_budget (B)";
             num_pq_chunks = config.disk_config.pq_chunks;
         }
 
@@ -319,7 +320,7 @@ namespace polaris {
         polaris::build_merged_vamana_index<T>(data_file_to_use.c_str(), polaris::MetricType::METRIC_L2, L, R, p_val,
                                               indexing_ram_budget, mem_index_path, medoids_path, centroids_path,
                                               build_pq_bytes, config.disk_config.use_opq, num_threads);
-        polaris::cout << timer.elapsed_seconds_for_step("building merged vamana index") << std::endl;
+        POLARIS_LOG(INFO)<< timer.elapsed_seconds_for_step("building merged vamana index");
 
         timer.reset();
         if (!use_disk_pq) {
@@ -331,7 +332,7 @@ namespace polaris {
                 polaris::create_disk_layout<uint8_t>(disk_pq_compressed_vectors_path, mem_index_path, disk_index_path,
                                                      data_file_to_use.c_str());
         }
-        polaris::cout << timer.elapsed_seconds_for_step("generating disk layout") << std::endl;
+        POLARIS_LOG(INFO)<< timer.elapsed_seconds_for_step("generating disk layout");
 
         double ten_percent_points = std::ceil(points_num * 0.1);
         double num_sample_points =
@@ -343,19 +344,15 @@ namespace polaris {
         std::remove(mem_index_path.c_str());
         if (use_disk_pq)
             std::remove(disk_pq_compressed_vectors_path.c_str());
-        try {
-            auto r = save_bin(tags_file, tags.data(), tags.size(), 1);
-            if (r <= 0) {
-                return turbo::make_status(turbo::kInternal, "Failed to save tags file");
-            }
-        } catch (std::exception &e) {
-            std::cerr << "Failed to save tags file: " << e.what() << std::endl;
+
+        auto r = save_bin(tags_file, tags.data(), tags.size(), 1);
+        if (!r.ok()) {
             return turbo::make_status(turbo::kInternal, "Failed to save tags file");
         }
 
         auto e = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> diff = e - s;
-        polaris::cout << "Indexing time: " << diff.count() << std::endl;
+        POLARIS_LOG(INFO)<< "Indexing time: " << diff.count();
 
         return turbo::ok_status();
 
@@ -402,7 +399,7 @@ namespace polaris {
 
     template<typename T>
     void PQFlashIndex<T>::load_cache_list(std::vector<uint32_t> &node_list) {
-        polaris::cout << "Loading the cache list into memory.." << std::flush;
+        POLARIS_LOG(INFO)<< "Loading the cache list into memory..";
         size_t num_cached_nodes = node_list.size();
 
         // borrow thread data
@@ -446,7 +443,7 @@ namespace polaris {
                 }
             }
         }
-        polaris::cout << "..done." << std::endl;
+        POLARIS_LOG(INFO)<< "..done.";
     }
 
     template<typename T>
@@ -478,7 +475,7 @@ namespace polaris {
         if (collie::filesystem::exists(sample_bin)) {
             polaris::load_aligned_bin<T>(sample_bin, samples, sample_num, sample_dim, sample_aligned_dim);
         } else {
-            polaris::cerr << "Sample bin file not found. Not generating cache." << std::endl;
+            POLARIS_LOG(WARN)<< "Sample bin file not found. Not generating cache.";
             return;
         }
 
@@ -521,11 +518,11 @@ namespace polaris {
         // Do not cache more than 10% of the nodes in the index
         uint64_t tenp_nodes = (uint64_t) (std::round(this->_num_points * 0.1));
         if (num_nodes_to_cache > tenp_nodes) {
-            polaris::cout << "Reducing nodes to cache from: " << num_nodes_to_cache << " to: " << tenp_nodes
-                          << "(10 percent of total nodes:" << this->_num_points << ")" << std::endl;
+            POLARIS_LOG(INFO)<< "Reducing nodes to cache from: " << num_nodes_to_cache << " to: " << tenp_nodes
+                          << "(10 percent of total nodes:" << this->_num_points << ")";
             num_nodes_to_cache = tenp_nodes == 0 ? 1 : tenp_nodes;
         }
-        polaris::cout << "Caching " << num_nodes_to_cache << "..." << std::endl;
+        POLARIS_LOG(INFO)<< "Caching " << num_nodes_to_cache << "...";
 
         // borrow thread data
         ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
@@ -563,13 +560,13 @@ namespace polaris {
             else
                 std::sort(nodes_to_expand.begin(), nodes_to_expand.end());
 
-            polaris::cout << "Level: " << lvl << std::flush;
+            POLARIS_LOG(INFO)<< "Level: " << lvl;
             bool finish_flag = false;
 
             uint64_t BLOCK_SIZE = 1024;
             uint64_t nblocks = DIV_ROUND_UP(nodes_to_expand.size(), BLOCK_SIZE);
             for (size_t block = 0; block < nblocks && !finish_flag; block++) {
-                polaris::cout << "." << std::flush;
+                POLARIS_LOG(INFO)<< ".";
                 size_t start = block * BLOCK_SIZE;
                 size_t end = (std::min)((block + 1) * BLOCK_SIZE, nodes_to_expand.size());
 
@@ -607,8 +604,8 @@ namespace polaris {
                 }
             }
 
-            polaris::cout << ". #nodes: " << node_set.size() - prev_node_set_size
-                          << ", #nodes thus far: " << node_set.size() << std::endl;
+            POLARIS_LOG(INFO)<< ". #nodes: " << node_set.size() - prev_node_set_size
+                          << ", #nodes thus far: " << node_set.size();
             prev_node_set_size = node_set.size();
             lvl++;
         }
@@ -622,11 +619,10 @@ namespace polaris {
         for (auto node: *cur_level)
             node_list.push_back(node);
 
-        polaris::cout << "Level: " << lvl << std::flush;
-        polaris::cout << ". #nodes: " << node_list.size() - prev_node_set_size << ", #nodes thus far: "
-                      << node_list.size()
-                      << std::endl;
-        polaris::cout << "done" << std::endl;
+        POLARIS_LOG(INFO)
+        << "Level: " << lvl << ". #nodes: " << node_list.size() - prev_node_set_size << ", #nodes thus far: "
+        << node_list.size();
+        POLARIS_LOG(INFO) << "done";
     }
 
     template<typename T>
@@ -640,8 +636,7 @@ namespace polaris {
         ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
         //auto data = manager.scratch_space();
         //IOContext &ctx = data->ctx;
-        polaris::cout << "Loading centroid data from medoids vector data of " << _num_medoids << " medoid(s)"
-                      << std::endl;
+        POLARIS_LOG(INFO) << "Loading centroid data from medoids vector data of " << _num_medoids << " medoid(s)";
 
         std::vector<uint32_t> nodes_to_read;
         std::vector<T *> medoid_bufs;
@@ -809,29 +804,27 @@ namespace polaris {
             READ_U64(index_metadata, this->_nvecs_per_sector);
         }
 
-        polaris::cout << "VamanaIndex File Meta-data: ";
-        polaris::cout << "# nodes per sector: " << _nnodes_per_sector;
-        polaris::cout << ", max node len (bytes): " << _max_node_len;
-        polaris::cout << ", max node degree: " << _max_degree << std::endl;
+        POLARIS_LOG(INFO)<< "VamanaIndex File Meta-data: "
+        << "# nodes per sector: " << _nnodes_per_sector
+        << ", max node len (bytes): " << _max_node_len
+        << ", max node degree: " << _max_degree;
         index_metadata.close();
-
         // open AlignedFileReader handle to index_file
         std::string index_fname(_disk_index_file);
         reader->open(index_fname);
         this->setup_thread_data(num_threads);
         this->_max_nthreads = num_threads;
-
         if (collie::filesystem::exists(medoids_file)) {
             size_t tmp_dim;
             polaris::load_bin<uint32_t>(medoids_file, _medoids, _num_medoids, tmp_dim);
 
             if (tmp_dim != 1) {
-                return turbo::make_status(turbo::kInvalidArgument, "Error loading medoids file. Expected bin format of m times 1 vector of uint32_t.");
+                return turbo::make_status(turbo::kInvalidArgument,
+                                          "Error loading medoids file. Expected bin format of m times 1 vector of uint32_t.");
             }
             if (!collie::filesystem::exists(centroids_file)) {
-                polaris::cout << "Centroid data file not found. Using corresponding vectors "
-                                 "for the medoids "
-                              << std::endl;
+                POLARIS_LOG(INFO) << "Centroid data file not found. Using corresponding vectors "
+                                 "for the medoids ";
                 use_medoids_data_as_centroids();
             } else {
                 size_t num_centroids, aligned_tmp_dim;
@@ -844,7 +837,7 @@ namespace polaris {
                               "m times data_dim vector of float, where m is number of "
                               "medoids "
                               "in medoids file.";
-                    POLARIS_LOG(ERROR)<< stream.str();
+                    POLARIS_LOG(ERROR) << stream.str();
                     return turbo::make_status(turbo::kInvalidArgument, stream.str());
                 }
             }
@@ -864,7 +857,7 @@ namespace polaris {
             POLARIS_LOG(INFO) << "Setting re-scaling factor of base vectors to " << this->_max_base_norm;
             delete[] norm_val;
         }
-        polaris::cout << "done.." << std::endl;
+        POLARIS_LOG(INFO) << "loading done..";
         return turbo::ok_status();
     }
 

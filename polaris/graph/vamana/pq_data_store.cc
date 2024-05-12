@@ -18,7 +18,7 @@
 #include <polaris/graph/vamana/pq_data_store.h>
 #include <polaris/graph/vamana/pq.h>
 #include <polaris/graph/vamana/pq_scratch.h>
-#include <polaris/graph/vamana/utils.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/distance/distance.h>
 
 namespace polaris {
@@ -52,7 +52,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    size_t PQDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
+    turbo::ResultStatus<size_t> PQDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
         return polaris::save_bin(filename, _quantized_data, this->capacity(), _num_chunks, 0);
     }
 

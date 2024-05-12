@@ -251,11 +251,11 @@ namespace polaris {
         // call public member functions save and load to invoke these.
         POLARIS_API size_t save_graph(std::string filename);
 
-        POLARIS_API size_t save_data(std::string filename);
+        POLARIS_API turbo::ResultStatus<size_t> save_data(std::string filename);
 
-        POLARIS_API size_t save_tags(std::string filename);
+        POLARIS_API turbo::ResultStatus<size_t> save_tags(std::string filename);
 
-        POLARIS_API size_t save_delete_list(const std::string &filename);
+        POLARIS_API turbo::ResultStatus<size_t> save_delete_list(const std::string &filename);
 
         POLARIS_API size_t load_graph(const std::string filename, size_t expected_num_points);
 

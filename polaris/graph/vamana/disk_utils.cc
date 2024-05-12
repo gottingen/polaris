@@ -26,10 +26,11 @@
 #include <polaris/core/log.h>
 #include <mkl.h>
 #include <omp.h>
-#include <polaris/graph/vamana/percentile_stats.h>
+#include <polaris/core/percentile_stats.h>
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_flash_index.h>
 #include <polaris/graph/vamana/timer.h>
+#include <polaris/datasets/bin.h>
 #include <turbo/container/flat_hash_set.h>
 
 namespace polaris {

@@ -36,9 +36,15 @@ namespace polaris {
         ObjectType object_type{ObjectType::ObjectTypeNone};
         size_t dimension{0};
         size_t max_points{0};
+        size_t load_threads{1};
     };
 
     struct IndexConfig {
+
+        IndexConfig() = default;
+
+        ~IndexConfig() = default;
+
         IndexBasicConfig basic_config;
         VamanaIndexConfig vamana_config;
         VamanaDiskIndexConfig disk_config;
@@ -63,6 +69,24 @@ namespace polaris {
             return *this;
         }
 
+        IndexConfigBuilder &with_dimension(size_t dimension) {
+            this->_basic_config.dimension = dimension;
+            return *this;
+        }
+
+        IndexConfigBuilder &with_max_points(size_t max_points) {
+            this->_basic_config.max_points = max_points;
+            return *this;
+        }
+
+        IndexConfigBuilder &with_load_threads(size_t threads) {
+            if(threads < 1) {
+                threads = 1;
+            }
+            this->_basic_config.load_threads = threads;
+            return *this;
+        }
+
         IndexConfigBuilder &vamana_with_graph_load_store_strategy(GraphStoreStrategy graph_strategy) {
             this->_vamana_config.graph_strategy = graph_strategy;
             return *this;
@@ -73,15 +97,6 @@ namespace polaris {
             return *this;
         }
 
-        IndexConfigBuilder &with_dimension(size_t dimension) {
-            this->_basic_config.dimension = dimension;
-            return *this;
-        }
-
-        IndexConfigBuilder &with_max_points(size_t max_points) {
-            this->_basic_config.max_points = max_points;
-            return *this;
-        }
 
         IndexConfigBuilder &vamana_is_dynamic_index(bool dynamic_index) {
             this->_vamana_config.dynamic_index = dynamic_index;
@@ -123,7 +138,8 @@ namespace polaris {
             return *this;
         }
 
-        IndexConfigBuilder &vamana_with_index_write_params(std::shared_ptr<IndexWriteParameters> index_write_params_ptr) {
+        IndexConfigBuilder &
+        vamana_with_index_write_params(std::shared_ptr<IndexWriteParameters> index_write_params_ptr) {
             if (index_write_params_ptr == nullptr) {
                 std::cout << "Passed, empty build_params while creating index config" << std::endl;
                 return *this;
@@ -196,9 +212,15 @@ namespace polaris {
             return *this;
         }
 
+        IndexConfigBuilder &vdisk_with_num_nodes_to_cache(uint32_t num_nodes_to_cache) {
+            this->_disk_config.num_nodes_to_cache = num_nodes_to_cache;
+            return *this;
+        }
+
         IndexConfig build_vdisk() {
             return IndexConfig{_basic_config, _disk_config};
         }
+
         IndexConfig build_vamana() {
             if (_basic_config.object_type == ObjectType::ObjectTypeNone)
                 throw PolarisException("Error: data_type can not be empty", -1);
@@ -219,7 +241,8 @@ namespace polaris {
             }
 
             if (_vamana_config.dynamic_index) {
-                if (_vamana_config.index_search_params != nullptr && _vamana_config.index_search_params->initial_search_list_size == 0)
+                if (_vamana_config.index_search_params != nullptr &&
+                    _vamana_config.index_search_params->initial_search_list_size == 0)
                     throw PolarisException("Error: please pass initial_search_list_size for building dynamic index.",
                                            -1);
             }
