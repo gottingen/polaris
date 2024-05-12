@@ -61,9 +61,9 @@ namespace polaris {
 
     public:
         // load compressed data, and obtains the handle to the disk-resident index
-        POLARIS_API int load(uint32_t num_threads, const char *index_prefix);
+        POLARIS_API turbo::Status load(uint32_t num_threads, const char *index_prefix);
 
-        POLARIS_API int load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
+        POLARIS_API turbo::Status load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
                                                  const char *pivots_filepath, const char *compressed_filepath);
 
         POLARIS_API void load_cache_list(std::vector<uint32_t> &node_list);

@@ -363,7 +363,8 @@ namespace polaris {
 
     template<typename T>
     POLARIS_API turbo::Status
-    PQFlashIndex<T>::build(const char *dataFilePath, const char *indexFilePath,  const std::string &tags_file,const IndexConfig &indexConfig,
+    PQFlashIndex<T>::build(const char *dataFilePath, const char *indexFilePath, const std::string &tags_file,
+                           const IndexConfig &indexConfig,
                            const std::string &codebook_prefix
     ) {
         std::vector<vid_t> tags;
@@ -677,7 +678,7 @@ namespace polaris {
     }
 
     template<typename T>
-    int PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
+    turbo::Status PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
         std::string pq_table_bin = std::string(index_prefix) + "_pq_pivots.bin";
         std::string pq_compressed_vectors = std::string(index_prefix) + "_pq_compressed.bin";
         std::string _disk_index_file = std::string(index_prefix) + "_disk.index";
@@ -686,8 +687,7 @@ namespace polaris {
         vid_t *tag_data;
         load_bin<vid_t>(std::string(tags_file), tag_data, file_num_points, file_dim);
         if (file_dim != 1) {
-            polaris::cout << "Error. Tags file should have 1 dimension. Exiting." << std::endl;
-            return -1;
+            return turbo::make_status(turbo::kInvalidArgument, "Tags file should have 1 dimension.");
         }
         _location_to_tag.reserve(file_num_points);
         for (uint32_t i = 0; i < (uint32_t) file_num_points; i++) {
@@ -700,9 +700,9 @@ namespace polaris {
     }
 
     template<typename T>
-    int PQFlashIndex<T>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
-                                                  const char *pivots_filepath,
-                                                  const char *compressed_filepath) {
+    turbo::Status PQFlashIndex<T>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
+                                                            const char *pivots_filepath,
+                                                            const char *compressed_filepath) {
         std::string pq_table_bin = pivots_filepath;
         std::string pq_compressed_vectors = compressed_filepath;
         std::string _disk_index_file = index_filepath;
@@ -715,8 +715,8 @@ namespace polaris {
         this->_disk_index_file = _disk_index_file;
 
         if (pq_file_num_centroids != 256) {
-            polaris::cout << "Error. Number of PQ centroids is not 256. Exiting." << std::endl;
-            return -1;
+            return turbo::make_status(turbo::kInvalidArgument, "Number of PQ centroids:{} is not 256.",
+                                      pq_file_num_centroids);
         }
 
         this->_data_dim = pq_file_dim;
@@ -732,16 +732,13 @@ namespace polaris {
         this->_n_chunks = nchunks_u64;
         _pq_table.load_pq_centroid_bin(pq_table_bin.c_str(), nchunks_u64);
 
-        polaris::cout << "Loaded PQ centroids and in-memory compressed vectors. #points: " << _num_points
-                      << " #dim: " << _data_dim << " #aligned_dim: " << _aligned_dim << " #chunks: " << _n_chunks
-                      << std::endl;
+        POLARIS_LOG(INFO) << "Loaded PQ centroids and in-memory compressed vectors. #points: " << _num_points
+                          << " #dim: " << _data_dim << " #aligned_dim: " << _aligned_dim << " #chunks: " << _n_chunks;
 
         if (_n_chunks > MAX_PQ_CHUNKS) {
-            std::stringstream stream;
-            stream << "Error loading index. Ensure that max PQ bytes for in-memory "
-                      "PQ data does not exceed "
-                   << MAX_PQ_CHUNKS << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument,
+                                      "Error loading index. Ensure that max PQ bytes for in-memory PQ data does not exceed {}.",
+                                      MAX_PQ_CHUNKS);
         }
 
         std::string disk_pq_pivots_path = this->_disk_index_file + "_pq_pivots.bin";
@@ -753,8 +750,8 @@ namespace polaris {
             _disk_pq_n_chunks = _disk_pq_table.get_num_chunks();
             _disk_bytes_per_point =
                     _disk_pq_n_chunks * sizeof(uint8_t); // revising disk_bytes_per_point since DISK PQ is used.
-            polaris::cout << "Disk index uses PQ data compressed down to " << _disk_pq_n_chunks << " bytes per point."
-                          << std::endl;
+            POLARIS_LOG(INFO) << "Disk index uses PQ data compressed down to "
+                              << _disk_pq_n_chunks << " bytes per point.";
         }
 
         std::ifstream index_metadata(_disk_index_file, std::ios::binary);
@@ -770,10 +767,12 @@ namespace polaris {
         READ_U64(index_metadata, disk_ndims);
 
         if (disk_nnodes != _num_points) {
-            polaris::cout << "Mismatch in #points for compressed data file and disk "
-                             "index file: "
-                          << disk_nnodes << " vs " << _num_points << std::endl;
-            return -1;
+            POLARIS_LOG(ERROR) << "Mismatch in #points for compressed data file and disk "
+                                  "index file: "
+                               << disk_nnodes << " vs " << _num_points;
+            return turbo::make_status(turbo::kInvalidArgument,
+                                      "Mismatch in #points for compressed data file and disk index file: {} vs {}",
+                                      disk_nnodes, _num_points);
         }
 
         size_t medoid_id_on_file;
@@ -783,11 +782,9 @@ namespace polaris {
         _max_degree = ((_max_node_len - _disk_bytes_per_point) / sizeof(uint32_t)) - 1;
 
         if (_max_degree > defaults::MAX_GRAPH_DEGREE) {
-            std::stringstream stream;
-            stream << "Error loading index. Ensure that max graph degree (R) does "
-                      "not exceed "
-                   << defaults::MAX_GRAPH_DEGREE << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument,
+                                      "Error loading index. Ensure that max graph degree (R) does not exceed {}.",
+                                      defaults::MAX_GRAPH_DEGREE);
         }
 
         // setting up concept of frozen points in disk index for streaming-DiskANN
@@ -797,16 +794,15 @@ namespace polaris {
         if (this->_num_frozen_points == 1)
             this->_frozen_location = file_frozen_id;
         if (this->_num_frozen_points == 1) {
-            polaris::cout << " Detected frozen point in index at location " << this->_frozen_location
-                          << ". Will not output it at search time." << std::endl;
+            POLARIS_LOG(INFO) << " Detected frozen point in index at location " << this->_frozen_location
+                              << ". Will not output it at search time.";
         }
 
         READ_U64(index_metadata, this->_reorder_data_exists);
         if (this->_reorder_data_exists) {
             if (this->_use_disk_index_pq == false) {
-                throw PolarisException("Reordering is designed for used with disk PQ "
-                                       "compression option",
-                                       -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+                return turbo::make_status(turbo::kInvalidArgument,
+                                          "Reordering is designed for used with disk PQ compression option.");
             }
             READ_U64(index_metadata, this->_reorder_data_start_sector);
             READ_U64(index_metadata, this->_ndims_reorder_vecs);
@@ -830,11 +826,7 @@ namespace polaris {
             polaris::load_bin<uint32_t>(medoids_file, _medoids, _num_medoids, tmp_dim);
 
             if (tmp_dim != 1) {
-                std::stringstream stream;
-                stream << "Error loading medoids file. Expected bin format of m times "
-                          "1 vector of uint32_t."
-                       << std::endl;
-                throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+                return turbo::make_status(turbo::kInvalidArgument, "Error loading medoids file. Expected bin format of m times 1 vector of uint32_t.");
             }
             if (!collie::filesystem::exists(centroids_file)) {
                 polaris::cout << "Centroid data file not found. Using corresponding vectors "
@@ -852,8 +844,8 @@ namespace polaris {
                               "m times data_dim vector of float, where m is number of "
                               "medoids "
                               "in medoids file.";
-                    polaris::cerr << stream.str() << std::endl;
-                    throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+                    POLARIS_LOG(ERROR)<< stream.str();
+                    return turbo::make_status(turbo::kInvalidArgument, stream.str());
                 }
             }
         } else {
@@ -873,7 +865,7 @@ namespace polaris {
             delete[] norm_val;
         }
         polaris::cout << "done.." << std::endl;
-        return 0;
+        return turbo::ok_status();
     }
 
     template<typename T>

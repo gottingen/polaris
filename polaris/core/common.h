@@ -71,6 +71,37 @@ namespace polaris {
         BFLOAT16 = 12
     };
 
+    inline uint32_t polaris_type_to_size(ObjectType type) {
+        switch (type) {
+            case UINT8:
+                return sizeof(uint8_t);
+            case INT8:
+                return sizeof(int8_t);
+            case UINT16:
+                return sizeof(uint16_t);
+            case INT16:
+                return sizeof(int16_t);
+            case UINT32:
+                return sizeof(uint32_t);
+            case INT32:
+                return sizeof(int32_t);
+            case UINT64:
+                return sizeof(uint64_t);
+            case INT64:
+                return sizeof(int64_t);
+            case FLOAT:
+                return sizeof(float);
+            case FLOAT16:
+                return sizeof(float16);
+            case DOUBLE:
+                return sizeof(double);
+            case BFLOAT16:
+                return sizeof(bfloat16);
+            default:
+                return 0;
+        }
+    }
+
     inline std::string polaris_type_to_string(ObjectType type) {
         switch (type) {
             case UINT8:

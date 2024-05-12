@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //
-
+#include <polaris/core/log.h>
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
 #include <polaris/graph/vamana/utils.h>
@@ -90,10 +90,11 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     std::unique_ptr<polaris::PQFlashIndex<T>> _pFlashIndex(
             new polaris::PQFlashIndex<T>(reader, metric));
 
-    int res = _pFlashIndex->load(num_threads, index_path_prefix.c_str());
+    auto res = _pFlashIndex->load(num_threads, index_path_prefix.c_str());
 
-    if (res != 0) {
-        return res;
+    if (!res.ok()) {
+        POLARIS_LOG(ERROR) << "Failed to load index: " << res.message();
+        return -1;
     }
 
     std::vector<uint32_t> node_list;
@@ -166,7 +167,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     for (uint32_t test_id = 0; test_id < Lvec.size(); test_id++) {
         uint32_t L = Lvec[test_id];
         search_contexts[test_id].resize(query_num);
-        for(int i = 0; i < query_num; i++) {
+        for (int i = 0; i < query_num; i++) {
             search_contexts[test_id][i] = std::make_unique<polaris::SearchContext>();
         }
         if (L < recall_at) {
@@ -188,14 +189,15 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
 #pragma omp parallel for schedule(dynamic, 1)
         for (int64_t i = 0; i < (int64_t) query_num; i++) {
             auto &ctx = *search_contexts[test_id][i];
-            ctx.set_query(query + (i * query_aligned_dim), query_aligned_dim * sizeof(T))
+            ctx.set_meta(polaris::polaris_type_to_name<T>(), query_aligned_dim)
+                    .set_query(query + (i * query_aligned_dim), query_aligned_dim * sizeof(T))
                     .set_top_k(recall_at)
                     .set_search_list(L)
                     .set_beam_width(optimized_beamwidth)
                     .set_with_local_ids(true)
                     .set_use_reorder_data(use_reorder_data);
             auto rs = _pFlashIndex->search(ctx, stats + i);
-            if(!rs.ok()) {
+            if (!rs.ok()) {
                 polaris::cerr << "Search failed for query " << i << std::endl;
                 exit(-1);
             }

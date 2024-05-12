@@ -19,6 +19,7 @@
 #include <polaris/core/array_view.h>
 #include <polaris/core/search_condition.h>
 #include <polaris/distance/object_distance.h>
+#include <polaris/utility/polaris_assert.h>
 #include <turbo/times/time.h>
 #include <cstdint>
 
@@ -27,6 +28,8 @@ namespace polaris {
     struct SearchContext {
 
         SearchContext &set_query(const void *data, size_t size) {
+            POLARIS_ASSERT_MSG(bytes_per_vector > 0, "Please set_meta before setting query");
+            POLARIS_ASSERT(data != nullptr&& size == bytes_per_vector);
             query.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data) + size);
             query_view.set_data(query.data());
             return *this;
@@ -67,6 +70,18 @@ namespace polaris {
             return *this;
         }
 
+        SearchContext &set_with_object_type(ObjectType type) {
+            this->object_type = type;
+            return *this;
+        }
+
+        SearchContext &set_meta(ObjectType type, uint32_t d) {
+            this->object_type = type;
+            this->dimension = d;
+            this->bytes_per_vector = polaris_type_to_size(type) * d;
+            return *this;
+        }
+
         void start() {
             start_time = turbo::Time::time_now();
         }
@@ -76,6 +91,9 @@ namespace polaris {
         }
 
 
+        ObjectType object_type{ObjectType::ObjectTypeNone};
+        uint32_t dimension{0};
+        uint32_t bytes_per_vector{0};
         turbo::Time start_time;
         turbo::Time end_time;
         /// member variables

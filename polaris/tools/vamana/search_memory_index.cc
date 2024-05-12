@@ -127,7 +127,8 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
         for (int64_t i = 0; i < (int64_t) query_num; i++) {
             auto qs = std::chrono::high_resolution_clock::now();
             auto &ctx = *search_contexts[test_id][i];
-            ctx.set_query(query + i * query_aligned_dim, query_aligned_dim * sizeof(T))
+            ctx.set_meta(polaris::polaris_type_to_name<T>(), query_aligned_dim)
+            .set_query(query + i * query_aligned_dim, query_aligned_dim * sizeof(T))
                     .set_top_k(recall_at)
                     .set_search_list(L)
                     .set_with_local_ids(true);
