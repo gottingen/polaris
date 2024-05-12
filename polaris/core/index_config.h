@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+#pragma once
 
 #include <polaris/utility/common_includes.h>
 #include <polaris/core/common.h>
@@ -40,9 +41,14 @@ namespace polaris {
     struct IndexConfig {
         IndexBasicConfig basic_config;
         VamanaIndexConfig vamana_config;
+        VamanaDiskIndexConfig disk_config;
     private:
-        IndexConfig(const IndexBasicConfig &basic_config, const VamanaIndexConfig &vamana_config)
-                : basic_config(basic_config), vamana_config(vamana_config) {
+        IndexConfig(const IndexBasicConfig &bconfig, const VamanaIndexConfig &vconfig)
+                : basic_config(bconfig), vamana_config(vconfig) {
+        }
+
+        IndexConfig(const IndexBasicConfig &bconfig, const VamanaDiskIndexConfig &dconfig)
+                : basic_config(bconfig), disk_config(dconfig) {
         }
 
         friend class IndexConfigBuilder;
@@ -140,6 +146,59 @@ namespace polaris {
             return *this;
         }
 
+        IndexConfigBuilder &vdisk_with_R(uint32_t R) {
+            this->_disk_config.R = R;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_L(uint32_t L) {
+            this->_disk_config.L = L;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_B(float B) {
+            this->_disk_config.B = B;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_M(float M) {
+            this->_disk_config.M = M;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_num_threads(uint32_t num_threads) {
+            this->_disk_config.num_threads = num_threads;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_pq_dims(uint32_t pq_dims) {
+            this->_disk_config.pq_dims = pq_dims;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_append_reorder_data(bool append_reorder_data) {
+            this->_disk_config.append_reorder_data = append_reorder_data;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_build_pq_bytes(uint32_t build_pq_bytes) {
+            this->_disk_config.build_pq_bytes = build_pq_bytes;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_pq_chunks(uint32_t pq_chunks) {
+            this->_disk_config.pq_chunks = pq_chunks;
+            return *this;
+        }
+
+        IndexConfigBuilder &vdisk_with_use_opq(bool use_opq) {
+            this->_disk_config.use_opq = use_opq;
+            return *this;
+        }
+
+        IndexConfig build_vdisk() {
+            return IndexConfig{_basic_config, _disk_config};
+        }
         IndexConfig build_vamana() {
             if (_basic_config.object_type == ObjectType::ObjectTypeNone)
                 throw PolarisException("Error: data_type can not be empty", -1);
@@ -182,5 +241,6 @@ namespace polaris {
     private:
         IndexBasicConfig _basic_config;
         VamanaIndexConfig _vamana_config;
+        VamanaDiskIndexConfig _disk_config;
     };
 } // namespace polaris

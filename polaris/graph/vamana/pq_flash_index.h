@@ -132,6 +132,7 @@ namespace polaris {
         uint64_t _nnodes_per_sector = 0; // 0 for multi-sector nodes, >0 for multi-node sectors
         uint64_t _max_degree = 0;
         // tag
+        turbo::flat_hash_map<vid_t, uint32_t> _tag_to_location;
         natural_number_map<uint32_t, vid_t> _location_to_tag;
         // Data used for searching with re-order vectors
         uint64_t _ndims_reorder_vecs = 0;

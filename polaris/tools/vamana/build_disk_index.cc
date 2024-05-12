@@ -125,43 +125,44 @@ namespace polaris {
             }
         }
 
-        std::string params = std::string(std::to_string(build_disk_index_context.R)) + " " +
-                             std::string(std::to_string(build_disk_index_context.L)) + " " +
-                             std::string(std::to_string(build_disk_index_context.B)) + " " +
-                             std::string(std::to_string(build_disk_index_context.M)) + " " +
-                             std::string(std::to_string(build_disk_index_context.num_threads)) + " " +
-                             std::string(std::to_string(build_disk_index_context.disk_PQ)) + " " +
-                             std::string(std::to_string(build_disk_index_context.append_reorder_data)) + " " +
-                             std::string(std::to_string(build_disk_index_context.build_PQ)) + " " +
-                             std::string(std::to_string(build_disk_index_context.QD));
+        IndexConfig indexConfig = IndexConfigBuilder()
+                .with_metric(metric)
+                .vdisk_with_L(build_disk_index_context.L)
+                .vdisk_with_R(build_disk_index_context.R)
+                .vdisk_with_B(build_disk_index_context.B)
+                .vdisk_with_M(build_disk_index_context.M)
+                .vdisk_with_num_threads(build_disk_index_context.num_threads)
+                .vdisk_with_pq_dims(build_disk_index_context.disk_PQ)
+                .vdisk_with_append_reorder_data(build_disk_index_context.append_reorder_data)
+                .vdisk_with_build_pq_bytes(build_disk_index_context.build_PQ)
+                .vdisk_with_pq_chunks(build_disk_index_context.QD)
+                .vdisk_with_use_opq(build_disk_index_context.use_opq)
+                .build_vdisk();
 
         try {
 
-            int r;
+            turbo::Status r;
             if (build_disk_index_context.data_type == std::string("int8"))
                 r = polaris::build_disk_index<int8_t>(build_disk_index_context.data_path.c_str(),
                                                       build_disk_index_context.index_path_prefix.c_str(),
-                                                      params.c_str(),
-                                                      metric, build_disk_index_context.use_opq,
+                                                      indexConfig,
                                                       build_disk_index_context.codebook_prefix);
             else if (build_disk_index_context.data_type == std::string("uint8"))
                 r = polaris::build_disk_index<uint8_t>(build_disk_index_context.data_path.c_str(),
                                                        build_disk_index_context.index_path_prefix.c_str(),
-                                                       params.c_str(),
-                                                       metric, build_disk_index_context.use_opq,
+                                                       indexConfig,
                                                        build_disk_index_context.codebook_prefix);
             else if (build_disk_index_context.data_type == std::string("float"))
                 r = polaris::build_disk_index<float>(build_disk_index_context.data_path.c_str(),
                                                      build_disk_index_context.index_path_prefix.c_str(),
-                                                     params.c_str(),
-                                                     metric, build_disk_index_context.use_opq,
+                                                     indexConfig,
                                                      build_disk_index_context.codebook_prefix);
             else {
                 polaris::cerr << "Error. Unsupported data type" << std::endl;
                 exit(-1);
             }
-            if (r != 0) {
-                polaris::cerr << "VamanaIndex build failed." << std::endl;
+            if (!r.ok()) {
+                polaris::cerr << "VamanaIndex build failed. " <<r.message()<< std::endl;
                 exit(-1);
             }
         }

@@ -153,4 +153,16 @@ namespace polaris {
         std::shared_ptr<IndexSearchParams> index_search_params;
     };
 
+    struct VamanaDiskIndexConfig {
+        uint32_t R{0};
+        uint32_t L{0};
+        float    B{0.0f};
+        float    M{0.0f};
+        uint32_t num_threads{0};
+        uint32_t pq_dims{0};
+        bool    append_reorder_data{false};
+        uint32_t  build_pq_bytes{0};
+        uint32_t pq_chunks{0};
+        bool use_opq{false};
+    };
 } // namespace polaris

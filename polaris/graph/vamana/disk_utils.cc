@@ -748,6 +748,223 @@ namespace polaris {
     }
 
     template<typename T>
+    POLARIS_API turbo::Status build_disk_index_with_tag_file(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
+                                               const std::string &tags_file,
+                                               const std::string &codebook_prefix
+    ) {
+        std::vector<vid_t> tags;
+        if (!tags_file.empty()) {
+            size_t file_dim, file_num_points;
+            vid_t *tag_data;
+            load_bin<vid_t>(tags_file, tag_data, file_num_points, file_dim);
+            if(file_dim != 1) {
+                return turbo::make_status(turbo::kInvalidArgument, "Tags file must be a 1D array.");
+            }
+            tags.assign(tag_data, tag_data + file_num_points);
+            delete[] tag_data;
+        } else {
+            return turbo::make_status(turbo::kInvalidArgument, "Tags file must be provided.");
+        }
+        return build_disk_index_with_tag<T>(dataFilePath, indexFilePath, indexConfig, tags, codebook_prefix);
+    }
+
+    template<typename T>
+    POLARIS_API turbo::Status build_disk_index(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,const std::string &codebook_prefix) {
+        std::vector<vid_t> tags;
+        size_t base_num, base_dim;
+        polaris::get_bin_metadata(dataFilePath, base_num, base_dim);
+        if(base_num <= 0) {
+            return turbo::make_status(turbo::kInvalidArgument, "Data file is empty.");
+        }
+        tags.resize(base_num);
+        for (size_t i = 0; i < base_num; i++) {
+            tags[i] = i + 1;
+        }
+        return build_disk_index_with_tag<T>(dataFilePath, indexFilePath, indexConfig, tags, codebook_prefix);
+    }
+
+    template<typename T>
+    POLARIS_API turbo::Status build_disk_index_with_tag(const char *dataFilePath, const char *indexFilePath, const IndexConfig &config,
+                                     const std::vector<vid_t> &tags,
+                                     const std::string &codebook_prefix) {
+
+        if (!std::is_same<T, float>::value &&
+            (config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ||
+                    config.basic_config.metric == polaris::MetricType::METRIC_COSINE)) {
+            std::stringstream stream;
+            stream << "Disk-index build currently only supports floating point data for Max "
+                      "Inner Product Search/ cosine similarity. "
+                   << std::endl;
+            return turbo::make_status(turbo::kInvalidArgument, stream.str());
+        }
+
+        // if there is a 6th parameter, it means we compress the disk index
+        // vectors also using PQ data (for very large dimensionality data). If the
+        // provided parameter is 0, it means we store full vectors.
+        size_t disk_pq_dims = config.disk_config.pq_dims;
+        bool use_disk_pq = disk_pq_dims > 0 ? true : false;
+        size_t build_pq_bytes = config.disk_config.build_pq_bytes;
+
+        bool reorder_data = config.disk_config.append_reorder_data;
+
+        std::string base_file(dataFilePath);
+        std::string data_file_to_use = base_file;
+        std::string index_prefix_path(indexFilePath);
+        std::string pq_pivots_path_base = codebook_prefix;
+        std::string pq_pivots_path = collie::filesystem::exists(pq_pivots_path_base) ? pq_pivots_path_base +
+                                                                                       "_pq_pivots.bin"
+                                                                                     : index_prefix_path +
+                                                                                       "_pq_pivots.bin";
+        std::string pq_compressed_vectors_path = index_prefix_path + "_pq_compressed.bin";
+        std::string mem_index_path = index_prefix_path + "_mem.index";
+        std::string disk_index_path = index_prefix_path + "_disk.index";
+        std::string medoids_path = disk_index_path + "_medoids.bin";
+        std::string centroids_path = disk_index_path + "_centroids.bin";
+        std::string tags_file = index_prefix_path + "_tags.bin";
+
+
+        std::string sample_base_prefix = index_prefix_path + "_sample";
+        // optional, used if disk index file must store pq data
+        std::string disk_pq_pivots_path = index_prefix_path + "_disk.index_pq_pivots.bin";
+        // optional, used if disk index must store pq data
+        std::string disk_pq_compressed_vectors_path = index_prefix_path + "_disk.index_pq_compressed.bin";
+        std::string prepped_base =
+                index_prefix_path +
+                "_prepped_base.bin"; // temp file for storing pre-processed base file for cosine/ mips metrics
+        bool created_temp_file_for_processed_data = false;
+
+        // output a new base file which contains extra dimension with sqrt(1 -
+        // ||x||^2/M^2) for every x, M is max norm of all points. Extra space on
+        // disk needed!
+        if (config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
+            Timer timer;
+            std::cout << "Using Inner Product search, so need to pre-process base "
+                         "data into temp file. Please ensure there is additional "
+                         "(n*(d+1)*4) bytes for storing pre-processed base vectors, "
+                         "apart from the interim indices created by DiskANN and the final index."
+                      << std::endl;
+            data_file_to_use = prepped_base;
+            float max_norm_of_base = polaris::prepare_base_for_inner_products<T>(base_file, prepped_base);
+            std::string norm_file = disk_index_path + "_max_base_norm.bin";
+            polaris::save_bin<float>(norm_file, &max_norm_of_base, 1, 1);
+            polaris::cout << timer.elapsed_seconds_for_step("preprocessing data for inner product") << std::endl;
+            created_temp_file_for_processed_data = true;
+        } else if (config.basic_config.metric == polaris::MetricType::METRIC_COSINE) {
+            Timer timer;
+            std::cout << "Normalizing data for cosine to temporary file, please ensure there is additional "
+                         "(n*d*4) bytes for storing normalized base vectors, "
+                         "apart from the interim indices created by DiskANN and the final index."
+                      << std::endl;
+            data_file_to_use = prepped_base;
+            polaris::normalize_data_file(base_file, prepped_base);
+            polaris::cout << timer.elapsed_seconds_for_step("preprocessing data for cosine") << std::endl;
+            created_temp_file_for_processed_data = true;
+        }
+        uint32_t R = config.disk_config.R;
+        uint32_t L = config.disk_config.L;
+
+        double final_index_ram_limit = config.disk_config.B;
+        if (final_index_ram_limit <= 0) {
+            return turbo::make_status(turbo::kInvalidArgument, "Insufficient memory budget (or string was not in right format). Should be > 0.");
+        }
+        double indexing_ram_budget = config.disk_config.M;
+        if (indexing_ram_budget <= 0) {
+            std::cerr << "Not building index. Please provide more RAM budget" << std::endl;
+            return turbo::make_status(turbo::kInvalidArgument, "Not building index. Please provide more RAM budget");
+        }
+        uint32_t num_threads = config.disk_config.num_threads;
+
+        if (num_threads != 0) {
+            omp_set_num_threads(num_threads);
+            mkl_set_num_threads(num_threads);
+        }
+
+        polaris::cout << "Starting index build: R=" << R << " L=" << L << " Query RAM budget: " << final_index_ram_limit
+                      << " Indexing ram budget: " << indexing_ram_budget << " T: " << num_threads << std::endl;
+
+        auto s = std::chrono::high_resolution_clock::now();
+        size_t points_num, dim;
+        Timer timer;
+        polaris::get_bin_metadata(data_file_to_use.c_str(), points_num, dim);
+        const double p_val = ((double) MAX_PQ_TRAINING_SET_SIZE / (double) points_num);
+
+        if (use_disk_pq) {
+            generate_disk_quantized_data<T>(data_file_to_use, disk_pq_pivots_path, disk_pq_compressed_vectors_path,
+                                            config.basic_config.metric, p_val, disk_pq_dims);
+        }
+        size_t num_pq_chunks = (size_t) (std::floor)(uint64_t(final_index_ram_limit / points_num));
+
+        num_pq_chunks = num_pq_chunks <= 0 ? 1 : num_pq_chunks;
+        num_pq_chunks = num_pq_chunks > dim ? dim : num_pq_chunks;
+        num_pq_chunks = num_pq_chunks > MAX_PQ_CHUNKS ? MAX_PQ_CHUNKS : num_pq_chunks;
+
+        if (config.disk_config.pq_chunks <= MAX_PQ_CHUNKS && config.disk_config.pq_chunks > 0) {
+            std::cout << "Use quantized dimension (QD) to overwrite derived quantized "
+                         "dimension from search_DRAM_budget (B)"
+                      << std::endl;
+            num_pq_chunks = config.disk_config.pq_chunks;
+        }
+
+        polaris::cout << "Compressing " << dim << "-dimensional data into " << num_pq_chunks << " bytes per vector."
+                      << std::endl;
+
+        generate_quantized_data<T>(data_file_to_use, pq_pivots_path, pq_compressed_vectors_path, config.basic_config.metric, p_val,
+                                   num_pq_chunks, config.disk_config.use_opq, codebook_prefix);
+        polaris::cout << timer.elapsed_seconds_for_step("generating quantized data") << std::endl;
+
+// Gopal. Splitting diskann_dll into separate DLLs for search and build.
+// This code should only be available in the "build" DLL.
+#if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
+        MallocExtension::instance()->ReleaseFreeMemory();
+#endif
+        // Whether it is cosine or inner product, we still L2 metric due to the pre-processing.
+        timer.reset();
+        polaris::build_merged_vamana_index<T>(data_file_to_use.c_str(), polaris::MetricType::METRIC_L2, L, R, p_val,
+                                              indexing_ram_budget, mem_index_path, medoids_path, centroids_path,
+                                              build_pq_bytes, config.disk_config.use_opq, num_threads);
+        polaris::cout << timer.elapsed_seconds_for_step("building merged vamana index") << std::endl;
+
+        timer.reset();
+        if (!use_disk_pq) {
+            polaris::create_disk_layout<T>(data_file_to_use.c_str(), mem_index_path, disk_index_path);
+        } else {
+            if (!reorder_data)
+                polaris::create_disk_layout<uint8_t>(disk_pq_compressed_vectors_path, mem_index_path, disk_index_path);
+            else
+                polaris::create_disk_layout<uint8_t>(disk_pq_compressed_vectors_path, mem_index_path, disk_index_path,
+                                                     data_file_to_use.c_str());
+        }
+        polaris::cout << timer.elapsed_seconds_for_step("generating disk layout") << std::endl;
+
+        double ten_percent_points = std::ceil(points_num * 0.1);
+        double num_sample_points =
+                ten_percent_points > MAX_SAMPLE_POINTS_FOR_WARMUP ? MAX_SAMPLE_POINTS_FOR_WARMUP : ten_percent_points;
+        double sample_sampling_rate = num_sample_points / points_num;
+        gen_random_slice<T>(data_file_to_use.c_str(), sample_base_prefix, sample_sampling_rate);
+        if (created_temp_file_for_processed_data)
+            std::remove(prepped_base.c_str());
+        std::remove(mem_index_path.c_str());
+        if (use_disk_pq)
+            std::remove(disk_pq_compressed_vectors_path.c_str());
+        try {
+            auto r = save_bin(tags_file, tags.data(), tags.size(), 1);
+            if (r <= 0) {
+                return turbo::make_status(turbo::kInternal, "Failed to save tags file");
+            }
+        } catch (std::exception &e) {
+            std::cerr << "Failed to save tags file: " << e.what() << std::endl;
+            return turbo::make_status(turbo::kInternal, "Failed to save tags file");
+        }
+
+        auto e = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = e - s;
+        polaris::cout << "Indexing time: " << diff.count() << std::endl;
+
+        return turbo::ok_status();
+
+    }
+
+    template<typename T>
     int build_disk_index(const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
                          polaris::MetricType compareMetric, bool use_opq, const std::string &codebook_prefix) {
         std::stringstream parser;
@@ -1013,6 +1230,48 @@ namespace polaris {
                                                      const char *indexBuildParameters,
                                                      polaris::MetricType compareMetric, bool use_opq,
                                                      const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index_with_tag<int8_t> (const char *dataFilePath, const char *indexFilePath,
+                                        const IndexConfig &config,
+                                        const std::vector<vid_t> &tags,
+                                        const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index_with_tag<uint8_t> (const char *dataFilePath, const char *indexFilePath,
+                                                                 const IndexConfig &config,
+                                                                 const std::vector<vid_t> &tags,
+                                                                 const std::string &codebook_prefix);
+    template POLARIS_API turbo::Status build_disk_index_with_tag<float> (const char *dataFilePath, const char *indexFilePath,
+                                                                 const IndexConfig &config,
+                                                                 const std::vector<vid_t> &tags,
+                                                                 const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index_with_tag_file<int8_t> (const char *dataFilePath, const char *indexFilePath,
+                                        const IndexConfig &config,
+                                        const std::string &tags_file,
+                                        const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index_with_tag_file<uint8_t> (const char *dataFilePath, const char *indexFilePath,
+                                                                 const IndexConfig &config,
+                                                                 const std::string &tags_file,
+                                                                 const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index_with_tag_file<float> (const char *dataFilePath, const char *indexFilePath,
+                                                                    const IndexConfig &config,
+                                                                    const std::string &tags_file,
+                                                                    const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index<int8_t> (const char *dataFilePath, const char *indexFilePath,
+                                                                const IndexConfig &config,
+                                                                const std::string &codebook_prefix);
+    template POLARIS_API turbo::Status build_disk_index<uint8_t> (const char *dataFilePath, const char *indexFilePath,
+                                                                const IndexConfig &config,
+                                                                const std::string &codebook_prefix);
+
+    template POLARIS_API turbo::Status build_disk_index<float> (const char *dataFilePath, const char *indexFilePath,
+                                                                 const IndexConfig &config,
+                                                                 const std::string &codebook_prefix);
+
+
 
     template POLARIS_API int build_merged_vamana_index<int8_t>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,

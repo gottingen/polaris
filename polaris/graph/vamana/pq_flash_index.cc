@@ -454,6 +454,20 @@ namespace polaris {
         std::string pq_table_bin = std::string(index_prefix) + "_pq_pivots.bin";
         std::string pq_compressed_vectors = std::string(index_prefix) + "_pq_compressed.bin";
         std::string _disk_index_file = std::string(index_prefix) + "_disk.index";
+        std::string tags_file = std::string(index_prefix) + "_tags.bin";
+        size_t file_dim, file_num_points;
+        vid_t *tag_data;
+        load_bin<vid_t>(std::string(tags_file), tag_data, file_num_points, file_dim);
+        if (file_dim != 1) {
+            polaris::cout << "Error. Tags file should have 1 dimension. Exiting." << std::endl;
+            return -1;
+        }
+        _location_to_tag.reserve(file_num_points);
+        for (uint32_t i = 0; i < (uint32_t) file_num_points; i++) {
+            vid_t tag = *(tag_data + i);
+            _location_to_tag.set(i, tag);
+            _tag_to_location[tag] = i;
+        }
         return load_from_separate_paths(num_threads, _disk_index_file.c_str(), pq_table_bin.c_str(),
                                         pq_compressed_vectors.c_str());
     }

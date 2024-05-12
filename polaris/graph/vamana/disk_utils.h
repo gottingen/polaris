@@ -43,6 +43,7 @@ typedef int FileHandle;
 
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/platform_macros.h>
+#include <polaris/core/index_config.h>
 
 namespace polaris {
     const size_t MAX_SAMPLE_POINTS_FOR_WARMUP = 100000;
@@ -93,11 +94,28 @@ namespace polaris {
                                             uint32_t start_bw = 2);
 
     template<typename T>
-    POLARIS_API int build_disk_index(
+    POLARIS_API int build_disk_index_old(
             const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
             polaris::MetricType _compareMetric, bool use_opq = false,
             const std::string &codebook_prefix = "" // default is empty for no codebook pass in
-            ); // default is empty string for no universal label
+            );
+
+    template<typename T>
+    POLARIS_API turbo::Status build_disk_index_with_tag(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
+            const std::vector<vid_t> &tags,
+            const std::string &codebook_prefix = "" // default is empty for no codebook pass in
+    );
+
+    template<typename T>
+    POLARIS_API turbo::Status build_disk_index_with_tag_file(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
+                                               const std::string &tags_file,
+                                               const std::string &codebook_prefix = "" // default is empty for no codebook pass in
+    );
+
+    template<typename T>
+    POLARIS_API turbo::Status build_disk_index(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
+                                               const std::string &codebook_prefix = "" // default is empty for no codebook pass in
+    );
 
     template<typename T>
     POLARIS_API void create_disk_layout(const std::string base_file, const std::string mem_index_file,
