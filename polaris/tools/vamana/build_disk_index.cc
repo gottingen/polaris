@@ -16,7 +16,7 @@
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
 #include <polaris/graph/vamana/utils.h>
-#include  <polaris/graph/vamana/disk_utils.h>
+#include  <polaris/graph/vamana/pq_flash_index.h>
 #include  <polaris/graph/vamana/math_utils.h>
 #include  <polaris/graph/vamana/index.h>
 #include  <polaris/graph/vamana/partition.h>
@@ -143,17 +143,17 @@ namespace polaris {
 
             turbo::Status r;
             if (build_disk_index_context.data_type == std::string("int8"))
-                r = polaris::build_disk_index<int8_t>(build_disk_index_context.data_path.c_str(),
+                r = polaris::PQFlashIndex<int8_t>::build(build_disk_index_context.data_path.c_str(),
                                                       build_disk_index_context.index_path_prefix.c_str(),
                                                       indexConfig,
                                                       build_disk_index_context.codebook_prefix);
             else if (build_disk_index_context.data_type == std::string("uint8"))
-                r = polaris::build_disk_index<uint8_t>(build_disk_index_context.data_path.c_str(),
+                r = polaris::PQFlashIndex<uint8_t>::build(build_disk_index_context.data_path.c_str(),
                                                        build_disk_index_context.index_path_prefix.c_str(),
                                                        indexConfig,
                                                        build_disk_index_context.codebook_prefix);
             else if (build_disk_index_context.data_type == std::string("float"))
-                r = polaris::build_disk_index<float>(build_disk_index_context.data_path.c_str(),
+                r =polaris::PQFlashIndex<float>::build(build_disk_index_context.data_path.c_str(),
                                                      build_disk_index_context.index_path_prefix.c_str(),
                                                      indexConfig,
                                                      build_disk_index_context.codebook_prefix);

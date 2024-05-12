@@ -111,7 +111,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     uint64_t warmup_L = 20;
     uint64_t warmup_num = 0, warmup_dim = 0, warmup_aligned_dim = 0;
     T *warmup = nullptr;
-
+/*
     if (WARMUP) {
         if (collie::filesystem::exists(warmup_query_file)) {
             polaris::load_aligned_bin<T>(warmup_query_file, warmup, warmup_num, warmup_dim, warmup_aligned_dim);
@@ -142,7 +142,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
         }
         polaris::cout << "..done" << std::endl;
     }
-
+*/
     polaris::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     polaris::cout.precision(2);
 
@@ -157,9 +157,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     polaris::cout << "==============================================================="
                      "======================================================="
                   << std::endl;
-
-    std::vector<std::vector<uint32_t>> query_result_ids(Lvec.size());
-    std::vector<std::vector<float>> query_result_dists(Lvec.size());
+    std::vector<std::vector<std::unique_ptr<polaris::SearchContext>>> search_contexts(Lvec.size());
 
     uint32_t optimized_beamwidth = 2;
 
@@ -167,7 +165,10 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
 
     for (uint32_t test_id = 0; test_id < Lvec.size(); test_id++) {
         uint32_t L = Lvec[test_id];
-
+        search_contexts[test_id].resize(query_num);
+        for(int i = 0; i < query_num; i++) {
+            search_contexts[test_id][i] = std::make_unique<polaris::SearchContext>();
+        }
         if (L < recall_at) {
             polaris::cout << "Ignoring search with L:" << L << " since it's smaller than K:" << recall_at << std::endl;
             continue;
@@ -176,31 +177,32 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
         if (beamwidth <= 0) {
             polaris::cout << "Tuning beamwidth.." << std::endl;
             optimized_beamwidth =
-                    optimize_beamwidth(_pFlashIndex, warmup, warmup_num, warmup_aligned_dim, L, optimized_beamwidth);
+                    _pFlashIndex->optimize_beamwidth(warmup, warmup_num, warmup_aligned_dim, L, optimized_beamwidth);
         } else
             optimized_beamwidth = beamwidth;
 
-        query_result_ids[test_id].resize(recall_at * query_num);
-        query_result_dists[test_id].resize(recall_at * query_num);
-
         auto stats = new polaris::QueryStats[query_num];
 
-        std::vector<uint64_t> query_result_ids_64(recall_at * query_num);
         auto s = std::chrono::high_resolution_clock::now();
 
 #pragma omp parallel for schedule(dynamic, 1)
         for (int64_t i = 0; i < (int64_t) query_num; i++) {
-            _pFlashIndex->cached_beam_search(query + (i * query_aligned_dim), recall_at, L,
-                                             query_result_ids_64.data() + (i * recall_at),
-                                             query_result_dists[test_id].data() + (i * recall_at),
-                                             optimized_beamwidth, use_reorder_data, stats + i);
+            auto &ctx = *search_contexts[test_id][i];
+            ctx.set_query(query + (i * query_aligned_dim), query_aligned_dim * sizeof(T))
+                    .set_top_k(recall_at)
+                    .set_search_list(L)
+                    .set_beam_width(optimized_beamwidth)
+                    .set_with_local_ids(true)
+                    .set_use_reorder_data(use_reorder_data);
+            auto rs = _pFlashIndex->search(ctx, stats + i);
+            if(!rs.ok()) {
+                polaris::cerr << "Search failed for query " << i << std::endl;
+                exit(-1);
+            }
         }
         auto e = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> diff = e - s;
         double qps = (1.0 * query_num) / (1.0 * diff.count());
-
-        polaris::convert_types<uint64_t, uint32_t>(query_result_ids_64.data(), query_result_ids[test_id].data(),
-                                                   query_num, recall_at);
 
         auto mean_latency = polaris::get_mean_stats<float>(
                 stats, query_num, [](const polaris::QueryStats &stats) { return stats.total_us; });
@@ -217,7 +219,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
         double recall = 0;
         if (calc_recall_flag) {
             recall = polaris::calculate_recall((uint32_t) query_num, gt_ids, gt_dists, (uint32_t) gt_dim,
-                                               query_result_ids[test_id].data(), recall_at, recall_at);
+                                               search_contexts[test_id], recall_at, recall_at);
             best_recall = std::max(recall, best_recall);
         }
 
@@ -233,17 +235,18 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
 
     polaris::cout << "Done searching. Now saving results " << std::endl;
     uint64_t test_id = 0;
+    /*
     for (auto L: Lvec) {
         if (L < recall_at)
             continue;
 
         std::string cur_result_path = result_output_prefix + "_" + std::to_string(L) + "_idx_uint32.bin";
-        polaris::save_bin<uint32_t>(cur_result_path, query_result_ids[test_id].data(), query_num, recall_at);
+        polaris::save_bin<uint32_t>(cur_result_path, search_contexts[test_id]->data(), query_num, recall_at);
 
         cur_result_path = result_output_prefix + "_" + std::to_string(L) + "_dists_float.bin";
         polaris::save_bin<float>(cur_result_path, query_result_dists[test_id++].data(), query_num, recall_at);
     }
-
+    */
     polaris::aligned_free(query);
     if (warmup != nullptr)
         polaris::aligned_free(warmup);

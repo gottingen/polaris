@@ -86,37 +86,6 @@ namespace polaris {
                                               std::string mem_index_path, std::string medoids_file,
                                               std::string centroids_file, size_t build_pq_bytes, bool use_opq,
                                               uint32_t num_threads);
-
-    template<typename T>
-    POLARIS_API uint32_t optimize_beamwidth(std::unique_ptr<polaris::PQFlashIndex<T>> &_pFlashIndex,
-                                            T *tuning_sample, uint64_t tuning_sample_num,
-                                            uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
-                                            uint32_t start_bw = 2);
-
-    template<typename T>
-    POLARIS_API int build_disk_index_old(
-            const char *dataFilePath, const char *indexFilePath, const char *indexBuildParameters,
-            polaris::MetricType _compareMetric, bool use_opq = false,
-            const std::string &codebook_prefix = "" // default is empty for no codebook pass in
-            );
-
-    template<typename T>
-    POLARIS_API turbo::Status build_disk_index_with_tag(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
-            const std::vector<vid_t> &tags,
-            const std::string &codebook_prefix = "" // default is empty for no codebook pass in
-    );
-
-    template<typename T>
-    POLARIS_API turbo::Status build_disk_index_with_tag_file(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
-                                               const std::string &tags_file,
-                                               const std::string &codebook_prefix = "" // default is empty for no codebook pass in
-    );
-
-    template<typename T>
-    POLARIS_API turbo::Status build_disk_index(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
-                                               const std::string &codebook_prefix = "" // default is empty for no codebook pass in
-    );
-
     template<typename T>
     POLARIS_API void create_disk_layout(const std::string base_file, const std::string mem_index_file,
                                         const std::string output_file,

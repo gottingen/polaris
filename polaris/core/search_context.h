@@ -52,6 +52,21 @@ namespace polaris {
             return *this;
         }
 
+        SearchContext &set_beam_width(uint32_t beam_width) {
+            vd_beam_width = beam_width;
+            return *this;
+        }
+
+        SearchContext &set_io_limit(uint32_t io_limit) {
+            vd_io_limit = io_limit;
+            return *this;
+        }
+
+        SearchContext &set_use_reorder_data(bool use_reorder_data) {
+            vd_use_reorder_data = use_reorder_data;
+            return *this;
+        }
+
         void start() {
             start_time = turbo::Time::time_now();
         }
@@ -84,6 +99,9 @@ namespace polaris {
         uint32_t cmps{0};
         // vamana optimized_layout
         bool vamana_optimized_layout{false};
-
+        // vamana  disk layout
+        uint32_t vd_beam_width{0};
+        uint32_t vd_io_limit{std::numeric_limits<uint32_t>::max()};
+        bool vd_use_reorder_data{false};
     };
 }  // namespace polaris

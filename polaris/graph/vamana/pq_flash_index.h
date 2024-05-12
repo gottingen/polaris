@@ -21,6 +21,7 @@
 #include <polaris/utility/concurrent_queue.h>
 #include <polaris/graph/vamana/neighbor.h>
 #include <polaris/core/vamana_parameters.h>
+#include <polaris/core/search_context.h>
 #include <polaris/graph/vamana/percentile_stats.h>
 #include <polaris/graph/vamana/pq.h>
 #include <polaris/graph/vamana/utils.h>
@@ -29,6 +30,8 @@
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/utility/natural_number_map.h>
+#include <turbo/status/status.h>
+#include <polaris/core/index_config.h>
 
 #define FULL_PRECISION_REORDER_MULTIPLIER 3
 
@@ -42,6 +45,21 @@ namespace polaris {
 
         POLARIS_API ~PQFlashIndex();
 
+    public:
+        POLARIS_API static turbo::Status
+        build(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
+              const std::vector<vid_t> &tags,
+              const std::string &codebook_prefix = "");
+
+        POLARIS_API static turbo::Status
+        build(const char *dataFilePath, const char *indexFilePath, const std::string &tags_file,const IndexConfig &indexConfig,
+              const std::string &codebook_prefix = "");
+
+        POLARIS_API static turbo::Status
+        build(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
+              const std::string &codebook_prefix = "");
+
+    public:
         // load compressed data, and obtains the handle to the disk-resident index
         POLARIS_API int load(uint32_t num_threads, const char *index_prefix);
 
@@ -58,20 +76,12 @@ namespace polaris {
         POLARIS_API void cache_bfs_levels(uint64_t num_nodes_to_cache, std::vector<uint32_t> &node_list,
                                           const bool shuffle = false);
 
-        POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
-                                            uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
-                                            const bool use_reorder_data = false, QueryStats *stats = nullptr);
-
-        POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
-                                            uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
-                                            const uint32_t io_limit, const bool use_reorder_data = false,
-                                            QueryStats *stats = nullptr);
-
-
         POLARIS_API uint32_t range_search(const T *query1, const double range, const uint64_t min_l_search,
                                           const uint64_t max_l_search, std::vector<uint64_t> &indices,
                                           std::vector<float> &distances, const uint64_t min_beam_width,
                                           QueryStats *stats = nullptr);
+
+        POLARIS_API turbo::Status search(SearchContext &search_context, QueryStats *stats = nullptr);
 
         POLARIS_API uint64_t get_data_dim();
 
@@ -94,10 +104,23 @@ namespace polaris {
 
         POLARIS_API uint64_t get_num_points();
 
+        POLARIS_API uint32_t optimize_beamwidth(T *tuning_sample, uint64_t tuning_sample_num,
+                                                uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
+                                                uint32_t start_bw = 2);
+
     protected:
         POLARIS_API void use_medoids_data_as_centroids();
 
         POLARIS_API void setup_thread_data(uint64_t nthreads, uint64_t visited_reserve = 4096);
+
+        POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
+                                            uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
+                                            const bool use_reorder_data = false, QueryStats *stats = nullptr);
+
+        POLARIS_API void cached_beam_search(const T *query, const uint64_t k_search, const uint64_t l_search,
+                                            uint64_t *res_ids, float *res_dists, const uint64_t beam_width,
+                                            const uint32_t io_limit, const bool use_reorder_data = false,
+                                            QueryStats *stats = nullptr);
 
     private:
 
