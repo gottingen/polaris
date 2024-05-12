@@ -84,9 +84,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
         calc_recall_flag = true;
     }
 
-    std::shared_ptr<AlignedFileReader> reader = nullptr;
-    reader.reset(new LinuxAlignedFileReader());
-
+    POLARIS_LOG(INFO) << "Loading index from " << index_path_prefix;
     std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA_DISK));
     polaris::IndexConfig config = polaris::IndexConfigBuilder()
             .with_load_threads(num_threads)
@@ -194,8 +192,9 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
                     .set_search_list(L)
                     .set_beam_width(optimized_beamwidth)
                     .set_with_local_ids(true)
+                    .set_query_stats(stats + i)
                     .set_use_reorder_data(use_reorder_data);
-            auto rs = unified_index->search(ctx, stats + i);
+            auto rs = unified_index->search(ctx);
             if (!rs.ok()) {
                 polaris::cerr << "Search failed for query " << i << std::endl;
                 exit(-1);

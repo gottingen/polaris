@@ -16,12 +16,16 @@
 
 #include <polaris/unified_index.h>
 #include <polaris/unified/vamana_disk.h>
+#include <polaris/unified/vamana.h>
+
 namespace polaris {
 
     UnifiedIndex *UnifiedIndex::create_index(IndexType type) {
         switch (type) {
             case IndexType::IT_VAMANA_DISK:
                 return new VamanaDisk();
+            case IndexType::IT_VAMANA:
+                return new Vamana();
             default:
                 return nullptr;
         }

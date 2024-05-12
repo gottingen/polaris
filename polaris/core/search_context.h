@@ -17,6 +17,7 @@
 #include <polaris/core/defines.h>
 #include <polaris/core/common.h>
 #include <polaris/core/array_view.h>
+#include <polaris/core/percentile_stats.h>
 #include <polaris/core/search_condition.h>
 #include <polaris/distance/object_distance.h>
 #include <polaris/utility/polaris_assert.h>
@@ -82,6 +83,11 @@ namespace polaris {
             return *this;
         }
 
+        SearchContext &set_query_stats(QueryStats *s) {
+            this->stats = s;
+            return *this;
+        }
+
         void start() {
             start_time = turbo::Time::time_now();
         }
@@ -108,6 +114,7 @@ namespace polaris {
         bool with_raw_vectors{false};
         std::vector<std::vector<uint8_t>> raw_vectors;
 
+        QueryStats *stats{nullptr};
         /// vid_t:distance pairs
         std::vector<ObjectDistance> top_k_queue;
         std::vector<ObjectDistance> extra_results;

@@ -449,15 +449,15 @@ namespace polaris {
         return 0;
     }
 
-// partitions a large base file into many shards using k-means hueristic
-// on a random sample generated using sampling_rate probability. After this, it
-// assignes each base point to the closest k_base nearest centers and creates
-// the shards.
-// The total number of points across all shards will be k_base * num_points.
+    // partitions a large base file into many shards using k-means hueristic
+    // on a random sample generated using sampling_rate probability. After this, it
+    // assignes each base point to the closest k_base nearest centers and creates
+    // the shards.
+    // The total number of points across all shards will be k_base * num_points.
 
     template<typename T>
-    int partition(const std::string data_file, const float sampling_rate, size_t num_parts, size_t max_k_means_reps,
-                  const std::string prefix_path, size_t k_base) {
+    turbo::Status partition(const std::string &data_file, const float sampling_rate, size_t num_parts, size_t max_k_means_reps,
+                  const std::string &prefix_path, size_t k_base) {
         size_t train_dim;
         size_t num_train;
         float *train_data_float;
@@ -484,20 +484,23 @@ namespace polaris {
         kmeans::run_lloyds(train_data_float, num_train, train_dim, pivot_data, num_parts, max_k_means_reps, NULL, NULL);
 
         polaris::cout << "Saving global k-center pivots" << std::endl;
-        polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim);
-
+        auto rs = polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim);
+        if(!rs.ok()) {
+            polaris::cout << "Error saving pivots: " << rs.status().message() << std::endl;
+            return rs.status();
+        }
         // now pivots are ready. need to stream base points and assign them to
         // closest clusters.
 
         shard_data_into_clusters<T>(data_file, pivot_data, num_parts, train_dim, k_base, prefix_path);
         delete[] pivot_data;
         delete[] train_data_float;
-        return 0;
+        return turbo::ok_status();
     }
 
     template<typename T>
-    int partition_with_ram_budget(const std::string data_file, const double sampling_rate, double ram_budget,
-                                  size_t graph_degree, const std::string prefix_path, size_t k_base) {
+    turbo::ResultStatus<int> partition_with_ram_budget(const std::string &data_file, double sampling_rate, double ram_budget,
+                                  size_t graph_degree, const std::string &prefix_path, size_t k_base) {
         size_t train_dim;
         size_t num_train;
         float *train_data_float;
@@ -565,8 +568,11 @@ namespace polaris {
         }
 
         polaris::cout << "Saving global k-center pivots" << std::endl;
-        polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim);
-
+        auto rs = polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim);
+        if(!rs.ok()) {
+            polaris::cout << "Error saving pivots: " << rs.status().message() << std::endl;
+            return rs.status();
+        }
         shard_data_into_clusters_only_ids<T>(data_file, pivot_data, num_parts, train_dim, k_base, prefix_path);
         delete[] pivot_data;
         delete[] train_data_float;
@@ -603,31 +609,31 @@ namespace polaris {
     template void POLARIS_API gen_random_slice<int8_t>(const std::string &data_file, double p_val,
                                                        float *&sampled_data, size_t &slice_size, size_t &ndims);
 
-    template POLARIS_API int partition<int8_t>(const std::string data_file, const float sampling_rate,
+    template POLARIS_API turbo::Status partition<int8_t>(const std::string &data_file, float sampling_rate,
                                                size_t num_centers, size_t max_k_means_reps,
-                                               const std::string prefix_path, size_t k_base);
+                                               const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API int partition<uint8_t>(const std::string data_file, const float sampling_rate,
+    template POLARIS_API turbo::Status partition<uint8_t>(const std::string &data_file, float sampling_rate,
                                                 size_t num_centers, size_t max_k_means_reps,
-                                                const std::string prefix_path, size_t k_base);
+                                                const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API int partition<float>(const std::string data_file, const float sampling_rate,
+    template POLARIS_API turbo::Status partition<float>(const std::string &data_file, float sampling_rate,
                                               size_t num_centers, size_t max_k_means_reps,
-                                              const std::string prefix_path, size_t k_base);
+                                              const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API int partition_with_ram_budget<int8_t>(const std::string data_file,
-                                                               const double sampling_rate, double ram_budget,
-                                                               size_t graph_degree, const std::string prefix_path,
+    template POLARIS_API turbo::ResultStatus<int> partition_with_ram_budget<int8_t>(const std::string &data_file,
+                                                               double sampling_rate, double ram_budget,
+                                                               size_t graph_degree, const std::string &prefix_path,
                                                                size_t k_base);
 
-    template POLARIS_API int partition_with_ram_budget<uint8_t>(const std::string data_file,
-                                                                const double sampling_rate, double ram_budget,
-                                                                size_t graph_degree, const std::string prefix_path,
+    template POLARIS_API turbo::ResultStatus<int> partition_with_ram_budget<uint8_t>(const std::string &data_file,
+                                                                double sampling_rate, double ram_budget,
+                                                                size_t graph_degree, const std::string &prefix_path,
                                                                 size_t k_base);
 
-    template POLARIS_API int partition_with_ram_budget<float>(const std::string data_file, const double sampling_rate,
+    template POLARIS_API turbo::ResultStatus<int> partition_with_ram_budget<float>(const std::string &data_file, double sampling_rate,
                                                               double ram_budget, size_t graph_degree,
-                                                              const std::string prefix_path, size_t k_base);
+                                                              const std::string &prefix_path, size_t k_base);
 
     template POLARIS_API int retrieve_shard_data_from_ids<float>(const std::string data_file,
                                                                  std::string idmap_filename,

@@ -22,6 +22,7 @@
 #include <turbo/status/status.h>
 #include <polaris/core/index_config.h>
 #include <polaris/core/percentile_stats.h>
+#include <polaris/core/report.h>
 
 namespace polaris {
 
@@ -49,9 +50,17 @@ namespace polaris {
 
         virtual turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) = 0;
 
-        virtual turbo::Status remove(vid_t vid) = 0;
+        virtual turbo::Status lazy_remove(vid_t vid) = 0;
 
-        virtual turbo::Status search(SearchContext &context, polaris::QueryStats *stats) = 0;
+        virtual turbo::ResultStatus<consolidation_report> consolidate_deletes(const IndexWriteParameters &parameters) = 0;
+
+        virtual turbo::Status search(SearchContext &context) = 0;
+
+        [[nodiscard]] virtual bool supports_dynamic() const  = 0;
+
+        /// @brief Get the snapshot of the index
+        /// @return the snapshot of the index 0 if not supported
+        [[nodiscard]] virtual uint64_t snapshot() const = 0;
 
         /// @brief Optimize the beam width for the index
         virtual turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,

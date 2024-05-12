@@ -21,6 +21,7 @@
 #include <polaris/utility/recall.h>
 #include <polaris/graph/vamana/timer.h>
 #include <polaris/core/percentile_stats.h>
+#include <polaris/unified_index.h>
 #include <polaris/datasets/bin.h>
 #include <sys/mman.h>
 
@@ -53,7 +54,8 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     auto config = polaris::IndexConfigBuilder()
             .with_metric(metric)
             .with_dimension(query_dim)
-            .with_max_points(0)
+            .with_max_points(*(std::max_element(Lvec.begin(), Lvec.end())))
+            .with_load_threads(num_threads)
             .vamana_with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
             .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
             .with_data_type(polaris::polaris_type_to_name<T>())
@@ -65,13 +67,18 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             .vamana_with_num_frozen_pts(num_frozen_pts)
             .build_vamana();
 
+    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
+    unified_index->initialize(config);
+    unified_index->load(index_path);
+    /*
     auto index_factory = polaris::IndexFactory(config);
     auto index = index_factory.create_instance();
     index->load(index_path.c_str(), num_threads, *(std::max_element(Lvec.begin(), Lvec.end())));
+     if (metric == polaris::MetricType::METRIC_FAST_L2)
+        index->optimize_index_layout();
+     */
     std::cout << "VamanaIndex loaded" << std::endl;
 
-    if (metric == polaris::MetricType::METRIC_FAST_L2)
-        index->optimize_index_layout();
 
     std::cout << "Using " << num_threads << " threads to search" << std::endl;
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -126,7 +133,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
                 std::cout << "Using optimized layout" << std::endl;
                 ctx.vamana_optimized_layout = true;
             }
-            auto rs = index->search(ctx);
+            auto rs = unified_index->search(ctx);
             if(!rs.ok()) {
                 std::cerr << "Search failed for query " << i <<" error: "<<rs.message()<< std::endl;
                 exit(-1);

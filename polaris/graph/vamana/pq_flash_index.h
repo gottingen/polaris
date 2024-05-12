@@ -81,7 +81,7 @@ namespace polaris {
                                           std::vector<float> &distances, const uint64_t min_beam_width,
                                           QueryStats *stats = nullptr);
 
-        POLARIS_API turbo::Status search(SearchContext &search_context, QueryStats *stats = nullptr);
+        POLARIS_API turbo::Status search(SearchContext &search_context);
 
         POLARIS_API uint64_t get_data_dim();
 

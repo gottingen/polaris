@@ -160,6 +160,7 @@ set(POLARIS_SRC
         graph/vamana/pq_l2_distance.cc
         graph/vamana/scratch.cc
         graph/vamana/utils.cc
+        unified/vamana.cc
         unified/vamana_disk.cc
         utility/memory_mapper.cc
         utility/mmap_manager.cc
@@ -367,6 +368,8 @@ set(POLARIS_HEADERS
         storage/in_mem_graph_store.h
         storage/in_mem_data_store.h
         storage/repository.h
+        unified/vamana.h
+        unified/vamana_disk.h
         utility/any_wrappers.h
         utility/args.h
         utility/bfloat.h

@@ -871,7 +871,8 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status PQFlashIndex<T>::search(SearchContext &sctx, QueryStats *stats) {
+    turbo::Status PQFlashIndex<T>::search(SearchContext &sctx) {
+        auto *stats = sctx.stats;
         uint64_t num_sector_per_nodes = DIV_ROUND_UP(_max_node_len, defaults::SECTOR_LEN);
         if (sctx.vd_beam_width > num_sector_per_nodes * defaults::MAX_N_SECTOR_READS) {
             return turbo::make_status(turbo::kInvalidArgument,

@@ -34,13 +34,21 @@ namespace polaris {
 
         turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) override;
 
-        turbo::Status remove(vid_t vid) override;
+        turbo::Status lazy_remove(vid_t vid) override;
 
-        turbo::Status search(SearchContext &context, polaris::QueryStats *stats) override;
+        turbo::Status search(SearchContext &context) override;
+
+        [[nodiscard]] bool supports_dynamic() const  override { return false; }
+
+        [[nodiscard]] uint64_t snapshot() const override { return 0; }
 
         turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
                                              uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
                                              uint32_t start_bw = 2) override;
+        turbo::ResultStatus<consolidation_report> consolidate_deletes(const IndexWriteParameters &parameters) override{
+            return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+
+        }
     private:
         void *index_{nullptr};
         IndexConfig config_;

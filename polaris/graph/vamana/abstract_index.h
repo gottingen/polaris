@@ -21,29 +21,11 @@
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/types.h>
 #include <polaris/core/index_config.h>
+#include <polaris/core/report.h>
 #include <polaris/core/common.h>
 #include <any>
 
 namespace polaris {
-    struct consolidation_report {
-        enum status_code {
-            SUCCESS = 0,
-            FAIL = 1,
-            LOCK_FAIL = 2,
-            INCONSISTENT_COUNT_ERROR = 3
-        };
-        status_code _status;
-        size_t _active_points, _max_points, _empty_slots, _slots_released, _delete_set_size, _num_calls_to_process_delete;
-        double _time;
-
-        consolidation_report(status_code status, size_t active_points, size_t max_points, size_t empty_slots,
-                             size_t slots_released, size_t delete_set_size, size_t num_calls_to_process_delete,
-                             double time_secs)
-                : _status(status), _active_points(active_points), _max_points(max_points), _empty_slots(empty_slots),
-                  _slots_released(slots_released), _delete_set_size(delete_set_size),
-                  _num_calls_to_process_delete(num_calls_to_process_delete), _time(time_secs) {
-        }
-    };
 
     /* A templated independent class for intercation with VamanaIndex. Uses Type Erasure to add virtual implemetation of methods
     that can take any type(using std::any) and Provides a clean API that can be inherited by different type of VamanaIndex.

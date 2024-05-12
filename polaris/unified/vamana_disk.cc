@@ -18,16 +18,42 @@
 
 namespace polaris {
 
+    template <typename T>
+    void vd_delete(void *index) {
+        auto ptr = (PQFlashIndex<T>*)index;
+        delete ptr;
+    }
     VamanaDisk::~VamanaDisk() {
         if (index_ != nullptr) {
-            delete index_;
+            switch (config_.basic_config.object_type) {
+                case ObjectType::UINT8:
+                    vd_delete<uint8_t>(index_);
+                    break;
+                case ObjectType::INT8:
+                    vd_delete<int8_t>(index_);
+                    break;
+                case ObjectType::FLOAT:
+                    vd_delete<float>(index_);
+                    break;
+                case ObjectType::UINT16:
+                case ObjectType::INT16:
+                case ObjectType::UINT32:
+                case ObjectType::INT32:
+                case ObjectType::UINT64:
+                case ObjectType::INT64:
+                case ObjectType::DOUBLE:
+                case ObjectType::FLOAT16:
+                case ObjectType::BFLOAT16:
+                default:
+                    break;
+            }
             index_ = nullptr;
         }
     }
 
     turbo::Status VamanaDisk::initialize(const IndexConfig &config) {
         if (index_ != nullptr) {
-            return turbo::Status(turbo::kEAGAIN, "Index already initialized");
+            return turbo::make_status(turbo::kEAGAIN, "Index already initialized");
         }
         if (config.basic_config.object_type == ObjectType::ObjectTypeNone) {
             return turbo::make_status(turbo::kInvalidArgument, "Invalid object type");
@@ -36,7 +62,7 @@ namespace polaris {
             return turbo::make_status(turbo::kInvalidArgument, "Invalid metric type");
         }
         config_ = config;
-        reader_.reset(new LinuxAlignedFileReader());
+        reader_ = std::make_shared<LinuxAlignedFileReader>();
         if (!reader_) {
             return turbo::make_status(turbo::kResourceExhausted, "Failed to create reader");
         }
@@ -67,7 +93,7 @@ namespace polaris {
     template <typename T>
     inline turbo::Status vd_load(void *index, uint32_t num_threads, uint32_t num_nodes_to_cache,  const std::string &index_path) {
         if (index == nullptr) {
-            return turbo::Status(turbo::kEINVAL, "Index not initialized");
+            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
         }
         auto ptr = (PQFlashIndex<T>*)index;
         ptr->load(num_threads, index_path.c_str());
@@ -80,7 +106,7 @@ namespace polaris {
     }
     turbo::Status VamanaDisk::load(const std::string &index_path) {
         if (index_ == nullptr) {
-            return turbo::Status(turbo::kEINVAL, "Index not initialized");
+            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
         }
 
         switch (config_.basic_config.object_type) {
@@ -112,27 +138,27 @@ namespace polaris {
         return turbo::make_status(turbo::kUnimplemented, "Not implemented");
     }
 
-    turbo::Status VamanaDisk::remove(vid_t vid) {
+    turbo::Status VamanaDisk::lazy_remove(vid_t vid) {
         return turbo::make_status(turbo::kUnimplemented, "Not implemented");
     }
 
     template <typename T>
-    inline turbo::Status vd_search(void *index,  SearchContext &context, polaris::QueryStats *stats) {
+    inline turbo::Status vd_search(void *index,  SearchContext &context) {
         auto ptr = (PQFlashIndex<T>*)index;
-        return ptr->search(context, stats);
+        return ptr->search(context);
     }
-    turbo::Status VamanaDisk::search(SearchContext &context, polaris::QueryStats *stats) {
+    turbo::Status VamanaDisk::search(SearchContext &context) {
         if (index_ == nullptr) {
-            return turbo::Status(turbo::kEINVAL, "Index not initialized");
+            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
         }
 
         switch (config_.basic_config.object_type) {
             case ObjectType::UINT8:
-                return vd_search<uint8_t>(index_, context, stats);
+                return vd_search<uint8_t>(index_, context);
             case ObjectType::INT8:
-                return vd_search<int8_t>(index_, context, stats);
+                return vd_search<int8_t>(index_, context);
             case ObjectType::FLOAT:
-                return vd_search<float>(index_, context, stats);
+                return vd_search<float>(index_, context);
             case ObjectType::UINT16:
             case ObjectType::INT16:
             case ObjectType::UINT32:

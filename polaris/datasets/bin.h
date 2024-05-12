@@ -201,6 +201,7 @@ namespace polaris {
             memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
         }
         POLARIS_LOG(INFO) << " done.";
+        return turbo::ok_status();
     }
 
     template<typename T>

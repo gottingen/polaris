@@ -17,6 +17,7 @@
 #pragma once
 
 #include <polaris/unified_index.h>
+#include <polaris/graph/vamana/index_factory.h>
 
 namespace polaris {
 
@@ -26,16 +27,33 @@ namespace polaris {
 
         ~Vamana() override = default;
 
-        turbo::Status initialize(const IndexBasicConfig &config) override;
+        turbo::Status initialize(const IndexConfig &config) override;
 
-        turbo::Status load(const IndexConfig &config, const std::string &index_path) override;
+        turbo::Status load(const std::string &index_path) override;
 
         turbo::Status save(const std::string &index_path) override;
 
         turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) override;
 
-        turbo::Status remove(vid_t vid) override;
+        turbo::Status lazy_remove(vid_t vid) override;
 
-        turbo::Status search(const std::vector<uint8_t> &query, const SearchContext &context) override;
+        turbo::ResultStatus<consolidation_report> consolidate_deletes(const IndexWriteParameters &parameters) override;
+
+        turbo::Status search(SearchContext &context) override;
+
+        [[nodiscard]] bool supports_dynamic() const override;
+
+        [[nodiscard]] uint64_t snapshot() const override { return 0; }
+
+        turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
+                                                          uint64_t tuning_sample_aligned_dim, uint32_t L,
+                                                          uint32_t nthreads,
+                                                          uint32_t start_bw = 2) override {
+            return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+        }
+
+    private:
+        std::unique_ptr<AbstractIndex> index_;
+        IndexConfig config_;
     };
 }  // namespace polaris
