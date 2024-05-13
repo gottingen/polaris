@@ -22,13 +22,13 @@ namespace polaris {
 
     class DistanceComparator {
     public:
-        POLARIS_API DistanceComparator(size_t d) : dimension(d) {}
+        POLARIS_API explicit DistanceComparator(size_t d) : dimension(d) {}
 
         POLARIS_API virtual float operator()(const ArrayView &a, const ArrayView &b) = 0;
 
-        POLARIS_API virtual MetricType get_metric() const = 0;
+        POLARIS_API [[nodiscard]] virtual MetricType get_metric() const = 0;
 
-        POLARIS_API virtual ~DistanceComparator() {}
+        POLARIS_API virtual ~DistanceComparator() = default;
 
         size_t dimension;
     };
@@ -36,13 +36,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorL1 : public DistanceComparator {
     public:
-        ComparatorL1(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorL1(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b)  override {
             return polaris::primitive::compare_l1((const OBJECT_TYPE *) a.data(), (const OBJECT_TYPE *) b.data(), dimension);
         }
 
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_L1;
         }
     };
@@ -50,13 +50,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorL2 : public DistanceComparator {
     public:
-        ComparatorL2(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorL2(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_l2((OBJECT_TYPE *) a.data(), (OBJECT_TYPE *) b.data(),
                                                   dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_L2;
         }
     };
@@ -64,7 +64,7 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorFastL2 : public DistanceComparator {
     public:
-        ComparatorFastL2(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorFastL2(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
 
@@ -73,7 +73,7 @@ namespace polaris {
             auto v = a.l2_norm_sq() + b.l2_norm_sq() - 2 * ip;
             return v <= 0.0 ? 0.0 : sqrt(v);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_FAST_L2;
         }
     };
@@ -81,13 +81,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorNormalizedL2 : public DistanceComparator {
     public:
-        ComparatorNormalizedL2(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorNormalizedL2(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_normalized_l2((OBJECT_TYPE *) a.data(),
                                                              (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_NORMALIZED_L2;
         }
     };
@@ -95,13 +95,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorHammingDistance : public DistanceComparator {
     public:
-        ComparatorHammingDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorHammingDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_hamming_distance((OBJECT_TYPE *) a.data(),
                                                                 (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_HAMMING;
         }
     };
@@ -110,13 +110,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorJaccardDistance : public DistanceComparator {
     public:
-        ComparatorJaccardDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorJaccardDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_jaccard_distance((OBJECT_TYPE *) a.data(),
                                                                 (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_JACCARD;
         }
     };
@@ -124,14 +124,14 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorSparseJaccardDistance : public DistanceComparator {
     public:
-        ComparatorSparseJaccardDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorSparseJaccardDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_sparse_jaccard_distance((OBJECT_TYPE *) a.data(),
                                                                        (OBJECT_TYPE *) b.data(), dimension);
         }
 
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_SPARSE_JACCARD;
         }
     };
@@ -139,13 +139,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorAngleDistance : public DistanceComparator {
     public:
-        ComparatorAngleDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorAngleDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_angle_distance((OBJECT_TYPE *) a.data(),
                                                               (OBJECT_TYPE *)b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_ANGLE;
         }
     };
@@ -153,13 +153,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorNormalizedAngleDistance : public DistanceComparator {
     public:
-        ComparatorNormalizedAngleDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorNormalizedAngleDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_normalized_angle_distance((OBJECT_TYPE *) a.data(),
                                                                          (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_NORMALIZED_ANGLE;
         }
     };
@@ -167,13 +167,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorCosineSimilarity : public DistanceComparator {
     public:
-        ComparatorCosineSimilarity(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorCosineSimilarity(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_cosine_similarity((const OBJECT_TYPE *) a.data(),
                                                                  (const OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_COSINE;
         }
     };
@@ -181,13 +181,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorNormalizedCosineSimilarity : public DistanceComparator {
     public:
-        ComparatorNormalizedCosineSimilarity(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorNormalizedCosineSimilarity(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override{
             return polaris::primitive::compare_normalized_cosine_similarity((OBJECT_TYPE *) a.data(),
                                                                             (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_NORMALIZED_COSINE;
         }
     };
@@ -195,13 +195,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorPoincareDistance : public DistanceComparator {  // added by Nyapicom
     public:
-        ComparatorPoincareDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorPoincareDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_poincare_distance((OBJECT_TYPE *)a.data(),
                                                                  (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_POINCARE;
         }
     };
@@ -209,13 +209,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorLorentzDistance : public DistanceComparator {  // added by Nyapicom
     public:
-        ComparatorLorentzDistance(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorLorentzDistance(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b) override {
             return polaris::primitive::compare_lorentz_distance((OBJECT_TYPE *) a.data(),
                                                                 (OBJECT_TYPE *) b.data(), dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_LORENTZ;
         }
     };
@@ -223,13 +223,13 @@ namespace polaris {
     template<typename OBJECT_TYPE>
     class ComparatorInnerProduct : public DistanceComparator {
     public:
-        ComparatorInnerProduct(size_t d) : DistanceComparator(d) {}
+        explicit ComparatorInnerProduct(size_t d) : DistanceComparator(d) {}
 
         float operator()(const ArrayView &a, const ArrayView &b)  override {
             return polaris::primitive::compare_dot_product((OBJECT_TYPE *) a.data(), (OBJECT_TYPE *) b.data(),
                                                            dimension);
         }
-        MetricType get_metric() const override {
+        [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_INNER_PRODUCT;
         }
     };
