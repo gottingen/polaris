@@ -18,6 +18,7 @@
 #include <polaris/storage/in_mem_data_store.h>
 #include <polaris/core/memory.h>
 #include <polaris/datasets/bin.h>
+#include <polaris/core/log.h>
 
 namespace polaris {
 
@@ -48,38 +49,43 @@ namespace polaris {
     }
 
     template<typename data_t>
-    location_t InMemDataStore<data_t>::load(const std::string &filename) {
+    turbo::ResultStatus<location_t> InMemDataStore<data_t>::load(const std::string &filename) {
         return load_impl(filename);
     }
 
 
     template<typename data_t>
-    location_t InMemDataStore<data_t>::load_impl(const std::string &filename) {
+    turbo::ResultStatus<location_t> InMemDataStore<data_t>::load_impl(const std::string &filename) {
         size_t file_dim, file_num_points;
         if (!collie::filesystem::exists(filename)) {
-            std::stringstream stream;
-            stream << "ERROR: data file " << filename << " does not exist." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
+            POLARIS_LOG(ERROR)<< "ERROR: data file " << filename << " does not exist.";
             aligned_free(_data);
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Data file does not exist.");
         }
         polaris::get_bin_metadata(filename, file_num_points, file_dim);
 
         if (file_dim != this->_dim) {
             std::stringstream stream;
-            stream << "ERROR: Driver requests loading " << this->_dim << " dimension,"
-                   << "but file has " << file_dim << " dimension." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
+            POLARIS_LOG(ERROR) << "ERROR: Driver requests loading " << this->_dim << " dimension,"
+                   << "but file has " << file_dim << " dimension.";
             aligned_free(_data);
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Dimension mismatch.");
         }
 
         if (file_num_points > this->capacity()) {
-            this->resize((location_t) file_num_points);
+            auto rs = this->resize((location_t) file_num_points);
+            if (!rs.ok()) {
+                aligned_free(_data);
+                return rs.status();
+            }
+
         }
 
-        copy_aligned_data_from_file<data_t>(filename.c_str(), _data, file_num_points, file_dim, _aligned_dim);
-
+        auto rs = copy_aligned_data_from_file<data_t>(filename.c_str(), _data, file_num_points, file_dim, _aligned_dim);
+        if (!rs.ok()) {
+            aligned_free(_data);
+            return rs;
+        }
         return (location_t) file_num_points;
     }
 
@@ -89,7 +95,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    void InMemDataStore<data_t>::populate_data(const data_t *vectors, const location_t num_pts) {
+    turbo::Status InMemDataStore<data_t>::populate_data(const data_t *vectors, const location_t num_pts) {
         memset(_data, 0, _aligned_dim * sizeof(data_t) * num_pts);
         for (location_t i = 0; i < num_pts; i++) {
             std::memmove(_data + i * _aligned_dim, vectors + i * this->_dim, this->_dim * sizeof(data_t));
@@ -98,31 +104,34 @@ namespace polaris {
         if (_distance_fn->preprocessing_required()) {
             _distance_fn->preprocess_base_points(_data, this->_aligned_dim, num_pts);
         }
+        return turbo::ok_status();
     }
 
     template<typename data_t>
-    void InMemDataStore<data_t>::populate_data(const std::string &filename, const size_t offset) {
+    turbo::Status InMemDataStore<data_t>::populate_data(const std::string &filename, const size_t offset) {
         size_t npts, ndim;
-        copy_aligned_data_from_file(filename.c_str(), _data, npts, ndim, _aligned_dim, offset);
+        auto rs = copy_aligned_data_from_file(filename.c_str(), _data, npts, ndim, _aligned_dim, offset);
+        if (!rs.ok()) {
+            return rs;
+        }
 
         if ((location_t) npts > this->capacity()) {
-            std::stringstream ss;
-            ss << "Number of points in the file: " << filename
+            POLARIS_LOG(ERROR) << "Number of points in the file: " << filename
                << " is greater than the capacity of data store: " << this->capacity()
-               << ". Must invoke resize before calling populate_data()" << std::endl;
-            throw polaris::PolarisException(ss.str(), -1);
+               << ". Must invoke resize before calling populate_data()";
+            return turbo::make_status(turbo::kInvalidArgument, "Number of points in the file is greater than the capacity of data store.");
         }
 
         if ((location_t) ndim != this->get_dims()) {
-            std::stringstream ss;
-            ss << "Number of dimensions of a point in the file: " << filename
-               << " is not equal to dimensions of data store: " << this->capacity() << "." << std::endl;
-            throw polaris::PolarisException(ss.str(), -1);
+            POLARIS_LOG(ERROR) << "Number of dimensions of a point in the file: " << filename
+               << " is not equal to dimensions of data store: " << this->capacity() << ".";
+            return turbo::make_status(turbo::kInvalidArgument, "Number of dimensions of a point in the file is not equal to dimensions of data store.");
         }
 
         if (_distance_fn->preprocessing_required()) {
             _distance_fn->preprocess_base_points(_data, this->_aligned_dim, this->capacity());
         }
+        return turbo::ok_status();
     }
 
     template<typename data_t>
@@ -153,15 +162,13 @@ namespace polaris {
     }
 
     template<typename data_t>
-    void InMemDataStore<data_t>::preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const {
+    turbo::Status InMemDataStore<data_t>::preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const {
         if (query_scratch != nullptr) {
             memcpy(query_scratch->aligned_query_T(), query, sizeof(data_t) * this->get_dims());
         } else {
-            std::stringstream ss;
-            ss << "In InMemDataStore::preprocess_query: Query scratch is null";
-            polaris::cerr << ss.str() << std::endl;
-            throw polaris::PolarisException(ss.str(), -1);
+            return turbo::make_status(turbo::kInvalidArgument, "Query scratch is null");
         }
+        return turbo::ok_status();
     }
 
     template<typename data_t>
@@ -197,14 +204,11 @@ namespace polaris {
     }
 
     template<typename data_t>
-    location_t InMemDataStore<data_t>::expand(const location_t new_size) {
+    turbo::ResultStatus<location_t> InMemDataStore<data_t>::expand(const location_t new_size) {
         if (new_size == this->capacity()) {
             return this->capacity();
         } else if (new_size < this->capacity()) {
-            std::stringstream ss;
-            ss << "Cannot 'expand' datastore when new capacity (" << new_size << ") < existing capacity("
-               << this->capacity() << ")" << std::endl;
-            throw polaris::PolarisException(ss.str(), -1);
+            return turbo::make_status(turbo::kInvalidArgument, "Cannot expand datastore when new capacity < existing capacity");
         }
 #ifndef _WINDOWS
         data_t *new_data;
@@ -220,14 +224,11 @@ namespace polaris {
     }
 
     template<typename data_t>
-    location_t InMemDataStore<data_t>::shrink(const location_t new_size) {
+    turbo::ResultStatus<location_t> InMemDataStore<data_t>::shrink(const location_t new_size) {
         if (new_size == this->capacity()) {
             return this->capacity();
         } else if (new_size > this->capacity()) {
-            std::stringstream ss;
-            ss << "Cannot 'shrink' datastore when new capacity (" << new_size << ") > existing capacity("
-               << this->capacity() << ")" << std::endl;
-            throw polaris::PolarisException(ss.str(), -1);
+            return turbo::make_status(turbo::kInvalidArgument, "Cannot shrink datastore when new capacity > existing capacity");
         }
 #ifndef _WINDOWS
         data_t *new_data;

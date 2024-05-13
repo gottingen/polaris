@@ -82,7 +82,7 @@ namespace polaris {
         // Reads the number of frozen points from graph's metadata file section.
         POLARIS_API static size_t get_graph_num_frozen_points(const std::string &graph_file);
 
-        POLARIS_API void load(const char *index_file, uint32_t num_threads, uint32_t search_l) override;
+        POLARIS_API [[nodiscard]] turbo::Status load(const char *index_file, uint32_t num_threads, uint32_t search_l) override;
         // get some private variables
         POLARIS_API size_t get_num_points();
 
@@ -227,7 +227,7 @@ namespace polaris {
 
         // Resize the index when no slots are left for insertion.
         // Acquire exclusive _update_lock and _tag_lock before calling.
-        void resize(size_t new_max_points);
+        turbo::Status resize(size_t new_max_points);
 
         // Acquire unique lock on _update_lock, _consolidate_lock, _tag_lock
         // and _delete_lock before calling these functions.
@@ -259,7 +259,7 @@ namespace polaris {
 
         POLARIS_API size_t load_graph(const std::string filename, size_t expected_num_points);
 
-        POLARIS_API size_t load_data(std::string filename0);
+        POLARIS_API turbo::ResultStatus<size_t> load_data(std::string filename0);
 
         POLARIS_API size_t load_tags(const std::string tag_file_name);
 

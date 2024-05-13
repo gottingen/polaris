@@ -40,69 +40,69 @@ namespace polaris {
         // Load quantized vectors from a set of files. Here filename is treated
         // as a prefix and the files are assumed to be named with DiskANN
         // conventions.
-        virtual location_t load(const std::string &file_prefix) override;
+        turbo::ResultStatus<location_t> load(const std::string &file_prefix) override;
 
         // Save quantized vectors to a set of files whose names start with
         // file_prefix.
         //  Currently, the plan is to save the quantized vectors to the quantized
         //  vectors file.
-        virtual turbo::ResultStatus<size_t> save(const std::string &file_prefix, const location_t num_points) override;
+        turbo::ResultStatus<size_t> save(const std::string &file_prefix, const location_t num_points) override;
 
         // Since base class function is pure virtual, we need to declare it here, even though alignent concept is not needed
         // for Quantized data stores.
-        virtual size_t get_aligned_dim() const override;
+        size_t get_aligned_dim() const override;
 
         // Populate quantized data from unaligned data using PQ functionality
-        virtual void populate_data(const data_t *vectors, const location_t num_pts) override;
+        turbo::Status populate_data(const data_t *vectors, const location_t num_pts) override;
 
-        virtual void populate_data(const std::string &filename, const size_t offset) override;
+        turbo::Status populate_data(const std::string &filename, const size_t offset) override;
 
-        virtual void extract_data_to_bin(const std::string &filename, const location_t num_pts) override;
+        void extract_data_to_bin(const std::string &filename, const location_t num_pts) override;
 
-        virtual void get_vector(const location_t i, data_t *target) const override;
+        void get_vector(const location_t i, data_t *target) const override;
 
-        virtual void set_vector(const location_t i, const data_t *const vector) override;
+        void set_vector(const location_t i, const data_t *const vector) override;
 
-        virtual void prefetch_vector(const location_t loc) override;
+        void prefetch_vector(const location_t loc) override;
 
-        virtual void move_vectors(const location_t old_location_start, const location_t new_location_start,
+        void move_vectors(const location_t old_location_start, const location_t new_location_start,
                                   const location_t num_points) override;
 
-        virtual void
+        void
         copy_vectors(const location_t from_loc, const location_t to_loc, const location_t num_points) override;
 
-        virtual void preprocess_query(const data_t *query, AbstractScratch<data_t> *scratch) const override;
+        turbo::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *scratch) const override;
 
-        virtual float get_distance(const data_t *query, const location_t loc) const override;
+        float get_distance(const data_t *query, const location_t loc) const override;
 
-        virtual float get_distance(const location_t loc1, const location_t loc2) const override;
+        float get_distance(const location_t loc1, const location_t loc2) const override;
 
         // NOTE: Caller must invoke "PQDistance->preprocess_query" ONCE before calling
         // this function.
-        virtual void get_distance(const data_t *preprocessed_query, const location_t *locations,
+        void get_distance(const data_t *preprocessed_query, const location_t *locations,
                                   const uint32_t location_count, float *distances,
                                   AbstractScratch<data_t> *scratch_space) const override;
 
         // NOTE: Caller must invoke "PQDistance->preprocess_query" ONCE before calling
         // this function.
-        virtual void get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
+        void get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
                                   std::vector<float> &distances, AbstractScratch<data_t> *scratch_space) const override;
 
         // We are returning the distance function that is used for full precision
         // vectors here, not the PQ distance function. This is because the callers
         // all are expecting a Distance<T> not QuantizedDistance<T>.
-        virtual Distance<data_t> *get_dist_fn() const override;
+        Distance<data_t> *get_dist_fn() const override;
 
-        virtual location_t calculate_medoid() const override;
+        location_t calculate_medoid() const override;
 
-        virtual size_t get_alignment_factor() const override;
+        size_t get_alignment_factor() const override;
 
     protected:
-        virtual location_t expand(const location_t new_size) override;
+        turbo::ResultStatus<location_t> expand(const location_t new_size) override;
 
-        virtual location_t shrink(const location_t new_size) override;
+        turbo::ResultStatus<location_t> shrink(const location_t new_size) override;
 
-        virtual location_t load_impl(const std::string &filename);
+        turbo::ResultStatus<location_t> load_impl(const std::string &filename);
 
     private:
         uint8_t *_quantized_data = nullptr;

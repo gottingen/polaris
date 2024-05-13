@@ -333,13 +333,11 @@ namespace polaris {
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::load_data(std::string filename) {
+    turbo::ResultStatus<size_t> VamanaIndex<T>::load_data(std::string filename) {
         size_t file_dim, file_num_points;
         if (!collie::filesystem::exists(filename)) {
-            std::stringstream stream;
-            stream << "ERROR: data file " << filename << " does not exist." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            POLARIS_LOG(ERROR) << "ERROR: data file " << filename << " does not exist.";
+            return turbo::make_status(turbo::kInvalidArgument, "Data file {} does not exist", filename);
         }
         polaris::get_bin_metadata(filename, file_num_points, file_dim);
 
@@ -347,11 +345,9 @@ namespace polaris {
         _empty_slots.clear();
 
         if (file_dim != _index_config.basic_config.dimension) {
-            std::stringstream stream;
-            stream << "ERROR: Driver requests loading " << _index_config.basic_config.dimension << " dimension,"
-                   << "but file has " << file_dim << " dimension." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            POLARIS_LOG(ERROR) << "ERROR: Driver requests loading " << _index_config.basic_config.dimension << " dimension,"
+                   << "but file has " << file_dim << " dimension.";
+            return turbo::make_status(turbo::kInvalidArgument, "Dimension mismatch: expected {}, got {}", _index_config.basic_config.dimension, file_dim);
         }
 
         if (file_num_points > _max_points + _num_frozen_pts) {
@@ -359,7 +355,10 @@ namespace polaris {
             resize(file_num_points - _num_frozen_pts);
         }
 
-        _data_store->load(filename); // offset == 0.
+        auto rs = _data_store->load(filename); // offset == 0.
+        if(!rs.ok()) {
+            return rs.status();
+        }
         return file_num_points;
     }
 
@@ -379,7 +378,7 @@ namespace polaris {
     // load the index from file and update the max_degree, cur (navigating
     // node loc), and _final_graph (adjacency list)
     template<typename T>
-    void VamanaIndex<T>::load(const char *filename, uint32_t num_threads, uint32_t search_l) {
+    turbo::Status VamanaIndex<T>::load(const char *filename, uint32_t num_threads, uint32_t search_l) {
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> cl(_consolidate_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -398,26 +397,27 @@ namespace polaris {
             std::string tags_file = std::string(filename) + ".tags";
             std::string delete_set_file = std::string(filename) + ".del";
             std::string graph_file = std::string(filename);
-            data_file_num_pts = load_data(data_file);
+            auto rs = load_data(data_file);
+            if(!rs.ok()) {
+                return rs.status();
+            }
+            data_file_num_pts = rs.value();
             if (collie::filesystem::exists(delete_set_file)) {
                 load_delete_set(delete_set_file);
             }
             tags_file_num_pts = load_tags(tags_file);
             graph_num_pts = load_graph(graph_file, data_file_num_pts);
         } else {
-            polaris::cout << "Single index file saving/loading support not yet "
-                             "enabled. Not loading the index."
-                          << std::endl;
-            return;
+            POLARIS_LOG(ERROR) << "Single index file saving/loading support not yet "
+                             "enabled. Not loading the index.";
+            return turbo::make_status(turbo::kInvalidArgument, "Single index file saving/loading not yet supported");
         }
 
         if (data_file_num_pts != graph_num_pts || (data_file_num_pts != tags_file_num_pts)) {
-            std::stringstream stream;
-            stream << "ERROR: When loading index, loaded " << data_file_num_pts << " points from datafile, "
+            POLARIS_LOG(ERROR) << "ERROR: When loading index, loaded " << data_file_num_pts << " points from datafile, "
                    << graph_num_pts << " from graph, and " << tags_file_num_pts
-                   << " tags, with num_frozen_pts being set to " << _num_frozen_pts << " in constructor." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+                   << " tags, with num_frozen_pts being set to " << _num_frozen_pts << " in constructor.";
+            return turbo::make_status(turbo::kInvalidArgument, "Mismatch in number of points loaded from data, graph and tags files");
         }
 
         _nd = data_file_num_pts - _num_frozen_pts;
@@ -428,10 +428,9 @@ namespace polaris {
         }
 
         reposition_frozen_point_to_end();
-        polaris::cout << "Num frozen points:" << _num_frozen_pts << " _nd: " << _nd << " _start: " << _start
+        POLARIS_LOG(INFO) << "Num frozen points:" << _num_frozen_pts << " _nd: " << _nd << " _start: " << _start
                       << " size(_location_to_tag): " << _location_to_tag.size()
-                      << " size(_tag_to_location):" << _tag_to_location.size() << " Max points: " << _max_points
-                      << std::endl;
+                      << " size(_tag_to_location):" << _tag_to_location.size() << " Max points: " << _max_points;
 
         // For incremental index, _query_scratch is initialized in the constructor.
         // For the bulk index, the params required to initialize _query_scratch
@@ -441,6 +440,7 @@ namespace polaris {
             initialize_query_scratch(num_threads, search_l, search_l, (uint32_t) _graph_store->get_max_range_of_graph(),
                                      _indexingMaxC, _index_config.basic_config.dimension);
         }
+        return turbo::ok_status();
     }
 
     template<typename T>
@@ -1867,12 +1867,15 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::resize(size_t new_max_points) {
+    turbo::Status VamanaIndex<T>::resize(size_t new_max_points) {
         const size_t new_internal_points = new_max_points + _num_frozen_pts;
         auto start = std::chrono::high_resolution_clock::now();
         assert(_empty_slots.size() == 0); // should not resize if there are empty slots.
 
-        _data_store->resize((location_t) new_internal_points);
+        auto rs = _data_store->resize((location_t) new_internal_points);
+        if (!rs.ok()) {
+            return rs.status();
+        }
         _graph_store->resize_graph(new_internal_points);
         _locks = std::vector<non_recursive_mutex>(new_internal_points);
 
@@ -1888,7 +1891,8 @@ namespace polaris {
         }
 
         auto stop = std::chrono::high_resolution_clock::now();
-        polaris::cout << "Resizing took: " << std::chrono::duration<double>(stop - start).count() << "s" << std::endl;
+        POLARIS_LOG(INFO) << "Resizing took: " << std::chrono::duration<double>(stop - start).count() << "s";
+        return turbo::ok_status();
     }
 
     template<typename T>

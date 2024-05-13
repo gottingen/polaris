@@ -45,7 +45,7 @@ namespace polaris {
             return save(filename.c_str(), false);
         }
 
-        virtual void load(const char *index_file, uint32_t num_threads, uint32_t search_l) = 0;
+        [[nodiscard]] virtual turbo::Status load(const char *index_file, uint32_t num_threads, uint32_t search_l) = 0;
 
         virtual turbo::Status search(SearchContext &search_context) = 0;
 
