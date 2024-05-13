@@ -281,30 +281,31 @@ namespace polaris {
 
 
     template<typename T>
-    inline void copy_aligned_data_from_file(const char *bin_file, T *&data, size_t &npts, size_t &dim,
+    [[nodiscard]] inline turbo::Status copy_aligned_data_from_file(const char *bin_file, T *&data, size_t &npts, size_t &dim,
                                             const size_t &rounded_dim, size_t offset = 0) {
         if (data == nullptr) {
-            polaris::cerr << "Memory was not allocated for " << data << " before calling the load function. Exiting..."
-                          << std::endl;
-            throw polaris::PolarisException("Null pointer passed to copy_aligned_data_from_file function", -1,
-                                            __PRETTY_FUNCTION__,
-                                            __FILE__, __LINE__);
+            return turbo::make_status(turbo::kInvalidArgument, "Null pointer passed to copy_aligned_data_from_file function");
         }
-        std::ifstream reader;
-        reader.exceptions(std::ios::badbit | std::ios::failbit);
-        reader.open(bin_file, std::ios::binary);
-        reader.seekg(offset, reader.beg);
+        try {
+            std::ifstream reader;
+            reader.exceptions(std::ios::badbit | std::ios::failbit);
+            reader.open(bin_file, std::ios::binary);
+            reader.seekg(offset, reader.beg);
 
-        int npts_i32, dim_i32;
-        reader.read((char *) &npts_i32, sizeof(int));
-        reader.read((char *) &dim_i32, sizeof(int));
-        npts = (unsigned) npts_i32;
-        dim = (unsigned) dim_i32;
+            int npts_i32, dim_i32;
+            reader.read((char *) &npts_i32, sizeof(int));
+            reader.read((char *) &dim_i32, sizeof(int));
+            npts = (unsigned) npts_i32;
+            dim = (unsigned) dim_i32;
 
-        for (size_t i = 0; i < npts; i++) {
-            reader.read((char *) (data + i * rounded_dim), dim * sizeof(T));
-            memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
+            for (size_t i = 0; i < npts; i++) {
+                reader.read((char *) (data + i * rounded_dim), dim * sizeof(T));
+                memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
+            }
+        } catch (std::system_error &e) {
+            return turbo::make_status(errno,e.what());
         }
+        return turbo::ok_status();
     }
 
 }  // namespace polaris
