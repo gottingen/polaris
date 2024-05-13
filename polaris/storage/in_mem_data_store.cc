@@ -100,10 +100,6 @@ namespace polaris {
         for (location_t i = 0; i < num_pts; i++) {
             std::memmove(_data + i * _aligned_dim, vectors + i * this->_dim, this->_dim * sizeof(data_t));
         }
-
-        if (_distance_fn->preprocessing_required()) {
-            _distance_fn->preprocess_base_points(_data, this->_aligned_dim, num_pts);
-        }
         return turbo::ok_status();
     }
 
@@ -128,9 +124,6 @@ namespace polaris {
             return turbo::make_status(turbo::kInvalidArgument, "Number of dimensions of a point in the file is not equal to dimensions of data store.");
         }
 
-        if (_distance_fn->preprocessing_required()) {
-            _distance_fn->preprocess_base_points(_data, this->_aligned_dim, this->capacity());
-        }
         return turbo::ok_status();
     }
 
@@ -150,9 +143,6 @@ namespace polaris {
         size_t offset_in_data = loc * _aligned_dim;
         memset(_data + offset_in_data, 0, _aligned_dim * sizeof(data_t));
         memcpy(_data + offset_in_data, vector, this->_dim * sizeof(data_t));
-        if (_distance_fn->preprocessing_required()) {
-            _distance_fn->preprocess_base_points(_data + offset_in_data, _aligned_dim, 1);
-        }
     }
 
     template<typename data_t>

@@ -35,29 +35,8 @@ namespace polaris {
         POLARIS_API virtual float compare(const T *a, const T *b, const float normA, const float normB,
                                           uint32_t length) const;
 
-        // For MIPS, normalization adds an extra dimension to the vectors.
-        // This function lets callers know if the normalization process
-        // changes the dimension.
-        POLARIS_API virtual uint32_t post_normalization_dimension(uint32_t orig_dimension) const;
-
         POLARIS_API virtual polaris::MetricType get_metric() const;
 
-        // This is for efficiency. If no normalization is required, the callers
-        // can simply ignore the normalize_data_for_build() function.
-        POLARIS_API virtual bool preprocessing_required() const;
-
-        // Check the preprocessing_required() function before calling this.
-        // Clients can call the function like this:
-        //
-        //  if (metric->preprocessing_required()){
-        //     T* normalized_data_batch;
-        //      Split data into batches of batch_size and for each, call:
-        //       metric->preprocess_base_points(data_batch, batch_size);
-        //
-        //  TODO: This does not take into account the case for SSD inner product
-        //  where the dimensions change after normalization.
-        POLARIS_API virtual void preprocess_base_points(T *original_data, const size_t orig_dim,
-                                                        const size_t num_points);
 
         // Invokes normalization for a single vector during search. The scratch space
         // has to be created by the caller keeping track of the fact that

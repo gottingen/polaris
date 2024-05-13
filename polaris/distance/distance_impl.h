@@ -137,13 +137,6 @@ namespace polaris {
             return 1.0f + _innerProduct.compare(a, b, length);
         }
 
-        POLARIS_API virtual uint32_t post_normalization_dimension(uint32_t orig_dimension) const override;
-
-        POLARIS_API virtual bool preprocessing_required() const;
-
-        POLARIS_API virtual void preprocess_base_points(float *original_data, const size_t orig_dim,
-                                                        const size_t num_points) override;
-
         POLARIS_API virtual void preprocess_query(const float *query_vec, const size_t query_dim,
                                                   float *scratch_query_vector) override;
     };

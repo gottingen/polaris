@@ -33,22 +33,8 @@ namespace polaris {
     }
 
     template<typename T>
-    uint32_t Distance<T>::post_normalization_dimension(uint32_t orig_dimension) const {
-        return orig_dimension;
-    }
-
-    template<typename T>
     polaris::MetricType Distance<T>::get_metric() const {
         return _distance_metric;
-    }
-
-    template<typename T>
-    bool Distance<T>::preprocessing_required() const {
-        return false;
-    }
-
-    template<typename T>
-    void Distance<T>::preprocess_base_points(T *original_data, const size_t orig_dim, const size_t num_points) {
     }
 
     template<typename T>
@@ -501,21 +487,6 @@ namespace polaris {
         result = unpack[0] + unpack[1] + unpack[2] + unpack[3] + unpack[4] + unpack[5] + unpack[6] + unpack[7];
 
         return -result;
-    }
-
-    uint32_t AVXNormalizedCosineDistanceFloat::post_normalization_dimension(uint32_t orig_dimension) const {
-        return orig_dimension;
-    }
-
-    bool AVXNormalizedCosineDistanceFloat::preprocessing_required() const {
-        return true;
-    }
-
-    void AVXNormalizedCosineDistanceFloat::preprocess_base_points(float *original_data, const size_t orig_dim,
-                                                                  const size_t num_points) {
-        for (uint32_t i = 0; i < num_points; i++) {
-            normalize((float *) (original_data + i * orig_dim), orig_dim);
-        }
     }
 
     void AVXNormalizedCosineDistanceFloat::preprocess_query(const float *query_vec, const size_t query_dim,
