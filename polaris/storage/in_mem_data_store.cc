@@ -16,7 +16,7 @@
 #include <memory>
 #include <polaris/graph/vamana/abstract_scratch.h>
 #include <polaris/storage/in_mem_data_store.h>
-
+#include <polaris/core/memory.h>
 #include <polaris/datasets/bin.h>
 
 namespace polaris {

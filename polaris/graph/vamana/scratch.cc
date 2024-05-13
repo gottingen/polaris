@@ -14,8 +14,7 @@
 //
 
 #include <vector>
-#include <boost/dynamic_bitset.hpp>
-
+#include <polaris/core/memory.h>
 #include <polaris/graph/vamana/scratch.h>
 #include <polaris/graph/vamana/pq_scratch.h>
 

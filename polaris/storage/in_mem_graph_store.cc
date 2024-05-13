@@ -14,7 +14,8 @@
 //
 
 #include <polaris/storage/in_mem_graph_store.h>
-#include <polaris/graph/vamana/utils.h>
+#include <polaris/core/log.h>
+#include <polaris/io/utils.h>
 
 namespace polaris {
     InMemGraphStore::InMemGraphStore(const size_t total_pts, const size_t reserve_graph_degree)
@@ -88,16 +89,16 @@ namespace polaris {
         in.read((char *) &file_frozen_pts, sizeof(size_t));
         size_t vamana_metadata_size = sizeof(size_t) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(size_t);
 
-        polaris::cout << "From graph header, expected_file_size: " << expected_file_size
+        POLARIS_LOG(INFO)<< "From graph header, expected_file_size: " << expected_file_size
                       << ", _max_observed_degree: " << _max_observed_degree << ", _start: " << start
-                      << ", file_frozen_pts: " << file_frozen_pts << std::endl;
+                      << ", file_frozen_pts: " << file_frozen_pts;
 
-        polaris::cout << "Loading vamana graph " << filename << "..." << std::flush;
+        POLARIS_LOG(INFO)<< "Loading vamana graph " << filename;
 
         // If user provides more points than max_points
         // resize the _graph to the larger size.
         if (get_total_points() < expected_num_points) {
-            polaris::cout << "resizing graph to " << expected_num_points << std::endl;
+            POLARIS_LOG(INFO) << "resizing graph to " << expected_num_points;
             this->resize_graph(expected_num_points);
         }
 
@@ -109,7 +110,7 @@ namespace polaris {
             in.read((char *) &k, sizeof(uint32_t));
 
             if (k == 0) {
-                polaris::cerr << "ERROR: Point found with no out-neighbours, point#" << nodes_read << std::endl;
+                POLARIS_LOG(ERROR) << "ERROR: Point found with no out-neighbours, point#" << nodes_read;
             }
 
             cc += k;
@@ -120,15 +121,14 @@ namespace polaris {
             _graph[nodes_read - 1].swap(tmp);
             bytes_read += sizeof(uint32_t) * ((size_t) k + 1);
             if (nodes_read % 10000000 == 0)
-                polaris::cout << "." << std::flush;
+                POLARIS_LOG(INFO) << ".";
             if (k > _max_range_of_graph) {
                 _max_range_of_graph = k;
             }
         }
 
-        polaris::cout << "done. Index has " << nodes_read << " nodes and " << cc << " out-edges, _start is set to "
-                      << start
-                      << std::endl;
+        POLARIS_LOG(INFO) << "done. Index has " << nodes_read << " nodes and " << cc << " out-edges, _start is set to "
+                      << start;
         return std::make_tuple(nodes_read, start, file_frozen_pts);
     }
 

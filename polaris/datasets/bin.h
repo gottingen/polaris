@@ -21,8 +21,9 @@
 #include <iostream>
 #include <cerrno>
 #include <polaris/core/log.h>
+#include <polaris/core/memory.h>
 #include <polaris/io/utils.h>
-#include <polaris/graph/vamana/utils.h>
+#include <polaris/io/cached_io.h>
 #include <turbo/status/result_status.h>
 
 namespace polaris {
@@ -214,6 +215,96 @@ namespace polaris {
         uint64_t fsize = reader.tellg();
         reader.seekg(0);
         return load_aligned_bin_impl(reader, fsize, data, npts, dim, rounded_dim);
+    }
+
+    inline turbo::Status load_truthset(const std::string &bin_file, uint32_t *&ids, float *&dists, size_t &npts, size_t &dim) {
+        size_t read_blk_size = 64 * 1024 * 1024;
+        cached_ifstream reader(bin_file, read_blk_size);
+        POLARIS_LOG(INFO) << "Reading truthset file " << bin_file.c_str() << " ...";
+        size_t actual_file_size = reader.get_file_size();
+
+        int npts_i32, dim_i32;
+        reader.read((char *) &npts_i32, sizeof(int));
+        reader.read((char *) &dim_i32, sizeof(int));
+        npts = (unsigned) npts_i32;
+        dim = (unsigned) dim_i32;
+
+        POLARIS_LOG(INFO) << "Metadata: #pts = " << npts << ", #dims = " << dim << "... ";
+
+        int truthset_type = -1; // 1 means truthset has ids and distances, 2 means
+        // only ids, -1 is error
+        size_t expected_file_size_with_dists = 2 * npts * dim * sizeof(uint32_t) + 2 * sizeof(uint32_t);
+
+        if (actual_file_size == expected_file_size_with_dists)
+            truthset_type = 1;
+
+        size_t expected_file_size_just_ids = npts * dim * sizeof(uint32_t) + 2 * sizeof(uint32_t);
+
+        if (actual_file_size == expected_file_size_just_ids)
+            truthset_type = 2;
+
+        if (truthset_type == -1) {
+            POLARIS_LOG(INFO) << "Error. File size mismatch. File should have bin format, with "
+                      "npts followed by ngt followed by npts*ngt ids and optionally "
+                      "followed by npts*ngt distance values; actual size: "
+                   << actual_file_size << ", expected: " << expected_file_size_with_dists << " or "
+                   << expected_file_size_just_ids;
+            return turbo::make_status(turbo::kInvalidArgument, "File size mismatch");
+        }
+
+        ids = new uint32_t[npts * dim];
+        reader.read((char *) ids, npts * dim * sizeof(uint32_t));
+
+        if (truthset_type == 1) {
+            dists = new float[npts * dim];
+            reader.read((char *) dists, npts * dim * sizeof(float));
+        }
+        return turbo::ok_status();
+    }
+
+    template<typename T>
+    inline size_t save_data_in_base_dimensions(const std::string &filename, T *data, size_t npts, size_t ndims,
+                                               size_t aligned_dim, size_t offset = 0) {
+        std::ofstream writer; //(filename, std::ios::binary | std::ios::out);
+        open_file_to_write(writer, filename);
+        int npts_i32 = (int) npts, ndims_i32 = (int) ndims;
+        size_t bytes_written = 2 * sizeof(uint32_t) + npts * ndims * sizeof(T);
+        writer.seekp(offset, writer.beg);
+        writer.write((char *) &npts_i32, sizeof(int));
+        writer.write((char *) &ndims_i32, sizeof(int));
+        for (size_t i = 0; i < npts; i++) {
+            writer.write((char *) (data + i * aligned_dim), ndims * sizeof(T));
+        }
+        writer.close();
+        return bytes_written;
+    }
+
+
+    template<typename T>
+    inline void copy_aligned_data_from_file(const char *bin_file, T *&data, size_t &npts, size_t &dim,
+                                            const size_t &rounded_dim, size_t offset = 0) {
+        if (data == nullptr) {
+            polaris::cerr << "Memory was not allocated for " << data << " before calling the load function. Exiting..."
+                          << std::endl;
+            throw polaris::PolarisException("Null pointer passed to copy_aligned_data_from_file function", -1,
+                                            __PRETTY_FUNCTION__,
+                                            __FILE__, __LINE__);
+        }
+        std::ifstream reader;
+        reader.exceptions(std::ios::badbit | std::ios::failbit);
+        reader.open(bin_file, std::ios::binary);
+        reader.seekg(offset, reader.beg);
+
+        int npts_i32, dim_i32;
+        reader.read((char *) &npts_i32, sizeof(int));
+        reader.read((char *) &dim_i32, sizeof(int));
+        npts = (unsigned) npts_i32;
+        dim = (unsigned) dim_i32;
+
+        for (size_t i = 0; i < npts; i++) {
+            reader.read((char *) (data + i * rounded_dim), dim * sizeof(T));
+            memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
+        }
     }
 
 }  // namespace polaris

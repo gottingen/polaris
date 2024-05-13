@@ -145,5 +145,76 @@ namespace polaris {
             delete[] p;
         }
     };
+
+    inline void print_error_and_terminate(std::stringstream &error_stream) {
+        std::cerr << error_stream.str() << std::endl;
+        throw polaris::PolarisException(error_stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+    }
+
+
+    inline void report_memory_allocation_failure() {
+        std::stringstream stream;
+        stream << "Memory Allocation Failed.";
+        print_error_and_terminate(stream);
+    }
+
+    inline void report_misalignment_of_requested_size(size_t align) {
+        std::stringstream stream;
+        stream << "Requested memory size is not a multiple of " << align << ". Can not be allocated.";
+        print_error_and_terminate(stream);
+    }
+
+    inline void alloc_aligned(void **ptr, size_t size, size_t align) {
+        *ptr = nullptr;
+        if (IS_ALIGNED(size, align) == 0)
+            report_misalignment_of_requested_size(align);
+#ifndef _WINDOWS
+        *ptr = ::aligned_alloc(align, size);
+#else
+        *ptr = ::_aligned_malloc(size, align); // note the swapped arguments!
+#endif
+        if (*ptr == nullptr)
+            report_memory_allocation_failure();
+    }
+
+    inline void aligned_free(void *ptr) {
+        // Gopal. Must have a check here if the pointer was actually allocated by
+        // _alloc_aligned
+        if (ptr == nullptr) {
+            return;
+        }
+#ifndef _WINDOWS
+        free(ptr);
+#else
+        ::_aligned_free(ptr);
+#endif
+    }
+
+    inline void realloc_aligned(void **ptr, size_t size, size_t align) {
+        if (IS_ALIGNED(size, align) == 0)
+            report_misalignment_of_requested_size(align);
+#ifdef _WINDOWS
+        *ptr = ::_aligned_realloc(*ptr, size, align);
+#else
+        std::cerr << "No aligned realloc on GCC. Must malloc and mem_align, "
+                         "left it out for now."
+                      << std::endl;
+#endif
+        if (*ptr == nullptr)
+            report_memory_allocation_failure();
+    }
+    // NOTE :: good efficiency when total_vec_size is integral multiple of 64
+    inline void prefetch_vector(const char *vec, size_t vecsize) {
+        size_t max_prefetch_size = (vecsize / 64) * 64;
+        for (size_t d = 0; d < max_prefetch_size; d += 64)
+            _mm_prefetch((const char *) vec + d, _MM_HINT_T0);
+    }
+
+    // NOTE :: good efficiency when total_vec_size is integral multiple of 64
+    inline void prefetch_vector_l2(const char *vec, size_t vecsize) {
+        size_t max_prefetch_size = (vecsize / 64) * 64;
+        for (size_t d = 0; d < max_prefetch_size; d += 64)
+            _mm_prefetch((const char *) vec + d, _MM_HINT_T1);
+    }
 }  // namespace polaris
 

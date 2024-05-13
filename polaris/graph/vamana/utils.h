@@ -82,51 +82,6 @@ inline void convert_labels_string_to_int(const std::string &inFileName, const st
 
 
 namespace polaris {
-    static const size_t MAX_SIZE_OF_STREAMBUF = 2LL * 1024 * 1024 * 1024;
-
-    inline void print_error_and_terminate(std::stringstream &error_stream) {
-        polaris::cerr << error_stream.str() << std::endl;
-        throw polaris::PolarisException(error_stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-    }
-
-    inline void report_memory_allocation_failure() {
-        std::stringstream stream;
-        stream << "Memory Allocation Failed.";
-        print_error_and_terminate(stream);
-    }
-
-    inline void report_misalignment_of_requested_size(size_t align) {
-        std::stringstream stream;
-        stream << "Requested memory size is not a multiple of " << align << ". Can not be allocated.";
-        print_error_and_terminate(stream);
-    }
-
-    inline void alloc_aligned(void **ptr, size_t size, size_t align) {
-        *ptr = nullptr;
-        if (IS_ALIGNED(size, align) == 0)
-            report_misalignment_of_requested_size(align);
-#ifndef _WINDOWS
-        *ptr = ::aligned_alloc(align, size);
-#else
-        *ptr = ::_aligned_malloc(size, align); // note the swapped arguments!
-#endif
-        if (*ptr == nullptr)
-            report_memory_allocation_failure();
-    }
-
-    inline void realloc_aligned(void **ptr, size_t size, size_t align) {
-        if (IS_ALIGNED(size, align) == 0)
-            report_misalignment_of_requested_size(align);
-#ifdef _WINDOWS
-        *ptr = ::_aligned_realloc(*ptr, size, align);
-#else
-        polaris::cerr << "No aligned realloc on GCC. Must malloc and mem_align, "
-                         "left it out for now."
-                      << std::endl;
-#endif
-        if (*ptr == nullptr)
-            report_memory_allocation_failure();
-    }
 
     inline void check_stop(std::string arnd) {
         int brnd;
@@ -134,18 +89,6 @@ namespace polaris {
         std::cin >> brnd;
     }
 
-    inline void aligned_free(void *ptr) {
-        // Gopal. Must have a check here if the pointer was actually allocated by
-        // _alloc_aligned
-        if (ptr == nullptr) {
-            return;
-        }
-#ifndef _WINDOWS
-        free(ptr);
-#else
-        ::_aligned_free(ptr);
-#endif
-    }
 
     inline void GenRandom(std::mt19937 &rng, unsigned *addr, unsigned size, unsigned N) {
         for (unsigned i = 0; i < size; ++i) {
@@ -202,52 +145,6 @@ namespace polaris {
         std::cin >> a;
     }
     // load_bin functions END
-
-    inline void load_truthset(const std::string &bin_file, uint32_t *&ids, float *&dists, size_t &npts, size_t &dim) {
-        size_t read_blk_size = 64 * 1024 * 1024;
-        cached_ifstream reader(bin_file, read_blk_size);
-        polaris::cout << "Reading truthset file " << bin_file.c_str() << " ..." << std::endl;
-        size_t actual_file_size = reader.get_file_size();
-
-        int npts_i32, dim_i32;
-        reader.read((char *) &npts_i32, sizeof(int));
-        reader.read((char *) &dim_i32, sizeof(int));
-        npts = (unsigned) npts_i32;
-        dim = (unsigned) dim_i32;
-
-        polaris::cout << "Metadata: #pts = " << npts << ", #dims = " << dim << "... " << std::endl;
-
-        int truthset_type = -1; // 1 means truthset has ids and distances, 2 means
-        // only ids, -1 is error
-        size_t expected_file_size_with_dists = 2 * npts * dim * sizeof(uint32_t) + 2 * sizeof(uint32_t);
-
-        if (actual_file_size == expected_file_size_with_dists)
-            truthset_type = 1;
-
-        size_t expected_file_size_just_ids = npts * dim * sizeof(uint32_t) + 2 * sizeof(uint32_t);
-
-        if (actual_file_size == expected_file_size_just_ids)
-            truthset_type = 2;
-
-        if (truthset_type == -1) {
-            std::stringstream stream;
-            stream << "Error. File size mismatch. File should have bin format, with "
-                      "npts followed by ngt followed by npts*ngt ids and optionally "
-                      "followed by npts*ngt distance values; actual size: "
-                   << actual_file_size << ", expected: " << expected_file_size_with_dists << " or "
-                   << expected_file_size_just_ids;
-            polaris::cout << stream.str();
-            throw polaris::PolarisException(stream.str(), -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
-        }
-
-        ids = new uint32_t[npts * dim];
-        reader.read((char *) ids, npts * dim * sizeof(uint32_t));
-
-        if (truthset_type == 1) {
-            dists = new float[npts * dim];
-            reader.read((char *) dists, npts * dim * sizeof(float));
-        }
-    }
 
     inline void prune_truthset_for_range(const std::string &bin_file, float range,
                                          std::vector<std::vector<uint32_t>> &groundtruth, size_t &npts) {
@@ -462,64 +359,6 @@ namespace polaris {
             T *cur_pt = data + i * ndims;
             writer.write((char *) cur_pt, ndims * sizeof(T));
         }
-    }
-
-    template<typename T>
-    inline size_t save_data_in_base_dimensions(const std::string &filename, T *data, size_t npts, size_t ndims,
-                                               size_t aligned_dim, size_t offset = 0) {
-        std::ofstream writer; //(filename, std::ios::binary | std::ios::out);
-        open_file_to_write(writer, filename);
-        int npts_i32 = (int) npts, ndims_i32 = (int) ndims;
-        size_t bytes_written = 2 * sizeof(uint32_t) + npts * ndims * sizeof(T);
-        writer.seekp(offset, writer.beg);
-        writer.write((char *) &npts_i32, sizeof(int));
-        writer.write((char *) &ndims_i32, sizeof(int));
-        for (size_t i = 0; i < npts; i++) {
-            writer.write((char *) (data + i * aligned_dim), ndims * sizeof(T));
-        }
-        writer.close();
-        return bytes_written;
-    }
-
-    template<typename T>
-    inline void copy_aligned_data_from_file(const char *bin_file, T *&data, size_t &npts, size_t &dim,
-                                            const size_t &rounded_dim, size_t offset = 0) {
-        if (data == nullptr) {
-            polaris::cerr << "Memory was not allocated for " << data << " before calling the load function. Exiting..."
-                          << std::endl;
-            throw polaris::PolarisException("Null pointer passed to copy_aligned_data_from_file function", -1,
-                                            __PRETTY_FUNCTION__,
-                                            __FILE__, __LINE__);
-        }
-        std::ifstream reader;
-        reader.exceptions(std::ios::badbit | std::ios::failbit);
-        reader.open(bin_file, std::ios::binary);
-        reader.seekg(offset, reader.beg);
-
-        int npts_i32, dim_i32;
-        reader.read((char *) &npts_i32, sizeof(int));
-        reader.read((char *) &dim_i32, sizeof(int));
-        npts = (unsigned) npts_i32;
-        dim = (unsigned) dim_i32;
-
-        for (size_t i = 0; i < npts; i++) {
-            reader.read((char *) (data + i * rounded_dim), dim * sizeof(T));
-            memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
-        }
-    }
-
-// NOTE :: good efficiency when total_vec_size is integral multiple of 64
-    inline void prefetch_vector(const char *vec, size_t vecsize) {
-        size_t max_prefetch_size = (vecsize / 64) * 64;
-        for (size_t d = 0; d < max_prefetch_size; d += 64)
-            _mm_prefetch((const char *) vec + d, _MM_HINT_T0);
-    }
-
-// NOTE :: good efficiency when total_vec_size is integral multiple of 64
-    inline void prefetch_vector_l2(const char *vec, size_t vecsize) {
-        size_t max_prefetch_size = (vecsize / 64) * 64;
-        for (size_t d = 0; d < max_prefetch_size; d += 64)
-            _mm_prefetch((const char *) vec + d, _MM_HINT_T1);
     }
 
     // NOTE: Implementation in utils.cpp.

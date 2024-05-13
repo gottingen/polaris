@@ -17,7 +17,6 @@
 #include <random>
 #include <math.h>
 #include <cmath>
-#include <polaris/graph/vamana/utils.h>
 #include <collie/cli/cli.h>
 
 namespace polaris {

@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 
+#include <polaris/utility/platform_macros.h>
 #include <polaris/io/linux_aligned_file_reader.h>
-
+#include <fcntl.h>
 #include <cassert>
 #include <cstdio>
 #include <iostream>
 #include <polaris/core/log.h>
-#include <polaris/graph/vamana/utils.h>
 
 #define MAX_EVENTS 1024
 

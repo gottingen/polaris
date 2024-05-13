@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 #include <polaris/datasets/recall.h>
+#include <polaris/datasets/bin.h>
 #include <polaris/utility/platform_macros.h>
-#include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/recall.h>
 #include <iostream>
 
