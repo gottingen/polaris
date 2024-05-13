@@ -19,37 +19,7 @@
 #include <polaris/graph/vamana/pq_scratch.h>
 
 namespace polaris {
-    //
-    // Functions to manage scratch space for in-memory index based search
-    //
-    /*
-    template<typename T>
-    InMemQueryScratch<T>::InMemQueryScratch(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc,
-                                            size_t dim,
-                                            size_t aligned_dim, size_t alignment_factor, bool init_pq_scratch)
-            : _L(0), _R(r), _maxc(maxc) {
-        if (search_l == 0 || indexing_l == 0 || r == 0 || dim == 0) {
-            std::stringstream ss;
-            ss << "In InMemQueryScratch, one of search_l = " << search_l << ", indexing_l = " << indexing_l
-               << ", dim = " << dim << " or r = " << r << " is zero." << std::endl;
-            throw polaris::PolarisException(ss.str(), -1);
-        }
 
-        alloc_aligned(((void **) &this->_aligned_query_T), aligned_dim * sizeof(T), alignment_factor * sizeof(T));
-        memset(this->_aligned_query_T, 0, aligned_dim * sizeof(T));
-
-        if (init_pq_scratch)
-            this->_pq_scratch = new PQScratch<T>(defaults::MAX_GRAPH_DEGREE, aligned_dim);
-        else
-            this->_pq_scratch = nullptr;
-
-        _occlude_factor.reserve(maxc);
-        _inserted_into_pool_bs = new collie::dynamic_bitset<>();
-        _id_scratch.reserve((size_t) std::ceil(1.5 * defaults::GRAPH_SLACK_FACTOR * _R));
-        _dist_scratch.reserve((size_t) std::ceil(1.5 * defaults::GRAPH_SLACK_FACTOR * _R));
-
-        resize_for_new_L(std::max(search_l, indexing_l));
-    }*/
 
     template<typename T>
     turbo::Status
@@ -64,8 +34,12 @@ namespace polaris {
         _L = 0;
         _R = r;
         _maxc = maxc;
+        _dim = dim;
+        _aligned_dim = aligned_dim;
         alloc_aligned(((void **) &this->_aligned_query_T), aligned_dim * sizeof(T), alignment_factor * sizeof(T));
         memset(this->_aligned_query_T, 0, aligned_dim * sizeof(T));
+
+        query_view.set_data(this->_aligned_query_T);
 
         if (init_pq_scratch)
             this->_pq_scratch = new PQScratch<T>(defaults::MAX_GRAPH_DEGREE, aligned_dim);
@@ -95,6 +69,10 @@ namespace polaris {
         _expanded_nodes_set.clear();
         _expanded_nghrs_vec.clear();
         _occlude_list_output.clear();
+    }
+    template<typename T>
+    void InMemQueryScratch<T>::set_query(const T *query) {
+        memcpy(this->_aligned_query_T, query, sizeof(T) *_dim);
     }
 
     template<typename T>

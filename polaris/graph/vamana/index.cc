@@ -568,7 +568,7 @@ namespace polaris {
         // Lambda to batch compute query<-> node distances in PQ space
         auto compute_dists = [this, scratch, pq_dists](const std::vector<uint32_t> &ids,
                                                        std::vector<float> &dists_out) {
-            _pq_data_store->get_distance(scratch->aligned_query(), ids, dists_out, scratch);
+            _pq_data_store->get_distance(scratch->query_view, ids, dists_out, scratch);
         };
 
         // Initialize the candidate pool with starting points
@@ -597,7 +597,7 @@ namespace polaris {
                 float distance;
                 uint32_t ids[] = {id};
                 float distances[] = {std::numeric_limits<float>::max()};
-                _pq_data_store->get_distance(aligned_query, ids, 1, distances, scratch);
+                _pq_data_store->get_distance(scratch->query_view, ids, 1, distances, scratch);
                 distance = distances[0];
 
                 Neighbor nn = Neighbor(id, distance);
@@ -724,7 +724,7 @@ namespace polaris {
         // Lambda to batch compute query<-> node distances in PQ space
         auto compute_dists = [this, scratch, pq_dists](const std::vector<uint32_t> &ids,
                                                        std::vector<float> &dists_out) {
-            _pq_data_store->get_distance(scratch->aligned_query(), ids, dists_out, scratch);
+            _pq_data_store->get_distance(scratch->query_view, ids, dists_out, scratch);
         };
 
         // Initialize the candidate pool with starting points
@@ -746,7 +746,7 @@ namespace polaris {
                 float distance;
                 uint32_t ids[] = {id};
                 float distances[] = {std::numeric_limits<float>::max()};
-                _pq_data_store->get_distance(aligned_query, ids, 1, distances, scratch);
+                _pq_data_store->get_distance(scratch->query_view, ids, 1, distances, scratch);
                 distance = distances[0];
 
                 Neighbor nn = Neighbor(id, distance);
@@ -1374,7 +1374,7 @@ namespace polaris {
 
         const std::vector<uint32_t> init_ids = get_init_ids();
 
-        _data_store->preprocess_query(reinterpret_cast<T *>(ctx.query.data()), scratch);
+       scratch->set_query(reinterpret_cast<T *>(ctx.query.data()));
         auto rs = iterate_to_fixed_point(scratch, ctx.search_list, init_ids, ctx.search_condition, true);
         if (!rs.ok()) {
             return rs.status();

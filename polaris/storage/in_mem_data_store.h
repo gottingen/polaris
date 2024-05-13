@@ -62,15 +62,15 @@ namespace polaris {
 
         turbo::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const override;
 
-        float get_distance(const data_t *preprocessed_query, const location_t loc) const override;
+        float get_distance(const ArrayView &preprocessed_query, const location_t loc) const override;
 
         float get_distance(const location_t loc1, const location_t loc2) const override;
 
-        void get_distance(const data_t *preprocessed_query, const location_t *locations,
+        void get_distance(const ArrayView &preprocessed_query, const location_t *locations,
                                   const uint32_t location_count, float *distances,
                                   AbstractScratch<data_t> *scratch) const override;
 
-        void get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
+        void get_distance(const ArrayView &preprocessed_query, const std::vector<location_t> &ids,
                                   std::vector<float> &distances, AbstractScratch<data_t> *scratch_space) const override;
 
         location_t calculate_medoid() const override;

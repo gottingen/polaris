@@ -161,7 +161,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    float PQDataStore<data_t>::get_distance(const data_t *query, const location_t loc) const {
+    float PQDataStore<data_t>::get_distance(const ArrayView&query, const location_t loc) const {
         throw std::logic_error("Not implemented yet");
     }
 
@@ -171,7 +171,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    void PQDataStore<data_t>::get_distance(const data_t *preprocessed_query, const location_t *locations,
+    void PQDataStore<data_t>::get_distance(const ArrayView&preprocessed_query, const location_t *locations,
                                            const uint32_t location_count, float *distances,
                                            AbstractScratch<data_t> *scratch_space) const {
         if (scratch_space == nullptr) {
@@ -187,7 +187,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    void PQDataStore<data_t>::get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
+    void PQDataStore<data_t>::get_distance(const ArrayView&preprocessed_query, const std::vector<location_t> &ids,
                                            std::vector<float> &distances,
                                            AbstractScratch<data_t> *scratch_space) const {
         if (scratch_space == nullptr) {

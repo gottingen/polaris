@@ -39,11 +39,6 @@ namespace polaris {
     public:
         InMemQueryScratch() = default;
         ~InMemQueryScratch() override;
-        /*
-        InMemQueryScratch(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
-                          size_t aligned_dim,
-                          size_t alignment_factor, bool init_pq_scratch = false);
-                          */
 
         turbo::Status initialize(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
                                  size_t aligned_dim,
@@ -64,6 +59,8 @@ namespace polaris {
         inline uint32_t get_maxc() {
             return _maxc;
         }
+
+        void set_query(const T *query);
 
         inline T *aligned_query() {
             return this->_aligned_query_T;
@@ -113,10 +110,14 @@ namespace polaris {
             return _occlude_list_output;
         }
 
+        using AbstractScratch<T>::query_view;
+
     private:
         uint32_t _L{0};
         uint32_t _R{0};
         uint32_t _maxc{0};
+        uint32_t _dim{0};
+        uint32_t _aligned_dim{0};
 
         // _pool stores all neighbors explored from best_L_nodes.
         // Usually around L+R, but could be higher.

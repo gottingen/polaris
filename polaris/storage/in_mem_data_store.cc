@@ -153,25 +153,27 @@ namespace polaris {
 
     template<typename data_t>
     turbo::Status InMemDataStore<data_t>::preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const {
+        /*
         if (query_scratch != nullptr) {
             memcpy(query_scratch->aligned_query_T(), query, sizeof(data_t) * this->get_dims());
         } else {
             return turbo::make_status(turbo::kInvalidArgument, "Query scratch is null");
         }
+         */
         return turbo::ok_status();
     }
 
     template<typename data_t>
-    float InMemDataStore<data_t>::get_distance(const data_t *query, const location_t loc) const {
-        return _distance_fn->compare(query, _data + _aligned_dim * loc, (uint32_t) _aligned_dim);
+    float InMemDataStore<data_t>::get_distance(const ArrayView &query, const location_t loc) const {
+        return _distance_fn->compare(static_cast<const data_t*>(query.data()), _data + _aligned_dim * loc, (uint32_t) _aligned_dim);
     }
 
     template<typename data_t>
-    void InMemDataStore<data_t>::get_distance(const data_t *query, const location_t *locations,
+    void InMemDataStore<data_t>::get_distance(const ArrayView &query, const location_t *locations,
                                               const uint32_t location_count, float *distances,
                                               AbstractScratch<data_t> *scratch_space) const {
         for (location_t i = 0; i < location_count; i++) {
-            distances[i] = _distance_fn->compare(query, _data + locations[i] * _aligned_dim,
+            distances[i] = _distance_fn->compare(static_cast<const data_t*>(query.data()), _data + locations[i] * _aligned_dim,
                                                  (uint32_t) this->_aligned_dim);
         }
     }
@@ -183,12 +185,12 @@ namespace polaris {
     }
 
     template<typename data_t>
-    void InMemDataStore<data_t>::get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
+    void InMemDataStore<data_t>::get_distance(const ArrayView &preprocessed_query, const std::vector<location_t> &ids,
                                               std::vector<float> &distances,
                                               AbstractScratch<data_t> *scratch_space) const {
         for (int i = 0; i < ids.size(); i++) {
             distances[i] =
-                    _distance_fn->compare(preprocessed_query, _data + ids[i] * _aligned_dim,
+                    _distance_fn->compare(static_cast<const data_t*>(preprocessed_query.data()), _data + ids[i] * _aligned_dim,
                                           (uint32_t) this->_aligned_dim);
         }
     }

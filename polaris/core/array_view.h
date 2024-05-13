@@ -31,7 +31,7 @@ namespace polaris {
 
         [[nodiscard]] float l2_norm_sq() const { return _l2_norm_sq; }
 
-        ArrayView &set_data(void *data) {
+        ArrayView &set_data(const void *data) {
             _data = data;
             return *this;
         }
@@ -46,11 +46,11 @@ namespace polaris {
             return *this;
         }
 
-        operator bool() const { return _data != nullptr; }
+        explicit operator bool() const { return _data != nullptr; }
 
 
     private:
-        void *_data{nullptr};
+        const void *_data{nullptr};
         float _l2_norm{0.0f};
         float _l2_norm_sq{0.0f};
     };

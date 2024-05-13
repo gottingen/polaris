@@ -73,19 +73,19 @@ namespace polaris {
 
         turbo::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *scratch) const override;
 
-        float get_distance(const data_t *query, const location_t loc) const override;
+        float get_distance(const ArrayView&query, const location_t loc) const override;
 
         float get_distance(const location_t loc1, const location_t loc2) const override;
 
         // NOTE: Caller must invoke "PQDistance->preprocess_query" ONCE before calling
         // this function.
-        void get_distance(const data_t *preprocessed_query, const location_t *locations,
+        void get_distance(const ArrayView&preprocessed_query, const location_t *locations,
                                   const uint32_t location_count, float *distances,
                                   AbstractScratch<data_t> *scratch_space) const override;
 
         // NOTE: Caller must invoke "PQDistance->preprocess_query" ONCE before calling
         // this function.
-        void get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
+        void get_distance(const ArrayView&preprocessed_query, const std::vector<location_t> &ids,
                                   std::vector<float> &distances, AbstractScratch<data_t> *scratch_space) const override;
 
         // We are returning the distance function that is used for full precision

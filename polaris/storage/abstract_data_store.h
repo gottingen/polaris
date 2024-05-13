@@ -21,6 +21,7 @@
 #include <polaris/utility/types.h>
 #include <polaris/utility/platform_macros.h>
 #include <polaris/distance/distance.h>
+#include <polaris/core/array_view.h>
 #include <turbo/status/result_status.h>
 
 namespace polaris {
@@ -103,13 +104,13 @@ namespace polaris {
                                       AbstractScratch<data_t> *query_scratch = nullptr) const = 0;
 
         // distance functions.
-        virtual float get_distance(const data_t *query, const location_t loc) const = 0;
+        virtual float get_distance(const ArrayView &query, const location_t loc) const = 0;
 
-        virtual void get_distance(const data_t *query, const location_t *locations, const uint32_t location_count,
+        virtual void get_distance(const ArrayView &query, const location_t *locations, const uint32_t location_count,
                                   float *distances, AbstractScratch<data_t> *scratch_space = nullptr) const = 0;
 
         // Specific overload for index.cpp.
-        virtual void get_distance(const data_t *preprocessed_query, const std::vector<location_t> &ids,
+        virtual void get_distance(const ArrayView &preprocessed_query, const std::vector<location_t> &ids,
                                   std::vector<float> &distances, AbstractScratch<data_t> *scratch_space) const = 0;
 
         virtual float get_distance(const location_t loc1, const location_t loc2) const = 0;
