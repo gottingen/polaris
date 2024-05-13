@@ -172,13 +172,18 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
+    turbo::Status VamanaIndex<T>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
                                                   uint32_t r, uint32_t maxc, size_t dim) {
         for (uint32_t i = 0; i < num_threads; i++) {
-            auto scratch = new InMemQueryScratch<T>(search_l, indexing_l, r, maxc, dim, _data_store->get_aligned_dim(),
+            auto scratch = new InMemQueryScratch<T>();
+            auto rs = scratch->initialize(search_l, indexing_l, r, maxc, dim, _data_store->get_aligned_dim(),
                                                     _data_store->get_alignment_factor(), _pq_dist);
+            if(!rs.ok()) {
+                return rs;
+            }
             _query_scratch.push(scratch);
         }
+        return turbo::ok_status();
     }
 
     template<typename T>
@@ -437,8 +442,11 @@ namespace polaris {
         // are known only at load time, hence this check and the call to
         // initialize_q_s().
         if (_query_scratch.size() == 0) {
-            initialize_query_scratch(num_threads, search_l, search_l, (uint32_t) _graph_store->get_max_range_of_graph(),
+            auto rs = initialize_query_scratch(num_threads, search_l, search_l, (uint32_t) _graph_store->get_max_range_of_graph(),
                                      _indexingMaxC, _index_config.basic_config.dimension);
+            if(!rs.ok()) {
+                return rs;
+            }
         }
         return turbo::ok_status();
     }
@@ -1168,8 +1176,11 @@ namespace polaris {
         uint32_t maxc = _indexingMaxC;
 
         if (_query_scratch.size() == 0) {
-            initialize_query_scratch(5 + num_threads_index, index_L, index_L, index_R, maxc,
+            auto rs = initialize_query_scratch(5 + num_threads_index, index_L, index_L, index_R, maxc,
                                      _data_store->get_aligned_dim());
+            if(!rs.ok()) {
+                return rs;
+            }
         }
 
         generate_frozen_point();

@@ -244,7 +244,7 @@ namespace polaris {
         void process_delete(const turbo::flat_hash_set<uint32_t> &old_delete_set, size_t loc, const uint32_t range,
                             const uint32_t maxc, const float alpha, InMemQueryScratch<T> *scratch);
 
-        void initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l, uint32_t r,
+        [[nodiscard]] turbo::Status initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l, uint32_t r,
                                       uint32_t maxc, size_t dim);
 
         // Do not call without acquiring appropriate locks

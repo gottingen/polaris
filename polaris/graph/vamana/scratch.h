@@ -19,7 +19,7 @@
 
 #include <turbo/container/flat_hash_set.h>
 #include <turbo/container/flat_hash_map.h>
-#include <turbo/container/flat_hash_map.h>
+#include <turbo/status/status.h>
 #include <polaris/core/vamana_parameters.h>
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/graph/vamana/abstract_scratch.h>
@@ -37,11 +37,17 @@ namespace polaris {
     template<typename T>
     class InMemQueryScratch : public AbstractScratch<T> {
     public:
-        ~InMemQueryScratch();
-
+        InMemQueryScratch() = default;
+        ~InMemQueryScratch() override;
+        /*
         InMemQueryScratch(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
                           size_t aligned_dim,
                           size_t alignment_factor, bool init_pq_scratch = false);
+                          */
+
+        turbo::Status initialize(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
+                                 size_t aligned_dim,
+                                 size_t alignment_factor, bool init_pq_scratch = false);
 
         void resize_for_new_L(uint32_t new_search_l);
 
@@ -108,9 +114,9 @@ namespace polaris {
         }
 
     private:
-        uint32_t _L;
-        uint32_t _R;
-        uint32_t _maxc;
+        uint32_t _L{0};
+        uint32_t _R{0};
+        uint32_t _maxc{0};
 
         // _pool stores all neighbors explored from best_L_nodes.
         // Usually around L+R, but could be higher.

@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+#include <polaris/core/array_view.h>
+
 #pragma once
 namespace polaris {
 
@@ -43,7 +45,7 @@ namespace polaris {
         PQScratch<data_t> *pq_scratch() {
             return _pq_scratch;
         }
-
+        ArrayView  query_view;
     protected:
         data_t *_aligned_query_T = nullptr;
         PQScratch<data_t> *_pq_scratch = nullptr;
