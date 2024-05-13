@@ -18,11 +18,10 @@
 #include <type_traits>
 #include <polaris/graph/vamana/index_factory.h>
 #include <polaris/utility/memory_mapper.h>
-#include <polaris/graph/vamana/timer.h>
+#include <polaris/utility/timer.h>
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/utility/platform_macros.h>
-#include <polaris/utility/tag_uint128.h>
 #include <polaris/datasets/bin.h>
 #include <polaris/distance/distance_impl.h>
 #include <polaris/core/log.h>
@@ -472,17 +471,16 @@ namespace polaris {
     }
 
     template<typename T>
-    int VamanaIndex<T>::get_vector_by_tag(vid_t &tag, void *vec) {
+    turbo::Status VamanaIndex<T>::get_vector_by_tag(vid_t &tag, void *vec) {
         std::shared_lock<std::shared_timed_mutex> lock(_tag_lock);
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
-            polaris::cout << "Tag " << get_tag_string(tag) << " does not exist" << std::endl;
-            return -1;
+            return turbo::make_status(turbo::kInvalidArgument, "Tag {} does not exist", tag);
         }
 
         location_t location = _tag_to_location[tag];
         _data_store->get_vector(location, static_cast<T *>(vec));
 
-        return 0;
+        return turbo::ok_status();
     }
 
     template<typename T>
@@ -1084,8 +1082,7 @@ namespace polaris {
             }
         }
         if (_nd > 0) {
-            polaris::cout << "done. Link time: " << ((double) link_timer.elapsed() / (double) 1000000) << "s"
-                          << std::endl;
+            POLARIS_LOG(INFO) << "done. Link time: " <<link_timer.elapsed().to_seconds<double>() << "s";
         }
     }
 
@@ -1624,8 +1621,8 @@ namespace polaris {
             update_lock.unlock();
         }
 
-        double duration = timer.elapsed() / 1000000.0;
-        polaris::cout << " done in " << duration << " seconds." << std::endl;
+        double duration = timer.elapsed().to_seconds<double>();
+        POLARIS_LOG(INFO) << " done in " << duration << " seconds.";
         return consolidation_report(polaris::consolidation_report::status_code::SUCCESS, ret_nd, max_points,
                                     empty_slots_size, old_delete_set_size, delete_set_size, num_calls_to_process_delete,
                                     duration);
@@ -2001,8 +1998,7 @@ namespace polaris {
         _data_compacted = false;
 
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
-            polaris::cerr << "Delete tag not found " << get_tag_string(tag) << std::endl;
-            return turbo::make_status(turbo::kNotFound, "Tag not found");
+            return turbo::make_status(turbo::kNotFound, "Tag({}) not found", tag);
         }
         assert(_tag_to_location[tag] < _max_points);
 

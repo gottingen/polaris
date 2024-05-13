@@ -19,7 +19,7 @@
 #include <polaris/graph/vamana/index_factory.h>
 #include <polaris/utility/common_includes.h>
 #include <polaris/utility/recall.h>
-#include <polaris/graph/vamana/timer.h>
+#include <polaris/utility/timer.h>
 #include <polaris/core/percentile_stats.h>
 #include <polaris/unified_index.h>
 #include <polaris/datasets/bin.h>

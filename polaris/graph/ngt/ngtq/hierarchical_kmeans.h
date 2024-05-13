@@ -744,7 +744,7 @@ namespace QBG {
       std::cerr << "max iteration=" << maximumIteration << std::endl;
       timer.stop();
       std::cerr << "time=" << timer << std::endl;
-      timer.restart();
+      timer.reset_start_time();
       if (ts != numOfLowerClusters || numOfRemainingClusters != 0) {
 	std::stringstream msg;
 	msg << "subclustering: Internal error! " << ts << ":" << numOfLowerClusters
@@ -805,7 +805,7 @@ namespace QBG {
             float progress = (cnt * 100 / upperClusters.size());
             std::cerr << "subclustering: " << cnt << " clusters ("
                       << progress << "%) have been processed. time=" << timer << std::endl;
-            timer.restart();
+            timer.reset_start_time();
           }
 	}
       }
@@ -1179,7 +1179,7 @@ namespace QBG {
             float progress = cnt * 100 / (endID - beginID);
             std::cerr << "assignWithNGT: " << cnt << " objects ("
                       << progress  << "%) have been assigned. time=" << timer << std::endl;
-            timer.restart();
+            timer.reset_start_time();
           }
 	}
       }

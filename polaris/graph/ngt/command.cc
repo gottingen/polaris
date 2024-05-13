@@ -346,7 +346,7 @@ void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t
             }
             cerr << " peak vm size=" << polaris::Common::getProcessVmPeakStr()
                  << " time=" << timer << std::endl;
-            timer.restart();
+            timer.reset_start_time();
         }
     }
     if (prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {

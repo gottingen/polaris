@@ -29,7 +29,7 @@
 #include <polaris/core/percentile_stats.h>
 #include <polaris/graph/vamana/partition.h>
 #include <polaris/graph/vamana/pq_flash_index.h>
-#include <polaris/graph/vamana/timer.h>
+#include <polaris/utility/timer.h>
 #include <polaris/datasets/bin.h>
 #include <turbo/container/flat_hash_set.h>
 
@@ -414,7 +414,7 @@ namespace polaris {
         std::string cur_centroid_filepath = merged_index_prefix + "_centroids.bin";
         std::rename(cur_centroid_filepath.c_str(), centroids_file.c_str());
 
-        timer.reset();
+        timer.reset_start_time();
         for (int p = 0; p < num_parts; p++) {
 #if defined(DISKANN_RELEASE_UNUSED_TCMALLOC_MEMORY_AT_CHECKPOINTS) && defined(DISKANN_BUILD)
             MallocExtension::instance()->ReleaseFreeMemory();
@@ -446,7 +446,7 @@ namespace polaris {
         }
         polaris::cout << timer.elapsed_seconds_for_step("building indices on shards") << std::endl;
 
-        timer.reset();
+        timer.reset_start_time();
         polaris::merge_shards(merged_index_prefix + "_subshard-", "_mem.index", merged_index_prefix + "_subshard-",
                               "_ids_uint32.bin", num_parts, R, mem_index_path, medoids_file);
         polaris::cout << timer.elapsed_seconds_for_step("merging indices") << std::endl;

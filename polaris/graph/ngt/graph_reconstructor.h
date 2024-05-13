@@ -200,7 +200,7 @@ namespace polaris {
             }
             timer.stop();
             std::cerr << "GraphReconstructor::adjustPaths: graph preparing time=" << timer << std::endl;
-            timer.reset();
+            timer.reset_delta();
             timer.start();
 
             std::vector<std::vector<std::pair<uint32_t, uint32_t>>> removeCandidates(tmpGraph.size());
@@ -253,7 +253,7 @@ namespace polaris {
             std::cerr << "GraphReconstructor::adjustPaths: extracting removed edge candidates time=" << timer
                       << std::endl;
             std::cerr << "removeCandidateCount=" << removeCandidateCount << std::endl;
-            timer.reset();
+            timer.reset_delta();
             timer.start();
 
             std::list<uint32_t> ids;
@@ -390,7 +390,7 @@ namespace polaris {
                               << polaris::Common::getProcessVmPeakStr()
                               << " time=" << timer << std::endl;
                     prevTime = timer.delta;
-                    timer.restart();
+                    timer.reset_start_time();
                 }
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -467,7 +467,7 @@ namespace polaris {
             timer.start();
             timer.stop();
             std::cerr << "GraphReconstructor::adjustPaths: graph preparing time=" << timer << std::endl;
-            timer.reset();
+            timer.reset_delta();
             timer.start();
 
             int removeCandidateCount = 0;

@@ -147,7 +147,7 @@ namespace polaris {
         POLARIS_API void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags) override;
 
         // memory should be allocated for vec before calling this function
-        POLARIS_API int get_vector_by_tag(vid_t &tag, void *vec) override;
+        POLARIS_API turbo::Status get_vector_by_tag(vid_t &tag, void *vec) override;
 
         POLARIS_API void print_status();
 

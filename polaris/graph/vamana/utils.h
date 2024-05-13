@@ -35,7 +35,6 @@
 #include <polaris/utility/platform_macros.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/utility/types.h>
-#include <polaris/utility/tag_uint128.h>
 #include <any>
 
 
@@ -359,19 +358,6 @@ namespace polaris {
         }
     }
 
-    inline void copy_file(std::string in_file, std::string out_file) {
-        std::ifstream source(in_file, std::ios::binary);
-        std::ofstream dest(out_file, std::ios::binary);
-
-        std::istreambuf_iterator<char> begin_source(source);
-        std::istreambuf_iterator<char> end_source;
-        std::ostreambuf_iterator<char> begin_dest(dest);
-        std::copy(begin_source, end_source, begin_dest);
-
-        source.close();
-        dest.close();
-    }
-
     POLARIS_API double calculate_range_search_recall(unsigned num_queries,
                                                      std::vector<std::vector<uint32_t>> &groundtruth,
                                                      std::vector<std::vector<uint32_t>> &our_results);
@@ -457,7 +443,7 @@ namespace polaris {
         return max_norm;
     }
 
-// plain saves data as npts X ndims array into filename
+    // plain saves data as npts X ndims array into filename
     template<typename T>
     void save_Tvecs(const char *filename, T *data, size_t npts, size_t ndims) {
         std::string fname(filename);
@@ -536,19 +522,10 @@ namespace polaris {
             _mm_prefetch((const char *) vec + d, _MM_HINT_T1);
     }
 
-// NOTE: Implementation in utils.cpp.
+    // NOTE: Implementation in utils.cpp.
     void block_convert(std::ofstream &writr, std::ifstream &readr, float *read_buf, uint64_t npts, uint64_t ndims);
 
     POLARIS_API void normalize_data_file(const std::string &inFileName, const std::string &outFileName);
-
-    inline std::string get_tag_string(std::uint64_t tag) {
-        return std::to_string(tag);
-    }
-
-    inline std::string get_tag_string(const tag_uint128 &tag) {
-        std::string str = std::to_string(tag._data2) + "_" + std::to_string(tag._data1);
-        return str;
-    }
 
 }; // namespace polaris
 

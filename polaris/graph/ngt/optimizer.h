@@ -1503,7 +1503,7 @@ namespace polaris {
                         sc.setResults(&results);
                         sc.setSize(nOfResults);
                         sc.setEpsilon(e);
-                        timer.restart();
+                        timer.reset_start_time();
                         index.search(sc);
                         timer.stop();
                         if (results.size() == 0) {

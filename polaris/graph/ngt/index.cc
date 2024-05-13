@@ -154,7 +154,7 @@ polaris::NgtIndex::loadAndCreateIndex(NgtIndex &index, const string &database, c
         POLARIS_THROW_EX("NgtIndex::create: Data file is empty.");
     }
     cerr << "# of objects=" << index.getObjectRepositorySize() - 1 << endl;
-    timer.reset();
+    timer.reset_delta();
     timer.start();
     index.createIndex(threadSize);
     timer.stop();
@@ -173,7 +173,7 @@ polaris::NgtIndex::append(const string &database, const string &dataFile, size_t
     timer.stop();
     cerr << "append: Data loading time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << index.getObjectRepositorySize() - 1 << endl;
-    timer.reset();
+    timer.reset_delta();
     timer.start();
     size_t nOfObjects = index.getObjectSpace().getRepository().size();
     size_t endOfAppendedObjectID = (nOfObjects == 0 ? 1 : nOfObjects) + dataSize;
@@ -197,7 +197,7 @@ polaris::NgtIndex::append(const string &database, const float *data, size_t data
     timer.stop();
     cerr << "Data loading time=" << timer.delta.to_seconds<double>() << " (sec) " << timer.delta.to_milliseconds<double>() << " (msec)" << endl;
     cerr << "# of objects=" << index.getObjectRepositorySize() - 1 << endl;
-    timer.reset();
+    timer.reset_delta();
     timer.start();
     index.createIndex(threadSize);
     timer.stop();
@@ -655,7 +655,7 @@ void GraphIndex::extractSparseness(InsertionOrder &insertionOrder) {
                       << " VM size=" << polaris::Common::getProcessVmSizeStr()
                       << " Peak VM size=" << polaris::Common::getProcessVmPeakStr()
                       << " Time=" << timer << std::endl;
-            timer.restart();
+            timer.reset_start_time();
         }
         polaris::Object *object = getObjectSpace().getRepository().get(query);
         {
@@ -1413,7 +1413,7 @@ GraphAndTreeIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder,
                      << " vm size=" << polaris::Common::getProcessVmSizeStr()
                      << ":" << polaris::Common::getProcessVmPeakStr() << endl;
                 timerCount += timerInterval;
-                timer.restart();
+                timer.reset_start_time();
             }
             buildTimeController.adjustEdgeSize(count);
             if (pathAdjustCount > 0 && pathAdjustCount <= count) {

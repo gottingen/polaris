@@ -341,7 +341,7 @@ namespace QBG {
                     timer.stop();
                     std::cerr << "The number of processed blobs=" << gid << " VmSize="
                               << polaris::Common::getProcessVmSizeStr() << " Elapsed time=" << timer << std::endl;
-                    timer.restart();
+                    timer.reset_start_time();
                 }
                 NGTQ::InvertedIndexEntry<uint16_t> invertedIndexObjects(numOfSubspaces);
                 quantizedIndex.getQuantizer().extractInvertedIndexObject(invertedIndexObjects, gid);
@@ -637,7 +637,7 @@ namespace QBG {
                         timer.stop();
                         std::cerr << "processed " << static_cast<float>(count) / 1000000.0 << "M objects."
                                   << " maxMag=" << maxMag << " time=" << timer << std::endl;
-                        timer.restart();
+                        timer.reset_start_time();
                     }
                 }
                 timer.stop();

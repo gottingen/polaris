@@ -24,22 +24,31 @@ namespace polaris {
     public:
         Timer() = default;
 
-        void reset() {
+        void reset_delta() {
             delta = turbo::Duration::zero();
         }
 
         void start() {
-            reset();
+            reset_delta();
             startTime = turbo::Time::time_now();
         }
 
-        void restart() {
+        void reset_start_time() {
             startTime = turbo::Time::time_now();
         }
 
         void stop() {
             stopTime = turbo::Time::time_now();
             delta = stopTime - startTime;
+        }
+
+        [[nodiscard]] turbo::Duration elapsed() const {
+            return turbo::Time::time_now() - startTime;
+        }
+
+        [[nodiscard]] std::string elapsed_seconds_for_step(const std::string &step) const {
+            return std::string("Time for ") + step + std::string(": ") + std::to_string(elapsed().to_seconds<double>()) +
+                   std::string(" seconds");
         }
 
         void add(Timer &t) {

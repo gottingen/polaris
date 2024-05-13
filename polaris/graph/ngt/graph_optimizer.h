@@ -154,14 +154,14 @@ namespace polaris {
             }
 
             polaris::Timer timer;
-            timer.reset();
+            timer.reset_delta();
             for (auto id = ids.begin(); id != ids.end(); id++) {
                 polaris::SearchContainer searchContainer(*objectRepository.get(*id));
                 polaris::ObjectDistances objects;
                 searchContainer.setResults(&objects);
                 searchContainer.setSize(10);
                 searchContainer.setEpsilon(epsilon);
-                timer.restart();
+                timer.reset_start_time();
                 index.search(searchContainer);
                 timer.stop();
             }

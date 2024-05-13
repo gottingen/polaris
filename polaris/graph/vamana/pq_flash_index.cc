@@ -15,7 +15,7 @@
 
 #include <polaris/utility/common_includes.h>
 #include <polaris/core/log.h>
-#include <polaris/graph/vamana/timer.h>
+#include <polaris/utility/timer.h>
 #include <polaris/graph/vamana/pq.h>
 #include <polaris/datasets/bin.h>
 #include <polaris/graph/vamana/disk_utils.h>
@@ -316,13 +316,13 @@ namespace polaris {
         MallocExtension::instance()->ReleaseFreeMemory();
 #endif
         // Whether it is cosine or inner product, we still L2 metric due to the pre-processing.
-        timer.reset();
+        timer.reset_start_time();
         polaris::build_merged_vamana_index<T>(data_file_to_use.c_str(), polaris::MetricType::METRIC_L2, L, R, p_val,
                                               indexing_ram_budget, mem_index_path, medoids_path, centroids_path,
                                               build_pq_bytes, config.disk_config.use_opq, num_threads);
         POLARIS_LOG(INFO)<< timer.elapsed_seconds_for_step("building merged vamana index");
 
-        timer.reset();
+        timer.reset_start_time();
         if (!use_disk_pq) {
             polaris::create_disk_layout<T>(data_file_to_use.c_str(), mem_index_path, disk_index_path);
         } else {
@@ -1031,10 +1031,10 @@ namespace polaris {
                     }
                     num_ios++;
                 }
-                io_timer.reset();
+                io_timer.reset_start_time();
                 reader->read(frontier_read_reqs, ctx); // synchronous IO linux
                 if (stats != nullptr) {
-                    stats->io_us += (float) io_timer.elapsed();
+                    stats->io_us += io_timer.elapsed().to_microseconds<double>();
                 }
             }
 
@@ -1064,11 +1064,11 @@ namespace polaris {
                 uint32_t *node_nbrs = cached_nhood.second.second;
 
                 // compute node_nbrs <-> query dists in PQ space
-                cpu_timer.reset();
+                cpu_timer.reset_start_time();
                 compute_dists(node_nbrs, nnbrs, dist_scratch);
                 if (stats != nullptr) {
                     stats->n_cmps += (uint32_t) nnbrs;
-                    stats->cpu_us += (float) cpu_timer.elapsed();
+                    stats->cpu_us += cpu_timer.elapsed().to_microseconds<double>();
                 }
 
                 // process prefetched nhood
@@ -1106,14 +1106,14 @@ namespace polaris {
                 }
                 uint32_t *node_nbrs = (node_buf + 1);
                 // compute node_nbrs <-> query dist in PQ space
-                cpu_timer.reset();
+                cpu_timer.reset_start_time();
                 compute_dists(node_nbrs, nnbrs, dist_scratch);
                 if (stats != nullptr) {
                     stats->n_cmps += (uint32_t) nnbrs;
-                    stats->cpu_us += (float) cpu_timer.elapsed();
+                    stats->cpu_us += cpu_timer.elapsed().to_microseconds<double>();
                 }
 
-                cpu_timer.reset();
+                cpu_timer.reset_start_time();
                 // process prefetch-ed nhood
                 for (uint64_t m = 0; m < nnbrs; ++m) {
                     uint32_t id = node_nbrs[m];
@@ -1130,7 +1130,7 @@ namespace polaris {
                 }
 
                 if (stats != nullptr) {
-                    stats->cpu_us += (float) cpu_timer.elapsed();
+                    stats->cpu_us += cpu_timer.elapsed().to_microseconds<double>();
                 }
             }
 
@@ -1165,10 +1165,10 @@ namespace polaris {
                 }
             }
 
-            io_timer.reset();
+            io_timer.reset_start_time();
             reader->read(vec_read_reqs, ctx); // synchronous IO linux
             if (stats != nullptr) {
-                stats->io_us += io_timer.elapsed();
+                stats->io_us += io_timer.elapsed().to_microseconds<double>();
             }
 
             for (size_t i = 0; i < full_retset.size(); ++i) {
@@ -1208,7 +1208,7 @@ namespace polaris {
         }
 
         if (stats != nullptr) {
-            stats->total_us = (float) query_timer.elapsed();
+            stats->total_us = query_timer.elapsed().to_microseconds<double>();
         }
         return turbo::ok_status();
     }
@@ -1375,10 +1375,10 @@ namespace polaris {
                     }
                     num_ios++;
                 }
-                io_timer.reset();
+                io_timer.reset_start_time();
                 reader->read(frontier_read_reqs, ctx); // synchronous IO linux
                 if (stats != nullptr) {
-                    stats->io_us += (float) io_timer.elapsed();
+                    stats->io_us += io_timer.elapsed().to_microseconds<double>();
                 }
             }
 
@@ -1403,11 +1403,11 @@ namespace polaris {
                 uint32_t *node_nbrs = cached_nhood.second.second;
 
                 // compute node_nbrs <-> query dists in PQ space
-                cpu_timer.reset();
+                cpu_timer.reset_start_time();
                 compute_dists(node_nbrs, nnbrs, dist_scratch);
                 if (stats != nullptr) {
                     stats->n_cmps += (uint32_t) nnbrs;
-                    stats->cpu_us += (float) cpu_timer.elapsed();
+                    stats->cpu_us += cpu_timer.elapsed().to_microseconds<double>();
                 }
 
                 // process prefetched nhood
@@ -1439,14 +1439,14 @@ namespace polaris {
                 full_retset.push_back(Neighbor(frontier_nhood.first, cur_expanded_dist));
                 uint32_t *node_nbrs = (node_buf + 1);
                 // compute node_nbrs <-> query dist in PQ space
-                cpu_timer.reset();
+                cpu_timer.reset_start_time();
                 compute_dists(node_nbrs, nnbrs, dist_scratch);
                 if (stats != nullptr) {
                     stats->n_cmps += (uint32_t) nnbrs;
-                    stats->cpu_us += (float) cpu_timer.elapsed();
+                    stats->cpu_us += cpu_timer.elapsed().to_microseconds<double>();
                 }
 
-                cpu_timer.reset();
+                cpu_timer.reset_start_time();
                 // process prefetch-ed nhood
                 for (uint64_t m = 0; m < nnbrs; ++m) {
                     uint32_t id = node_nbrs[m];
@@ -1463,7 +1463,7 @@ namespace polaris {
                 }
 
                 if (stats != nullptr) {
-                    stats->cpu_us += (float) cpu_timer.elapsed();
+                    stats->cpu_us += cpu_timer.elapsed().to_microseconds<double>();
                 }
             }
 
@@ -1498,10 +1498,10 @@ namespace polaris {
                 }
             }
 
-            io_timer.reset();
+            io_timer.reset_start_time();
             reader->read(vec_read_reqs, ctx); // synchronous IO linux
             if (stats != nullptr) {
-                stats->io_us += io_timer.elapsed();
+                stats->io_us += io_timer.elapsed().to_microseconds<double>();
             }
 
             for (size_t i = 0; i < full_retset.size(); ++i) {
@@ -1532,7 +1532,7 @@ namespace polaris {
         }
 
         if (stats != nullptr) {
-            stats->total_us = (float) query_timer.elapsed();
+            stats->total_us = query_timer.elapsed().to_microseconds<double>();
         }
     }
 

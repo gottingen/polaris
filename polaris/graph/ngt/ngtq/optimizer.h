@@ -289,10 +289,10 @@ namespace QBG {
 	timelimitTimer.stop();
 	if (timelimitTimer.delta.to_seconds<double>() > timelimit) {
 	  std::cerr << "Optimizer: Warning. The elapsed time exceeded the limit-time. " << timelimit << ":" << timelimitTimer.delta.to_seconds<double>() << std::endl;
-	  timelimitTimer.restart();
+	  timelimitTimer.reset_start_time();
 	  break;
 	}
-	timelimitTimer.restart();
+	timelimitTimer.reset_start_time();
 	if (rotation) {
 	  Matrix<float> a(xt);
 	  a.mul(quantizedVectors);

@@ -13,11 +13,8 @@
 // limitations under the License.
 //
 
-#include <assert.h>
-#include <boost/dynamic_bitset.hpp>
-
+#include <cassert>
 #include <polaris/utility/natural_number_map.h>
-#include <polaris/utility/tag_uint128.h>
 
 namespace polaris {
     static constexpr auto invalid_position = collie::dynamic_bitset<>::npos;
@@ -123,6 +120,4 @@ namespace polaris {
     template
     class natural_number_map<uint32_t, uint64_t>;
 
-    template
-    class natural_number_map<uint32_t, tag_uint128>;
 } // namespace polaris

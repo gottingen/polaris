@@ -4032,7 +4032,7 @@ public:
                     std::cerr << "# of processed objects=" << id << ", time=" << timer << ", vm size="
                               << polaris::Common::getProcessVmSizeStr() << "/"
                               << polaris::Common::getProcessVmPeakStr() << std::endl;
-                    timer.restart();
+                    timer.reset_start_time();
                 }
 #ifdef NGTQ_VECTOR_OBJECT
                 std::vector<float> object;
