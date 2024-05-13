@@ -15,8 +15,6 @@
 
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include <polaris/graph/vamana/utils.h>
-#include <polaris/graph/vamana/index_factory.h>
 #include <polaris/utility/common_includes.h>
 #include <polaris/utility/recall.h>
 #include <polaris/utility/timer.h>
@@ -48,8 +46,12 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     } else {
         polaris::cout << " Truthset file " << truthset_file << " not found. Not computing recall." << std::endl;
     }
-
-    const size_t num_frozen_pts = polaris::get_graph_num_frozen_points(index_path);
+    auto num_frozen_pts_rs = polaris::UnifiedIndex::get_frozen_points(polaris::IndexType::IT_VAMANA, index_path);
+    if(!num_frozen_pts_rs.ok()) {
+        std::cerr << "Failed to get number of frozen points from index" << std::endl;
+        exit(-1);
+    }
+    const size_t num_frozen_pts = num_frozen_pts_rs.value();
 
     auto config = polaris::IndexConfigBuilder()
             .with_metric(metric)

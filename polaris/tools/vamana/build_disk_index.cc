@@ -15,9 +15,7 @@
 
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include <polaris/graph/vamana/utils.h>
 #include  <polaris/graph/vamana/pq_flash_index.h>
-#include  <polaris/graph/vamana/math_utils.h>
 #include  <polaris/graph/vamana/index.h>
 #include  <polaris/graph/vamana/partition.h>
 

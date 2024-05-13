@@ -66,6 +66,9 @@ namespace polaris {
         virtual turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
                                                 uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
                                                 uint32_t start_bw = 2) = 0;
+
+        static turbo::ResultStatus<size_t> get_frozen_points(IndexType it, const std::string &index_path);
+
         static UnifiedIndex *create_index(IndexType type);
     };
 }  // namespace polaris

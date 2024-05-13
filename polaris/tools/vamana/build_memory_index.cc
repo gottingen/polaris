@@ -15,7 +15,6 @@
 
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include <polaris/graph/vamana/utils.h>
 #include <polaris/datasets/bin.h>
 #include <polaris/graph/vamana/disk_utils.h>
 #include <polaris/graph/vamana/math_utils.h>
@@ -98,9 +97,9 @@ namespace polaris {
                     .with_metric(metric)
                     .with_dimension(data_dim)
                     .with_max_points(data_num)
+                    .with_data_type(polaris::string_to_polaris_type(ctx.data_type))
                     .vamana_with_data_load_store_strategy(polaris::DataStoreStrategy::MEMORY)
                     .vamana_with_graph_load_store_strategy(polaris::GraphStoreStrategy::MEMORY)
-                    .with_data_type(polaris::string_to_polaris_type(ctx.data_type))
                     .vamana_is_dynamic_index(false)
                     .vamana_with_index_write_params(index_build_params)
                     .vamana_is_use_opq(ctx.use_opq)

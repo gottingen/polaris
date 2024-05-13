@@ -16,22 +16,11 @@
 #include <polaris/core/log.h>
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include <polaris/graph/vamana/utils.h>
-#include <polaris/graph/vamana/disk_utils.h>
-#include <polaris/graph/vamana/math_utils.h>
-#include <polaris/graph/vamana/index.h>
-#include <polaris/graph/vamana/partition.h>
-
 #include <polaris/utility/common_includes.h>
 #include <polaris/utility/recall.h>
-#include <polaris/graph/vamana/pq_flash_index.h>
 #include <polaris/utility/timer.h>
 #include <polaris/core/percentile_stats.h>
 #include <polaris/datasets/bin.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <polaris/io/linux_aligned_file_reader.h>
 #include <polaris/unified_index.h>
 
 #define WARMUP false
