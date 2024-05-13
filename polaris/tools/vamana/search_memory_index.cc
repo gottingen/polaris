@@ -70,13 +70,6 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
     unified_index->initialize(config);
     unified_index->load(index_path);
-    /*
-    auto index_factory = polaris::IndexFactory(config);
-    auto index = index_factory.create_instance();
-    index->load(index_path.c_str(), num_threads, *(std::max_element(Lvec.begin(), Lvec.end())));
-     if (metric == polaris::MetricType::METRIC_FAST_L2)
-        index->optimize_index_layout();
-     */
     std::cout << "VamanaIndex loaded" << std::endl;
 
 
