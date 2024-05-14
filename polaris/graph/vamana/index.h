@@ -285,9 +285,6 @@ namespace polaris {
         // See also _start below.
         size_t _num_frozen_pts = 0;
         size_t _frozen_pts_used = 0;
-        size_t _node_size;
-        size_t _data_len;
-        size_t _neighbor_len;
 
         //  Start point of the search. When _num_frozen_pts is greater than zero,
         //  this is the location of the first frozen point. Otherwise, this is a
