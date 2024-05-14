@@ -120,14 +120,10 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             auto qs = std::chrono::high_resolution_clock::now();
             auto &ctx = *search_contexts[test_id][i];
             ctx.set_meta(polaris::polaris_type_to_name<T>(), query_aligned_dim)
-            .set_query(query + i * query_aligned_dim, query_aligned_dim * sizeof(T))
+            .set_query(query + i * query_aligned_dim)
                     .set_top_k(recall_at)
                     .set_search_list(L)
                     .set_with_local_ids(true);
-            if (metric == polaris::MetricType::METRIC_FAST_L2) {
-                std::cout << "Using optimized layout" << std::endl;
-                ctx.vamana_optimized_layout = true;
-            }
             auto rs = unified_index->search(ctx);
             if(!rs.ok()) {
                 std::cerr << "Search failed for query " << i <<" error: "<<rs.message()<< std::endl;
@@ -246,8 +242,6 @@ namespace polaris {
             metric = polaris::MetricType::METRIC_L2;
         } else if (ctx.dist_fn == std::string("cosine")) {
             metric = polaris::MetricType::METRIC_COSINE;
-        } else if ((ctx.dist_fn == std::string("fast_l2")) && (ctx.data_type == std::string("float"))) {
-            metric = polaris::MetricType::METRIC_FAST_L2;
         } else {
             std::cout << "Unsupported distance function. Currently only l2/ cosine are "
                          "supported in general, and mips/fast_l2 only for floating "

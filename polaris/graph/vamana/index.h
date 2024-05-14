@@ -108,9 +108,6 @@ namespace polaris {
         // to have higher consistency between index builds.
         POLARIS_API void set_start_points_at_random(const std::any &radius, uint32_t random_seed) override;
 
-        // For FastL2 search on a static index, we interleave the data with graph
-        POLARIS_API void optimize_index_layout() override;
-
         POLARIS_API turbo::Status search(SearchContext &ctx) override;
 
         // Will fail if tag already in the index or if tag=0.
@@ -167,7 +164,6 @@ namespace polaris {
 
         VamanaIndex<T> &operator=(const VamanaIndex<T> &) = delete;
     protected:
-        POLARIS_API turbo::Status search_with_optimized_layout(SearchContext &ctx);
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
         turbo::Status build_with_data_populated(const std::vector<vid_t> &tags);
@@ -276,8 +272,6 @@ namespace polaris {
 
         // Graph related data structures
         std::unique_ptr<AbstractGraphStore> _graph_store;
-
-        char *_opt_graph = nullptr;
 
         // Dimensions
         //size_t _dim = 0;

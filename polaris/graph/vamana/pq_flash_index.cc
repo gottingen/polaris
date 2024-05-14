@@ -898,7 +898,7 @@ namespace polaris {
         // normalization step. for cosine, we simply normalize the query
         // for mips, we normalize the first d-1 dims, and add a 0 for last dim, since an extra coordinate was used to
         // convert MIPS to L2 search
-        auto query1 = (T *) sctx.query.data();
+        auto query1 = (const T *) sctx.query;
         if (metric == polaris::MetricType::METRIC_INNER_PRODUCT || metric == polaris::MetricType::METRIC_COSINE) {
             uint64_t inherent_dim = (metric == polaris::MetricType::METRIC_COSINE) ? this->_data_dim : (uint64_t) (
                     this->_data_dim - 1);
@@ -949,7 +949,7 @@ namespace polaris {
             polaris::pq_dist_lookup(pq_coord_scratch, n_ids, this->_n_chunks, pq_dists, dists_out);
         };
         Timer query_timer, io_timer, cpu_timer;
-
+        query_timer.reset_start_time();
         turbo::flat_hash_set<uint64_t> &visited = query_scratch->visited;
         NeighborPriorityQueue &retset = query_scratch->retset;
         retset.reserve(sctx.search_list);
@@ -1294,7 +1294,7 @@ namespace polaris {
             polaris::pq_dist_lookup(pq_coord_scratch, n_ids, this->_n_chunks, pq_dists, dists_out);
         };
         Timer query_timer, io_timer, cpu_timer;
-
+        query_timer.reset_start_time();
         turbo::flat_hash_set<uint64_t> &visited = query_scratch->visited;
         NeighborPriorityQueue &retset = query_scratch->retset;
         retset.reserve(l_search);

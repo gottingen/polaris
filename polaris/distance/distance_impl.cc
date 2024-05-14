@@ -27,11 +27,12 @@ namespace polaris {
     //
     // Base Class Implementatons
     //
+    /*
     template<typename T>
     float Distance<T>::compare(const T *a, const T *b, const float normA, const float normB, uint32_t length) const {
         throw std::logic_error("This function is not implemented.");
     }
-
+    */
     template<typename T>
     polaris::MetricType Distance<T>::get_metric() const {
         return _distance_metric;
@@ -343,7 +344,7 @@ namespace polaris {
 #endif
         return result;
     }
-
+    /*
     template<typename T>
     float DistanceFastL2<T>::compare(const T *a, const T *b, float norm, uint32_t size) const {
         float result = -2 * DistanceInnerProduct<T>::inner_product(a, b, size);
@@ -428,7 +429,6 @@ namespace polaris {
         const float *last = a + size;
         const float *unroll_group = last - 3;
 
-        /* Process 4 items with each loop for efficiency. */
         while (a < unroll_group)
         {
             dot0 = a[0] * a[0];
@@ -438,7 +438,6 @@ namespace polaris {
             result += dot0 + dot1 + dot2 + dot3;
             a += 4;
         }
-        /* Process last 0-3 pixels.  Not needed for standard vector lengths. */
         while (a < last)
         {
             result += (*a) * (*a);
@@ -449,7 +448,7 @@ namespace polaris {
 #endif
         return result;
     }
-
+    */
     float AVXDistanceInnerProductFloat::compare(const float *a, const float *b, uint32_t size) const {
         float result = 0.0f;
 #define AVX_DOT(addr1, addr2, dest, tmp1, tmp2)                                                                        \
@@ -525,11 +524,6 @@ namespace polaris {
                              "AVXDistanceInnerProductFloat"
                           << std::endl;
             return new polaris::AVXDistanceInnerProductFloat();
-        } else if (m == polaris::MetricType::METRIC_FAST_L2) {
-            polaris::cout << "Fast_L2: Using AVX2 implementation with norm "
-                             "memoization DistanceFastL2<float>"
-                          << std::endl;
-            return new polaris::DistanceFastL2<float>();
         } else {
             std::stringstream stream;
             stream << "Only L2, cosine, and inner product supported for floating "
@@ -594,15 +588,6 @@ namespace polaris {
 
     template POLARIS_API
     class DistanceInnerProduct<uint8_t>;
-
-    template POLARIS_API
-    class DistanceFastL2<float>;
-
-    template POLARIS_API
-    class DistanceFastL2<int8_t>;
-
-    template POLARIS_API
-    class DistanceFastL2<uint8_t>;
 
     template POLARIS_API
     class SlowDistanceL2<float>;

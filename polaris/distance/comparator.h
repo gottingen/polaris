@@ -61,6 +61,7 @@ namespace polaris {
         }
     };
 
+    /*
     template<typename OBJECT_TYPE>
     class ComparatorFastL2 : public DistanceComparator {
     public:
@@ -76,7 +77,7 @@ namespace polaris {
         [[nodiscard]] MetricType get_metric() const override {
             return MetricType::METRIC_FAST_L2;
         }
-    };
+    };*/
 
     template<typename OBJECT_TYPE>
     class ComparatorNormalizedL2 : public DistanceComparator {
@@ -241,8 +242,6 @@ namespace polaris {
                 return new ComparatorL1<T>(dimension);
             case MetricType::METRIC_L2:
                 return new ComparatorL2<T>(dimension);
-            case MetricType::METRIC_FAST_L2:
-                return new ComparatorFastL2<T>(dimension);
             case MetricType::METRIC_NORMALIZED_L2:
                 return new ComparatorNormalizedL2<T>(dimension);
             case MetricType::METRIC_HAMMING:

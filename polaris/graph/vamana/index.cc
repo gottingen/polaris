@@ -161,10 +161,6 @@ namespace polaris {
             LockGuard lg(lock);
         }
 
-        if (_opt_graph != nullptr) {
-            delete[] _opt_graph;
-        }
-
         if (!_query_scratch.empty()) {
             ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
             manager.destroy();
@@ -1355,10 +1351,6 @@ namespace polaris {
                                       ctx.top_k, ctx.search_list);
         }
 
-        if(ctx.vamana_optimized_layout) {
-            return search_with_optimized_layout(ctx);
-        }
-
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
         auto scratch = manager.scratch_space();
 
@@ -1374,7 +1366,7 @@ namespace polaris {
 
         const std::vector<uint32_t> init_ids = get_init_ids();
 
-       scratch->set_query(reinterpret_cast<T *>(ctx.query.data()));
+       scratch->set_query(reinterpret_cast<const T *>(ctx.query));
         auto rs = iterate_to_fixed_point(scratch, ctx.search_list, init_ids, ctx.search_condition, true);
         if (!rs.ok()) {
             return rs.status();
@@ -2117,129 +2109,6 @@ namespace polaris {
 
         delete[] bfs_sets;
     }
-
-    // REFACTOR: This should be an OptimizedDataStore class
-    template<typename T>
-    void VamanaIndex<T>::optimize_index_layout() { // use after build or load
-        if (_dynamic_index) {
-            throw polaris::PolarisException("Optimize_index_layout not implemented for dyanmic indices", -1,
-                                            __PRETTY_FUNCTION__,
-                                            __FILE__, __LINE__);
-        }
-
-        float *cur_vec = new float[_data_store->get_aligned_dim()];
-        std::memset(cur_vec, 0, _data_store->get_aligned_dim() * sizeof(float));
-        _data_len = (_data_store->get_aligned_dim() + 1) * sizeof(float);
-        _neighbor_len = (_graph_store->get_max_observed_degree() + 1) * sizeof(uint32_t);
-        _node_size = _data_len + _neighbor_len;
-        _opt_graph = new char[_node_size * _nd];
-        auto dist_fast = (DistanceFastL2<T> *) (_data_store->get_dist_fn());
-        for (uint32_t i = 0; i < _nd; i++) {
-            char *cur_node_offset = _opt_graph + i * _node_size;
-            _data_store->get_vector(i, (T *) cur_vec);
-            float cur_norm = dist_fast->norm((T *) cur_vec, (uint32_t) _data_store->get_aligned_dim());
-            std::memcpy(cur_node_offset, &cur_norm, sizeof(float));
-            std::memcpy(cur_node_offset + sizeof(float), cur_vec, _data_len - sizeof(float));
-
-            cur_node_offset += _data_len;
-            uint32_t k = (uint32_t) _graph_store->get_neighbours(i).size();
-            std::memcpy(cur_node_offset, &k, sizeof(uint32_t));
-            std::memcpy(cur_node_offset + sizeof(uint32_t), _graph_store->get_neighbours(i).data(),
-                        k * sizeof(uint32_t));
-            // std::vector<uint32_t>().swap(_graph_store->get_neighbours(i));
-            _graph_store->clear_neighbours(i);
-        }
-        _graph_store->clear_graph();
-        _graph_store->resize_graph(0);
-        delete[] cur_vec;
-    }
-
-    template<typename T>
-    turbo::Status
-    VamanaIndex<T>::search_with_optimized_layout(SearchContext &ctx) {
-        DistanceFastL2<T> *dist_fast = (DistanceFastL2<T> *) (_data_store->get_dist_fn());
-        auto tquery = reinterpret_cast<const T *>(ctx.query.data());
-        NeighborPriorityQueue retset(ctx.search_list);
-        std::vector<uint32_t> init_ids(ctx.search_list);
-
-        collie::dynamic_bitset<> flags{_nd, 0};
-        uint32_t tmp_l = 0;
-        uint32_t *neighbors = (uint32_t * )(_opt_graph + _node_size * _start + _data_len);
-        uint32_t MaxM_ep = *neighbors;
-        neighbors++;
-
-        for (; tmp_l < ctx.search_list && tmp_l < MaxM_ep; tmp_l++) {
-            init_ids[tmp_l] = neighbors[tmp_l];
-            flags[init_ids[tmp_l]] = true;
-        }
-
-        while (tmp_l < ctx.search_list) {
-            uint32_t id = rand() % _nd;
-            if (flags[id])
-                continue;
-            flags[id] = true;
-            init_ids[tmp_l] = id;
-            tmp_l++;
-        }
-
-        for (uint32_t i = 0; i < init_ids.size(); i++) {
-            uint32_t id = init_ids[i];
-            if (id >= _nd)
-                continue;
-            _mm_prefetch(_opt_graph + _node_size * id, _MM_HINT_T0);
-        }
-        auto L = 0;
-        for (uint32_t i = 0; i < init_ids.size(); i++) {
-            uint32_t id = init_ids[i];
-            if (id >= _nd)
-                continue;
-            T *x = (T *) (_opt_graph + _node_size * id);
-            float norm_x = *x;
-            x++;
-            float dist = dist_fast->compare(x, tquery, norm_x, (uint32_t) _data_store->get_aligned_dim());
-            retset.insert(Neighbor(id, dist));
-            flags[id] = true;
-            L++;
-        }
-        vid_t tmp_vid;
-        while (retset.has_unexpanded_node()) {
-            auto nbr = retset.closest_unexpanded();
-            auto n = nbr.id;
-            _mm_prefetch(_opt_graph + _node_size * n + _data_len, _MM_HINT_T0);
-            neighbors = (uint32_t * )(_opt_graph + _node_size * n + _data_len);
-            uint32_t MaxM = *neighbors;
-            neighbors++;
-            for (uint32_t m = 0; m < MaxM; ++m)
-                _mm_prefetch(_opt_graph + _node_size * neighbors[m], _MM_HINT_T0);
-            for (uint32_t m = 0; m < MaxM; ++m) {
-                uint32_t id = neighbors[m];
-                if (flags[id])
-                    continue;
-                flags[id] = 1;
-                if(!_location_to_tag.try_get(id, tmp_vid))
-                    return turbo::make_status(turbo::kInternal, "Error in getting tag from location");
-                if(ctx.search_condition->is_in_blacklist(tmp_vid))
-                    continue;
-                T *data = (T *) (_opt_graph + _node_size * id);
-                float norm = *data;
-                data++;
-                float dist = dist_fast->compare(tquery, data, norm, (uint32_t) _data_store->get_aligned_dim());
-                Neighbor nn(id, dist);
-                retset.insert(nn);
-            }
-        }
-
-        for (size_t i = 0; i < ctx.top_k; i++) {
-            if(!_location_to_tag.try_get(retset[i].id, tmp_vid))
-                 return turbo::make_status(turbo::kInternal, "Error in getting tag from location");
-            ctx.top_k_queue.emplace_back(tmp_vid, retset[i].distance);
-            if (ctx.with_local_ids) {
-                ctx.local_ids.emplace_back(retset[i].id);
-            }
-        }
-        return turbo::ok_status();
-    }
-
     /*  Internals of the library */
     template<typename T> const float VamanaIndex<T>::INDEX_GROWTH_FACTOR = 1.5f;
 

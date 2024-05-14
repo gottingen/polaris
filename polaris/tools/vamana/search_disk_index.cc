@@ -176,7 +176,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
         for (int64_t i = 0; i < (int64_t) query_num; i++) {
             auto &ctx = *search_contexts[test_id][i];
             ctx.set_meta(polaris::polaris_type_to_name<T>(), query_aligned_dim)
-                    .set_query(query + (i * query_aligned_dim), query_aligned_dim * sizeof(T))
+                    .set_query(query + (i * query_aligned_dim))
                     .set_top_k(recall_at)
                     .set_search_list(L)
                     .set_beam_width(optimized_beamwidth)
@@ -212,8 +212,8 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
             best_recall = std::max(recall, best_recall);
         }
 
-        polaris::cout << std::setw(6) << L << std::setw(12) << optimized_beamwidth << std::setw(16) << qps
-                      << std::setw(16) << mean_latency << std::setw(16) << latency_999 << std::setw(16) << mean_ios
+        polaris::cout << std::setw(6) << L << std::setw(12) << optimized_beamwidth << std::setw(16) << static_cast<int>(qps)
+                      << std::setw(16) <<static_cast<int>( mean_latency) << std::setw(16) << static_cast<int>(latency_999) << std::setw(16) << mean_ios
                       << std::setw(16) << mean_cpuus;
         if (calc_recall_flag) {
             polaris::cout << std::setw(16) << recall << std::endl;

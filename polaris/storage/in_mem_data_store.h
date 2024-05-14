@@ -98,7 +98,7 @@ namespace polaris {
         std::unique_ptr<Distance<data_t>> _distance_fn;
 
         // in case we need to save vector norms for optimization
-        std::shared_ptr<float[]> _pre_computed_norms;
+        std::vector<float> _pre_computed_norms_l2;
     };
 
 } // namespace polaris

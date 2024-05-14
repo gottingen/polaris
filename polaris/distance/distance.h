@@ -32,9 +32,10 @@ namespace polaris {
         POLARIS_API virtual float compare(const T *a, const T *b, uint32_t length) const = 0;
 
         // Needed only for COSINE-BYTE and INNER_PRODUCT-BYTE
+        /*
         POLARIS_API virtual float compare(const T *a, const T *b, const float normA, const float normB,
                                           uint32_t length) const;
-
+        */
         POLARIS_API virtual polaris::MetricType get_metric() const;
 
 

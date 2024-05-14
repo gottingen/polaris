@@ -31,11 +31,8 @@ namespace polaris {
         if (index_ == nullptr) {
             return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
         }
-        index_->load(index_path.c_str(), config_.basic_config.load_threads, config_.basic_config.max_points);
-        if (config_.basic_config.metric == polaris::MetricType::METRIC_FAST_L2) {
-            index_->optimize_index_layout();
-        }
-        return turbo::ok_status();
+        auto rs = index_->load(index_path.c_str(), config_.basic_config.load_threads, config_.basic_config.max_points);
+        return rs;
     }
 
     turbo::Status Vamana::save(const std::string &index_path) {

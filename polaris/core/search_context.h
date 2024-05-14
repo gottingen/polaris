@@ -28,11 +28,10 @@ namespace polaris {
 
     struct SearchContext {
 
-        SearchContext &set_query(const void *data, size_t size) {
+        SearchContext &set_query(const void *data) {
             POLARIS_ASSERT_MSG(bytes_per_vector > 0, "Please set_meta before setting query");
-            POLARIS_ASSERT(data != nullptr&& size == bytes_per_vector);
-            query.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data) + size);
-            query_view.set_data(query.data());
+            POLARIS_ASSERT(data != nullptr);
+            query = data;
             return *this;
         }
 
@@ -103,8 +102,7 @@ namespace polaris {
         turbo::Time start_time;
         turbo::Time end_time;
         /// member variables
-        aligned_vector<uint8_t> query;
-        ArrayView query_view;
+        const void* query{nullptr};
         uint32_t top_k{10};
         uint32_t search_list{100};
 
@@ -122,8 +120,6 @@ namespace polaris {
         void * user_data{nullptr};
         uint32_t hops{0};
         uint32_t cmps{0};
-        // vamana optimized_layout
-        bool vamana_optimized_layout{false};
         // vamana  disk layout
         uint32_t vd_beam_width{0};
         uint32_t vd_io_limit{std::numeric_limits<uint32_t>::max()};

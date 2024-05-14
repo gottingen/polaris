@@ -33,7 +33,6 @@ enum MetricType {
     METRIC_INNER_PRODUCT = 10, ///< maximum inner product search
     METRIC_POINCARE = 11,     ///< Poincare distance
     METRIC_LORENTZ = 12,      ///< Lorentz distance
-    METRIC_FAST_L2 = 13,           ///< fast L2 search
 
     /// some additional metrics defined in scipy.spatial.distance
     METRIC_Linf,              ///< infinity distance

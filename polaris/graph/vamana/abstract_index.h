@@ -68,8 +68,6 @@ namespace polaris {
 
         virtual consolidation_report consolidate_deletes(const IndexWriteParameters &parameters) = 0;
 
-        virtual void optimize_index_layout() = 0;
-
         // memory should be allocated for vec before calling this function
         virtual turbo::Status get_vector_by_tag(vid_t &tag, void *vec) = 0;
     };

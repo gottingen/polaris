@@ -99,19 +99,6 @@ namespace polaris {
         }
     };
 
-    template<typename T>
-    class DistanceFastL2 : public DistanceInnerProduct<T> {
-        // currently defined only for float.
-        // templated for future use.
-    public:
-        DistanceFastL2() : DistanceInnerProduct<T>(polaris::MetricType::METRIC_FAST_L2) {
-        }
-
-        float norm(const T *a, unsigned size) const;
-
-        float compare(const T *a, const T *b, float norm, unsigned size) const;
-    };
-
     class AVXDistanceInnerProductFloat : public Distance<float> {
     public:
         AVXDistanceInnerProductFloat() : Distance<float>(polaris::MetricType::METRIC_INNER_PRODUCT) {
