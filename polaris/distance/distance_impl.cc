@@ -18,10 +18,11 @@
 
 #include <polaris/distance/distance_impl.h>
 #include <polaris/distance/norm.h>
+#include <polaris/distance/primitive.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/graph/vamana/logger.h>
 #include <polaris/utility/polaris_exception.h>
-
+#define USE_AVX2
 namespace polaris {
 
     //
@@ -109,50 +110,9 @@ namespace polaris {
         return (float) result;
     }
 
-#ifndef _WINDOWS
-
-    float DistanceL2Float::compare(const float *a, const float *b, uint32_t size) const {
-        a = (const float *) __builtin_assume_aligned(a, 32);
-        b = (const float *) __builtin_assume_aligned(b, 32);
-#else
-        float DistanceL2Float::compare(const float *a, const float *b, uint32_t size) const
-        {
-#endif
-
-        float result = 0;
-#ifdef USE_AVX2
-        // assume size is divisible by 8
-        uint16_t niters = (uint16_t)(size / 8);
-        __m256 sum = _mm256_setzero_ps();
-        for (uint16_t j = 0; j < niters; j++)
-        {
-            // scope is a[8j:8j+7], b[8j:8j+7]
-            // load a_vec
-            if (j < (niters - 1))
-            {
-                _mm_prefetch((char *)(a + 8 * (j + 1)), _MM_HINT_T0);
-                _mm_prefetch((char *)(b + 8 * (j + 1)), _MM_HINT_T0);
-            }
-            __m256 a_vec = _mm256_load_ps(a + 8 * j);
-            // load b_vec
-            __m256 b_vec = _mm256_load_ps(b + 8 * j);
-            // a_vec - b_vec
-            __m256 tmp_vec = _mm256_sub_ps(a_vec, b_vec);
-
-            sum = _mm256_fmadd_ps(tmp_vec, tmp_vec, sum);
-        }
-
-        // horizontal add sum
-        result = _mm256_reduce_add_ps(sum);
-#else
-#ifndef _WINDOWS
-#pragma omp simd reduction(+ : result) aligned(a, b : 32)
-#endif
-        for (int32_t i = 0; i < (int32_t) size; i++) {
-            result += (a[i] - b[i]) * (a[i] - b[i]);
-        }
-#endif
-        return result;
+    float DistanceL2Float::compare(const float *__restrict a, const float *__restrict b, uint32_t size) const {
+        return primitive::compare_template_l2_sqr<float, collie::simd::best_arch, collie::simd::aligned_mode>(
+                a, b, size);
     }
 
     template<typename T>
@@ -164,65 +124,6 @@ namespace polaris {
         return result;
     }
 
-#ifdef _WINDOWS
-    float AVXDistanceL2Int8::compare(const int8_t *a, const int8_t *b, uint32_t length) const
-    {
-        __m128 r = _mm_setzero_ps();
-        __m128i r1;
-        while (length >= 16)
-        {
-            r1 = _mm_subs_epi8(_mm_load_si128((__m128i *)a), _mm_load_si128((__m128i *)b));
-            r = _mm_add_ps(r, _mm_mul_epi8(r1));
-            a += 16;
-            b += 16;
-            length -= 16;
-        }
-        r = _mm_hadd_ps(_mm_hadd_ps(r, r), r);
-        float res = r.m128_f32[0];
-
-        if (length >= 8)
-        {
-            __m128 r2 = _mm_setzero_ps();
-            __m128i r3 = _mm_subs_epi8(_mm_load_si128((__m128i *)(a - 8)), _mm_load_si128((__m128i *)(b - 8)));
-            r2 = _mm_add_ps(r2, _mm_mulhi_epi8(r3));
-            a += 8;
-            b += 8;
-            length -= 8;
-            r2 = _mm_hadd_ps(_mm_hadd_ps(r2, r2), r2);
-            res += r2.m128_f32[0];
-        }
-
-        if (length >= 4)
-        {
-            __m128 r2 = _mm_setzero_ps();
-            __m128i r3 = _mm_subs_epi8(_mm_load_si128((__m128i *)(a - 12)), _mm_load_si128((__m128i *)(b - 12)));
-            r2 = _mm_add_ps(r2, _mm_mulhi_epi8_shift32(r3));
-            res += r2.m128_f32[0] + r2.m128_f32[1];
-        }
-
-        return res;
-    }
-
-    float AVXDistanceL2Float::compare(const float *a, const float *b, uint32_t length) const
-    {
-        __m128 diff, v1, v2;
-        __m128 sum = _mm_set1_ps(0);
-
-        while (length >= 4)
-        {
-            v1 = _mm_loadu_ps(a);
-            a += 4;
-            v2 = _mm_loadu_ps(b);
-            b += 4;
-            diff = _mm_sub_ps(v1, v2);
-            sum = _mm_add_ps(sum, _mm_mul_ps(diff, diff));
-            length -= 4;
-        }
-
-        return sum.m128_f32[0] + sum.m128_f32[1] + sum.m128_f32[2] + sum.m128_f32[3];
-    }
-#else
-
     float AVXDistanceL2Int8::compare(const int8_t *, const int8_t *, uint32_t) const {
         return 0;
     }
@@ -230,8 +131,6 @@ namespace polaris {
     float AVXDistanceL2Float::compare(const float *, const float *, uint32_t) const {
         return 0;
     }
-
-#endif
 
     template<typename T>
     float DistanceInnerProduct<T>::inner_product(const T *a, const T *b, uint32_t size) const {
@@ -245,7 +144,6 @@ namespace polaris {
         float result = 0;
 
 #ifdef __GNUC__
-#define USE_AVX2
 #ifdef USE_AVX2
 #define AVX_DOT(addr1, addr2, dest, tmp1, tmp2)                                                                        \
     tmp1 = _mm256_loadu_ps(addr1);                                                                                     \
@@ -344,111 +242,7 @@ namespace polaris {
 #endif
         return result;
     }
-    /*
-    template<typename T>
-    float DistanceFastL2<T>::compare(const T *a, const T *b, float norm, uint32_t size) const {
-        float result = -2 * DistanceInnerProduct<T>::inner_product(a, b, size);
-        result += norm;
-        return result;
-    }
 
-    template<typename T>
-    float DistanceFastL2<T>::norm(const T *a, uint32_t size) const {
-        if (!std::is_floating_point<T>::value) {
-            polaris::cerr << "ERROR: FastL2 only defined for float currently." << std::endl;
-            throw polaris::PolarisException("ERROR: FastL2 only defined for float currently.", -1, __PRETTY_FUNCTION__,
-                                            __FILE__,
-                                            __LINE__);
-        }
-        float result = 0;
-#ifdef __GNUC__
-#ifdef __AVX__
-#define AVX_L2NORM(addr, dest, tmp)                                                                                    \
-    tmp = _mm256_loadu_ps(addr);                                                                                       \
-    tmp = _mm256_mul_ps(tmp, tmp);                                                                                     \
-    dest = _mm256_add_ps(dest, tmp);
-
-        __m256 sum;
-        __m256 l0, l1;
-        uint32_t D = (size + 7) & ~7U;
-        uint32_t DR = D % 16;
-        uint32_t DD = D - DR;
-        const float *l = (float *) a;
-        const float *e_l = l + DD;
-        float unpack[8] __attribute__((aligned(32))) = {0, 0, 0, 0, 0, 0, 0, 0};
-
-        sum = _mm256_loadu_ps(unpack);
-        if (DR) {
-            AVX_L2NORM(e_l, sum, l0);
-        }
-        for (uint32_t i = 0; i < DD; i += 16, l += 16) {
-            AVX_L2NORM(l, sum, l0);
-            AVX_L2NORM(l + 8, sum, l1);
-        }
-        _mm256_storeu_ps(unpack, sum);
-        result = unpack[0] + unpack[1] + unpack[2] + unpack[3] + unpack[4] + unpack[5] + unpack[6] + unpack[7];
-#else
-#ifdef __SSE2__
-#define SSE_L2NORM(addr, dest, tmp)                                                                                    \
-    tmp = _mm128_loadu_ps(addr);                                                                                       \
-    tmp = _mm128_mul_ps(tmp, tmp);                                                                                     \
-    dest = _mm128_add_ps(dest, tmp);
-
-        __m128 sum;
-        __m128 l0, l1, l2, l3;
-        uint32_t D = (size + 3) & ~3U;
-        uint32_t DR = D % 16;
-        uint32_t DD = D - DR;
-        const float *l = a;
-        const float *e_l = l + DD;
-        float unpack[4] __attribute__((aligned(16))) = {0, 0, 0, 0};
-
-        sum = _mm_load_ps(unpack);
-        switch (DR)
-        {
-        case 12:
-            SSE_L2NORM(e_l + 8, sum, l2);
-        case 8:
-            SSE_L2NORM(e_l + 4, sum, l1);
-        case 4:
-            SSE_L2NORM(e_l, sum, l0);
-        default:
-            break;
-        }
-        for (uint32_t i = 0; i < DD; i += 16, l += 16)
-        {
-            SSE_L2NORM(l, sum, l0);
-            SSE_L2NORM(l + 4, sum, l1);
-            SSE_L2NORM(l + 8, sum, l2);
-            SSE_L2NORM(l + 12, sum, l3);
-        }
-        _mm_storeu_ps(unpack, sum);
-        result += unpack[0] + unpack[1] + unpack[2] + unpack[3];
-#else
-        float dot0, dot1, dot2, dot3;
-        const float *last = a + size;
-        const float *unroll_group = last - 3;
-
-        while (a < unroll_group)
-        {
-            dot0 = a[0] * a[0];
-            dot1 = a[1] * a[1];
-            dot2 = a[2] * a[2];
-            dot3 = a[3] * a[3];
-            result += dot0 + dot1 + dot2 + dot3;
-            a += 4;
-        }
-        while (a < last)
-        {
-            result += (*a) * (*a);
-            a++;
-        }
-#endif
-#endif
-#endif
-        return result;
-    }
-    */
     float AVXDistanceInnerProductFloat::compare(const float *a, const float *b, uint32_t size) const {
         float result = 0.0f;
 #define AVX_DOT(addr1, addr2, dest, tmp1, tmp2)                                                                        \
@@ -467,11 +261,7 @@ namespace polaris {
         const float *r = (float *) b;
         const float *e_l = l + DD;
         const float *e_r = r + DD;
-#ifndef _WINDOWS
         float unpack[8] __attribute__((aligned(32))) = {0, 0, 0, 0, 0, 0, 0, 0};
-#else
-        __declspec(align(32)) float unpack[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-#endif
 
         sum = _mm256_loadu_ps(unpack);
         if (DR) {

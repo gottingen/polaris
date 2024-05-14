@@ -193,7 +193,7 @@ namespace polaris::primitive {
         std::size_t inc = b_type::size;
         std::size_t vec_size = d - d % inc;
         float sum = 0.0;
-        b_type sum_vec = collie::simd::broadcast(T(0));
+        b_type sum_vec = collie::simd::broadcast<T, Arch>(T(0));
         for (std::size_t i = 0; i < vec_size; i += inc) {
             b_type xvec = b_type::load(x + i, Tag());
             b_type yvec = b_type::load(y + i, Tag());
