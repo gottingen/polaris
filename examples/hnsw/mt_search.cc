@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/hnswlib/hnswlib.h>
+#include <polaris/graph/hnsw/hnswlib.h>
 #include <thread>
 
 
@@ -83,10 +83,9 @@ int main() {
     int ef_construction = 200;  // Controls index search speed/build speed tradeoff
     int num_threads = 20;       // Number of threads for operations with index
 
-    // Initing index with allow_replace_deleted=true
-    int seed = 100; 
+    // Initing index
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction, seed, true);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
 
     // Generate random data
     std::mt19937 rng;
@@ -102,28 +101,22 @@ int main() {
         alg_hnsw->addPoint((void*)(data + dim * row), row);
     });
 
-    // Mark first half of elements as deleted
-    int num_deleted = max_elements / 2;
-    ParallelFor(0, num_deleted, num_threads, [&](size_t row, size_t threadId) {
-        alg_hnsw->markDelete(row);
+    // Query the elements for themselves and measure recall
+    std::vector<hnswlib::labeltype> neighbors(max_elements);
+    ParallelFor(0, max_elements, num_threads, [&](size_t row, size_t threadId) {
+        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + dim * row, 1);
+        hnswlib::labeltype label = result.top().second;
+        neighbors[row] = label;
     });
-
-    // Generate additional random data
-    float* add_data = new float[dim * num_deleted];
-    for (int i = 0; i < dim * num_deleted; i++) {
-        add_data[i] = distrib_real(rng);
+    float correct = 0;
+    for (int i = 0; i < max_elements; i++) {
+        hnswlib::labeltype label = neighbors[i];
+        if (label == i) correct++;
     }
-
-    // Replace deleted data with new elements
-    // Maximum number of elements is reached therefore we cannot add new items,
-    // but we can replace the deleted ones by using replace_deleted=true
-    ParallelFor(0, num_deleted, num_threads, [&](size_t row, size_t threadId) {
-        hnswlib::labeltype label = max_elements + row;
-        alg_hnsw->addPoint((void*)(add_data + dim * row), label, true);
-    });
+    float recall = correct / max_elements;
+    std::cout << "Recall: " << recall << "\n";
 
     delete[] data;
-    delete[] add_data;
     delete alg_hnsw;
     return 0;
 }

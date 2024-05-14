@@ -13,21 +13,7 @@
 // limitations under the License.
 //
 
-
-#include <polaris/graph/hnswlib/hnswlib.h>
-
-
-// Filter that allows labels divisible by divisor
-class PickDivisibleIds: public hnswlib::BaseFilterFunctor {
-unsigned int divisor = 1;
- public:
-    PickDivisibleIds(unsigned int divisor): divisor(divisor) {
-        assert(divisor != 0);
-    }
-    bool operator()(hnswlib::labeltype label_id) {
-        return label_id % divisor == 0;
-    }
-};
+#include <polaris/graph/hnsw/hnswlib.h>
 
 
 int main() {
@@ -55,17 +41,31 @@ int main() {
         alg_hnsw->addPoint(data + i * dim, i);
     }
 
-    // Create filter that allows only even labels
-    PickDivisibleIds pickIdsDivisibleByTwo(2);
-
-    // Query the elements for themselves with filter and check returned labels
-    int k = 10;
+    // Query the elements for themselves and measure recall
+    float correct = 0;
     for (int i = 0; i < max_elements; i++) {
-        std::vector<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnnCloserFirst(data + i * dim, k, &pickIdsDivisibleByTwo);
-        for (auto item: result) {
-            if (item.second % 2 == 1) std::cout << "Error: found odd label\n";
-        }
+        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
+        hnswlib::labeltype label = result.top().second;
+        if (label == i) correct++;
     }
+    float recall = correct / max_elements;
+    std::cout << "Recall: " << recall << "\n";
+
+    // Serialize index
+    std::string hnsw_path = "hnsw.bin";
+    alg_hnsw->saveIndex(hnsw_path);
+    delete alg_hnsw;
+
+    // Deserialize index and check recall
+    alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, hnsw_path);
+    correct = 0;
+    for (int i = 0; i < max_elements; i++) {
+        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
+        hnswlib::labeltype label = result.top().second;
+        if (label == i) correct++;
+    }
+    recall = (float)correct / max_elements;
+    std::cout << "Recall of deserialized index: " << recall << "\n";
 
     delete[] data;
     delete alg_hnsw;

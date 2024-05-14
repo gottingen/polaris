@@ -14,22 +14,12 @@
 # limitations under the License.
 #
 
-carbin_cc_binary(
-        NAMESPACE polaris
-        NAME hnsw_epsilon_search
-        SOURCES
-        example_epsilon_search.cc
-        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
-        LINKS
-        polaris::polaris
-        ${POLARIS_DEPS_LINKS}
-)
 
 carbin_cc_binary(
         NAMESPACE polaris
         NAME hnsw_filter
         SOURCES
-        example_filter.cc
+        filter.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
         polaris::polaris
@@ -40,7 +30,7 @@ carbin_cc_binary(
         NAMESPACE polaris
         NAME hnsw_mt_filter
         SOURCES
-        example_mt_filter.cc
+        mt_filter.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
         polaris::polaris
@@ -51,7 +41,7 @@ carbin_cc_binary(
         NAMESPACE polaris
         NAME hnsw_mt_replace_deleted
         SOURCES
-        example_mt_replace_deleted.cc
+        mt_replace_deleted.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
         polaris::polaris
@@ -62,29 +52,19 @@ carbin_cc_binary(
         NAMESPACE polaris
         NAME hnsw_mt_search
         SOURCES
-        example_mt_search.cc
+        mt_search.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
         polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 
-carbin_cc_binary(
-        NAMESPACE polaris
-        NAME hnsw_multivector_search
-        SOURCES
-        example_multivector_search.cc
-        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
-        LINKS
-        polaris::polaris
-        ${POLARIS_DEPS_LINKS}
-)
 
 carbin_cc_binary(
         NAMESPACE polaris
         NAME hnsw_replace_deleted
         SOURCES
-        example_replace_deleted.cc
+        replace_deleted.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
         polaris::polaris
@@ -95,7 +75,7 @@ carbin_cc_binary(
         NAMESPACE polaris
         NAME hnsw_search
         SOURCES
-        example_search.cc
+        search.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
         polaris::polaris

@@ -17,7 +17,7 @@
 //  >>>    searchKnnCloserFirst(const void* query_data, size_t k) const;
 // of class AlgorithmInterface
 
-#include <polaris/graph/hnswlib/hnswlib.h>
+#include <polaris/graph/hnsw/hnswlib.h>
 
 #include <assert.h>
 

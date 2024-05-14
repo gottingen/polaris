@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#include <polaris/graph/hnswlib/hnswlib.h>
+#include <polaris/graph/hnsw/hnswlib.h>
 #include <thread>
 
 

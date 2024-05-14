@@ -37,6 +37,17 @@ namespace polaris {
         IT_VAMANA
     };
 
+    struct UnifiedBuildParameters {
+        std::string data_file;
+        std::string tags_file;
+        size_t num_points_to_load;
+        void *data{nullptr};
+        std::vector<vid_t> tags;
+        std::string output_path;
+        // for disk index
+        std::string codebook_prefix;
+    };
+
 
     class UnifiedIndex {
     public:
@@ -44,9 +55,8 @@ namespace polaris {
 
         virtual turbo::Status initialize(const IndexConfig &config) = 0;
 
-        virtual turbo::Status build(const std::string &data_file, size_t num_points_to_load, const std::string &tags_file) = 0;
-        virtual turbo::Status build(const std::string &data_file, size_t num_points_to_load, const std::vector<vid_t> &tags) = 0;
-        virtual turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) =0;
+        [[nodiscard]] virtual turbo::Status build(const UnifiedBuildParameters &parameters) = 0;
+
         [[nodiscard]] virtual turbo::Status load(const std::string &index_path) = 0;
 
         virtual turbo::Status save(const std::string &index_path) = 0;
@@ -55,11 +65,12 @@ namespace polaris {
 
         virtual turbo::Status lazy_remove(vid_t vid) = 0;
 
-        virtual turbo::ResultStatus<consolidation_report> consolidate_deletes(const IndexWriteParameters &parameters) = 0;
+        virtual turbo::ResultStatus<consolidation_report>
+        consolidate_deletes(const IndexWriteParameters &parameters) = 0;
 
         virtual turbo::Status search(SearchContext &context) = 0;
 
-        [[nodiscard]] virtual bool supports_dynamic() const  = 0;
+        [[nodiscard]] virtual bool supports_dynamic() const = 0;
 
         /// @brief Get the snapshot of the index
         /// @return the snapshot of the index 0 if not supported
@@ -67,8 +78,9 @@ namespace polaris {
 
         /// @brief Optimize the beam width for the index
         virtual turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
-                                                uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
-                                                uint32_t start_bw = 2) = 0;
+                                                                  uint64_t tuning_sample_aligned_dim, uint32_t L,
+                                                                  uint32_t nthreads,
+                                                                  uint32_t start_bw = 2) = 0;
 
         static turbo::ResultStatus<size_t> get_frozen_points(IndexType it, const std::string &index_path);
 

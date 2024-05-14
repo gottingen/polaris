@@ -4,7 +4,6 @@
 #include <mutex>
 #include <algorithm>
 #include <assert.h>
-#include <polaris/io/utils.h>
 
 namespace hnswlib {
 template<typename dist_t>
@@ -85,16 +84,10 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
 
 
     void removePoint(labeltype cur_external) {
-        std::unique_lock<std::mutex> lock(index_lock);
+        size_t cur_c = dict_external_to_internal[cur_external];
 
-        auto found = dict_external_to_internal.find(cur_external);
-        if (found == dict_external_to_internal.end()) {
-            return;
-        }
+        dict_external_to_internal.erase(cur_external);
 
-        dict_external_to_internal.erase(found);
-
-        size_t cur_c = found->second;
         labeltype label = *((labeltype*)(data_ + size_per_element_ * (cur_element_count-1) + data_size_));
         dict_external_to_internal[label] = cur_c;
         memcpy(data_ + size_per_element_ * cur_c,
@@ -113,7 +106,7 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
             dist_t dist = fstdistfunc_(query_data, data_ + size_per_element_ * i, dist_func_param_);
             labeltype label = *((labeltype*) (data_ + size_per_element_ * i + data_size_));
             if ((!isIdAllowed) || (*isIdAllowed)(label)) {
-                topResults.emplace(dist, label);
+                topResults.push(std::pair<dist_t, labeltype>(dist, label));
             }
         }
         dist_t lastdist = topResults.empty() ? std::numeric_limits<dist_t>::max() : topResults.top().first;
@@ -122,7 +115,7 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
             if (dist <= lastdist) {
                 labeltype label = *((labeltype *) (data_ + size_per_element_ * i + data_size_));
                 if ((!isIdAllowed) || (*isIdAllowed)(label)) {
-                    topResults.emplace(dist, label);
+                    topResults.push(std::pair<dist_t, labeltype>(dist, label));
                 }
                 if (topResults.size() > k)
                     topResults.pop();
@@ -140,9 +133,9 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
         std::ofstream output(location, std::ios::binary);
         std::streampos position;
 
-        polaris::write_binary_pod(output, maxelements_);
-        polaris::write_binary_pod(output, size_per_element_);
-        polaris::write_binary_pod(output, cur_element_count);
+        writeBinaryPOD(output, maxelements_);
+        writeBinaryPOD(output, size_per_element_);
+        writeBinaryPOD(output, cur_element_count);
 
         output.write(data_, maxelements_ * size_per_element_);
 
@@ -154,9 +147,9 @@ class BruteforceSearch : public AlgorithmInterface<dist_t> {
         std::ifstream input(location, std::ios::binary);
         std::streampos position;
 
-        polaris::read_binary_pod(input, maxelements_);
-        polaris::read_binary_pod(input, size_per_element_);
-        polaris::read_binary_pod(input, cur_element_count);
+        readBinaryPOD(input, maxelements_);
+        readBinaryPOD(input, size_per_element_);
+        readBinaryPOD(input, cur_element_count);
 
         data_size_ = s->get_data_size();
         fstdistfunc_ = s->get_dist_func();

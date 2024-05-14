@@ -13,7 +13,21 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/hnswlib/hnswlib.h>
+
+#include <polaris/graph/hnsw/hnswlib.h>
+
+
+// Filter that allows labels divisible by divisor
+class PickDivisibleIds: public hnswlib::BaseFilterFunctor {
+unsigned int divisor = 1;
+ public:
+    PickDivisibleIds(unsigned int divisor): divisor(divisor) {
+        assert(divisor != 0);
+    }
+    bool operator()(hnswlib::labeltype label_id) {
+        return label_id % divisor == 0;
+    }
+};
 
 
 int main() {
@@ -23,10 +37,9 @@ int main() {
                                 // strongly affects the memory consumption
     int ef_construction = 200;  // Controls index search speed/build speed tradeoff
 
-    // Initing index with allow_replace_deleted=true
-    int seed = 100; 
+    // Initing index
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction, seed, true);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
 
     // Generate random data
     std::mt19937 rng;
@@ -42,28 +55,19 @@ int main() {
         alg_hnsw->addPoint(data + i * dim, i);
     }
 
-    // Mark first half of elements as deleted
-    int num_deleted = max_elements / 2;
-    for (int i = 0; i < num_deleted; i++) {
-        alg_hnsw->markDelete(i);
-    }
+    // Create filter that allows only even labels
+    PickDivisibleIds pickIdsDivisibleByTwo(2);
 
-    // Generate additional random data
-    float* add_data = new float[dim * num_deleted];
-    for (int i = 0; i < dim * num_deleted; i++) {
-        add_data[i] = distrib_real(rng);
-    }
-
-    // Replace deleted data with new elements
-    // Maximum number of elements is reached therefore we cannot add new items,
-    // but we can replace the deleted ones by using replace_deleted=true
-    for (int i = 0; i < num_deleted; i++) {
-        hnswlib::labeltype label = max_elements + i;
-        alg_hnsw->addPoint(add_data + i * dim, label, true);
+    // Query the elements for themselves with filter and check returned labels
+    int k = 10;
+    for (int i = 0; i < max_elements; i++) {
+        std::vector<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnnCloserFirst(data + i * dim, k, &pickIdsDivisibleByTwo);
+        for (auto item: result) {
+            if (item.second % 2 == 1) std::cout << "Error: found odd label\n";
+        }
     }
 
     delete[] data;
-    delete[] add_data;
     delete alg_hnsw;
     return 0;
 }

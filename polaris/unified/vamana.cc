@@ -27,30 +27,26 @@ namespace polaris {
         return turbo::ok_status();
     }
 
-    turbo::Status Vamana::build(const std::string &data_file, size_t num_points_to_load, const std::string &tags_file) {
+    turbo::Status Vamana::build(const UnifiedBuildParameters &parameters) {
         if (index_ == nullptr) {
             return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
         }
-        return index_->build(data_file, num_points_to_load, tags_file);
-    }
-
-    turbo::Status
-    Vamana::build(const std::string &data_file, size_t num_points_to_load, const std::vector<vid_t> &tags) {
-        if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+        if (parameters.data_file.empty() && parameters.data == nullptr) {
+            return turbo::make_status(turbo::kInvalidArgument, "Data file not provided");
         }
-        if (tags.empty()) {
-            return index_->build(data_file, num_points_to_load);
+        turbo::Status rs;
+        if (!parameters.tags_file.empty()) {
+            rs =  index_->build(parameters.data_file, parameters.num_points_to_load, parameters.tags_file);
+        } else if (!parameters.tags.empty() && !parameters.data_file.empty()) {
+            rs = index_->build(parameters.data_file, parameters.num_points_to_load, parameters.tags);
+        } else if(parameters.data != nullptr && !parameters.tags.empty()) {
+            rs = index_->build(parameters.data, parameters.num_points_to_load, parameters.tags);
+        } else if (!parameters.data_file.empty()) {
+            rs = index_->build(parameters.data_file, parameters.num_points_to_load);
         } else {
-            return index_->build(data_file, num_points_to_load, tags);
+            return turbo::make_status(turbo::kInvalidArgument, "Invalid build parameters");
         }
-    }
-
-    turbo::Status Vamana::build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) {
-        if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
-        }
-        return index_->build(data, num_points_to_load, tags);
+        return save(parameters.output_path);
     }
 
     turbo::Status Vamana::load(const std::string &index_path) {

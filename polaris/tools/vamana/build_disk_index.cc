@@ -15,9 +15,7 @@
 
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
-#include  <polaris/graph/vamana/pq_flash_index.h>
-#include  <polaris/graph/vamana/index.h>
-#include  <polaris/graph/vamana/partition.h>
+#include <polaris/unified_index.h>
 
 namespace polaris {
 
@@ -125,6 +123,7 @@ namespace polaris {
 
         IndexConfig indexConfig = IndexConfigBuilder()
                 .with_metric(metric)
+                .with_data_type(string_to_polaris_type(build_disk_index_context.data_type))
                 .vdisk_with_L(build_disk_index_context.L)
                 .vdisk_with_R(build_disk_index_context.R)
                 .vdisk_with_B(build_disk_index_context.B)
@@ -137,37 +136,23 @@ namespace polaris {
                 .vdisk_with_use_opq(build_disk_index_context.use_opq)
                 .build_vdisk();
 
-        try {
-
-            turbo::Status r;
-            if (build_disk_index_context.data_type == std::string("int8"))
-                r = polaris::PQFlashIndex<int8_t>::build(build_disk_index_context.data_path.c_str(),
-                                                      build_disk_index_context.index_path_prefix.c_str(),
-                                                      indexConfig,
-                                                      build_disk_index_context.codebook_prefix);
-            else if (build_disk_index_context.data_type == std::string("uint8"))
-                r = polaris::PQFlashIndex<uint8_t>::build(build_disk_index_context.data_path.c_str(),
-                                                       build_disk_index_context.index_path_prefix.c_str(),
-                                                       indexConfig,
-                                                       build_disk_index_context.codebook_prefix);
-            else if (build_disk_index_context.data_type == std::string("float"))
-                r =polaris::PQFlashIndex<float>::build(build_disk_index_context.data_path.c_str(),
-                                                     build_disk_index_context.index_path_prefix.c_str(),
-                                                     indexConfig,
-                                                     build_disk_index_context.codebook_prefix);
-            else {
-                polaris::cerr << "Error. Unsupported data type" << std::endl;
-                exit(-1);
-            }
-            if (!r.ok()) {
-                polaris::cerr << "VamanaIndex build failed. " <<r.message()<< std::endl;
-                exit(-1);
-            }
-        }
-        catch (const std::exception &e) {
-            std::cout << std::string(e.what()) << std::endl;
-            polaris::cerr << "VamanaIndex build failed." << std::endl;
+        std::unique_ptr<polaris::UnifiedIndex> unified_index(
+                polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA_DISK));
+        auto rs = unified_index->initialize(indexConfig);
+        if (!rs.ok()) {
+            std::cerr << "VamanaIndex initialization failed." << std::endl;
             exit(-1);
         }
+        UnifiedBuildParameters parameters;
+        parameters.data_file = build_disk_index_context.data_path;
+        parameters.num_points_to_load = 0;
+        parameters.output_path = build_disk_index_context.index_path_prefix;
+        parameters.codebook_prefix = build_disk_index_context.codebook_prefix;
+        rs = unified_index->build(parameters);
+        if (!rs.ok()) {
+            std::cerr << "VamanaIndex build failed." << std::endl;
+            exit(-1);
+        }
+        unified_index.reset();
     }
 }  // namespace polaris

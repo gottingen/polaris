@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/hnswlib/hnswlib.h>
+#include <polaris/graph/hnsw/hnswlib.h>
 #include <thread>
 #include <chrono>
 

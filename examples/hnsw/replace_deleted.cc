@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/hnswlib/hnswlib.h>
+#include <polaris/graph/hnsw/hnswlib.h>
 
 
 int main() {
@@ -23,9 +23,10 @@ int main() {
                                 // strongly affects the memory consumption
     int ef_construction = 200;  // Controls index search speed/build speed tradeoff
 
-    // Initing index
+    // Initing index with allow_replace_deleted=true
+    int seed = 100; 
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction, seed, true);
 
     // Generate random data
     std::mt19937 rng;
@@ -41,33 +42,28 @@ int main() {
         alg_hnsw->addPoint(data + i * dim, i);
     }
 
-    // Query the elements for themselves and measure recall
-    float correct = 0;
-    for (int i = 0; i < max_elements; i++) {
-        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
-        hnswlib::labeltype label = result.top().second;
-        if (label == i) correct++;
+    // Mark first half of elements as deleted
+    int num_deleted = max_elements / 2;
+    for (int i = 0; i < num_deleted; i++) {
+        alg_hnsw->markDelete(i);
     }
-    float recall = correct / max_elements;
-    std::cout << "Recall: " << recall << "\n";
 
-    // Serialize index
-    std::string hnsw_path = "hnsw.bin";
-    alg_hnsw->saveIndex(hnsw_path);
-    delete alg_hnsw;
-
-    // Deserialize index and check recall
-    alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, hnsw_path);
-    correct = 0;
-    for (int i = 0; i < max_elements; i++) {
-        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
-        hnswlib::labeltype label = result.top().second;
-        if (label == i) correct++;
+    // Generate additional random data
+    float* add_data = new float[dim * num_deleted];
+    for (int i = 0; i < dim * num_deleted; i++) {
+        add_data[i] = distrib_real(rng);
     }
-    recall = (float)correct / max_elements;
-    std::cout << "Recall of deserialized index: " << recall << "\n";
+
+    // Replace deleted data with new elements
+    // Maximum number of elements is reached therefore we cannot add new items,
+    // but we can replace the deleted ones by using replace_deleted=true
+    for (int i = 0; i < num_deleted; i++) {
+        hnswlib::labeltype label = max_elements + i;
+        alg_hnsw->addPoint(add_data + i * dim, label, true);
+    }
 
     delete[] data;
+    delete[] add_data;
     delete alg_hnsw;
     return 0;
 }

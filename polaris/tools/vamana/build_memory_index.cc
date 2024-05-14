@@ -103,9 +103,20 @@ namespace polaris {
                     .vamana_with_num_pq_chunks(ctx.build_PQ_bytes)
                     .build_vamana();
             std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
-            unified_index->initialize(config);
-            unified_index->build(ctx.data_path, data_num, std::vector<vid_t>());
-            unified_index->save(ctx.index_path_prefix.c_str());
+            auto rs = unified_index->initialize(config);
+            if (!rs.ok()) {
+                polaris::cerr << "VamanaIndex initialization failed." << std::endl;
+                exit(-1);
+            }
+            UnifiedBuildParameters build_params;
+            build_params.data_file = ctx.data_path;
+            build_params.num_points_to_load = data_num;
+            build_params.output_path = ctx.index_path_prefix;
+            rs = unified_index->build(build_params);
+            if (!rs.ok()) {
+                polaris::cerr << "VamanaIndex build failed." << std::endl;
+                exit(-1);
+            }
             unified_index.reset();
         }
         catch (const std::exception &e) {

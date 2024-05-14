@@ -29,9 +29,7 @@ namespace polaris {
 
         turbo::Status initialize(const IndexConfig &config) override;
 
-        turbo::Status build(const std::string &data_file, size_t num_points_to_load, const std::string &tags_file) override;
-        turbo::Status build(const std::string &data_file, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
-        turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
+        turbo::Status build(const UnifiedBuildParameters &parameters) override;
 
         turbo::Status load(const std::string &index_path) override;
 

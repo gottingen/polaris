@@ -14,7 +14,7 @@
 //
 // This is a test file for testing the filtering feature
 
-#include <polaris/graph/hnswlib/hnswlib.h>
+#include <polaris/graph/hnsw/hnswlib.h>
 
 #include <assert.h>
 

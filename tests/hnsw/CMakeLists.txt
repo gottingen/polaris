@@ -14,16 +14,7 @@
 # limitations under the License.
 #
 
-carbin_cc_binary(
-        NAMESPACE polaris
-        NAME epsilon_search_test
-        SOURCES
-        epsilon_search_test.cc
-        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
-        LINKS
-        polaris::polaris
-        ${POLARIS_DEPS_LINKS}
-)
+
 carbin_cc_binary(
         NAMESPACE polaris
         NAME multi_thread_load_test
@@ -45,16 +36,6 @@ carbin_cc_binary(
         ${POLARIS_DEPS_LINKS}
 )
 
-carbin_cc_binary(
-        NAMESPACE polaris
-        NAME multivector_search_test
-        SOURCES
-        multivector_search_test.cc
-        CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
-        LINKS
-        polaris::polaris
-        ${POLARIS_DEPS_LINKS}
-)
 
 carbin_cc_binary(
         NAMESPACE polaris

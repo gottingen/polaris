@@ -90,6 +90,39 @@ namespace polaris {
         }
         return turbo::ok_status();
     }
+
+    turbo::Status VamanaDisk::build(const UnifiedBuildParameters &parameters) {
+        if (index_ == nullptr) {
+            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+        }
+
+        if(parameters.data_file.empty() || parameters.output_path.empty()) {
+            return turbo::make_status(turbo::kEINVAL, "Invalid build parameters");
+        }
+
+        switch (config_.basic_config.object_type) {
+            case ObjectType::UINT8:
+                return PQFlashIndex<uint8_t>::build(parameters.data_file.c_str(), parameters.output_path.c_str(),
+                                                    config_, parameters.codebook_prefix);
+            case ObjectType::INT8:
+                return PQFlashIndex<int8_t>::build(parameters.data_file.c_str(), parameters.output_path.c_str(),
+                                                   config_, parameters.codebook_prefix);
+            case ObjectType::FLOAT:
+                return PQFlashIndex<float>::build(parameters.data_file.c_str(), parameters.output_path.c_str(), config_,
+                                                  parameters.codebook_prefix);
+            case ObjectType::UINT16:
+            case ObjectType::INT16:
+            case ObjectType::UINT32:
+            case ObjectType::INT32:
+            case ObjectType::UINT64:
+            case ObjectType::INT64:
+            case ObjectType::DOUBLE:
+            case ObjectType::FLOAT16:
+            case ObjectType::BFLOAT16:
+            default:
+                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+        }
+    }
     template <typename T>
     inline turbo::Status vd_load(void *index, uint32_t num_threads, uint32_t num_nodes_to_cache,  const std::string &index_path) {
         if (index == nullptr) {
