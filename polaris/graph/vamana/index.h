@@ -89,10 +89,10 @@ namespace polaris {
         POLARIS_API size_t get_max_points();
 
         // Batch build from a file. Optionally pass tags vector.
-        POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const std::vector<vid_t> &tags);
+        POLARIS_API turbo::Status build(const std::string &filename, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
 
         // Batch build from a file. Optionally pass tags file.
-        POLARIS_API turbo::Status build(const char *filename, size_t num_points_to_load, const char *tag_filename);
+        POLARIS_API turbo::Status build(const std::string &filename, size_t num_points_to_load, const std::string&tag_filename) override;
 
         // Batch build from a data array, which must pad vectors to aligned_dim
         POLARIS_API turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) override;

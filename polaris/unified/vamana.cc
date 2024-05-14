@@ -27,6 +27,32 @@ namespace polaris {
         return turbo::ok_status();
     }
 
+    turbo::Status Vamana::build(const std::string &data_file, size_t num_points_to_load, const std::string &tags_file) {
+        if (index_ == nullptr) {
+            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+        }
+        return index_->build(data_file, num_points_to_load, tags_file);
+    }
+
+    turbo::Status
+    Vamana::build(const std::string &data_file, size_t num_points_to_load, const std::vector<vid_t> &tags) {
+        if (index_ == nullptr) {
+            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+        }
+        if (tags.empty()) {
+            return index_->build(data_file, num_points_to_load);
+        } else {
+            return index_->build(data_file, num_points_to_load, tags);
+        }
+    }
+
+    turbo::Status Vamana::build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) {
+        if (index_ == nullptr) {
+            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+        }
+        return index_->build(data, num_points_to_load, tags);
+    }
+
     turbo::Status Vamana::load(const std::string &index_path) {
         if (index_ == nullptr) {
             return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
@@ -58,7 +84,7 @@ namespace polaris {
     }
 
     turbo::ResultStatus<consolidation_report> Vamana::consolidate_deletes(const IndexWriteParameters &parameters) {
-        if(index_ == nullptr) {
+        if (index_ == nullptr) {
             return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
         }
         return index_->consolidate_deletes(parameters);

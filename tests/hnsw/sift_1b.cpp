@@ -16,7 +16,7 @@
 #include <fstream>
 #include <queue>
 #include <chrono>
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/graph/hnswlib/hnswlib.h>
 
 
 #include <unordered_set>

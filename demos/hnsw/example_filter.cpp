@@ -1,4 +1,4 @@
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/graph/hnswlib/hnswlib.h>
 
 
 // Filter that allows labels divisible by divisor

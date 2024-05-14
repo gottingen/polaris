@@ -14,7 +14,7 @@
 //
 
 
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/graph/hnswlib/hnswlib.h>
 
 typedef unsigned int docidtype;
 typedef float dist_t;

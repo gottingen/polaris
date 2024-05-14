@@ -36,8 +36,10 @@ namespace polaris {
 
         virtual ~AbstractIndex() = default;
 
-        virtual turbo::Status build(const std::string &data_file, size_t num_points_to_load) = 0;
+        virtual turbo::Status build(const std::string &filename, size_t num_points_to_load, const std::vector<vid_t> &tags) = 0;
+        virtual turbo::Status build(const std::string &filename, size_t num_points_to_load, const std::string&tag_filename) = 0;
         virtual turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) = 0;
+        virtual turbo::Status build(const std::string &data_file, size_t num_points_to_load) = 0;
 
 
         virtual turbo::Status save(const char *filename, bool compact_before_save) = 0;

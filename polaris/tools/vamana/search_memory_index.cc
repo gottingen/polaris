@@ -71,7 +71,11 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
 
     std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
     unified_index->initialize(config);
-    unified_index->load(index_path);
+    auto lrs = unified_index->load(index_path);
+    if(!lrs.ok()) {
+        std::cerr << "Failed to load index from " << index_path << " error: " << lrs.message() << std::endl;
+        exit(-1);
+    }
     std::cout << "VamanaIndex loaded" << std::endl;
 
 

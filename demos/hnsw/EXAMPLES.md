@@ -2,7 +2,7 @@
 
 Creating index, inserting elements, searching and serialization
 ```cpp
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/graph/hnswlib/hnswlib.h>
 
 
 int main() {
@@ -64,7 +64,7 @@ int main() {
 
 An example of filtering with a boolean function during the search:
 ```cpp
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/graph/hnswlib/hnswlib.h>
 
 
 // Filter that allows labels divisible by divisor
@@ -125,7 +125,7 @@ int main() {
 
 An example with reusing the memory of the deleted elements when new elements are being added (via `allow_replace_deleted` flag):
 ```cpp
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/graph/hnswlib/hnswlib.h>
 
 
 int main() {

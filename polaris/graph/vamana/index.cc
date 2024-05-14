@@ -1223,7 +1223,7 @@ namespace polaris {
 
     template<typename T>
     turbo::Status
-    VamanaIndex<T>::build(const char *filename, size_t num_points_to_load, const std::vector<vid_t> &tags) {
+    VamanaIndex<T>::build(const std::string&filename, size_t num_points_to_load, const std::vector<vid_t> &tags) {
         // idealy this should call build_filtered_index based on params passed
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -1246,7 +1246,7 @@ namespace polaris {
         }
 
         size_t file_num_points, file_dim;
-        if (filename == nullptr) {
+        if (filename.empty()) {
             return turbo::make_status(turbo::kInvalidArgument, "Can not build with an empty file");
         }
 
@@ -1300,11 +1300,11 @@ namespace polaris {
 
     template<typename T>
     turbo::Status
-    VamanaIndex<T>::build(const char *filename, size_t num_points_to_load, const char *tag_filename) {
+    VamanaIndex<T>::build(const std::string &filename, size_t num_points_to_load, const std::string &tag_filename) {
         std::vector<vid_t> tags;
 
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
-        if (tag_filename == nullptr) {
+        if (tag_filename.empty()) {
             return turbo::make_status(turbo::kInvalidArgument, "Tag filename is null");
         } else {
             if (collie::filesystem::exists(tag_filename)) {
@@ -1340,7 +1340,7 @@ namespace polaris {
         for (int i = 1; i < limit; ++i) {
             tags.push_back(i);
         }
-        return this->build(data_file.c_str(), points_to_load, tags);
+        return this->build(data_file, points_to_load, tags);
     }
 
 

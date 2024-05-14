@@ -16,11 +16,7 @@
 #include <polaris/tools/vamana/vamana.h>
 #include <polaris/tools/vamana/program_options_utils.h>
 #include <polaris/datasets/bin.h>
-#include <polaris/graph/vamana/disk_utils.h>
-#include <polaris/graph/vamana/math_utils.h>
-#include <polaris/graph/vamana/index.h>
-#include <polaris/graph/vamana/index_factory.h>
-#include <polaris/graph/vamana/partition.h>
+#include <polaris/unified_index.h>
 
 
 namespace polaris {
@@ -106,12 +102,11 @@ namespace polaris {
                     .vamana_is_pq_dist_build(use_pq_build)
                     .vamana_with_num_pq_chunks(ctx.build_PQ_bytes)
                     .build_vamana();
-
-            auto index_factory = polaris::IndexFactory(config);
-            auto index = index_factory.create_instance();
-            index->build(ctx.data_path, data_num);
-            index->save(ctx.index_path_prefix.c_str());
-            index.reset();
+            std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
+            unified_index->initialize(config);
+            unified_index->build(ctx.data_path, data_num, std::vector<vid_t>());
+            unified_index->save(ctx.index_path_prefix.c_str());
+            unified_index.reset();
         }
         catch (const std::exception &e) {
             std::cout << std::string(e.what()) << std::endl;
