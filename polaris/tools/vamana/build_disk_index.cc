@@ -137,7 +137,7 @@ namespace polaris {
                 .build_vdisk();
 
         std::unique_ptr<polaris::UnifiedIndex> unified_index(
-                polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA_DISK));
+                polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA_DISK));
         auto rs = unified_index->initialize(indexConfig);
         if (!rs.ok()) {
             std::cerr << "VamanaIndex initialization failed." << std::endl;

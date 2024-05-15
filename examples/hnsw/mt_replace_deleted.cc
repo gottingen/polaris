@@ -105,7 +105,10 @@ int main() {
     // Mark first half of elements as deleted
     int num_deleted = max_elements / 2;
     ParallelFor(0, num_deleted, num_threads, [&](size_t row, size_t threadId) {
-        alg_hnsw->markDelete(row);
+        auto r = alg_hnsw->mark_delete(row);
+        if (!r.ok()) {
+            std::cerr << "Failed to delete element " << row << std::endl;
+        }
     });
 
     // Generate additional random data

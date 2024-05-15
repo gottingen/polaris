@@ -74,7 +74,7 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     }
 
     POLARIS_LOG(INFO) << "Loading index from " << index_path_prefix;
-    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA_DISK));
+    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA_DISK));
     polaris::IndexConfig config = polaris::IndexConfigBuilder()
             .with_load_threads(num_threads)
             .with_metric(metric)

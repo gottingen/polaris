@@ -112,7 +112,7 @@ namespace polaris {
 
         static constexpr bool available() noexcept { return true; }
 
-        static constexpr unsigned version() noexcept { return static_cast<int>(IndexType::IT_VAMANA_DISK); }
+        static constexpr unsigned version() noexcept { return static_cast<int>(IndexType::INDEX_VAMANA_DISK); }
 
         static constexpr std::size_t alignment() noexcept { return 0; }
 
@@ -126,7 +126,7 @@ namespace polaris {
 
         static constexpr bool available() noexcept { return true; }
 
-        static constexpr unsigned version() noexcept { return static_cast<int>(IndexType::IT_VAMANA); }
+        static constexpr unsigned version() noexcept { return static_cast<int>(IndexType::INDEX_VAMANA); }
 
         static constexpr std::size_t alignment() noexcept { return 0; }
 

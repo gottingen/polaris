@@ -45,7 +45,10 @@ int main() {
     // Mark first half of elements as deleted
     int num_deleted = max_elements / 2;
     for (int i = 0; i < num_deleted; i++) {
-        alg_hnsw->markDelete(i);
+        auto r = alg_hnsw->mark_delete(i);
+        if (!r.ok()) {
+            std::cerr << "Failed to delete element " << i << std::endl;
+        }
     }
 
     // Generate additional random data

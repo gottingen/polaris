@@ -17,15 +17,17 @@
 #include <polaris/unified_index.h>
 #include <polaris/unified/vamana_disk.h>
 #include <polaris/unified/vamana.h>
-
+#include <polaris/unified/hnsw.h>
 namespace polaris {
 
     UnifiedIndex *UnifiedIndex::create_index(IndexType type) {
         switch (type) {
-            case IndexType::IT_VAMANA_DISK:
+            case IndexType::INDEX_VAMANA_DISK:
                 return new VamanaDisk();
-            case IndexType::IT_VAMANA:
+            case IndexType::INDEX_VAMANA:
                 return new Vamana();
+            case IndexType::INDEX_HNSW:
+                return new Hnsw();
             default:
                 return nullptr;
         }
@@ -49,7 +51,7 @@ namespace polaris {
     }
 
     turbo::ResultStatus<size_t> UnifiedIndex::get_frozen_points(IndexType it, const std::string &index_path) {
-        if(it == IndexType::IT_VAMANA) {
+        if(it == IndexType::INDEX_VAMANA) {
             return get_graph_num_frozen_points(index_path);
         }
         return 0;

@@ -26,10 +26,15 @@ namespace polaris {
             LOCK_FAIL = 2,
             INCONSISTENT_COUNT_ERROR = 3
         };
-        status_code _status;
-        size_t _active_points, _max_points, _empty_slots, _slots_released, _delete_set_size, _num_calls_to_process_delete;
-        double _time;
-
+        status_code _status{status_code::SUCCESS};
+        size_t _active_points{0};
+        size_t _max_points{0};
+        size_t _empty_slots{0};
+        size_t _slots_released{0};
+        size_t _delete_set_size{0};
+        size_t _num_calls_to_process_delete{0};
+        double _time{0.0};
+        consolidation_report() = default;
         consolidation_report(status_code status, size_t active_points, size_t max_points, size_t empty_slots,
                              size_t slots_released, size_t delete_set_size, size_t num_calls_to_process_delete,
                              double time_secs)

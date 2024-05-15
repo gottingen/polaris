@@ -39,6 +39,14 @@ namespace polaris {
         size_t load_threads{1};
     };
 
+    struct HnswConfig {
+        uint32_t m{16};
+        uint32_t ef{50};
+        uint32_t ef_construction{200};
+        uint32_t random_seed{100};
+        uint32_t thread_num;
+    };
+
     struct IndexConfig {
 
         IndexConfig() = default;
@@ -48,6 +56,8 @@ namespace polaris {
         IndexBasicConfig basic_config;
         VamanaIndexConfig vamana_config;
         VamanaDiskIndexConfig disk_config;
+        HnswConfig hnsw_config;
+
     private:
         IndexConfig(const IndexBasicConfig &bconfig, const VamanaIndexConfig &vconfig)
                 : basic_config(bconfig), vamana_config(vconfig) {

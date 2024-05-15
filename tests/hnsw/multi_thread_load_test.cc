@@ -106,7 +106,7 @@ int main() {
                             alg_hnsw->unmarkDelete(label);
                             marked_deleted[id] = false;
                         } else {
-                            alg_hnsw->markDelete(label);
+                            alg_hnsw->mark_delete(label);
                             marked_deleted[id] = true;
                         }
                     }

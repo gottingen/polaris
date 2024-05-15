@@ -102,7 +102,7 @@ namespace polaris {
                     .vamana_is_pq_dist_build(use_pq_build)
                     .vamana_with_num_pq_chunks(ctx.build_PQ_bytes)
                     .build_vamana();
-            std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
+            std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA));
             auto rs = unified_index->initialize(config);
             if (!rs.ok()) {
                 polaris::cerr << "VamanaIndex initialization failed." << std::endl;

@@ -114,7 +114,10 @@ int main() {
 
         // delete half random elements of batch1 data
         for (int i = 0; i < num_elements; i++) {
-            alg_hnsw->markDelete(rand_labels[i]);
+            auto rs = alg_hnsw->mark_delete(rand_labels[i]);
+            if (!rs.ok()) {
+                std::cerr << "Failed to delete element " << rand_labels[i] <<" "<<rs.to_string()<< std::endl;
+            }
         }
 
         // replace deleted elements with batch2 data

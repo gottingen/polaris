@@ -46,7 +46,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     } else {
         polaris::cout << " Truthset file " << truthset_file << " not found. Not computing recall." << std::endl;
     }
-    auto num_frozen_pts_rs = polaris::UnifiedIndex::get_frozen_points(polaris::IndexType::IT_VAMANA, index_path);
+    auto num_frozen_pts_rs = polaris::UnifiedIndex::get_frozen_points(polaris::IndexType::INDEX_VAMANA, index_path);
     if(!num_frozen_pts_rs.ok()) {
         std::cerr << "Failed to get number of frozen points from index" << std::endl;
         exit(-1);
@@ -69,7 +69,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             .vamana_with_num_frozen_pts(num_frozen_pts)
             .build_vamana();
 
-    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::IT_VAMANA));
+    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA));
     unified_index->initialize(config);
     auto lrs = unified_index->load(index_path);
     if(!lrs.ok()) {

@@ -161,6 +161,8 @@ set(POLARIS_SRC
         graph/vamana/utils.cc
         unified/vamana.cc
         unified/vamana_disk.cc
+        unified/hnsw.cc
+        unified/hnsw_flat.cc
         utility/memory_mapper.cc
         utility/mmap_manager.cc
         utility/natural_number_map.cc
@@ -367,6 +369,8 @@ set(POLARIS_HEADERS
         storage/repository.h
         unified/vamana.h
         unified/vamana_disk.h
+        unified/hnsw.h
+        unified/hnsw_flat.h
         utility/any_wrappers.h
         utility/args.h
         utility/bfloat.h

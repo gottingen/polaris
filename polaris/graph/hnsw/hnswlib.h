@@ -50,6 +50,9 @@ static uint64_t xgetbv(unsigned int index) {
 // Adapted from https://github.com/Mysticial/FeatureDetector
 #define _XCR_XFEATURE_ENABLED_MASK  0
 
+#include <turbo/status/status.h>
+#include <polaris/core/search_context.h>
+
 static bool AVXCapable() {
     int cpuInfo[4];
 
@@ -158,7 +161,7 @@ class SpaceInterface {
 template<typename dist_t>
 class AlgorithmInterface {
  public:
-    virtual void addPoint(const void *datapoint, labeltype label, bool replace_deleted = false) = 0;
+    virtual turbo::Status addPoint(const void *datapoint, labeltype label, bool replace_deleted = false) = 0;
 
     virtual std::priority_queue<std::pair<dist_t, labeltype>>
         searchKnn(const void*, size_t, BaseFilterFunctor* isIdAllowed = nullptr) const = 0;
@@ -167,7 +170,9 @@ class AlgorithmInterface {
     virtual std::vector<std::pair<dist_t, labeltype>>
         searchKnnCloserFirst(const void* query_data, size_t k, BaseFilterFunctor* isIdAllowed = nullptr) const;
 
-    virtual void saveIndex(const std::string &location) = 0;
+    virtual turbo::Status saveIndex(const std::string &location) = 0;
+    virtual turbo::Status load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) = 0;
+    virtual turbo::Status search(polaris::SearchContext&ctx) const = 0;
     virtual ~AlgorithmInterface(){
     }
 };
