@@ -810,7 +810,7 @@ namespace polaris {
             size_t dim = clusters.front().centroid.size();
             polaris::Property property;
             property.dimension = dim;
-            property.graphType = polaris::Property::GraphType::GraphTypeANNG;
+            property.graphType = polaris::GraphType::GraphTypeANNG;
             property.objectType = polaris::ObjectType::FLOAT;
             property.distanceType = polaris::MetricType::METRIC_L2;
 

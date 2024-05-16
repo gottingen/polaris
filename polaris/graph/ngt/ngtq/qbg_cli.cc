@@ -101,7 +101,7 @@ public:
         creation.globalEdgeSizeForSearch = args.getl("S", 40);
         {
             char indexType = args.getChar("i", 't');
-            creation.globalIndexType = indexType == 't' ? polaris::Property::GraphAndTree : polaris::Property::Graph;
+            creation.globalIndexType = indexType == 't' ? polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE : polaris::IndexType::INDEX_NGT_GRAPH;
             creation.localIndexType = creation.globalIndexType;
         }
         creation.globalInsertionRadiusCoefficient = args.getf("e", 0.1) + 1.0;

@@ -46,9 +46,9 @@ polaris::NgtIndex::NgtIndex(polaris::Property &prop) : redirect(false) {
         POLARIS_THROW_EX("NgtIndex::NgtIndex. Dimension is not specified.");
     }
     NgtIndex *idx = 0;
-    if (prop.indexType == polaris::NgtIndex::Property::GraphAndTree) {
+    if (prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) {
         idx = new polaris::GraphAndTreeIndex(prop);
-    } else if (prop.indexType == polaris::NgtIndex::Property::Graph) {
+    } else if (prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH) {
         idx = new polaris::GraphIndex(prop);
     } else {
         POLARIS_THROW_EX("NgtIndex::NgtIndex: Not found IndexType in property file.");
@@ -72,10 +72,10 @@ polaris::NgtIndex::open(const string &database, bool rdOnly, polaris::NgtIndex::
     polaris::Property prop;
     prop.load(database);
     NgtIndex *idx = 0;
-    if ((prop.indexType == polaris::NgtIndex::Property::GraphAndTree) &&
+    if ((prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) &&
         ((openType & polaris::NgtIndex::OpenTypeGraphDisabled) == 0)) {
         idx = new polaris::GraphAndTreeIndex(database, rdOnly);
-    } else if ((prop.indexType == polaris::NgtIndex::Property::Graph) ||
+    } else if ((prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH) ||
                ((openType & polaris::NgtIndex::OpenTypeGraphDisabled) != 0)) {
         idx = new polaris::GraphIndex(database, rdOnly, openType);
     } else {
@@ -96,7 +96,7 @@ polaris::NgtIndex::createGraphAndTree(const string &database, polaris::Property 
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("NgtIndex::createGraphAndTree. Dimension is not specified.");
     }
-    prop.indexType = polaris::NgtIndex::Property::IndexType::GraphAndTree;
+    prop.indexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
     NgtIndex *idx = 0;
     idx = new polaris::GraphAndTreeIndex(prop);
     assert(idx != 0);
@@ -119,7 +119,7 @@ polaris::NgtIndex::createGraph(const string &database, polaris::Property &prop, 
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("NgtIndex::createGraphAndTree. Dimension is not specified.");
     }
-    prop.indexType = polaris::NgtIndex::Property::IndexType::Graph;
+    prop.indexType = polaris::IndexType::INDEX_NGT_GRAPH;
     NgtIndex *idx = 0;
     idx = new polaris::GraphIndex(prop);
     assert(idx != 0);
@@ -233,11 +233,11 @@ polaris::NgtIndex::importIndex(const string &database, const string &file) {
     property.importProperty(file);
     polaris::Timer timer;
     timer.start();
-    property.databaseType = polaris::NgtIndex::Property::DatabaseType::Memory;
-    if (property.indexType == polaris::NgtIndex::Property::IndexType::GraphAndTree) {
+    property.databaseType = polaris::DatabaseType::Memory;
+    if (property.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) {
         idx = new polaris::GraphAndTreeIndex(property);
         assert(idx != 0);
-    } else if (property.indexType == polaris::NgtIndex::Property::IndexType::Graph) {
+    } else if (property.indexType == polaris::IndexType::INDEX_NGT_GRAPH) {
         idx = new polaris::GraphIndex(property);
         assert(idx != 0);
     } else {
@@ -340,7 +340,7 @@ polaris::NgtIndex::Property::set(polaris::Property &prop) {
     if (prop.refinementObjectType != ObjectSpace::ObjectTypeNone) refinementObjectType = prop.refinementObjectType;
 #endif
     if (prop.distanceType != MetricType::METRIC_NONE) distanceType = prop.distanceType;
-    if (prop.indexType != IndexTypeNone) indexType = prop.indexType;
+    if (prop.indexType != IndexType::INDEX_NONE) indexType = prop.indexType;
     if (prop.databaseType != DatabaseTypeNone) databaseType = prop.databaseType;
     if (prop.objectAlignment != ObjectAlignmentNone) objectAlignment = prop.objectAlignment;
     if (prop.pathAdjustmentInterval != -1) pathAdjustmentInterval = prop.pathAdjustmentInterval;
@@ -433,7 +433,7 @@ CreateIndexThread::run() {
         ObjectDistances *rs = new ObjectDistances;
         Object &obj = *job.object;
         try {
-            if (graphIndex.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeKNNG) {
+            if (graphIndex.NeighborhoodGraph::property.graphType == GraphType::GraphTypeKNNG) {
                 graphIndex.searchForKNNGInsertion(obj, job.id, *rs);    // linear search
             } else {
                 graphIndex.searchForNNGInsertion(obj, *rs);
@@ -595,7 +595,7 @@ polaris::GraphIndex::exportProperty(const std::string &file) {
 polaris::GraphIndex::GraphIndex(const string &database, bool rdOnly, polaris::NgtIndex::OpenType openType) : readOnly(rdOnly) {
     polaris::Property prop;
     prop.load(database);
-    if (prop.databaseType != polaris::NgtIndex::Property::DatabaseType::Memory) {
+    if (prop.databaseType != polaris::DatabaseType::Memory) {
         POLARIS_THROW_EX("GraphIndex: Cannot open. Not memory type.");
     }
     assert(prop.dimension != 0);
@@ -798,7 +798,7 @@ searchMultipleQueryForCreation(GraphIndex &neighborhoodGraph,
         if (repo[oid] == 0) {
             continue;
         }
-        if (neighborhoodGraph.NeighborhoodGraph::property.graphType != NeighborhoodGraph::GraphTypeBKNNG) {
+        if (neighborhoodGraph.NeighborhoodGraph::property.graphType != GraphType::GraphTypeBKNNG) {
             if (oid < anngRepo.size() && anngRepo[oid] != 0) {
                 continue;
             }
@@ -821,20 +821,20 @@ insertMultipleSearchResults(GraphIndex &neighborhoodGraph,
                             CreateIndexThreadPool::OutputJobQueue &output,
                             ObjectID id,
                             size_t dataSize) {
-    if (neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeRANNG ||
-        neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeRIANNG) {
+    if (neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeRANNG ||
+        neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeRIANNG) {
 #pragma omp parallel for
         for (size_t i = 0; i < dataSize; i++) {
             neighborhoodGraph.deleteShortcutEdges(*output[i].results);
         }
     }
     // compute distances among all of the resultant objects
-    if (neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeANNG ||
-        neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeIANNG ||
-        neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeONNG ||
-        neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeDNNG ||
-        neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeRANNG ||
-        neighborhoodGraph.NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeRIANNG) {
+    if (neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeANNG ||
+        neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeIANNG ||
+        neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeONNG ||
+        neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeDNNG ||
+        neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeRANNG ||
+        neighborhoodGraph.NeighborhoodGraph::property.graphType == GraphType::GraphTypeRIANNG) {
         // This processing occupies about 30% of total indexing time when batch size is 200.
         // Only initial batch objects should be connected for each other.
         // The number of nodes in the graph is checked to know whether the batch is initial.
@@ -868,8 +868,8 @@ insertMultipleSearchResults(GraphIndex &neighborhoodGraph,
         auto targetID = id == 0 ? gr.id : (id + i);
         if (static_cast<int>(targetID) > neighborhoodGraph.NeighborhoodGraph::property.edgeSizeForCreation &&
             static_cast<int>(gr.results->size()) < neighborhoodGraph.NeighborhoodGraph::property.edgeSizeForCreation) {
-            if (neighborhoodGraph.NeighborhoodGraph::property.graphType != NeighborhoodGraph::GraphTypeRANNG &&
-                neighborhoodGraph.NeighborhoodGraph::property.graphType != NeighborhoodGraph::GraphTypeRIANNG) {
+            if (neighborhoodGraph.NeighborhoodGraph::property.graphType != GraphType::GraphTypeRANNG &&
+                neighborhoodGraph.NeighborhoodGraph::property.graphType != GraphType::GraphTypeRIANNG) {
                 cerr
                         << "createIndex: Warning. The specified number of edges could not be acquired, because the pruned parameter [-S] might be set."
                         << endl;
@@ -1392,7 +1392,7 @@ GraphAndTreeIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder,
                         DVPTree::insert(tiobj);
                     } catch (polaris::PolarisException &err) {
                         cerr << "polaris::createIndex: Fatal error. ID=" << job.id << ":";
-                        if (NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeKNNG) {
+                        if (NeighborhoodGraph::property.graphType == GraphType::GraphTypeKNNG) {
                             cerr << err.what() << " continue.." << endl;
                         } else {
                             throw err;
@@ -1522,13 +1522,13 @@ GraphAndTreeIndex::createIndex(const vector<pair<polaris::Object *, size_t> > &o
                 for (size_t i = 0; i < cnt; i++) {
                     CreateIndexJob &job = output.front();
                     if (job.id != 0) {
-                        if (property.indexType == polaris::Property::GraphAndTree) {
+                        if (property.indexType == IndexType::INDEX_NGT_GRAPH_AND_TREE) {
                             DVPTree::InsertContainer tiobj(*job.object, job.id);
                             try {
                                 DVPTree::insert(tiobj);
                             } catch (polaris::PolarisException &err) {
                                 cerr << "polaris::createIndex: Fatal error. ID=" << job.id << ":" << err.what();
-                                if (NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeKNNG) {
+                                if (NeighborhoodGraph::property.graphType == GraphType::GraphTypeKNNG) {
                                     cerr << err.what() << " continue.." << endl;
                                 } else {
                                     throw err;

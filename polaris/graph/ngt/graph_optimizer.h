@@ -301,7 +301,7 @@ namespace polaris {
                         // extract only edges from the index to reduce the memory usage.
                         polaris::GraphReconstructor::extractGraph(graph, *graphIndex);
                         NeighborhoodGraph::Property &prop = graphIndex->getGraphProperty();
-                        if (prop.graphType == polaris::NeighborhoodGraph::GraphTypeONNG) {
+                        if (prop.graphType == polaris::GraphType::GraphTypeONNG) {
                             polaris::GraphReconstructor::convertToANNG(graph);
                         }
                         polaris::GraphReconstructor::reconstructGraph(graph, *graphIndex, numOfOutgoingEdges,
@@ -310,7 +310,7 @@ namespace polaris {
                         std::cerr << "Optimizer::execute: Graph reconstruction time=" << timer.delta.to_seconds<double>() << " (sec) "
                                   << std::endl;
                         graphIndex->saveGraph(outIndexPath);
-                        prop.graphType = polaris::NeighborhoodGraph::GraphTypeONNG;
+                        prop.graphType = polaris::GraphType::GraphTypeONNG;
                         graphIndex->saveProperty(outIndexPath);
                     } catch (polaris::PolarisException &err) {
                         delete graphIndex;

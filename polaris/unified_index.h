@@ -26,19 +26,6 @@
 
 namespace polaris {
 
-    enum class IndexType {
-        IT_NONE,
-        INDEX_HNSW_FLAT,
-        IT_FLAT,
-        IT_FLATIP,
-        IT_FLATL2,
-        IT_LSH,
-        IT_IVFFLAT,
-        INDEX_VAMANA_DISK,
-        INDEX_VAMANA,
-        INDEX_HNSW
-    };
-
     struct UnifiedBuildParameters {
         std::string data_file;
         std::string tags_file;

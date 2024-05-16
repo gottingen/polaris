@@ -218,7 +218,7 @@ bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NG
 
         globalProperty.edgeSizeForCreation = 10;
         globalProperty.edgeSizeForSearch = 40;
-        globalProperty.indexType = polaris::Property::GraphAndTree;
+        globalProperty.indexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
         globalProperty.insertionRadiusCoefficient = 1.1;
 
         localProperty.indexType = globalProperty.indexType;

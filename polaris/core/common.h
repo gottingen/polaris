@@ -41,6 +41,7 @@
 #include <polaris/utility/bfloat.h>
 #include <polaris/utility/polaris_exception.h>
 #include <polaris/utility/serialize.h>
+#include <polaris/utility/property_set.h>
 #include <polaris/distance/object_distance.h>
 #include <collie/strings/match.h>
 
@@ -69,6 +70,13 @@ namespace polaris {
         FLOAT16 = 10,
         DOUBLE = 11,
         BFLOAT16 = 12
+    };
+
+    enum DatabaseType {
+        DatabaseTypeNone = 0,
+        Memory = 1,
+        MemoryMappedFile = 2,
+        SSD = 3
     };
 
     inline uint32_t polaris_type_to_size(ObjectType type) {
@@ -134,29 +142,29 @@ namespace polaris {
     }
 
     inline ObjectType string_to_polaris_type(const std::string &type) {
-        if(collie::str_equals_ignore_case(type, "UINT8")) {
+        if (collie::str_equals_ignore_case(type, "UINT8")) {
             return UINT8;
-        } else if(collie::str_equals_ignore_case(type, "INT8")) {
+        } else if (collie::str_equals_ignore_case(type, "INT8")) {
             return INT8;
-        } else if(collie::str_equals_ignore_case(type, "UINT16")) {
+        } else if (collie::str_equals_ignore_case(type, "UINT16")) {
             return UINT16;
-        } else if(collie::str_equals_ignore_case(type, "INT16")) {
+        } else if (collie::str_equals_ignore_case(type, "INT16")) {
             return INT16;
-        } else if(collie::str_equals_ignore_case(type, "UINT32")) {
+        } else if (collie::str_equals_ignore_case(type, "UINT32")) {
             return UINT32;
-        } else if(collie::str_equals_ignore_case(type, "INT32")) {
+        } else if (collie::str_equals_ignore_case(type, "INT32")) {
             return INT32;
-        } else if(collie::str_equals_ignore_case(type, "UINT64")) {
+        } else if (collie::str_equals_ignore_case(type, "UINT64")) {
             return UINT64;
-        } else if(collie::str_equals_ignore_case(type, "INT64")) {
+        } else if (collie::str_equals_ignore_case(type, "INT64")) {
             return INT64;
-        } else if(collie::str_equals_ignore_case(type, "FLOAT")) {
+        } else if (collie::str_equals_ignore_case(type, "FLOAT")) {
             return FLOAT;
-        } else if(collie::str_equals_ignore_case(type, "FLOAT16")) {
+        } else if (collie::str_equals_ignore_case(type, "FLOAT16")) {
             return FLOAT16;
-        } else if(collie::str_equals_ignore_case(type, "DOUBLE")) {
+        } else if (collie::str_equals_ignore_case(type, "DOUBLE")) {
             return DOUBLE;
-        } else if(collie::str_equals_ignore_case(type, "BFLOAT16")) {
+        } else if (collie::str_equals_ignore_case(type, "BFLOAT16")) {
             return BFLOAT16;
         } else {
             return ObjectTypeNone;
@@ -411,6 +419,95 @@ namespace polaris {
         size_t dimension;
 
         virtual ~Comparator() {}
+    };
+
+    enum ObjectAlignment {
+        ObjectAlignmentNone = 0,
+        ObjectAlignmentTrue = 1,
+        ObjectAlignmentFalse = 2
+    };
+
+    enum GraphType {
+        GraphTypeNone = 0,
+        GraphTypeANNG = 1,
+        GraphTypeKNNG = 2,
+        GraphTypeBKNNG = 3,
+        GraphTypeONNG = 4,
+        GraphTypeIANNG = 5,    // Improved ANNG
+        GraphTypeDNNG = 6,
+        GraphTypeRANNG = 7,
+        GraphTypeRIANNG = 8,
+        GraphTypeHNSW = 9,
+        GraphTypeVAMANA = 10
+    };
+
+    enum SeedType {
+        SeedTypeNone = 0,
+        SeedTypeRandomNodes = 1,
+        SeedTypeFixedNodes = 2,
+        SeedTypeFirstNode = 3,
+        SeedTypeAllLeafNodes = 4
+    };
+
+    enum IndexType {
+        INDEX_NONE = 0,
+        // INDEX NGT Graph And Tree
+        INDEX_NGT_GRAPH_AND_TREE,
+        // INDEX NGT Graph
+        INDEX_NGT_GRAPH,
+        INDEX_HNSW_FLAT,
+        IT_FLAT,
+        IT_FLATIP,
+        IT_FLATL2,
+        IT_LSH,
+        IT_IVFFLAT,
+        INDEX_VAMANA_DISK,
+        INDEX_VAMANA,
+        INDEX_HNSW
+    };
+
+    struct PropertySerializer {
+        static const std::string OBJECT_TYPE;
+        static const std::string DISTANCE_TYPE;
+        static const std::string DATABASE_TYPE;
+        static const std::string OBJECT_ALIGNMENT;
+        static const std::string GRAPH_TYPE;
+        static const std::string SEED_TYPE;
+        static const std::string INDEX_TYPE;
+        static const std::string DIMENSION;
+
+        [[nodiscard]] static turbo::Status
+        object_type_export(PropertySet &ps, ObjectType type, std::set<ObjectType> *allow_set = nullptr);
+
+        static turbo::ResultStatus<ObjectType>
+        object_type_import(const PropertySet &ps, std::set<ObjectType> *allow_set = nullptr);
+
+        [[nodiscard]] static turbo::Status
+        distance_type_export(PropertySet &ps, MetricType diss, std::set<MetricType> *allow_set = nullptr);
+
+        static turbo::ResultStatus<MetricType>
+        distance_type_import(const PropertySet &ps, std::set<MetricType> *allow_set = nullptr);
+
+        [[nodiscard]] static turbo::Status
+        database_type_export(PropertySet &ps, DatabaseType type, std::set<DatabaseType> *allow_set = nullptr);
+
+        static turbo::ResultStatus<DatabaseType>
+        database_type_import(const PropertySet &ps, std::set<DatabaseType> *allow_set = nullptr);
+
+        [[nodiscard]] static turbo::Status object_alignment_export(PropertySet &ps, ObjectAlignment type);
+        static turbo::ResultStatus<ObjectAlignment> object_alignment_import(const PropertySet &ps);
+
+        [[nodiscard]] static turbo::Status graph_type_export(PropertySet &ps, GraphType type);
+        static turbo::ResultStatus<GraphType> graph_type_import(const PropertySet &ps);
+
+        [[nodiscard]] static turbo::Status seed_type_export(PropertySet &ps, SeedType type);
+        static turbo::ResultStatus<SeedType> seed_type_import(const PropertySet &ps);
+
+        [[nodiscard]] static turbo::Status index_type_export(PropertySet &ps, IndexType type);
+        static turbo::ResultStatus<IndexType> index_type_import(const PropertySet &ps);
+
+        static void dimension_export(PropertySet &ps, size_t dimension);
+        static turbo::ResultStatus<size_t> dimension_import(const PropertySet &ps);
     };
 
 } // namespace polaris

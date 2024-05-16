@@ -55,33 +55,33 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
     }
 
     property.objectAlignment =
-            args.getChar("A", 'f') == 't' ? polaris::Property::ObjectAlignmentTrue : polaris::Property::ObjectAlignmentFalse;
+            args.getChar("A", 'f') == 't' ? polaris::ObjectAlignment::ObjectAlignmentTrue : polaris::ObjectAlignment::ObjectAlignmentFalse;
 
     char graphType = args.getChar("g", 'a');
     switch (graphType) {
         case 'a':
-            property.graphType = polaris::Property::GraphType::GraphTypeANNG;
+            property.graphType = polaris::GraphType::GraphTypeANNG;
             break;
         case 'k':
-            property.graphType = polaris::Property::GraphType::GraphTypeKNNG;
+            property.graphType = polaris::GraphType::GraphTypeKNNG;
             break;
         case 'b':
-            property.graphType = polaris::Property::GraphType::GraphTypeBKNNG;
+            property.graphType = polaris::GraphType::GraphTypeBKNNG;
             break;
         case 'd':
-            property.graphType = polaris::Property::GraphType::GraphTypeDNNG;
+            property.graphType = polaris::GraphType::GraphTypeDNNG;
             break;
         case 'o':
-            property.graphType = polaris::Property::GraphType::GraphTypeONNG;
+            property.graphType = polaris::GraphType::GraphTypeONNG;
             break;
         case 'i':
-            property.graphType = polaris::Property::GraphType::GraphTypeIANNG;
+            property.graphType = polaris::GraphType::GraphTypeIANNG;
             break;
         case 'r':
-            property.graphType = polaris::Property::GraphType::GraphTypeRANNG;
+            property.graphType = polaris::GraphType::GraphTypeRANNG;
             break;
         case 'R':
-            property.graphType = polaris::Property::GraphType::GraphTypeRIANNG;
+            property.graphType = polaris::GraphType::GraphTypeRIANNG;
             break;
         default:
             std::stringstream msg;
@@ -89,11 +89,11 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
             POLARIS_THROW_EX(msg);
     }
 
-    if (property.graphType == polaris::Property::GraphType::GraphTypeANNG ||
-        property.graphType == polaris::Property::GraphType::GraphTypeONNG ||
-        property.graphType == polaris::Property::GraphType::GraphTypeIANNG ||
-        property.graphType == polaris::Property::GraphType::GraphTypeRANNG ||
-        property.graphType == polaris::Property::GraphType::GraphTypeRIANNG) {
+    if (property.graphType == polaris::GraphType::GraphTypeANNG ||
+        property.graphType == polaris::GraphType::GraphTypeONNG ||
+        property.graphType == polaris::GraphType::GraphTypeIANNG ||
+        property.graphType == polaris::GraphType::GraphTypeRANNG ||
+        property.graphType == polaris::GraphType::GraphTypeRIANNG) {
         property.outgoingEdge = 10;
         property.incomingEdge = 100;
         string str = args.getString("O", "-");
@@ -115,20 +115,20 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
     char seedType = args.getChar("s", '-');
     switch (seedType) {
         case 'f':
-            property.seedType = polaris::Property::SeedType::SeedTypeFixedNodes;
+            property.seedType = polaris::SeedType::SeedTypeFixedNodes;
             break;
         case '1':
-            property.seedType = polaris::Property::SeedType::SeedTypeFirstNode;
+            property.seedType = polaris::SeedType::SeedTypeFirstNode;
             break;
         case 'r':
-            property.seedType = polaris::Property::SeedType::SeedTypeRandomNodes;
+            property.seedType = polaris::SeedType::SeedTypeRandomNodes;
             break;
         case 'l':
-            property.seedType = polaris::Property::SeedType::SeedTypeAllLeafNodes;
+            property.seedType = polaris::SeedType::SeedTypeAllLeafNodes;
             break;
         default:
         case '-':
-            property.seedType = polaris::Property::SeedType::SeedTypeNone;
+            property.seedType = polaris::SeedType::SeedTypeNone;
             break;
     }
 

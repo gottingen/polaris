@@ -24,6 +24,9 @@
 #include <fstream>
 #include <polaris/utility/polaris_exception.h>
 #include <polaris/utility/utils.h>
+#include <polaris/core/log.h>
+#include <turbo/status/result_status.h>
+#include <turbo/strings/numbers.h>
 #include <cstdint>
 
 namespace polaris {
@@ -44,7 +47,7 @@ namespace polaris {
             auto precision = vstr.precision();
             vstr << std::setprecision(7);
             vstr << value;
-            iterator it = find(key);
+            auto it = find(key);
             if (it == end()) {
                 insert(std::pair<std::string, std::string>(key, vstr.str()));
             } else {
@@ -54,7 +57,7 @@ namespace polaris {
         }
 
         std::string get(const std::string &key) {
-            iterator it = find(key);
+            auto it = find(key);
             if (it != end()) {
                 return it->second;
             }
@@ -62,13 +65,12 @@ namespace polaris {
         }
 
         float getf(const std::string &key, float defvalue) {
-            iterator it = find(key);
+            auto it = find(key);
             if (it != end()) {
-                char *e = 0;
-                float val = strtof(it->second.c_str(), &e);
-                if (*e != 0) {
-                    std::cerr << "Warning: Illegal property. " << key << ":" << it->second << " (" << e << ")"
-                              << std::endl;
+                float val;
+                auto b = turbo::simple_atof(it->second, &val);
+                if (!b) {
+                    POLARIS_LOG(ERROR) << "Warning: Illegal property. " << key << ":" << it->second;
                     return defvalue;
                 }
                 return val;
@@ -77,53 +79,56 @@ namespace polaris {
         }
 
         void updateAndInsert(PropertySet &prop) {
-            for (std::map<std::string, std::string>::iterator i = prop.begin(); i != prop.end(); ++i) {
+            for (auto i = prop.begin(); i != prop.end(); ++i) {
                 set((*i).first, (*i).second);
             }
         }
 
         long getl(const std::string &key, long defvalue) {
-            iterator it = find(key);
+            auto it = find(key);
             if (it != end()) {
-                char *e = 0;
-                float val = strtol(it->second.c_str(), &e, 10);
-                if (*e != 0) {
-                    std::cerr << "Warning: Illegal property. " << key << ":" << it->second << " (" << e << ")"
-                              << std::endl;
+                long val;
+                auto b = turbo::simple_atoi(it->second, &val);
+                if (!b) {
+                    POLARIS_LOG(ERROR)<< "Warning: Illegal property. " << key << ":" << it->second;
+                    return defvalue;
                 }
                 return val;
             }
             return defvalue;
         }
 
-        void load(const std::string &f) {
+        [[nodiscard]] turbo::Status load(const std::string &f) {
             std::ifstream st(f);
             if (!st) {
-                std::stringstream msg;
-                msg << "PropertySet::load: Cannot load the property file " << f << ".";
-                POLARIS_THROW_EX(msg);
+                return turbo::make_status(errno, "PropertySet::load: Cannot load the property file {}", f);
             }
-            load(st);
+            return load(st);
         }
 
-        void save(const std::string &f) {
+        [[nodiscard]] turbo::Status save(const std::string &f) {
             std::ofstream st(f);
             if (!st) {
-                std::stringstream msg;
-                msg << "PropertySet::save: Cannot save. " << f << std::endl;
-                POLARIS_THROW_EX(msg);
+                return turbo::make_status(errno, "PropertySet::save: Cannot save. {}", f);
             }
-            save(st);
+            return save(st);
         }
 
-        void save(std::ofstream &os) {
-            for (std::map<std::string, std::string>::iterator i = this->begin(); i != this->end(); i++) {
-                os << i->first << "\t" << i->second << std::endl;
+        [[nodiscard]] turbo::Status save(std::ofstream &os) {
+
+            try {
+                for (auto i = this->begin(); i != this->end(); i++) {
+                    os << i->first << "\t" << i->second << std::endl;
+                }
+            } catch (std::exception &e) {
+                return turbo::make_status(errno, "PropertySet::save: {}", e.what());
             }
+            return turbo::ok_status();
         }
 
-        void load(std::ifstream &is) {
+        [[nodiscard]] turbo::Status load(std::ifstream &is) {
             std::string line;
+            try {
             while (getline(is, line)) {
                 std::vector<std::string> tokens;
                 polaris::Common::tokenize(line, tokens, "\t");
@@ -133,6 +138,10 @@ namespace polaris {
                 }
                 set(tokens[0], tokens[1]);
             }
+            } catch (std::exception &e) {
+                return turbo::make_status(errno, "PropertySet::load: {}", e.what());
+            }
+            return turbo::ok_status();
         }
     };
 

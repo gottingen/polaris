@@ -4147,13 +4147,13 @@ public:
             gp.batchSizeForCreation = 500;
             gp.edgeSizeLimitForCreation = 0;
             gp.edgeSizeForCreation = 100;
-            gp.graphType = polaris::NgtIndex::Property::GraphType::GraphTypeANNG;
+            gp.graphType = polaris::GraphType::GraphTypeANNG;
             gp.insertionRadiusCoefficient = 1.1;
 
             lp.batchSizeForCreation = 500;
             lp.edgeSizeLimitForCreation = 0;
             lp.edgeSizeForCreation = 10;
-            lp.graphType = polaris::NgtIndex::Property::GraphType::GraphTypeANNG;
+            lp.graphType = polaris::GraphType::GraphTypeANNG;
             lp.insertionRadiusCoefficient = 1.1;
             gp.set(globalProperty);
             lp.set(localProperty);

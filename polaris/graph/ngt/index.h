@@ -50,23 +50,6 @@ namespace polaris {
 
         class Property {
         public:
-            typedef NeighborhoodGraph::SeedType SeedType;
-            typedef NeighborhoodGraph::GraphType GraphType;
-            enum ObjectAlignment {
-                ObjectAlignmentNone = 0,
-                ObjectAlignmentTrue = 1,
-                ObjectAlignmentFalse = 2
-            };
-            enum IndexType {
-                IndexTypeNone = 0,
-                GraphAndTree = 1,
-                Graph = 2
-            };
-            enum DatabaseType {
-                DatabaseTypeNone = 0,
-                Memory = 1,
-                MemoryMappedFile = 2
-            };
 
             Property() { setDefault(); }
 
@@ -78,7 +61,7 @@ namespace polaris {
                 refinementObjectType	= ObjectType::FLOAT;
 #endif
                 distanceType = MetricType::METRIC_L2;
-                indexType = IndexType::GraphAndTree;
+                indexType = IndexType::INDEX_NGT_GRAPH_AND_TREE;
                 objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
                 pathAdjustmentInterval = 0;
                 databaseType = DatabaseType::Memory;
@@ -97,7 +80,7 @@ namespace polaris {
                 refinementObjectType	= ObjectSpace::ObjectTypeNone;
 #endif
                 distanceType = MetricType::METRIC_NONE;
-                indexType = IndexTypeNone;
+                indexType = IndexType::INDEX_NONE;
                 databaseType = DatabaseTypeNone;
                 objectAlignment = ObjectAlignment::ObjectAlignmentNone;
                 pathAdjustmentInterval = -1;
@@ -110,116 +93,49 @@ namespace polaris {
             }
 
             void exportProperty(polaris::PropertySet &p) {
-                p.set("Dimension", dimension);
+                PropertySerializer::dimension_export(p, dimension);
                 p.set("ThreadPoolSize", threadPoolSize);
-                switch (objectType) {
-                    case polaris::ObjectType::UINT8:
-                        p.set("ObjectType", "Integer-1");
-                        break;
-                    case polaris::ObjectType::FLOAT:
-                        p.set("ObjectType", "Float-4");
-                        break;
-                    case polaris::ObjectType::FLOAT16:
-                        p.set("ObjectType", "Float-2");
-                        break;
-                    case polaris::ObjectType::BFLOAT16:
-                        p.set("ObjectType", "Bfloat-2");
-                        break;
-                    default :
-                        std::cerr << "Fatal error. Invalid object type. " << objectType << std::endl;
-                        abort();
+                static std::set<ObjectType> allow_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16,
+                                                         ObjectType::BFLOAT16};
+                auto rs = PropertySerializer::object_type_export(p, objectType, &allow_set);
+                if(!rs.ok()) {
+                    POLARIS_LOG(ERROR) << rs.message();
+                    abort();
                 }
 #ifdef NGT_REFINEMENT
-                switch (refinementObjectType) {
-                case polaris::ObjectType::UINT8: p.set("RefinementObjectType", "Integer-1"); break;
-                case polaris::ObjectType::FLOAT: p.set("RefinementObjectType", "Float-4"); break;
-                case polaris::ObjectType::FLOAT16: p.set("RefinementObjectType", "Float-2"); break;
-                case polaris::ObjectType::BFLOAT16: p.set("RefinementObjectType", "Bfloat-2"); break;
-                default : std::cerr << "Fatal error. Invalid refinement object type. " << refinementObjectType << std::endl; abort();
+                static std::set<ObjectType> refinement_allow_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
+                auto rrs = PropertySerializer::object_type_export(p, refinementObjectType, &refinement_allow_set);
+                if(!rrs.ok()) {
+                    POLARIS_LOG(ERROR) << rs.message();
+                    abort();
                 }
 #endif
-                switch (distanceType) {
-                    case MetricType::METRIC_NONE:
-                        p.set("MetricType", "None");
-                        break;
-                    case MetricType::METRIC_L1:
-                        p.set("MetricType", "L1");
-                        break;
-                    case MetricType::METRIC_L2:
-                        p.set("MetricType", "L2");
-                        break;
-                    case MetricType::METRIC_HAMMING:
-                        p.set("MetricType", "Hamming");
-                        break;
-                    case MetricType::METRIC_JACCARD:
-                        p.set("MetricType", "Jaccard");
-                        break;
-                    case MetricType::METRIC_SPARSE_JACCARD:
-                        p.set("MetricType", "SparseJaccard");
-                        break;
-                    case MetricType::METRIC_ANGLE:
-                        p.set("MetricType", "Angle");
-                        break;
-                    case MetricType::METRIC_COSINE:
-                        p.set("MetricType", "Cosine");
-                        break;
-                    case MetricType::METRIC_NORMALIZED_ANGLE:
-                        p.set("MetricType", "NormalizedAngle");
-                        break;
-                    case MetricType::METRIC_NORMALIZED_COSINE:
-                        p.set("MetricType", "NormalizedCosine");
-                        break;
-                    case MetricType::METRIC_NORMALIZED_L2:
-                        p.set("MetricType", "NormalizedL2");
-                        break;
-                    case MetricType::METRIC_INNER_PRODUCT:
-                        p.set("MetricType", "InnerProduct");
-                        break;
-                    case MetricType::METRIC_POINCARE:
-                        p.set("MetricType", "Poincare");
-                        break;  // added by Nyapicom
-                    case MetricType::METRIC_LORENTZ:
-                        p.set("MetricType", "Lorentz");
-                        break;  // added by Nyapicom
-                    default :
-                        std::cerr << "Fatal error. Invalid distance type. " << distanceType << std::endl;
-                        abort();
+                static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1, MetricType::METRIC_L2,
+                                                          MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD, MetricType::METRIC_SPARSE_JACCARD,
+                                                          MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
+                                                          MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
+                                                          MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
+                rs = PropertySerializer::distance_type_export(p, distanceType, &allow_dis_set);
+                if(!rs.ok()) {
+                    POLARIS_LOG(ERROR) << rs.message();
+                    abort();
                 }
-                switch (indexType) {
-                    case IndexType::GraphAndTree:
-                        p.set("IndexType", "GraphAndTree");
-                        break;
-                    case IndexType::Graph:
-                        p.set("IndexType", "Graph");
-                        break;
-                    default :
-                        std::cerr << "Fatal error. Invalid index type. " << indexType << std::endl;
-                        abort();
+
+                rs = PropertySerializer::index_type_export(p, indexType);
+                if(!rs.ok()) {
+                    POLARIS_LOG(ERROR) << rs.message();
+                    abort();
                 }
-                switch (databaseType) {
-                    case DatabaseType::Memory:
-                        p.set("DatabaseType", "Memory");
-                        break;
-                    case DatabaseType::MemoryMappedFile:
-                        p.set("DatabaseType", "MemoryMappedFile");
-                        break;
-                    default :
-                        std::cerr << "Fatal error. Invalid database type. " << databaseType << std::endl;
-                        abort();
+
+                rs = PropertySerializer::database_type_export(p, databaseType);
+                if(!rs.ok()) {
+                    POLARIS_LOG(ERROR) << rs.message();
+                    abort();
                 }
-                switch (objectAlignment) {
-                    case ObjectAlignment::ObjectAlignmentNone:
-                        p.set("ObjectAlignment", "None");
-                        break;
-                    case ObjectAlignment::ObjectAlignmentTrue:
-                        p.set("ObjectAlignment", "True");
-                        break;
-                    case ObjectAlignment::ObjectAlignmentFalse:
-                        p.set("ObjectAlignment", "False");
-                        break;
-                    default :
-                        std::cerr << "Fatal error. Invalid objectAlignment. " << objectAlignment << std::endl;
-                        abort();
+                rs = PropertySerializer::object_alignment_export(p, objectAlignment);
+                if(!rs.ok()) {
+                    POLARIS_LOG(ERROR) << rs.message();
+                    abort();
                 }
                 p.set("PathAdjustmentInterval", pathAdjustmentInterval);
                 p.set("PrefetchOffset", prefetchOffset);
@@ -232,128 +148,70 @@ namespace polaris {
 
             void importProperty(polaris::PropertySet &p) {
                 setDefault();
-                dimension = p.getl("Dimension", dimension);
-                threadPoolSize = p.getl("ThreadPoolSize", threadPoolSize);
-                PropertySet::iterator it = p.find("ObjectType");
-                if (it != p.end()) {
-                    if (it->second == "Float-4") {
-                        objectType = polaris::ObjectType::FLOAT;
-                    } else if (it->second == "Integer-1") {
-                        objectType = polaris::ObjectType::UINT8;
-                    } else if (it->second == "Float-2") {
-                        objectType = polaris::ObjectType::FLOAT16;
-                    } else if (it->second == "Bfloat-2") {
-                        objectType = polaris::ObjectType::BFLOAT16;
-                    } else {
-                        std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second
-                                  << std::endl;
-                    }
+                auto dmrs = PropertySerializer::dimension_import(p);
+                if(!dmrs.ok()) {
+                    POLARIS_LOG(ERROR) << dmrs.status().message();
+                    dimension = 0;
                 } else {
-                    std::cerr << "Not found \"ObjectType\"" << std::endl;
+                    dimension = dmrs.value();
                 }
+                threadPoolSize = p.getl("ThreadPoolSize", threadPoolSize);
+
+                static std::set<ObjectType> allow_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
+                auto otrs = PropertySerializer::object_type_import(p, &allow_object_set);
+                if(!otrs.ok()) {
+                    POLARIS_LOG(ERROR) << otrs.status().message();
+                    objectType = ObjectType::ObjectTypeNone;
+                }
+                objectType = otrs.value();
 #ifdef NGT_REFINEMENT
                 {
-                  PropertySet::iterator it = p.find("RefinementObjectType");
-                  if (it != p.end()) {
-                    if (it->second == "Float-4") {
-                      refinementObjectType = polaris::ObjectType::FLOAT;
-                    } else if (it->second == "Integer-1") {
-                      refinementObjectType = polaris::ObjectType::UINT8;
-                    } else if (it->second == "Float-2") {
-                      refinementObjectType = polaris::ObjectType::FLOAT16;
-                    } else if (it->second == "Bfloat-2") {
-                      refinementObjectType = polaris::ObjectType::BFLOAT16;
-                    } else {
-                      std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second << std::endl;
+                    static std::set<ObjectType> allow_refinement_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
+                    auto rtrs = PropertySerializer::object_type_import(p, &allow_refinement_object_set);
+                    if(!rtrs.ok()) {
+                        POLARIS_LOG(ERROR) << rtrs.status().message();
+                        refinementObjectType = ObjectType::ObjectTypeNone;
                     }
-                  } else {
-                    std::cerr << "Not found \"RefinementObjectType\"" << std::endl;
-                  }
+                    refinementObjectType = rtrs.value();
                 }
 #endif
-                it = p.find("MetricType");
-                if (it != p.end()) {
-                    if (it->second == "None") {
-                        distanceType = MetricType::METRIC_NONE;
-                    } else if (it->second == "L1") {
-                        distanceType = MetricType::METRIC_L1;
-                    } else if (it->second == "L2") {
-                        distanceType = MetricType::METRIC_L2;
-                    } else if (it->second == "Hamming") {
-                        distanceType = MetricType::METRIC_HAMMING;
-                    } else if (it->second == "Jaccard") {
-                        distanceType = MetricType::METRIC_JACCARD;
-                    } else if (it->second == "SparseJaccard") {
-                        distanceType = MetricType::METRIC_SPARSE_JACCARD;
-                    } else if (it->second == "Angle") {
-                        distanceType = MetricType::METRIC_ANGLE;
-                    } else if (it->second == "Cosine") {
-                        distanceType = MetricType::METRIC_COSINE;
-                    } else if (it->second == "Poincare") {  // added by Nyapicom
-                        distanceType = MetricType::METRIC_POINCARE;
-                    } else if (it->second == "Lorentz") {  // added by Nyapicom
-                        distanceType = MetricType::METRIC_LORENTZ;
-                    } else if (it->second == "NormalizedAngle") {
-                        distanceType = MetricType::METRIC_NORMALIZED_ANGLE;
-                    } else if (it->second == "NormalizedCosine") {
-                        distanceType = MetricType::METRIC_NORMALIZED_COSINE;
-                    } else if (it->second == "NormalizedL2") {
-                        distanceType = MetricType::METRIC_NORMALIZED_L2;
-                    } else if (it->second == "InnerProduct") {
-                        distanceType = MetricType::METRIC_INNER_PRODUCT;
-                    } else {
-                        std::cerr << "Invalid distance_t Type in the property. " << it->first << ":" << it->second
-                                  << std::endl;
-                    }
-                } else {
-                    std::cerr << "Not found \"MetricType\"" << std::endl;
+                static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1, MetricType::METRIC_L2,
+                                                          MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD, MetricType::METRIC_SPARSE_JACCARD,
+                                                          MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
+                                                          MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
+                                                          MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
+                auto drs = PropertySerializer::distance_type_import(p, &allow_dis_set);
+                if(!drs.ok()) {
+                    POLARIS_LOG(ERROR) << drs.status().message();
+                    distanceType = MetricType::METRIC_NONE;
                 }
-                it = p.find("IndexType");
-                if (it != p.end()) {
-                    if (it->second == "GraphAndTree") {
-                        indexType = IndexType::GraphAndTree;
-                    } else if (it->second == "Graph") {
-                        indexType = IndexType::Graph;
-                    } else {
-                        std::cerr << "Invalid NgtIndex Type in the property. " << it->first << ":" << it->second
-                                  << std::endl;
-                    }
+                distanceType = drs.value();
+                auto irs = PropertySerializer::index_type_import(p);
+                if(!irs.ok()) {
+                    POLARIS_LOG(ERROR) << irs.status().message();
+                    indexType = IndexType::INDEX_NONE;
                 } else {
-                    std::cerr << "Not found \"IndexType\"" << std::endl;
+                    indexType = irs.value();
                 }
-                it = p.find("DatabaseType");
-                if (it != p.end()) {
-                    if (it->second == "Memory") {
-                        databaseType = DatabaseType::Memory;
-                    } else if (it->second == "MemoryMappedFile") {
-                        databaseType = DatabaseType::MemoryMappedFile;
-                    } else {
-                        std::cerr << "Invalid Database Type in the property. " << it->first << ":" << it->second
-                                  << std::endl;
-                    }
+                std::set<DatabaseType> allow_database_set = {DatabaseType::Memory, DatabaseType::MemoryMappedFile};
+                auto dbtrs = PropertySerializer::database_type_import(p, &allow_database_set);
+                if(!dbtrs.ok()) {
+                    POLARIS_LOG(ERROR) << dbtrs.status().message();
+                    databaseType = DatabaseType::DatabaseTypeNone;
                 } else {
-                    std::cerr << "Not found \"DatabaseType\"" << std::endl;
+                    databaseType = dbtrs.value();
                 }
-                it = p.find("ObjectAlignment");
-                if (it != p.end()) {
-                    if (it->second == "None") {
-                        objectAlignment = ObjectAlignment::ObjectAlignmentNone;
-                    } else if (it->second == "True") {
-                        objectAlignment = ObjectAlignment::ObjectAlignmentTrue;
-                    } else if (it->second == "False") {
-                        objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
-                    } else {
-                        std::cerr << "Invalid Object Alignment in the property. " << it->first << ":" << it->second
-                                  << std::endl;
-                    }
-                } else {
-                    std::cerr << "Not found \"ObjectAlignment\"" << std::endl;
+                auto alrs = PropertySerializer::object_alignment_import(p);
+                if(!alrs.ok()) {
+                    POLARIS_LOG(ERROR) << alrs.status().message();
                     objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
+                } else {
+                    objectAlignment = alrs.value();
                 }
                 pathAdjustmentInterval = p.getl("PathAdjustmentInterval", pathAdjustmentInterval);
                 prefetchOffset = p.getl("PrefetchOffset", prefetchOffset);
                 prefetchSize = p.getl("PrefetchSize", prefetchSize);
-                it = p.find("AccuracyTable");
+                auto it = p.find("AccuracyTable");
                 if (it != p.end()) {
                     accuracyTable = it->second;
                 }
@@ -1216,9 +1074,9 @@ namespace polaris {
             }
             Object &po = *fr[id];
             ObjectDistances rs;
-            if (NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeANNG ||
-                NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeIANNG ||
-                NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeRANNG) {
+            if (NeighborhoodGraph::property.graphType == GraphType::GraphTypeANNG ||
+                NeighborhoodGraph::property.graphType == GraphType::GraphTypeIANNG ||
+                NeighborhoodGraph::property.graphType == GraphType::GraphTypeRANNG) {
                 searchForNNGInsertion(po, rs);
             } else {
                 searchForKNNGInsertion(po, id, rs);
@@ -1477,16 +1335,16 @@ namespace polaris {
             if (repo.size() != 0) {
                 size_t seedSize = repo.size() - 1 < (size_t) NeighborhoodGraph::property.seedSize ?
                                   repo.size() - 1 : (size_t) NeighborhoodGraph::property.seedSize;
-                if (NeighborhoodGraph::property.seedType == NeighborhoodGraph::SeedTypeRandomNodes ||
-                    NeighborhoodGraph::property.seedType == NeighborhoodGraph::SeedTypeNone) {
+                if (NeighborhoodGraph::property.seedType == SeedType::SeedTypeRandomNodes ||
+                    NeighborhoodGraph::property.seedType == SeedType::SeedTypeNone) {
                     getRandomSeeds(repo, seeds, seedSize);
-                } else if (NeighborhoodGraph::property.seedType == NeighborhoodGraph::SeedTypeFixedNodes) {
+                } else if (NeighborhoodGraph::property.seedType == SeedType::SeedTypeFixedNodes) {
                     // To check speed using fixed seeds.
                     for (size_t i = 1; i <= seedSize; i++) {
                         ObjectDistance obj(i, 0.0);
                         seeds.push_back(obj);
                     }
-                } else if (NeighborhoodGraph::property.seedType == NeighborhoodGraph::SeedTypeFirstNode) {
+                } else if (NeighborhoodGraph::property.seedType == SeedType::SeedTypeFirstNode) {
                     ObjectDistance obj(1, 0.0);
                     seeds.push_back(obj);
                 } else {
@@ -1697,7 +1555,7 @@ namespace polaris {
             std::ifstream ist(ifile + "/tre");
             DVPTree::deserialize(ist);
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
-            if (property.objectAlignment == polaris::NgtIndex::Property::ObjectAlignmentTrue) {
+            if (property.objectAlignment == polaris::ObjectAlignmentTrue) {
                 alignObjects();
             }
 #endif
@@ -1843,9 +1701,9 @@ namespace polaris {
             }
             Object &po = *fr[id];
             ObjectDistances rs;
-            if (NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeANNG ||
-                NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeIANNG ||
-                NeighborhoodGraph::property.graphType == NeighborhoodGraph::GraphTypeRANNG) {
+            if (NeighborhoodGraph::property.graphType == GraphType::GraphTypeANNG ||
+                NeighborhoodGraph::property.graphType == GraphType::GraphTypeIANNG ||
+                NeighborhoodGraph::property.graphType == GraphType::GraphTypeRANNG) {
                 searchForNNGInsertion(po, rs);
             } else {
                 searchForKNNGInsertion(po, id, rs);
@@ -1933,7 +1791,7 @@ namespace polaris {
             sc.distanceComputationCount += tso.distanceComputationCount;
             sc.visitCount += tso.visitCount;
             if (sc.useAllNodesInLeaf ||
-                NeighborhoodGraph::property.seedType == NeighborhoodGraph::SeedTypeAllLeafNodes) {
+                NeighborhoodGraph::property.seedType == SeedType::SeedTypeAllLeafNodes) {
                 return;
             }
             // if seedSize is zero, the result size of the query is used as seedSize.

@@ -23,8 +23,8 @@
 using namespace std;
 using namespace polaris;
 
-void
-NeighborhoodGraph::Property::set(polaris::Property &prop) {
+#ifdef NGT_GRAPH_READ_ONLY_GRAPH
+void NeighborhoodGraph::Property::set(polaris::Property &prop) {
     if (prop.truncationThreshold != -1) truncationThreshold = prop.truncationThreshold;
     if (prop.edgeSizeForCreation != -1) edgeSizeForCreation = prop.edgeSizeForCreation;
     if (prop.edgeSizeForSearch != -1) edgeSizeForSearch = prop.edgeSizeForSearch;
@@ -42,8 +42,7 @@ NeighborhoodGraph::Property::set(polaris::Property &prop) {
     if (prop.graphType != GraphTypeNone) graphType = prop.graphType;
 }
 
-void
-NeighborhoodGraph::Property::get(polaris::Property &prop) {
+void NeighborhoodGraph::Property::get(polaris::Property &prop) {
     prop.truncationThreshold = truncationThreshold;
     prop.edgeSizeForCreation = edgeSizeForCreation;
     prop.edgeSizeForSearch = edgeSizeForSearch;
@@ -60,10 +59,6 @@ NeighborhoodGraph::Property::get(polaris::Property &prop) {
     prop.outgoingEdge = outgoingEdge;
     prop.incomingEdge = incomingEdge;
 }
-
-
-#ifdef NGT_GRAPH_READ_ONLY_GRAPH
-
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                            ObjectDistances &seeds) {

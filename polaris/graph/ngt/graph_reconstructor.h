@@ -655,7 +655,7 @@ namespace polaris {
 
             polaris::Property prop;
             outGraph.getProperty().get(prop);
-            prop.graphType = polaris::NeighborhoodGraph::GraphTypeONNG;
+            prop.graphType = polaris::GraphType::GraphTypeONNG;
             outGraph.getProperty().set(prop);
         }
 

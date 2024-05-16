@@ -20,6 +20,7 @@
 #include <turbo/status/status.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/types.h>
+#include <polaris/utility/property_set.h>
 #include <polaris/core/index_config.h>
 #include <polaris/core/report.h>
 #include <polaris/core/common.h>
@@ -46,6 +47,8 @@ namespace polaris {
         virtual turbo::Status save(const std::string &filename) {
             return save(filename.c_str(), false);
         }
+
+        //virtual turbo::Status export_properties(const std::string &filename) const = 0;
 
         [[nodiscard]] virtual turbo::Status load(const char *index_file, uint32_t num_threads, uint32_t search_l) = 0;
 

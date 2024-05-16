@@ -218,25 +218,6 @@ namespace polaris {
 
     class NeighborhoodGraph {
     public:
-        enum GraphType {
-            GraphTypeNone = 0,
-            GraphTypeANNG = 1,
-            GraphTypeKNNG = 2,
-            GraphTypeBKNNG = 3,
-            GraphTypeONNG = 4,
-            GraphTypeIANNG = 5,    // Improved ANNG
-            GraphTypeDNNG = 6,
-            GraphTypeRANNG = 7,
-            GraphTypeRIANNG = 8
-        };
-
-        enum SeedType {
-            SeedTypeNone = 0,
-            SeedTypeRandomNodes = 1,
-            SeedTypeFixedNodes = 2,
-            SeedTypeFirstNode = 3,
-            SeedTypeAllLeafNodes = 4
-        };
 
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
 
@@ -587,52 +568,15 @@ namespace polaris {
                 p.set("BuildTimeLimit", buildTimeLimit);
                 p.set("OutgoingEdge", outgoingEdge);
                 p.set("IncomingEdge", incomingEdge);
-                switch (graphType) {
-                    case NeighborhoodGraph::GraphTypeKNNG:
-                        p.set("GraphType", "KNNG");
-                        break;
-                    case NeighborhoodGraph::GraphTypeANNG:
-                        p.set("GraphType", "ANNG");
-                        break;
-                    case NeighborhoodGraph::GraphTypeBKNNG:
-                        p.set("GraphType", "BKNNG");
-                        break;
-                    case NeighborhoodGraph::GraphTypeONNG:
-                        p.set("GraphType", "ONNG");
-                        break;
-                    case NeighborhoodGraph::GraphTypeIANNG:
-                        p.set("GraphType", "IANNG");
-                        break;
-                    case NeighborhoodGraph::GraphTypeRANNG:
-                        p.set("GraphType", "RANNG");
-                        break;
-                    case NeighborhoodGraph::GraphTypeRIANNG:
-                        p.set("GraphType", "RIANNG");
-                        break;
-                    default:
-                        std::cerr << "Graph::exportProperty: Fatal error! Invalid Graph Type. " << graphType
-                                  << std::endl;
-                        abort();
+                auto rs = PropertySerializer::graph_type_export(p, graphType);
+                if (!rs.ok()) {
+                    std::cerr << "Graph::exportProperty: Fatal error! Invalid Graph Type. " << graphType << std::endl;
+                    abort();
                 }
-                switch (seedType) {
-                    case NeighborhoodGraph::SeedTypeRandomNodes:
-                        p.set("SeedType", "RandomNodes");
-                        break;
-                    case NeighborhoodGraph::SeedTypeFixedNodes:
-                        p.set("SeedType", "FixedNodes");
-                        break;
-                    case NeighborhoodGraph::SeedTypeFirstNode:
-                        p.set("SeedType", "FirstNode");
-                        break;
-                    case NeighborhoodGraph::SeedTypeNone:
-                        p.set("SeedType", "None");
-                        break;
-                    case NeighborhoodGraph::SeedTypeAllLeafNodes:
-                        p.set("SeedType", "AllLeafNodes");
-                        break;
-                    default:
-                        std::cerr << "Graph::exportProperty: Fatal error! Invalid Seed Type. " << seedType << std::endl;
-                        abort();
+                rs = PropertySerializer::seed_type_export(p, seedType);
+                if (!rs.ok()) {
+                    std::cerr << "Graph::exportProperty: Fatal error! Invalid Seed Type. " << seedType << std::endl;
+                    abort();
                 }
             }
 
@@ -652,34 +596,19 @@ namespace polaris {
                 buildTimeLimit = p.getf("BuildTimeLimit", buildTimeLimit);
                 outgoingEdge = p.getl("OutgoingEdge", outgoingEdge);
                 incomingEdge = p.getl("IncomingEdge", incomingEdge);
-                PropertySet::iterator it = p.find("GraphType");
-                if (it != p.end()) {
-                    if (it->second == "KNNG") graphType = NeighborhoodGraph::GraphTypeKNNG;
-                    else if (it->second == "ANNG") graphType = NeighborhoodGraph::GraphTypeANNG;
-                    else if (it->second == "BKNNG") graphType = NeighborhoodGraph::GraphTypeBKNNG;
-                    else if (it->second == "ONNG") graphType = NeighborhoodGraph::GraphTypeONNG;
-                    else if (it->second == "IANNG") graphType = NeighborhoodGraph::GraphTypeIANNG;
-                    else if (it->second == "RANNG") graphType = NeighborhoodGraph::GraphTypeRANNG;
-                    else if (it->second == "RIANNG") graphType = NeighborhoodGraph::GraphTypeRIANNG;
-                    else {
-                        std::cerr << "Graph::importProperty: Fatal error! Invalid Graph Type. " << it->second
-                                  << std::endl;
-                        abort();
-                    }
+                auto grs = PropertySerializer::graph_type_import(p);
+                if (!grs.ok()) {
+                    std::cerr << "Graph::importProperty: Fatal error! Invalid Graph Type. " << grs.status().message() << std::endl;
+                    abort();
                 }
-                it = p.find("SeedType");
-                if (it != p.end()) {
-                    if (it->second == "RandomNodes") seedType = NeighborhoodGraph::SeedTypeRandomNodes;
-                    else if (it->second == "FixedNodes") seedType = NeighborhoodGraph::SeedTypeFixedNodes;
-                    else if (it->second == "FirstNode") seedType = NeighborhoodGraph::SeedTypeFirstNode;
-                    else if (it->second == "None") seedType = NeighborhoodGraph::SeedTypeNone;
-                    else if (it->second == "AllLeafNodes") seedType = NeighborhoodGraph::SeedTypeAllLeafNodes;
-                    else {
-                        std::cerr << "Graph::importProperty: Fatal error! Invalid Seed Type. " << it->second
-                                  << std::endl;
-                        abort();
-                    }
+                graphType = (GraphType) grs.value();
+                auto srs = PropertySerializer::seed_type_import(p);
+                if (!srs.ok()) {
+                    std::cerr << "Graph::importProperty: Fatal error! Invalid Seed Type. " << srs.status().message() << std::endl;
+                    abort();
                 }
+                seedType = (SeedType) srs.value();
+                auto it = p.find("SeedType");
             }
 
             friend std::ostream &operator<<(std::ostream &os, const Property &p) {

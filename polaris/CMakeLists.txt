@@ -32,10 +32,12 @@ carbin_cc_library(
 ]]
 
 set(POLARIS_SRC
+        core/common.cc
         core/log.cc
         core/executor.cc
         core/random.cc
         core/search_condition.cc
+        core/ngt_parameters.cc
         distance/distance.cc
         distance/distance_impl.cc
         datasets/fvecs.cc

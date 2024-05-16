@@ -541,10 +541,10 @@ namespace NGTQG {
             property.localDivisionNo = NGTQG::NgtqgIndex::getNumberOfSubvectors(property.dimension, dimensionOfSubvector);
             globalProperty.edgeSizeForCreation = 10;
             globalProperty.edgeSizeForSearch = 40;
-            globalProperty.indexType = polaris::Property::GraphAndTree;
+            globalProperty.indexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
             globalProperty.insertionRadiusCoefficient = 1.1;
 
-            localProperty.indexType = polaris::Property::GraphAndTree;
+            localProperty.indexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
             localProperty.insertionRadiusCoefficient = 1.1;
 
             NGTQ::NgtqIndex::create(quantizedIndexPath, property, globalProperty, localProperty);

@@ -57,13 +57,13 @@ namespace QBG {
 
             globalEdgeSizeForCreation = 10;
             globalEdgeSizeForSearch = 40;
-            globalIndexType = polaris::Property::GraphAndTree;
+            globalIndexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
             globalInsertionRadiusCoefficient = 1.1;
-            globalGraphType = polaris::NeighborhoodGraph::GraphTypeANNG;
+            globalGraphType = polaris::GraphType::GraphTypeANNG;
 
-            localIndexType = polaris::Property::GraphAndTree;
+            localIndexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
             localInsertionRadiusCoefficient = 1.1;
-            localGraphType = polaris::NeighborhoodGraph::GraphTypeANNG;
+            localGraphType = polaris::GraphType::GraphTypeANNG;
 
             verbose = false;
         }
@@ -133,13 +133,13 @@ namespace QBG {
 
         size_t globalEdgeSizeForCreation;
         size_t globalEdgeSizeForSearch;
-        polaris::Property::IndexType globalIndexType;
+        polaris::IndexType globalIndexType;
         float globalInsertionRadiusCoefficient;
-        polaris::Property::GraphType globalGraphType;
+        polaris::GraphType globalGraphType;
 
-        polaris::Property::IndexType localIndexType;
+        polaris::IndexType localIndexType;
         float localInsertionRadiusCoefficient;
-        polaris::Property::GraphType localGraphType;
+        polaris::GraphType localGraphType;
 
         bool verbose;
     };
