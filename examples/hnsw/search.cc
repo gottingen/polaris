@@ -44,8 +44,8 @@ int main() {
     // Query the elements for themselves and measure recall
     float correct = 0;
     for (int i = 0; i < max_elements; i++) {
-        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
-        hnswlib::labeltype label = result.top().second;
+        std::priority_queue<std::pair<float, polaris::vid_t>> result = alg_hnsw->searchKnn(data + i * dim, 1);
+        polaris::vid_t label = result.top().second;
         if (label == i) correct++;
     }
     float recall = correct / max_elements;
@@ -60,8 +60,8 @@ int main() {
     alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, hnsw_path);
     correct = 0;
     for (int i = 0; i < max_elements; i++) {
-        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
-        hnswlib::labeltype label = result.top().second;
+        std::priority_queue<std::pair<float, polaris::vid_t>> result = alg_hnsw->searchKnn(data + i * dim, 1);
+        polaris::vid_t label = result.top().second;
         if (label == i) correct++;
     }
     recall = (float)correct / max_elements;

@@ -1998,6 +1998,17 @@ namespace polaris {
     }
 
     template<typename T>
+    turbo::Status VamanaIndex<T>::get_vector(vid_t tag, void *vec) const {
+        std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
+        if (_tag_to_location.find(tag) == _tag_to_location.end()) {
+            return turbo::make_status(turbo::kNotFound, "Tag({}) not found", tag);
+        }
+        auto location = _tag_to_location.at(tag);
+        _data_store->get_vector(location, static_cast<T *>(vec));
+        return turbo::ok_status();
+    }
+
+    template<typename T>
     turbo::Status VamanaIndex<T>::lazy_delete(const vid_t &tag) {
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -2042,6 +2053,11 @@ namespace polaris {
     template<typename T>
     bool VamanaIndex<T>::is_index_saved() {
         return _is_saved;
+    }
+
+    template<typename T>
+    size_t VamanaIndex<T>::size() const {
+        return _nd;
     }
 
     template<typename T>

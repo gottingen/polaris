@@ -24,7 +24,7 @@ unsigned int divisor = 1;
     PickDivisibleIds(unsigned int divisor): divisor(divisor) {
         assert(divisor != 0);
     }
-    bool operator()(hnswlib::labeltype label_id) {
+    bool operator()(polaris::vid_t label_id) {
         return label_id % divisor == 0;
     }
 };
@@ -61,7 +61,7 @@ int main() {
     // Query the elements for themselves with filter and check returned labels
     int k = 10;
     for (int i = 0; i < max_elements; i++) {
-        std::vector<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnnCloserFirst(data + i * dim, k, &pickIdsDivisibleByTwo);
+        std::vector<std::pair<float, polaris::vid_t>> result = alg_hnsw->searchKnnCloserFirst(data + i * dim, k, &pickIdsDivisibleByTwo);
         for (auto item: result) {
             if (item.second % 2 == 1) std::cout << "Error: found odd label\n";
         }

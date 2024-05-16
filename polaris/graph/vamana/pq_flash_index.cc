@@ -695,6 +695,11 @@ namespace polaris {
     }
 
     template<typename T>
+    size_t PQFlashIndex<T>::size() const {
+        return _tag_to_location.size();
+    }
+
+    template<typename T>
     turbo::Status PQFlashIndex<T>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
                                                             const char *pivots_filepath,
                                                             const char *compressed_filepath) {
@@ -1211,6 +1216,11 @@ namespace polaris {
             stats->total_us = query_timer.elapsed().to_microseconds<double>();
         }
         return turbo::ok_status();
+    }
+
+    template<typename T>
+    turbo::Status PQFlashIndex<T>::get_vector(vid_t vid, void *vec) const {
+        return turbo::make_status(turbo::kUnimplemented, "Not implemented");
     }
 
     template<typename T>

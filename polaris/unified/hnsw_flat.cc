@@ -63,8 +63,22 @@ namespace polaris {
         return appr_alg_->saveIndex(index_path);
     }
 
-    turbo::Status HnswFlat::add(vid_t vid, const std::vector<uint8_t> &vec) {
-        return appr_alg_->addPoint(reinterpret_cast<const void *>(vec.data()), vid);
+    turbo::Status HnswFlat::add(vid_t vid, const void *vec) {
+        if (!appr_alg_) {
+            return turbo::make_status(turbo::kDataLoss, "index uninitialized");
+        }
+        return appr_alg_->addPoint(vec, vid);
+    }
+
+    size_t HnswFlat::size() const {
+        if (!appr_alg_) {
+            return 0;
+        }
+        return appr_alg_->size();
+    }
+
+    turbo::Status HnswFlat::get_vector(vid_t vid, void *vec) const {
+        return  appr_alg_->get_vector(vid, vec);
     }
 
     turbo::Status HnswFlat::lazy_remove(vid_t vid) {

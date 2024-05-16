@@ -67,8 +67,19 @@ namespace polaris {
         return appr_alg_->saveIndex(index_path);
     }
 
-    turbo::Status Hnsw::add(vid_t vid, const std::vector<uint8_t> &vec) {
-        return appr_alg_->addPoint(reinterpret_cast<const void *>(vec.data()), vid);
+    turbo::Status Hnsw::add(vid_t vid, const void* vec) {
+        return appr_alg_->addPoint(vec, vid);
+    }
+
+    turbo::Status Hnsw::get_vector(vid_t vid, void *vec) const {
+        return  appr_alg_->get_vector(vid, vec);
+    }
+
+    size_t Hnsw::size() const {
+        if (!appr_alg_) {
+            return 0;
+        }
+        return appr_alg_->size();
     }
 
     turbo::Status Hnsw::lazy_remove(vid_t vid) {

@@ -102,15 +102,15 @@ int main() {
     });
 
     // Query the elements for themselves and measure recall
-    std::vector<hnswlib::labeltype> neighbors(max_elements);
+    std::vector<polaris::vid_t> neighbors(max_elements);
     ParallelFor(0, max_elements, num_threads, [&](size_t row, size_t threadId) {
-        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + dim * row, 1);
-        hnswlib::labeltype label = result.top().second;
+        std::priority_queue<std::pair<float, polaris::vid_t>> result = alg_hnsw->searchKnn(data + dim * row, 1);
+        polaris::vid_t label = result.top().second;
         neighbors[row] = label;
     });
     float correct = 0;
     for (int i = 0; i < max_elements; i++) {
-        hnswlib::labeltype label = neighbors[i];
+        polaris::vid_t label = neighbors[i];
         if (label == i) correct++;
     }
     float recall = correct / max_elements;

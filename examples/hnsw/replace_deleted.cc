@@ -61,7 +61,7 @@ int main() {
     // Maximum number of elements is reached therefore we cannot add new items,
     // but we can replace the deleted ones by using replace_deleted=true
     for (int i = 0; i < num_deleted; i++) {
-        hnswlib::labeltype label = max_elements + i;
+        polaris::vid_t label = max_elements + i;
         alg_hnsw->addPoint(add_data + i * dim, label, true);
     }
 

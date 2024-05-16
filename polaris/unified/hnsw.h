@@ -35,7 +35,11 @@ namespace polaris {
 
         turbo::Status save(const std::string &index_path) override;
 
-        turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) override;
+        turbo::Status add(vid_t vid, const void *vec) override;
+
+        turbo::Status get_vector(vid_t vid, void *vec) const override;
+
+        size_t size() const override;
 
         turbo::Status lazy_remove(vid_t vid) override;
 

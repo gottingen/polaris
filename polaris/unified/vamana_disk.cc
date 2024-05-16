@@ -167,12 +167,74 @@ namespace polaris {
         return turbo::make_status(turbo::kUnimplemented, "Not implemented");
     }
 
-    turbo::Status VamanaDisk::add(vid_t vid, const std::vector<uint8_t> &vec) {
+    turbo::Status VamanaDisk::add(vid_t vid, const void *vec) {
         return turbo::make_status(turbo::kUnimplemented, "Not implemented");
     }
 
+    template <typename T>
+    inline turbo::Status vd_get_vector(void *index, vid_t vid, void *vec) {
+        auto ptr = (PQFlashIndex<T>*)index;
+        return ptr->get_vector(vid, vec);
+    }
+
+    turbo::Status VamanaDisk::get_vector(vid_t vid, void *vec) const {
+        if (index_ == nullptr) {
+            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+        }
+
+        switch (config_.basic_config.object_type) {
+            case ObjectType::UINT8:
+                return vd_get_vector<uint8_t>(index_, vid, vec);
+            case ObjectType::INT8:
+                return vd_get_vector<int8_t>(index_, vid, vec);
+            case ObjectType::FLOAT:
+                return vd_get_vector<float>(index_, vid, vec);
+            case ObjectType::UINT16:
+            case ObjectType::INT16:
+            case ObjectType::UINT32:
+            case ObjectType::INT32:
+            case ObjectType::UINT64:
+            case ObjectType::INT64:
+            case ObjectType::DOUBLE:
+            case ObjectType::FLOAT16:
+            case ObjectType::BFLOAT16:
+            default:
+                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+        }
+    }
     turbo::Status VamanaDisk::lazy_remove(vid_t vid) {
         return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+    }
+
+    template <typename T>
+    size_t vd_size(void *index) {
+        auto ptr = (PQFlashIndex<T>*)index;
+        return ptr->size();
+    }
+    size_t VamanaDisk::size() const {
+if (index_ == nullptr) {
+            return 0;
+        }
+
+        switch (config_.basic_config.object_type) {
+            case ObjectType::UINT8:
+                return vd_size<uint8_t>(index_);
+            case ObjectType::INT8:
+                return vd_size<int8_t>(index_);
+            case ObjectType::FLOAT:
+                return vd_size<float>(index_);
+            case ObjectType::UINT16:
+            case ObjectType::INT16:
+            case ObjectType::UINT32:
+            case ObjectType::INT32:
+            case ObjectType::UINT64:
+            case ObjectType::INT64:
+            case ObjectType::DOUBLE:
+            case ObjectType::FLOAT16:
+            case ObjectType::BFLOAT16:
+            default:
+                return 0;
+        }
     }
 
     template <typename T>

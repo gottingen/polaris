@@ -46,6 +46,9 @@ namespace polaris {
         } else {
             return turbo::make_status(turbo::kInvalidArgument, "Invalid build parameters");
         }
+        if (!rs.ok()) {
+            return rs;
+        }
         return save(parameters.output_path);
     }
 
@@ -57,6 +60,14 @@ namespace polaris {
         return rs;
     }
 
+    size_t Vamana::size() const {
+        if (index_ == nullptr) {
+            return 0;
+        }
+        return index_->size();
+
+    }
+
     turbo::Status Vamana::save(const std::string &index_path) {
         if (index_ == nullptr) {
             return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
@@ -65,11 +76,19 @@ namespace polaris {
         return turbo::ok_status();
     }
 
-    turbo::Status Vamana::add(vid_t vid, const std::vector<uint8_t> &vec) {
+    turbo::Status Vamana::add(vid_t vid, const void*vec) {
         if (index_ == nullptr) {
             return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
         }
-        return index_->insert_point(vec.data(), vid);
+        return index_->insert_point(vec, vid);
+    }
+
+    turbo::Status Vamana::get_vector(vid_t vid, void *vec) const {
+        if (index_ == nullptr) {
+            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+        }
+        return index_->get_vector(vid, vec);
+
     }
 
     turbo::Status Vamana::lazy_remove(vid_t vid) {

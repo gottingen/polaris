@@ -18,6 +18,7 @@
 #include <polaris/unified/vamana_disk.h>
 #include <polaris/unified/vamana.h>
 #include <polaris/unified/hnsw.h>
+#include <polaris/unified/hnsw_flat.h>
 namespace polaris {
 
     UnifiedIndex *UnifiedIndex::create_index(IndexType type) {
@@ -28,6 +29,8 @@ namespace polaris {
                 return new Vamana();
             case IndexType::INDEX_HNSW:
                 return new Hnsw();
+            case IndexType::INDEX_HNSW_FLAT:
+                return new HnswFlat();
             default:
                 return nullptr;
         }

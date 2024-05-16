@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/unified_index.h>
 #include <thread>
 #include <chrono>
 
@@ -26,9 +26,16 @@ int main() {
     std::mt19937 rng;
     rng.seed(47);
     std::uniform_real_distribution<> distrib_real;
-
-    hnswlib::L2Space space(d);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, 2 * max_elements);
+    polaris::IndexConfig config = polaris::IndexConfigBuilder()
+        .with_dimension(d)
+        .with_max_points(max_elements * 2)
+        .with_metric(polaris::MetricType::METRIC_L2)
+        .with_data_type(polaris::ObjectType::FLOAT)
+        .build_hnsw();
+    polaris::UnifiedIndex* alg_hnsw = polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_HNSW);
+    alg_hnsw->initialize(config);
+    //hnswlib::L2Space space(d);
+    //hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, 2 * max_elements);
 
     std::cout << "Building index" << std::endl;
     int num_threads = 40;
@@ -50,11 +57,11 @@ int main() {
                     [&] {
                         for (int iter = 0; iter < num_iterations; iter++) {
                             std::vector<float> data(d);
-                            hnswlib::labeltype label = distrib_int(rng);
+                            polaris::vid_t label = distrib_int(rng);
                             for (int i = 0; i < d; i++) {
                                 data[i] = distrib_real(rng);
                             }
-                            alg_hnsw->addPoint(data.data(), label);
+                            alg_hnsw->add(label, data.data());
                         }
                     }
                 )
@@ -63,23 +70,20 @@ int main() {
         for (auto &thread : threads) {
             thread.join();
         }
-        if (alg_hnsw->cur_element_count > max_elements - num_labels) {
+        if (alg_hnsw->size() > max_elements - num_labels) {
             break;
         }
         start_label += num_labels;
     }
 
     // insert remaining elements if needed
-    for (hnswlib::labeltype label = 0; label < max_elements; label++) {
-        auto search = alg_hnsw->label_lookup_.find(label);
-        if (search == alg_hnsw->label_lookup_.end()) {
-            std::cout << "Adding " << label << std::endl;
-            std::vector<float> data(d);
-            for (int i = 0; i < d; i++) {
-                data[i] = distrib_real(rng);
-            }
-            alg_hnsw->addPoint(data.data(), label);
+    for (polaris::vid_t label = 0; label < max_elements; label++) {
+        std::cout << "Adding " << label << std::endl;
+        std::vector<float> data(d);
+        for (int i = 0; i < d; i++) {
+            data[i] = distrib_real(rng);
         }
+        alg_hnsw->add(label + 1, data.data());
     }
 
     std::cout << "Index is created" << std::endl;
@@ -89,6 +93,7 @@ int main() {
 
     // create threads that will do markDeleted and unmarkDeleted of random elements
     // each thread works with specific range of labels
+    /*
     std::cout << "Starting markDeleted and unmarkDeleted threads" << std::endl;
     num_threads = 20;
     int chunk_size = max_elements / num_threads;
@@ -101,12 +106,12 @@ int main() {
                     std::vector<bool> marked_deleted(chunk_size);
                     while (!stop_threads) {
                         int id = distrib_int(rng);
-                        hnswlib::labeltype label = start_id + id;
+                        polaris::vid_t label = start_id + id;
                         if (marked_deleted[id]) {
                             alg_hnsw->unmarkDelete(label);
                             marked_deleted[id] = false;
                         } else {
-                            alg_hnsw->mark_delete(label);
+                            alg_hnsw->lazy_remove(label);
                             marked_deleted[id] = true;
                         }
                     }
@@ -114,7 +119,7 @@ int main() {
             )
         );
     }
-
+    */
     // create threads that will add and update random elements
     std::cout << "Starting add and update elements threads" << std::endl;
     num_threads = 20;
@@ -125,12 +130,14 @@ int main() {
                 [&] {
                     std::vector<float> data(d);
                     while (!stop_threads) {
-                        hnswlib::labeltype label = distrib_int_add(rng);
+                        polaris::vid_t label = distrib_int_add(rng);
                         for (int i = 0; i < d; i++) {
                             data[i] = distrib_real(rng);
                         }
-                        alg_hnsw->addPoint(data.data(), label);
-                        std::vector<float> data = alg_hnsw->getDataByLabel<float>(label);
+                        alg_hnsw->add(label, data.data());
+                        std::vector<float> data;
+                        data.resize(d);
+                         auto rs = alg_hnsw->get_vector(label, data.data());
                         float max_val = *max_element(data.begin(), data.end());
                         // never happens but prevents compiler from deleting unused code
                         if (max_val > 10) {

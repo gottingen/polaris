@@ -15,7 +15,7 @@
 // This is a test file for testing the filtering feature
 
 #include <polaris/graph/hnsw/hnswlib.h>
-
+#include <polaris/core/common.h>
 #include <assert.h>
 
 #include <vector>
@@ -23,7 +23,7 @@
 
 namespace {
 
-using idx_t = hnswlib::labeltype;
+using idx_t = polaris::vid_t;
 
 class PickDivisibleIds: public hnswlib::BaseFilterFunctor {
 unsigned int divisor = 1;

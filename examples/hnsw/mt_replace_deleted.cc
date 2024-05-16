@@ -121,7 +121,7 @@ int main() {
     // Maximum number of elements is reached therefore we cannot add new items,
     // but we can replace the deleted ones by using replace_deleted=true
     ParallelFor(0, num_deleted, num_threads, [&](size_t row, size_t threadId) {
-        hnswlib::labeltype label = max_elements + row;
+        polaris::vid_t label = max_elements + row;
         alg_hnsw->addPoint((void*)(add_data + dim * row), label, true);
     });
 

@@ -82,7 +82,7 @@ unsigned int divisor = 1;
     PickDivisibleIds(unsigned int divisor): divisor(divisor) {
         assert(divisor != 0);
     }
-    bool operator()(hnswlib::labeltype label_id) {
+    bool operator()(polaris::vid_t label_id) {
         return label_id % divisor == 0;
     }
 };
@@ -119,17 +119,17 @@ int main() {
 
     // Query the elements for themselves with filter and check returned labels
     int k = 10;
-    std::vector<hnswlib::labeltype> neighbors(max_elements * k);
+    std::vector<polaris::vid_t> neighbors(max_elements * k);
     ParallelFor(0, max_elements, num_threads, [&](size_t row, size_t threadId) {
-        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + dim * row, k, &pickIdsDivisibleByTwo);
+        std::priority_queue<std::pair<float, polaris::vid_t>> result = alg_hnsw->searchKnn(data + dim * row, k, &pickIdsDivisibleByTwo);
         for (int i = 0; i < k; i++) {
-            hnswlib::labeltype label = result.top().second;
+            polaris::vid_t label = result.top().second;
             result.pop();
             neighbors[row * k + i] = label;
         }
     });
 
-    for (hnswlib::labeltype label: neighbors) {
+    for (polaris::vid_t label: neighbors) {
         if (label % 2 == 1) std::cout << "Error: found odd label\n";
     }
 

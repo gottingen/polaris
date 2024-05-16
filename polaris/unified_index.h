@@ -63,9 +63,13 @@ namespace polaris {
 
         virtual turbo::Status save(const std::string &index_path) = 0;
 
-        virtual turbo::Status add(vid_t vid, const std::vector<uint8_t> &vec) = 0;
+        virtual turbo::Status add(vid_t vid, const void *vec) = 0;
 
         virtual turbo::Status lazy_remove(vid_t vid) = 0;
+
+        virtual turbo::Status get_vector(vid_t vid, void *vec) const = 0;
+
+        virtual size_t size() const = 0;
 
         virtual turbo::ResultStatus<consolidation_report>
         consolidate_deletes(const IndexWriteParameters &parameters) = 0;

@@ -83,6 +83,10 @@ namespace polaris {
 
         POLARIS_API turbo::Status search(SearchContext &search_context);
 
+        POLARIS_API turbo::Status get_vector(vid_t vid, void *vec) const;
+
+        POLARIS_API size_t size() const;
+
         POLARIS_API uint64_t get_data_dim();
 
         std::shared_ptr<AlignedFileReader> &reader;

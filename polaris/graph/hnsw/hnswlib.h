@@ -52,6 +52,7 @@ static uint64_t xgetbv(unsigned int index) {
 
 #include <turbo/status/status.h>
 #include <polaris/core/search_context.h>
+#include <polaris/core/common.h>
 
 static bool AVXCapable() {
     int cpuInfo[4];
@@ -116,12 +117,11 @@ static bool AVX512Capable() {
 #include <string.h>
 
 namespace hnswlib {
-typedef size_t labeltype;
 
 // This can be extended to store state for filtering (e.g. from a std::set)
 class BaseFilterFunctor {
  public:
-    virtual bool operator()(hnswlib::labeltype id) { return true; }
+    virtual bool operator()(polaris::vid_t id) { return true; }
 };
 
 template <typename T>
@@ -161,13 +161,13 @@ class SpaceInterface {
 template<typename dist_t>
 class AlgorithmInterface {
  public:
-    virtual turbo::Status addPoint(const void *datapoint, labeltype label, bool replace_deleted = false) = 0;
+    virtual turbo::Status addPoint(const void *datapoint, polaris::vid_t label, bool replace_deleted = false) = 0;
 
-    virtual std::priority_queue<std::pair<dist_t, labeltype>>
+    virtual std::priority_queue<std::pair<dist_t, polaris::vid_t>>
         searchKnn(const void*, size_t, BaseFilterFunctor* isIdAllowed = nullptr) const = 0;
 
     // Return k nearest neighbor in the order of closer fist
-    virtual std::vector<std::pair<dist_t, labeltype>>
+    virtual std::vector<std::pair<dist_t, polaris::vid_t>>
         searchKnnCloserFirst(const void* query_data, size_t k, BaseFilterFunctor* isIdAllowed = nullptr) const;
 
     virtual turbo::Status saveIndex(const std::string &location) = 0;
@@ -178,10 +178,10 @@ class AlgorithmInterface {
 };
 
 template<typename dist_t>
-std::vector<std::pair<dist_t, labeltype>>
+std::vector<std::pair<dist_t, polaris::vid_t>>
 AlgorithmInterface<dist_t>::searchKnnCloserFirst(const void* query_data, size_t k,
                                                  BaseFilterFunctor* isIdAllowed) const {
-    std::vector<std::pair<dist_t, labeltype>> result;
+    std::vector<std::pair<dist_t, polaris::vid_t>> result;
 
     // here searchKnn returns the result in the order of further first
     auto ret = searchKnn(query_data, k, isIdAllowed);

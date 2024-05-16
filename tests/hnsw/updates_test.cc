@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 #include <polaris/graph/hnsw/hnswlib.h>
+#include <polaris/core/common.h>
 #include <thread>
 
 
@@ -120,12 +121,12 @@ std::vector<datatype> load_batch(std::string path, int size) {
 template <typename d_type>
 static float
 test_approx(std::vector<float> &queries, size_t qsize, hnswlib::HierarchicalNSW<d_type> &appr_alg, size_t vecdim,
-            std::vector<std::unordered_set<hnswlib::labeltype>> &answers, size_t K) {
+            std::vector<std::unordered_set<polaris::vid_t>> &answers, size_t K) {
     size_t correct = 0;
     size_t total = 0;
 
     for (int i = 0; i < qsize; i++) {
-        std::priority_queue<std::pair<d_type, hnswlib::labeltype>> result = appr_alg.searchKnn((char *)(queries.data() + vecdim * i), K);
+        std::priority_queue<std::pair<d_type, polaris::vid_t>> result = appr_alg.searchKnn((char *)(queries.data() + vecdim * i), K);
         total += K;
         while (result.size()) {
             if (answers[i].find(result.top().second) != answers[i].end()) {
@@ -145,7 +146,7 @@ test_vs_recall(
     size_t qsize,
     hnswlib::HierarchicalNSW<float> &appr_alg,
     size_t vecdim,
-    std::vector<std::unordered_set<hnswlib::labeltype>> &answers,
+    std::vector<std::unordered_set<polaris::vid_t>> &answers,
     size_t k) {
 
     std::vector<size_t> efs = {1};
@@ -276,7 +277,7 @@ int main(int argc, char **argv) {
 
     std::vector<int> gt = load_batch<int>(path + "gt.bin", N_queries * K);
 
-    std::vector<std::unordered_set<hnswlib::labeltype>> answers(N_queries);
+    std::vector<std::unordered_set<polaris::vid_t>> answers(N_queries);
     for (int i = 0; i < N_queries; i++) {
         for (int j = 0; j < K; j++) {
             answers[i].insert(gt[i * K + j]);

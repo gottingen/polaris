@@ -54,6 +54,10 @@ namespace polaris {
         // insert point for unfiltered index build. do not use with filtered index
         virtual turbo::Status insert_point(const void *point, const vid_t tag) = 0;
 
+        virtual turbo::Status get_vector(vid_t tag, void *vec) const= 0;
+
+        virtual size_t size() const = 0;
+
         // delete point with tag, or return -1 if point can not be deleted
         virtual turbo::Status lazy_delete(const vid_t &tag) = 0;
 

@@ -113,6 +113,8 @@ namespace polaris {
         // Will fail if tag already in the index or if tag=0.
         POLARIS_API turbo::Status insert_point(const void *point, const vid_t tag) override;
 
+        POLARIS_API turbo::Status get_vector(vid_t tag, void *vec) const override;
+
         // call this before issuing deletions to sets relevant flags
         POLARIS_API int enable_delete();
 
@@ -131,6 +133,8 @@ namespace polaris {
         POLARIS_API consolidation_report consolidate_deletes(const IndexWriteParameters &parameters) override;
 
         POLARIS_API bool is_index_saved();
+
+        size_t size() const override;
 
         // repositions frozen points to the end of _data - if they have been moved
         // during deletion
@@ -344,7 +348,7 @@ namespace polaris {
         _update_lock;       // search/inserts/deletes/consolidate (shared lock)
         std::shared_timed_mutex // Ensure only one consolidate or compact_data is
         _consolidate_lock;  // ever active
-        std::shared_timed_mutex // RW lock for _tag_to_location,
+        mutable std::shared_timed_mutex // RW lock for _tag_to_location,
         _tag_lock;          // _location_to_tag, _empty_slots, _nd, _max_points, _label_to_start_id
         std::shared_timed_mutex // RW Lock on _delete_set and _data_compacted
         _delete_lock;       // variable

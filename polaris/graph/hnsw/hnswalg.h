@@ -58,7 +58,7 @@ namespace hnswlib {
         void *dist_func_param_{nullptr};
 
         mutable std::mutex label_lookup_lock;  // lock for label_lookup_
-        std::unordered_map<labeltype, tableint> label_lookup_;
+        std::unordered_map<polaris::vid_t, tableint> label_lookup_;
 
         std::default_random_engine level_generator_;
         std::default_random_engine update_probability_generator_;
@@ -113,7 +113,7 @@ namespace hnswlib {
             update_probability_generator_.seed(random_seed + 1);
 
             size_links_level0_ = maxM0_ * sizeof(tableint) + sizeof(linklistsizeint);
-            size_data_per_element_ = size_links_level0_ + data_size_ + sizeof(labeltype);
+            size_data_per_element_ = size_links_level0_ + data_size_ + sizeof(polaris::vid_t);
             offsetData_ = size_links_level0_;
             label_offset_ = size_links_level0_ + data_size_;
             offsetLevel0_ = 0;
@@ -163,29 +163,29 @@ namespace hnswlib {
         }
 
 
-        inline std::mutex &getLabelOpMutex(labeltype label) const {
+        inline std::mutex &getLabelOpMutex(polaris::vid_t label) const {
             // calculate hash
             size_t lock_id = label & (MAX_LABEL_OPERATION_LOCKS - 1);
             return label_op_locks_[lock_id];
         }
 
 
-        inline labeltype getExternalLabel(tableint internal_id) const {
-            labeltype return_label;
+        inline polaris::vid_t getExternalLabel(tableint internal_id) const {
+            polaris::vid_t return_label;
             memcpy(&return_label, (data_level0_memory_ + internal_id * size_data_per_element_ + label_offset_),
-                   sizeof(labeltype));
+                   sizeof(polaris::vid_t));
             return return_label;
         }
 
 
-        inline void setExternalLabel(tableint internal_id, labeltype label) const {
+        inline void setExternalLabel(tableint internal_id, polaris::vid_t label) const {
             memcpy((data_level0_memory_ + internal_id * size_data_per_element_ + label_offset_), &label,
-                   sizeof(labeltype));
+                   sizeof(polaris::vid_t));
         }
 
 
-        inline labeltype *getExternalLabeLp(tableint internal_id) const {
-            return (labeltype *) (data_level0_memory_ + internal_id * size_data_per_element_ + label_offset_);
+        inline polaris::vid_t *getExternalLabeLp(tableint internal_id) const {
+            return (polaris::vid_t *) (data_level0_memory_ + internal_id * size_data_per_element_ + label_offset_);
         }
 
 
@@ -842,9 +842,29 @@ namespace hnswlib {
             return turbo::ok_status();
         }
 
+        turbo::Status get_vector(polaris::vid_t vid, void *vec) const {
+            std::unique_lock<std::mutex> lock_label(getLabelOpMutex(vid));
+
+            std::unique_lock<std::mutex> lock_table(label_lookup_lock);
+            auto search = label_lookup_.find(vid);
+            if (search == label_lookup_.end() || isMarkedDeleted(search->second)) {
+                throw std::runtime_error("Label not found");
+            }
+            tableint internalId = search->second;
+            lock_table.unlock();
+
+            char *data_ptrv = getDataByInternalId(internalId);
+            size_t dim = *((size_t *) dist_func_param_);
+            memcpy(vec, data_ptrv, dim * sizeof(float));
+            return turbo::ok_status();
+        }
+
+        size_t size() const {
+            return cur_element_count;
+        }
 
         template<typename data_t>
-        std::vector<data_t> getDataByLabel(labeltype label) const {
+        std::vector<data_t> getDataByLabel(polaris::vid_t label) const {
             // lock all operations with element by label
             std::unique_lock<std::mutex> lock_label(getLabelOpMutex(label));
 
@@ -871,7 +891,7 @@ namespace hnswlib {
         /*
         * Marks an element with the given label deleted, does NOT really change the current graph.
         */
-        [[nodiscard]] turbo::Status mark_delete(labeltype label) {
+        [[nodiscard]] turbo::Status mark_delete(polaris::vid_t label) {
             // lock all operations with element by label
             std::unique_lock<std::mutex> lock_label(getLabelOpMutex(label));
 
@@ -916,7 +936,7 @@ namespace hnswlib {
         * Note: the method is not safe to use when replacement of deleted elements is enabled,
         *  because elements marked as deleted can be completely removed by addPoint
         */
-        void unmarkDelete(labeltype label) {
+        void unmarkDelete(polaris::vid_t label) {
             // lock all operations with element by label
             std::unique_lock<std::mutex> lock_label(getLabelOpMutex(label));
 
@@ -974,7 +994,7 @@ namespace hnswlib {
         * Adds point. Updates the point if it is already in the index.
         * If replacement of deleted elements is enabled: replaces previously deleted point if any, updating it with new point
         */
-        turbo::Status addPoint(const void *data_point, labeltype label, bool replace_deleted = false) {
+        turbo::Status addPoint(const void *data_point, polaris::vid_t label, bool replace_deleted = false) {
             if ((allow_replace_deleted_ == false) && (replace_deleted == true)) {
                 return turbo::make_status(turbo::kInvalidArgument, "Replacement of deleted elements is disabled in constructor");
             }
@@ -1000,7 +1020,7 @@ namespace hnswlib {
                 return addPoint(data_point, label, -1).status();
             } else {
                 // we assume that there are no concurrent operations on deleted element
-                labeltype label_replaced = getExternalLabel(internal_id_replaced);
+                polaris::vid_t label_replaced = getExternalLabel(internal_id_replaced);
                 setExternalLabel(internal_id_replaced, label);
 
                 std::unique_lock<std::mutex> lock_table(label_lookup_lock);
@@ -1178,7 +1198,7 @@ namespace hnswlib {
         }
 
 
-        turbo::ResultStatus<tableint> addPoint(const void *data_point, labeltype label, int level) {
+        turbo::ResultStatus<tableint> addPoint(const void *data_point, polaris::vid_t label, int level) {
             tableint cur_c = 0;
             {
                 // Checking if the element with the same label already exists
@@ -1229,7 +1249,7 @@ namespace hnswlib {
             memset(data_level0_memory_ + cur_c * size_data_per_element_ + offsetLevel0_, 0, size_data_per_element_);
 
             // Initialisation of the data and label
-            memcpy(getExternalLabeLp(cur_c), &label, sizeof(labeltype));
+            memcpy(getExternalLabeLp(cur_c), &label, sizeof(polaris::vid_t));
             memcpy(getDataByInternalId(cur_c), data_point, data_size_);
 
             if (curlevel) {
@@ -1363,9 +1383,9 @@ namespace hnswlib {
         }
 
 
-        std::priority_queue<std::pair<dist_t, labeltype >>
+        std::priority_queue<std::pair<dist_t, polaris::vid_t >>
         searchKnn(const void *query_data, size_t k, BaseFilterFunctor *isIdAllowed = nullptr) const {
-            std::priority_queue<std::pair<dist_t, labeltype >> result;
+            std::priority_queue<std::pair<dist_t, polaris::vid_t >> result;
             if (cur_element_count == 0) return result;
 
             tableint currObj = enterpoint_node_;
@@ -1412,7 +1432,7 @@ namespace hnswlib {
             }
             while (top_candidates.size() > 0) {
                 std::pair<dist_t, tableint> rez = top_candidates.top();
-                result.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
+                result.push(std::pair<dist_t, polaris::vid_t>(rez.first, getExternalLabel(rez.second)));
                 top_candidates.pop();
             }
             return result;

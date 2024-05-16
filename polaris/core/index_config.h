@@ -67,6 +67,10 @@ namespace polaris {
                 : basic_config(bconfig), disk_config(dconfig) {
         }
 
+        IndexConfig(const IndexBasicConfig &bconfig, const HnswConfig &dconfig)
+                : basic_config(bconfig), hnsw_config(dconfig) {
+        }
+
         friend class IndexConfigBuilder;
     };
 
@@ -227,6 +231,36 @@ namespace polaris {
             return *this;
         }
 
+        IndexConfigBuilder &hnsw_with_m(uint32_t m) {
+            this->_hnsw_config.m = m;
+            return *this;
+        }
+
+        IndexConfigBuilder &hnsw_with_ef(uint32_t ef) {
+            this->_hnsw_config.ef = ef;
+            return *this;
+        }
+
+        IndexConfigBuilder &hnsw_with_ef_construction(uint32_t ef_construction) {
+            this->_hnsw_config.ef_construction = ef_construction;
+            return *this;
+        }
+
+        IndexConfigBuilder &hnsw_with_random_seed(uint32_t random_seed) {
+            this->_hnsw_config.random_seed = random_seed;
+            return *this;
+        }
+
+        IndexConfigBuilder &hnsw_with_thread_num(uint32_t thread_num) {
+            this->_hnsw_config.thread_num = thread_num;
+            return *this;
+        }
+
+        IndexConfig build_hnsw() {
+
+            return IndexConfig{_basic_config, _hnsw_config};
+        }
+
         IndexConfig build_vdisk() {
             return IndexConfig{_basic_config, _disk_config};
         }
@@ -275,5 +309,6 @@ namespace polaris {
         IndexBasicConfig _basic_config;
         VamanaIndexConfig _vamana_config;
         VamanaDiskIndexConfig _disk_config;
+        HnswConfig _hnsw_config;
     };
 } // namespace polaris

@@ -5,6 +5,7 @@
 #include <mutex>
 #include <algorithm>
 #include <assert.h>
+#include <polaris/core/log.h>
 
 namespace hnswlib {
     template<typename dist_t>
@@ -20,7 +21,7 @@ namespace hnswlib {
         void *dist_func_param_;
         std::mutex index_lock;
 
-        std::unordered_map<labeltype, size_t> dict_external_to_internal;
+        std::unordered_map<polaris::vid_t, size_t> dict_external_to_internal;
 
 
         BruteforceSearch(SpaceInterface<dist_t> *s)
@@ -49,7 +50,7 @@ namespace hnswlib {
             data_size_ = s->get_data_size();
             fstdistfunc_ = s->get_dist_func();
             dist_func_param_ = s->get_dist_func_param();
-            size_per_element_ = data_size_ + sizeof(labeltype);
+            size_per_element_ = data_size_ + sizeof(polaris::vid_t);
             data_ = (char *) malloc(maxElements * size_per_element_);
             if (data_ == nullptr)
                 throw std::runtime_error("Not enough memory: BruteforceSearch failed to allocate data");
@@ -62,7 +63,7 @@ namespace hnswlib {
         }
 
 
-        turbo::Status addPoint(const void *datapoint, labeltype label, bool replace_deleted = false) {
+        turbo::Status addPoint(const void *datapoint, polaris::vid_t label, bool replace_deleted = false) {
             int idx;
             {
                 std::unique_lock<std::mutex> lock(index_lock);
@@ -80,28 +81,32 @@ namespace hnswlib {
                     cur_element_count++;
                 }
             }
-            memcpy(data_ + size_per_element_ * idx + data_size_, &label, sizeof(labeltype));
+            memcpy(data_ + size_per_element_ * idx + data_size_, &label, sizeof(polaris::vid_t));
             memcpy(data_ + size_per_element_ * idx, datapoint, data_size_);
             return turbo::ok_status();
         }
 
+        size_t size() const {
+            return cur_element_count;
+        }
 
-        turbo::Status mark_delete(labeltype cur_external) {
+
+        turbo::Status mark_delete(polaris::vid_t cur_external) {
             size_t cur_c = dict_external_to_internal[cur_external];
 
             dict_external_to_internal.erase(cur_external);
 
-            labeltype label = *((labeltype * )(data_ + size_per_element_ * (cur_element_count - 1) + data_size_));
+            polaris::vid_t label = *((polaris::vid_t * )(data_ + size_per_element_ * (cur_element_count - 1) + data_size_));
             dict_external_to_internal[label] = cur_c;
             memcpy(data_ + size_per_element_ * cur_c,
                    data_ + size_per_element_ * (cur_element_count - 1),
-                   data_size_ + sizeof(labeltype));
+                   data_size_ + sizeof(polaris::vid_t));
             cur_element_count--;
             return turbo::ok_status();
         }
 
         turbo::Status search(polaris::SearchContext &ctx) const override {
-            if (ctx.top_k <= cur_element_count) {
+            if (ctx.top_k >= cur_element_count) {
                 return turbo::make_status(turbo::kInvalidArgument, "k should be less than the number of elements");
             }
             std::priority_queue<std::pair<dist_t, int>> topResults;
@@ -110,7 +115,7 @@ namespace hnswlib {
             }
             for (int i = 0; i < ctx.top_k; i++) {
                 dist_t dist = fstdistfunc_(ctx.query, data_ + size_per_element_ * i, dist_func_param_);
-                labeltype label = *((labeltype * )(data_ + size_per_element_ * i + data_size_));
+                polaris::vid_t label = *((polaris::vid_t * )(data_ + size_per_element_ * i + data_size_));
                 if (!ctx.search_condition->is_in_blacklist(label)) {
                     topResults.push(std::pair<dist_t, int>(dist, i));
                 }
@@ -119,7 +124,7 @@ namespace hnswlib {
             for (int i = ctx.top_k; i < cur_element_count; i++) {
                 dist_t dist = fstdistfunc_(ctx.query, data_ + size_per_element_ * i, dist_func_param_);
                 if (dist <= lastdist) {
-                    labeltype label = *((labeltype * )(data_ + size_per_element_ * i + data_size_));
+                    polaris::vid_t label = *((polaris::vid_t * )(data_ + size_per_element_ * i + data_size_));
                     if (!ctx.search_condition->is_in_blacklist(label)) {
                         topResults.push(std::pair<dist_t, int>(dist, i));
                     }
@@ -133,7 +138,7 @@ namespace hnswlib {
             }
             while (!topResults.empty()) {
                 auto top = topResults.top();
-                labeltype label = *((labeltype * )(data_ + size_per_element_ * top.second + data_size_));
+                polaris::vid_t label = *((polaris::vid_t * )(data_ + size_per_element_ * top.second + data_size_));
                 ctx.top_k_queue.emplace_back(label, top.first);
                 topResults.pop();
             }
@@ -141,26 +146,35 @@ namespace hnswlib {
             return turbo::ok_status();
         }
 
+        turbo::Status get_vector(polaris::vid_t vid, void *vec) const {
+            auto search = dict_external_to_internal.find(vid);
+            if (search == dict_external_to_internal.end()) {
+                return turbo::make_status(turbo::kNotFound, "Vector not found");
+            }
+            int idx = search->second;
+            memcpy(vec, data_ + size_per_element_ * idx, data_size_);
+            return turbo::ok_status();
+        }
 
-        std::priority_queue<std::pair<dist_t, labeltype >>
+        std::priority_queue<std::pair<dist_t, polaris::vid_t >>
         searchKnn(const void *query_data, size_t k, BaseFilterFunctor *isIdAllowed = nullptr) const {
             assert(k <= cur_element_count);
-            std::priority_queue<std::pair<dist_t, labeltype >> topResults;
+            std::priority_queue<std::pair<dist_t, polaris::vid_t >> topResults;
             if (cur_element_count == 0) return topResults;
             for (int i = 0; i < k; i++) {
                 dist_t dist = fstdistfunc_(query_data, data_ + size_per_element_ * i, dist_func_param_);
-                labeltype label = *((labeltype * )(data_ + size_per_element_ * i + data_size_));
+                polaris::vid_t label = *((polaris::vid_t * )(data_ + size_per_element_ * i + data_size_));
                 if ((!isIdAllowed) || (*isIdAllowed)(label)) {
-                    topResults.push(std::pair<dist_t, labeltype>(dist, label));
+                    topResults.push(std::pair<dist_t, polaris::vid_t>(dist, label));
                 }
             }
             dist_t lastdist = topResults.empty() ? std::numeric_limits<dist_t>::max() : topResults.top().first;
             for (int i = k; i < cur_element_count; i++) {
                 dist_t dist = fstdistfunc_(query_data, data_ + size_per_element_ * i, dist_func_param_);
                 if (dist <= lastdist) {
-                    labeltype label = *((labeltype * )(data_ + size_per_element_ * i + data_size_));
+                    polaris::vid_t label = *((polaris::vid_t * )(data_ + size_per_element_ * i + data_size_));
                     if ((!isIdAllowed) || (*isIdAllowed)(label)) {
-                        topResults.push(std::pair<dist_t, labeltype>(dist, label));
+                        topResults.push(std::pair<dist_t, polaris::vid_t>(dist, label));
                     }
                     if (topResults.size() > k)
                         topResults.pop();
@@ -200,10 +214,11 @@ namespace hnswlib {
             data_size_ = s->get_data_size();
             fstdistfunc_ = s->get_dist_func();
             dist_func_param_ = s->get_dist_func_param();
-            size_per_element_ = data_size_ + sizeof(labeltype);
+            size_per_element_ = data_size_ + sizeof(polaris::vid_t);
             data_ = (char *) malloc(maxelements_ * size_per_element_);
-            if (data_ == nullptr)
-                throw std::runtime_error("Not enough memory: loadIndex failed to allocate data");
+            if (data_ == nullptr) {
+                return turbo::make_status(turbo::kResourceExhausted, "Not enough memory: loadIndex failed to allocate data");
+            }
 
             input.read(data_, maxelements_ * size_per_element_);
 
