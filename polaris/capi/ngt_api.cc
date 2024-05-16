@@ -71,7 +71,7 @@ NGTIndex ngt_create_graph_and_tree(const char *database, NGTProperty prop, NGTEr
   polaris::NgtIndex *index = NULL;
   try{
     std::string database_str(database);
-    polaris::Property prop_i = *(static_cast<polaris::Property*>(prop));
+    polaris::NgtParameters prop_i = *(static_cast<polaris::NgtParameters*>(prop));
     polaris::NgtIndex::createGraphAndTree(database_str, prop_i, true);
     index = new polaris::NgtIndex(database_str);
     index->disableLog();
@@ -87,7 +87,7 @@ NGTIndex ngt_create_graph_and_tree(const char *database, NGTProperty prop, NGTEr
 
 NGTIndex ngt_create_graph_and_tree_in_memory(NGTProperty prop, NGTError error) {
   try{
-    polaris::NgtIndex *index = new polaris::NgtIndex(*(static_cast<polaris::Property*>(prop)));
+    polaris::NgtIndex *index = new polaris::NgtIndex(*(static_cast<polaris::NgtParameters*>(prop)));
     index->disableLog();
     return static_cast<NGTIndex>(index);
   }catch(std::exception &err){
@@ -100,7 +100,7 @@ NGTIndex ngt_create_graph_and_tree_in_memory(NGTProperty prop, NGTError error) {
 
 NGTProperty ngt_create_property(NGTError error) {
   try{
-    return static_cast<NGTProperty>(new polaris::Property());
+    return static_cast<NGTProperty>(new polaris::NgtParameters());
   }catch(std::exception &err){
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -131,7 +131,7 @@ bool ngt_get_property(NGTIndex index, NGTProperty prop, NGTError error) {
   }
 
   try{
-    (static_cast<polaris::NgtIndex*>(index))->getProperty(*(static_cast<polaris::Property*>(prop)));
+    (static_cast<polaris::NgtIndex*>(index))->getProperty(*(static_cast<polaris::NgtParameters*>(prop)));
   }catch(std::exception &err) {
     std::stringstream ss;
     ss << "Capi : " << __FUNCTION__ << "() : Error: " << err.what();
@@ -148,7 +148,7 @@ int32_t ngt_get_property_dimension(NGTProperty prop, NGTError error) {
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<polaris::Property*>(prop)).dimension;
+  return (*static_cast<polaris::NgtParameters*>(prop)).dimension;
 }
 
 bool ngt_set_property_dimension(NGTProperty prop, int32_t value, NGTError error) {
@@ -158,7 +158,7 @@ bool ngt_set_property_dimension(NGTProperty prop, int32_t value, NGTError error)
     operate_error_string_(ss, error);
     return false;
   }
-  (*static_cast<polaris::Property*>(prop)).dimension = value;
+  (*static_cast<polaris::NgtParameters*>(prop)).dimension = value;
   return true;
 }
 
@@ -169,7 +169,7 @@ bool ngt_set_property_edge_size_for_creation(NGTProperty prop, int16_t value, NG
     operate_error_string_(ss, error);
     return false;
   }
-  (*static_cast<polaris::Property*>(prop)).edgeSizeForCreation = value;
+  (*static_cast<polaris::NgtParameters*>(prop)).edgeSizeForCreation = value;
   return true;
 }
 
@@ -180,7 +180,7 @@ bool ngt_set_property_edge_size_for_search(NGTProperty prop, int16_t value, NGTE
     operate_error_string_(ss, error);
     return false;
   }
-  (*static_cast<polaris::Property*>(prop)).edgeSizeForSearch = value;
+  (*static_cast<polaris::NgtParameters*>(prop)).edgeSizeForSearch = value;
   return true;
 }
 
@@ -191,7 +191,7 @@ int32_t ngt_get_property_object_type(NGTProperty prop, NGTError error) {
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<polaris::Property*>(prop)).objectType;
+  return (*static_cast<polaris::NgtParameters*>(prop)).objectType;
 }
 
 bool ngt_is_property_object_type_float(int32_t object_type) {
@@ -214,7 +214,7 @@ bool ngt_set_property_object_type_float(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).objectType =polaris::ObjectType::FLOAT;
+  (*static_cast<polaris::NgtParameters*>(prop)).objectType =polaris::ObjectType::FLOAT;
   return true;
 }
 
@@ -226,7 +226,7 @@ bool ngt_set_property_object_type_float16(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectType::FLOAT16;
+  (*static_cast<polaris::NgtParameters*>(prop)).objectType = polaris::ObjectType::FLOAT16;
   return true;
 }
 
@@ -238,7 +238,7 @@ bool ngt_set_property_object_type_integer(NGTProperty prop, NGTError error) {
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).objectType = polaris::ObjectType::UINT8;
+  (*static_cast<polaris::NgtParameters*>(prop)).objectType = polaris::ObjectType::UINT8;
   return true;
 }
 
@@ -250,7 +250,7 @@ bool ngt_set_property_distance_type(NGTProperty prop, polaris::MetricType type, 
     return false;
   }
 
-  (*static_cast<polaris::Property*>(prop)).distanceType = type;
+  (*static_cast<polaris::NgtParameters*>(prop)).distanceType = type;
   return true;
 }
 
@@ -1143,7 +1143,7 @@ void ngt_destroy_results(NGTObjectDistances results) {
 
 void ngt_destroy_property(NGTProperty prop) {
     if(prop == NULL) return;
-    delete static_cast<polaris::Property*>(prop);
+    delete static_cast<polaris::NgtParameters*>(prop);
 }
 
 void ngt_close_index(NGTIndex index) {
@@ -1159,7 +1159,7 @@ int16_t ngt_get_property_edge_size_for_creation(NGTProperty prop, NGTError error
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<polaris::Property*>(prop)).edgeSizeForCreation;
+  return (*static_cast<polaris::NgtParameters*>(prop)).edgeSizeForCreation;
 }
 
 int16_t ngt_get_property_edge_size_for_search(NGTProperty prop, NGTError error) {
@@ -1169,7 +1169,7 @@ int16_t ngt_get_property_edge_size_for_search(NGTProperty prop, NGTError error) 
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<polaris::Property*>(prop)).edgeSizeForSearch;
+  return (*static_cast<polaris::NgtParameters*>(prop)).edgeSizeForSearch;
 }
 
 int32_t ngt_get_property_distance_type(NGTProperty prop, NGTError error){
@@ -1179,7 +1179,7 @@ int32_t ngt_get_property_distance_type(NGTProperty prop, NGTError error){
     operate_error_string_(ss, error);
     return -1;
   }
-  return (*static_cast<polaris::Property*>(prop)).distanceType;
+  return (*static_cast<polaris::NgtParameters*>(prop)).distanceType;
 }
 
 NGTError ngt_create_error_object()

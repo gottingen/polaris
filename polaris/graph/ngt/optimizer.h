@@ -742,7 +742,7 @@ namespace polaris {
                             }
                             searchParameters.step = 10;
                             polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
-                            NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
+                            auto &prop = graphIndex.getGraphProperty();
                             prop.dynamicEdgeSizeBase = base;
                             double time;
                             if (times.count(base) == 0) {
@@ -852,7 +852,7 @@ namespace polaris {
                             }
                             searchParameters.step = 10;
                             polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
-                            NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
+                            auto &prop = graphIndex.getGraphProperty();
                             prop.dynamicEdgeSizeRate = rate;
                             double time;
                             if (times.count(rate) == 0) {
@@ -924,7 +924,7 @@ namespace polaris {
             Command::SearchParameters searchParameters;
             searchParameters.edgeSize = -1;
             polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
-            NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
+            auto &prop = graphIndex.getGraphProperty();
             searchParameters.size = nOfResults;
             redirector.begin();
             try {
@@ -1033,7 +1033,7 @@ namespace polaris {
                 auto v = optimizer.adjustSearchEdgeSize(baseAccuracyRange, rateAccuracyRange, querySize, epsilon,
                                                         margin);
                 polaris::GraphIndex &graphIndex = static_cast<GraphIndex &>(index.getIndex());
-                NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
+                auto &prop = graphIndex.getGraphProperty();
                 if (v.first > 0) {
                     prop.dynamicEdgeSizeBase = v.first;
                 }
@@ -1050,7 +1050,7 @@ namespace polaris {
         }
 
 
-        void outputObject(std::ostream &os, std::vector<float> &v, polaris::Property &prop) {
+        void outputObject(std::ostream &os, std::vector<float> &v, polaris::NgtParameters &prop) {
             switch (prop.objectType) {
                 case polaris::ObjectType::UINT8: {
                     for (auto i = v.begin(); i != v.end(); ++i) {
@@ -1079,7 +1079,7 @@ namespace polaris {
         }
 
         void outputObjects(std::vector<std::vector<float>> &vs, std::ostream &os) {
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             index.getProperty(prop);
 
             for (auto i = vs.begin(); i != vs.end(); ++i) {
@@ -1087,7 +1087,7 @@ namespace polaris {
             }
         }
 
-        std::vector<float> extractObject(size_t id, polaris::Property &prop) {
+        std::vector<float> extractObject(size_t id, polaris::NgtParameters &prop) {
             std::vector<float> v;
             switch (prop.objectType) {
                 case polaris::ObjectType::UINT8: {
@@ -1119,7 +1119,7 @@ namespace polaris {
             return v;
         }
 
-        std::vector<float> meanObject(size_t id1, size_t id2, polaris::Property &prop) {
+        std::vector<float> meanObject(size_t id1, size_t id2, polaris::NgtParameters &prop) {
             std::vector<float> v;
             switch (prop.objectType) {
                 case polaris::ObjectType::UINT8: {
@@ -1155,7 +1155,7 @@ namespace polaris {
         }
 
         void extractQueries(std::vector<std::vector<float>> &queries, std::ostream &os) {
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             index.getProperty(prop);
 
             for (auto i = queries.begin(); i != queries.end(); ++i) {
@@ -1172,7 +1172,7 @@ namespace polaris {
         }
 
         void extractAndRemoveRandomQueries(size_t nqueries, std::vector<std::vector<float>> &queries) {
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             index.getProperty(prop);
             size_t repositorySize = index.getObjectRepositorySize();
             polaris::ObjectRepository &objectRepository = index.getObjectSpace().getRepository();
@@ -1199,7 +1199,7 @@ namespace polaris {
 
         void extractQueries(size_t nqueries, std::vector<std::vector<float>> &queries, bool similarObject = false) {
 
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             index.getProperty(prop);
 
             size_t osize = index.getObjectRepositorySize();
@@ -1557,7 +1557,7 @@ namespace polaris {
         static std::vector<std::pair<float, double>>
         generateAccuracyTable(polaris::NgtIndex &index, size_t nOfResults = 50, size_t querySize = 100) {
 
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             index.getProperty(prop);
             if (prop.edgeSizeForSearch != 0 && prop.edgeSizeForSearch != -2) {
                 std::stringstream msg;

@@ -24,7 +24,7 @@ main(int argc, char **argv) {
     string queryFile = "./data/sift-query-3.tsv";
     // index construction
     try {
-        polaris::Property property;
+        polaris::NgtParameters property;
         property.dimension = 128;
         property.objectType = polaris::ObjectType::UINT8;
         property.distanceType = polaris::MetricType::METRIC_L2;
@@ -64,7 +64,7 @@ main(int argc, char **argv) {
     // nearest neighbor search
     try {
         polaris::NgtIndex index(indexPath);
-        polaris::Property property;
+        polaris::NgtParameters property;
         index.getProperty(property);
         ifstream is(queryFile);
         string line;

@@ -128,7 +128,7 @@ namespace QBG {
     {
       vector<vector<float>> residualVectors;
 
-      polaris::Property property;
+      polaris::NgtParameters property;
       property.objectType = polaris::ObjectType::FLOAT;
       property.distanceType = polaris::MetricType::METRIC_L2;
       if (globalCentroid[0].size() != vectors[0].size()) {

@@ -25,7 +25,7 @@ void NGTQG::NgtqgIndex::quantize(const std::string indexPath, size_t dimensionOf
     const std::string quantizedIndexPath = indexPath + "/qg";
     struct stat st;
     if (stat(quantizedIndexPath.c_str(), &st) != 0) {
-      polaris::Property ngtProperty;
+      polaris::NgtParameters ngtProperty;
       index.getProperty(ngtProperty);
       QBG::BuildParameters buildParameters;
       buildParameters.creation.dimensionOfSubvector = dimensionOfSubvector;

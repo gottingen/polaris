@@ -1535,7 +1535,7 @@ QBG::CLI::assign(polaris::Args &args) {
 
     try {
         polaris::NgtIndex index(indexPath);
-        polaris::Property property;
+        polaris::NgtParameters property;
         index.getProperty(property);
         ifstream is(queryPath);
         if (!is) {

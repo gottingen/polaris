@@ -97,7 +97,7 @@ namespace polaris {
             try {
                 auto coefficients = optimizer.adjustSearchEdgeSize(baseAccuracyRange, rateAccuracyRange, numOfQueries,
                                                                    gtEpsilon, margin);
-                polaris::NeighborhoodGraph::Property &prop = graph.getGraphProperty();
+                polaris::NgtGraphParameters &prop = graph.getGraphProperty();
                 prop.dynamicEdgeSizeBase = coefficients.first;
                 prop.dynamicEdgeSizeRate = coefficients.second;
                 prop.edgeSizeForSearch = -2;
@@ -300,7 +300,7 @@ namespace polaris {
                         std::cerr << "Optimizer::execute: Extract the graph data." << std::endl;
                         // extract only edges from the index to reduce the memory usage.
                         polaris::GraphReconstructor::extractGraph(graph, *graphIndex);
-                        NeighborhoodGraph::Property &prop = graphIndex->getGraphProperty();
+                        auto &prop = graphIndex->getGraphProperty();
                         if (prop.graphType == polaris::GraphType::GraphTypeONNG) {
                             polaris::GraphReconstructor::convertToANNG(graph);
                         }
@@ -368,7 +368,7 @@ namespace polaris {
                 try {
                     auto coefficients = optimizer.adjustSearchEdgeSize(baseAccuracyRange, rateAccuracyRange,
                                                                        numOfQueries, gtEpsilon, margin);
-                    polaris::NeighborhoodGraph::Property &prop = outGraph.getGraphProperty();
+                   auto &prop = outGraph.getGraphProperty();
                     prop.dynamicEdgeSizeBase = coefficients.first;
                     prop.dynamicEdgeSizeRate = coefficients.second;
                     prop.edgeSizeForSearch = -2;
@@ -391,7 +391,7 @@ namespace polaris {
                     }
                     try {
                         auto prefetch = adjustPrefetchParameters(outIndex);
-                        polaris::Property prop;
+                        polaris::NgtParameters prop;
                         outIndex.getProperty(prop);
                         prop.prefetchOffset = prefetch.first;
                         prop.prefetchSize = prefetch.second;
@@ -411,7 +411,7 @@ namespace polaris {
                     try {
                         auto table = polaris::Optimizer::generateAccuracyTable(outIndex, numOfResults, numOfQueries);
                         polaris::NgtIndex::AccuracyTable accuracyTable(table);
-                        polaris::Property prop;
+                        polaris::NgtParameters prop;
                         outIndex.getProperty(prop);
                         prop.accuracyTable = accuracyTable.getString();
                         outIndex.setProperty(prop);
@@ -506,7 +506,7 @@ namespace polaris {
                 treeIndex.DVPTree::insertNode(treeIndex.DVPTree::leafNodes.allocate());
             }
 
-            polaris::NeighborhoodGraph::Property &prop = graphIndex.getGraphProperty();
+            auto &prop = graphIndex.getGraphProperty();
             prop.edgeSizeForCreation = parameter.maxNoOfEdges;
             std::vector<std::pair<size_t, std::tuple<size_t, double, double>>> transition;
             size_t targetNo = 12500;
@@ -583,7 +583,7 @@ namespace polaris {
                     noOfEdges = parameter.maxNoOfEdges;
                 }
 
-                polaris::NeighborhoodGraph::Property &prop = graph.getGraphProperty();
+                auto &prop = graph.getGraphProperty();
                 prop.edgeSizeForCreation = noOfEdges;
                 static_cast<polaris::GraphIndex &>(index.getIndex()).saveProperty(indexPath);
                 optimizedEdge.first = noOfEdges;

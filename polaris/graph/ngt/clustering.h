@@ -808,7 +808,7 @@ namespace polaris {
             string dataFile;
             size_t dataSize = 0;
             size_t dim = clusters.front().centroid.size();
-            polaris::Property property;
+            polaris::NgtParameters property;
             property.dimension = dim;
             property.graphType = polaris::GraphType::GraphTypeANNG;
             property.objectType = polaris::ObjectType::FLOAT;
@@ -866,7 +866,7 @@ namespace polaris {
         }
 
         double kmeansWithNGT(polaris::NgtIndex &index, size_t numberOfClusters) {
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             index.getProperty(prop);
             string path = index.getPath();
             index.save();

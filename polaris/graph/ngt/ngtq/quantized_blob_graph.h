@@ -68,8 +68,8 @@ namespace QBG {
             verbose = false;
         }
 
-        static void setProperties(CreationParameters &creation, NGTQ::Property &property, polaris::Property &globalProperty,
-                                  polaris::Property &localProperty) {
+        static void setProperties(CreationParameters &creation, NGTQ::Property &property, polaris::NgtParameters &globalProperty,
+                                  polaris::NgtParameters &localProperty) {
             property.threadSize = creation.threadSize;
             property.globalCentroidLimit = 0;
             property.localCentroidLimit = creation.numOfLocalClusters;
@@ -261,8 +261,8 @@ namespace QBG {
             optimization.setDefault();
         }
 
-        void setProperties(NGTQ::Property &property, polaris::Property &globalProperty,
-                           polaris::Property &localProperty) {
+        void setProperties(NGTQ::Property &property, polaris::NgtParameters &globalProperty,
+                           polaris::NgtParameters &localProperty) {
             CreationParameters::setProperties(creation, property, globalProperty, localProperty);
         }
 
@@ -485,8 +485,8 @@ namespace QBG {
                            CreationParameters &creation,
                            std::vector<float> *rotation = 0, const std::string objectFile = "") {
             NGTQ::Property property;
-            polaris::Property globalProperty;
-            polaris::Property localProperty;
+            polaris::NgtParameters globalProperty;
+            polaris::NgtParameters localProperty;
             CreationParameters::setProperties(creation, property, globalProperty, localProperty);
             property.quantizerType = NGTQ::QuantizerTypeQBG;
             NGTQ::NgtqIndex::create(index, property, globalProperty, localProperty, rotation, objectFile);
@@ -495,7 +495,7 @@ namespace QBG {
 #endif
 #ifdef NGTQ_QBG
 
-        static void initialize(NGTQ::Property &property, polaris::Property &globalProperty, polaris::Property &localProperty) {
+        static void initialize(NGTQ::Property &property, polaris::NgtParameters &globalProperty, polaris::NgtParameters &localProperty) {
             QBG::CreationParameters params;
             QBG::CreationParameters::setProperties(params, property, globalProperty, localProperty);
         }
@@ -503,13 +503,13 @@ namespace QBG {
 #endif
 
         static void create(const std::string &index, NGTQ::Property &property,
-                           polaris::Property &globalProperty,
+                           polaris::NgtParameters &globalProperty,
 #ifdef NGTQ_QBG
-                           polaris::Property &localProperty,
+                           polaris::NgtParameters &localProperty,
                            std::vector<float> *rotation,
                            const std::string &objectFile) {
 #else
-            polaris::Property &localProperty) {
+            polaris::NgtParameters &localProperty) {
 #endif
             property.quantizerType = NGTQ::QuantizerTypeQBG;
 #ifdef NGTQ_QBG

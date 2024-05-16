@@ -653,7 +653,7 @@ namespace polaris {
             std::cerr << "Reconstruction time=" << originalEdgeTimer.delta.to_seconds<double>() << ":" << reverseEdgeTimer.delta.to_seconds<double>()
                       << ":" << normalizeEdgeTimer.delta.to_seconds<double>() << std::endl;
 
-            polaris::Property prop;
+            polaris::NgtParameters prop;
             outGraph.getProperty().get(prop);
             prop.graphType = polaris::GraphType::GraphTypeONNG;
             outGraph.getProperty().set(prop);

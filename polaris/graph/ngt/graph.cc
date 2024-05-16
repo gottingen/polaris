@@ -24,41 +24,7 @@ using namespace std;
 using namespace polaris;
 
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
-void NeighborhoodGraph::Property::set(polaris::Property &prop) {
-    if (prop.truncationThreshold != -1) truncationThreshold = prop.truncationThreshold;
-    if (prop.edgeSizeForCreation != -1) edgeSizeForCreation = prop.edgeSizeForCreation;
-    if (prop.edgeSizeForSearch != -1) edgeSizeForSearch = prop.edgeSizeForSearch;
-    if (prop.edgeSizeLimitForCreation != -1) edgeSizeLimitForCreation = prop.edgeSizeLimitForCreation;
-    if (prop.insertionRadiusCoefficient != -1) insertionRadiusCoefficient = prop.insertionRadiusCoefficient;
-    if (prop.seedSize != -1) seedSize = prop.seedSize;
-    if (prop.seedType != SeedTypeNone) seedType = prop.seedType;
-    if (prop.truncationThreadPoolSize != -1) truncationThreadPoolSize = prop.truncationThreadPoolSize;
-    if (prop.batchSizeForCreation != -1) batchSizeForCreation = prop.batchSizeForCreation;
-    if (prop.dynamicEdgeSizeBase != -1) dynamicEdgeSizeBase = prop.dynamicEdgeSizeBase;
-    if (prop.dynamicEdgeSizeRate != -1) dynamicEdgeSizeRate = prop.dynamicEdgeSizeRate;
-    if (prop.buildTimeLimit != -1) buildTimeLimit = prop.buildTimeLimit;
-    if (prop.outgoingEdge != -1) outgoingEdge = prop.outgoingEdge;
-    if (prop.incomingEdge != -1) incomingEdge = prop.incomingEdge;
-    if (prop.graphType != GraphTypeNone) graphType = prop.graphType;
-}
 
-void NeighborhoodGraph::Property::get(polaris::Property &prop) {
-    prop.truncationThreshold = truncationThreshold;
-    prop.edgeSizeForCreation = edgeSizeForCreation;
-    prop.edgeSizeForSearch = edgeSizeForSearch;
-    prop.edgeSizeLimitForCreation = edgeSizeLimitForCreation;
-    prop.insertionRadiusCoefficient = insertionRadiusCoefficient;
-    prop.seedSize = seedSize;
-    prop.seedType = seedType;
-    prop.truncationThreadPoolSize = truncationThreadPoolSize;
-    prop.batchSizeForCreation = batchSizeForCreation;
-    prop.dynamicEdgeSizeBase = dynamicEdgeSizeBase;
-    prop.dynamicEdgeSizeRate = dynamicEdgeSizeRate;
-    prop.graphType = graphType;
-    prop.buildTimeLimit = buildTimeLimit;
-    prop.outgoingEdge = outgoingEdge;
-    prop.incomingEdge = incomingEdge;
-}
 void
 NeighborhoodGraph::Search::normalizedCosineSimilarityFloat(NeighborhoodGraph &graph, polaris::SearchContainer &sc,
                                                            ObjectDistances &seeds) {

@@ -196,8 +196,8 @@ bool qbg_create(const char *indexPath, QBGConstructionParameters *parameters, NG
     try {
         std::vector<float> r;
         NGTQ::Property property;
-        polaris::Property globalProperty;
-        polaris::Property localProperty;
+        polaris::NgtParameters globalProperty;
+        polaris::NgtParameters localProperty;
         property.dimension = parameters->extended_dimension;
         if (property.dimension == 0) {
             property.dimension = parameters->dimension;

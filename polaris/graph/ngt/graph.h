@@ -20,6 +20,7 @@
 
 #include <polaris/core/defines.h>
 #include <polaris/core/common.h>
+#include <polaris/core/ngt_parameters.h>
 #include <polaris/graph/ngt/object_space_repository.h>
 #include <polaris/utility/hash_based_boolean_set.h>
 #include <polaris/utility/boolean_set.h>
@@ -54,7 +55,6 @@
 #endif
 
 namespace polaris {
-    class Property;
 
     typedef GraphNode GRAPH_NODE;
 
@@ -509,144 +509,6 @@ namespace polaris {
 
 #endif
 
-        class Property {
-        public:
-            Property() { setDefault(); }
-
-            void setDefault() {
-                truncationThreshold = 0;
-                edgeSizeForCreation = NGT_CREATION_EDGE_SIZE;
-                edgeSizeForSearch = 0;
-                edgeSizeLimitForCreation = 5;
-                insertionRadiusCoefficient = NGT_INSERTION_EXPLORATION_COEFFICIENT;
-                seedSize = NGT_SEED_SIZE;
-                seedType = SeedTypeNone;
-                truncationThreadPoolSize = 8;
-                batchSizeForCreation = 200;
-                graphType = GraphTypeANNG;
-                dynamicEdgeSizeBase = 30;
-                dynamicEdgeSizeRate = 20;
-                buildTimeLimit = 0.0;
-                outgoingEdge = 10;
-                incomingEdge = 80;
-            }
-
-            void clear() {
-                truncationThreshold = -1;
-                edgeSizeForCreation = -1;
-                edgeSizeForSearch = -1;
-                edgeSizeLimitForCreation = -1;
-                insertionRadiusCoefficient = -1;
-                seedSize = -1;
-                seedType = SeedTypeNone;
-                truncationThreadPoolSize = -1;
-                batchSizeForCreation = -1;
-                graphType = GraphTypeNone;
-                dynamicEdgeSizeBase = -1;
-                dynamicEdgeSizeRate = -1;
-                buildTimeLimit = -1;
-                outgoingEdge = -1;
-                incomingEdge = -1;
-            }
-
-            void set(polaris::Property &prop);
-
-            void get(polaris::Property &prop);
-
-            void exportProperty(polaris::PropertySet &p) {
-                p.set("IncrimentalEdgeSizeLimitForTruncation", truncationThreshold);
-                p.set("EdgeSizeForCreation", edgeSizeForCreation);
-                p.set("EdgeSizeForSearch", edgeSizeForSearch);
-                p.set("EdgeSizeLimitForCreation", edgeSizeLimitForCreation);
-                assert(insertionRadiusCoefficient >= 1.0);
-                p.set("EpsilonForCreation", insertionRadiusCoefficient - 1.0);
-                p.set("BatchSizeForCreation", batchSizeForCreation);
-                p.set("SeedSize", seedSize);
-                p.set("TruncationThreadPoolSize", truncationThreadPoolSize);
-                p.set("DynamicEdgeSizeBase", dynamicEdgeSizeBase);
-                p.set("DynamicEdgeSizeRate", dynamicEdgeSizeRate);
-                p.set("BuildTimeLimit", buildTimeLimit);
-                p.set("OutgoingEdge", outgoingEdge);
-                p.set("IncomingEdge", incomingEdge);
-                auto rs = PropertySerializer::graph_type_export(p, graphType);
-                if (!rs.ok()) {
-                    std::cerr << "Graph::exportProperty: Fatal error! Invalid Graph Type. " << graphType << std::endl;
-                    abort();
-                }
-                rs = PropertySerializer::seed_type_export(p, seedType);
-                if (!rs.ok()) {
-                    std::cerr << "Graph::exportProperty: Fatal error! Invalid Seed Type. " << seedType << std::endl;
-                    abort();
-                }
-            }
-
-            void importProperty(polaris::PropertySet &p) {
-                setDefault();
-                truncationThreshold = p.getl("IncrimentalEdgeSizeLimitForTruncation", truncationThreshold);
-                edgeSizeForCreation = p.getl("EdgeSizeForCreation", edgeSizeForCreation);
-                edgeSizeForSearch = p.getl("EdgeSizeForSearch", edgeSizeForSearch);
-                edgeSizeLimitForCreation = p.getl("EdgeSizeLimitForCreation", edgeSizeLimitForCreation);
-                insertionRadiusCoefficient = p.getf("EpsilonForCreation", insertionRadiusCoefficient);
-                insertionRadiusCoefficient += 1.0;
-                batchSizeForCreation = p.getl("BatchSizeForCreation", batchSizeForCreation);
-                seedSize = p.getl("SeedSize", seedSize);
-                truncationThreadPoolSize = p.getl("TruncationThreadPoolSize", truncationThreadPoolSize);
-                dynamicEdgeSizeBase = p.getl("DynamicEdgeSizeBase", dynamicEdgeSizeBase);
-                dynamicEdgeSizeRate = p.getl("DynamicEdgeSizeRate", dynamicEdgeSizeRate);
-                buildTimeLimit = p.getf("BuildTimeLimit", buildTimeLimit);
-                outgoingEdge = p.getl("OutgoingEdge", outgoingEdge);
-                incomingEdge = p.getl("IncomingEdge", incomingEdge);
-                auto grs = PropertySerializer::graph_type_import(p);
-                if (!grs.ok()) {
-                    std::cerr << "Graph::importProperty: Fatal error! Invalid Graph Type. " << grs.status().message() << std::endl;
-                    abort();
-                }
-                graphType = (GraphType) grs.value();
-                auto srs = PropertySerializer::seed_type_import(p);
-                if (!srs.ok()) {
-                    std::cerr << "Graph::importProperty: Fatal error! Invalid Seed Type. " << srs.status().message() << std::endl;
-                    abort();
-                }
-                seedType = (SeedType) srs.value();
-                auto it = p.find("SeedType");
-            }
-
-            friend std::ostream &operator<<(std::ostream &os, const Property &p) {
-                os << "truncationThreshold=" << p.truncationThreshold << std::endl;
-                os << "edgeSizeForCreation=" << p.edgeSizeForCreation << std::endl;
-                os << "edgeSizeForSearch=" << p.edgeSizeForSearch << std::endl;
-                os << "edgeSizeLimitForCreation=" << p.edgeSizeLimitForCreation << std::endl;
-                os << "insertionRadiusCoefficient=" << p.insertionRadiusCoefficient << std::endl;
-                os << "insertionRadiusCoefficient=" << p.insertionRadiusCoefficient << std::endl;
-                os << "seedSize=" << p.seedSize << std::endl;
-                os << "seedType=" << p.seedType << std::endl;
-                os << "truncationThreadPoolSize=" << p.truncationThreadPoolSize << std::endl;
-                os << "batchSizeForCreation=" << p.batchSizeForCreation << std::endl;
-                os << "graphType=" << p.graphType << std::endl;
-                os << "dynamicEdgeSizeBase=" << p.dynamicEdgeSizeBase << std::endl;
-                os << "dynamicEdgeSizeRate=" << p.dynamicEdgeSizeRate << std::endl;
-                os << "outgoingEdge=" << p.outgoingEdge << std::endl;
-                os << "incomingEdge=" << p.incomingEdge << std::endl;
-                return os;
-            }
-
-            int16_t truncationThreshold;
-            int16_t edgeSizeForCreation;
-            int16_t edgeSizeForSearch;
-            int16_t edgeSizeLimitForCreation;
-            double insertionRadiusCoefficient;
-            int16_t seedSize;
-            SeedType seedType;
-            int16_t truncationThreadPoolSize;
-            int16_t batchSizeForCreation;
-            GraphType graphType;
-            int16_t dynamicEdgeSizeBase;
-            int16_t dynamicEdgeSizeRate;
-            float buildTimeLimit;
-            int16_t outgoingEdge;
-            int16_t incomingEdge;
-        };
-
         NeighborhoodGraph() : objectSpace(0) {
             property.truncationThreshold = NGT_TRUNCATION_THRESHOLD;
             // initialize random to generate random seeds
@@ -1081,7 +943,7 @@ namespace polaris {
         SearchGraphRepository searchRepository;
 #endif
 
-        NeighborhoodGraph::Property property;
+        NgtGraphParameters property;
 
     }; // NeighborhoodGraph
 

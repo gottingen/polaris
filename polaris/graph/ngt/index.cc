@@ -41,7 +41,7 @@ size_t NgtIndex::getDimension() {
     return static_cast<polaris::GraphIndex &>(getIndex()).getProperty().dimension;
 }
 
-polaris::NgtIndex::NgtIndex(polaris::Property &prop) : redirect(false) {
+polaris::NgtIndex::NgtIndex(polaris::NgtParameters &prop) : redirect(false) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("NgtIndex::NgtIndex. Dimension is not specified.");
     }
@@ -69,7 +69,7 @@ polaris::NgtIndex::getEpsilonFromExpectedAccuracy(double accuracy) {
 
 void
 polaris::NgtIndex::open(const string &database, bool rdOnly, polaris::NgtIndex::OpenType openType) {
-    polaris::Property prop;
+    polaris::NgtParameters prop;
     prop.load(database);
     NgtIndex *idx = 0;
     if ((prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) &&
@@ -91,7 +91,7 @@ polaris::NgtIndex::open(const string &database, bool rdOnly, polaris::NgtIndex::
 }
 
 void
-polaris::NgtIndex::createGraphAndTree(const string &database, polaris::Property &prop, const string &dataFile,
+polaris::NgtIndex::createGraphAndTree(const string &database, polaris::NgtParameters &prop, const string &dataFile,
                                size_t dataSize, bool redirect) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("NgtIndex::createGraphAndTree. Dimension is not specified.");
@@ -114,7 +114,7 @@ polaris::NgtIndex::createGraphAndTree(const string &database, polaris::Property 
 }
 
 void
-polaris::NgtIndex::createGraph(const string &database, polaris::Property &prop, const string &dataFile, size_t dataSize,
+polaris::NgtIndex::createGraph(const string &database, polaris::NgtParameters &prop, const string &dataFile, size_t dataSize,
                         bool redirect) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("NgtIndex::createGraphAndTree. Dimension is not specified.");
@@ -229,7 +229,7 @@ polaris::NgtIndex::remove(const string &database, vector<ObjectID> &objects, boo
 void
 polaris::NgtIndex::importIndex(const string &database, const string &file) {
     NgtIndex *idx = 0;
-    polaris::Property property;
+    polaris::NgtParameters property;
     property.importProperty(file);
     polaris::Timer timer;
     timer.start();
@@ -303,7 +303,7 @@ polaris::NgtIndex::createIndex(size_t threadNumber, size_t sizeOfRepository) {
     redirector.begin();
     try {
         InsertionOrder insertionOrder;
-        polaris::Property prop;
+        polaris::NgtParameters prop;
         getProperty(prop);
         if (prop.distanceType == MetricType::METRIC_INNER_PRODUCT) {
             size_t beginId = 1;
@@ -329,47 +329,6 @@ polaris::NgtIndex::createIndex(size_t threadNumber, size_t sizeOfRepository) {
         throw err;
     }
     redirector.end();
-}
-
-void
-polaris::NgtIndex::Property::set(polaris::Property &prop) {
-    if (prop.dimension != -1) dimension = prop.dimension;
-    if (prop.threadPoolSize != -1) threadPoolSize = prop.threadPoolSize;
-    if (prop.objectType != ObjectType::ObjectTypeNone) objectType = prop.objectType;
-#ifdef NGT_REFINEMENT
-    if (prop.refinementObjectType != ObjectSpace::ObjectTypeNone) refinementObjectType = prop.refinementObjectType;
-#endif
-    if (prop.distanceType != MetricType::METRIC_NONE) distanceType = prop.distanceType;
-    if (prop.indexType != IndexType::INDEX_NONE) indexType = prop.indexType;
-    if (prop.databaseType != DatabaseTypeNone) databaseType = prop.databaseType;
-    if (prop.objectAlignment != ObjectAlignmentNone) objectAlignment = prop.objectAlignment;
-    if (prop.pathAdjustmentInterval != -1) pathAdjustmentInterval = prop.pathAdjustmentInterval;
-    if (prop.prefetchOffset != -1) prefetchOffset = prop.prefetchOffset;
-    if (prop.prefetchSize != -1) prefetchSize = prop.prefetchSize;
-    if (prop.accuracyTable != "") accuracyTable = prop.accuracyTable;
-    if (prop.maxMagnitude != -1) maxMagnitude = prop.maxMagnitude;
-    if (prop.nOfNeighborsForInsertionOrder != -1) nOfNeighborsForInsertionOrder = prop.nOfNeighborsForInsertionOrder;
-    if (prop.epsilonForInsertionOrder != -1) epsilonForInsertionOrder = prop.epsilonForInsertionOrder;
-}
-
-void
-polaris::NgtIndex::Property::get(polaris::Property &prop) {
-    prop.dimension = dimension;
-    prop.threadPoolSize = threadPoolSize;
-    prop.objectType = objectType;
-#ifdef NGT_REFINEMENT
-    prop.refinementObjectType = refinementObjectType;
-#endif
-    prop.distanceType = distanceType;
-    prop.indexType = indexType;
-    prop.databaseType = databaseType;
-    prop.pathAdjustmentInterval = pathAdjustmentInterval;
-    prop.prefetchOffset = prefetchOffset;
-    prop.prefetchSize = prefetchSize;
-    prop.accuracyTable = accuracyTable;
-    prop.maxMagnitude = maxMagnitude;
-    prop.nOfNeighborsForInsertionOrder = nOfNeighborsForInsertionOrder;
-    prop.epsilonForInsertionOrder = epsilonForInsertionOrder;
 }
 
 class CreateIndexJob {
@@ -453,7 +412,7 @@ CreateIndexThread::run() {
 
 class BuildTimeController {
 public:
-    BuildTimeController(GraphIndex &graph, NeighborhoodGraph::Property &prop) : property(prop) {
+    BuildTimeController(GraphIndex &graph, NgtGraphParameters &prop) : property(prop) {
         noOfInsertedObjects = graph.objectSpace->getRepository().size() - graph.repository.size();
         interval = 10000;
         count = interval;
@@ -501,11 +460,11 @@ public:
     Timer timer;
     double time;
     double buildTimeLimit;
-    NeighborhoodGraph::Property &property;
+    NgtGraphParameters &property;
 };
 
 void
-polaris::GraphIndex::constructObjectSpace(polaris::Property &prop) {
+polaris::GraphIndex::constructObjectSpace(polaris::NgtParameters &prop) {
     assert(prop.dimension != 0);
     size_t dimension = prop.dimension;
     if (prop.distanceType == polaris::MetricType::METRIC_SPARSE_JACCARD ||
@@ -583,17 +542,23 @@ polaris::GraphIndex::loadIndex(const string &ifile, bool readOnly, polaris::NgtI
 
 void
 polaris::GraphIndex::saveProperty(const std::string &file) {
-    polaris::Property::save(*this, file);
+    polaris::PropertySet prop;
+    this->getGraphIndexProperty().export_property(prop);
+    this->getGraphProperty().export_property(prop);
+    prop.save(file + "/prf");
 }
 
 void
 polaris::GraphIndex::exportProperty(const std::string &file) {
-    polaris::Property::exportProperty(*this, file);
+    polaris::PropertySet prop;
+    this->getGraphIndexProperty().export_property(prop);
+    this->getGraphProperty().export_property(prop);
+    prop.save(file + "/prf");
 }
 
 
 polaris::GraphIndex::GraphIndex(const string &database, bool rdOnly, polaris::NgtIndex::OpenType openType) : readOnly(rdOnly) {
-    polaris::Property prop;
+    polaris::NgtParameters prop;
     prop.load(database);
     if (prop.databaseType != polaris::DatabaseType::Memory) {
         POLARIS_THROW_EX("GraphIndex: Cannot open. Not memory type.");
@@ -971,7 +936,7 @@ GraphIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder, size_t
 
 }
 
-void GraphIndex::setupPrefetch(polaris::Property &prop) {
+void GraphIndex::setupPrefetch(polaris::NgtParameters &prop) {
     assert(GraphIndex::objectSpace != 0);
     prop.prefetchOffset = GraphIndex::objectSpace->setPrefetchOffset(prop.prefetchOffset);
     prop.prefetchSize = GraphIndex::objectSpace->setPrefetchSize(prop.prefetchSize);

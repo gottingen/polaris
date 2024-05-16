@@ -29,6 +29,7 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <polaris/core/common.h>
+#include <polaris/core/ngt_parameters.h>
 #include <polaris/utility/property_set.h>
 #include <polaris/graph/ngt/tree.h>
 #include <polaris/graph/ngt/thread.h>
@@ -37,8 +38,6 @@
 
 namespace polaris {
 
-    class Property;
-
     class NgtIndex {
     public:
         enum OpenType {
@@ -46,207 +45,6 @@ namespace polaris {
             OpenTypeGraphDisabled = 0x01,
             OpenTypeTreeDisabled = 0x02,
             OpenTypeObjectDisabled = 0x04
-        };
-
-        class Property {
-        public:
-
-            Property() { setDefault(); }
-
-            void setDefault() {
-                dimension = 0;
-                threadPoolSize = 32;
-                objectType = ObjectType::FLOAT;
-#ifdef NGT_REFINEMENT
-                refinementObjectType	= ObjectType::FLOAT;
-#endif
-                distanceType = MetricType::METRIC_L2;
-                indexType = IndexType::INDEX_NGT_GRAPH_AND_TREE;
-                objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
-                pathAdjustmentInterval = 0;
-                databaseType = DatabaseType::Memory;
-                prefetchOffset = 0;
-                prefetchSize = 0;
-                maxMagnitude = 0.0;
-                nOfNeighborsForInsertionOrder = 0;
-                epsilonForInsertionOrder = 0.1;
-            }
-
-            void clear() {
-                dimension = -1;
-                threadPoolSize = -1;
-                objectType = ObjectType::ObjectTypeNone;
-#ifdef NGT_REFINEMENT
-                refinementObjectType	= ObjectSpace::ObjectTypeNone;
-#endif
-                distanceType = MetricType::METRIC_NONE;
-                indexType = IndexType::INDEX_NONE;
-                databaseType = DatabaseTypeNone;
-                objectAlignment = ObjectAlignment::ObjectAlignmentNone;
-                pathAdjustmentInterval = -1;
-                prefetchOffset = -1;
-                prefetchSize = -1;
-                accuracyTable = "";
-                maxMagnitude = -1;
-                nOfNeighborsForInsertionOrder = -1;
-                epsilonForInsertionOrder = -1;
-            }
-
-            void exportProperty(polaris::PropertySet &p) {
-                PropertySerializer::dimension_export(p, dimension);
-                p.set("ThreadPoolSize", threadPoolSize);
-                static std::set<ObjectType> allow_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16,
-                                                         ObjectType::BFLOAT16};
-                auto rs = PropertySerializer::object_type_export(p, objectType, &allow_set);
-                if(!rs.ok()) {
-                    POLARIS_LOG(ERROR) << rs.message();
-                    abort();
-                }
-#ifdef NGT_REFINEMENT
-                static std::set<ObjectType> refinement_allow_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
-                auto rrs = PropertySerializer::object_type_export(p, refinementObjectType, &refinement_allow_set);
-                if(!rrs.ok()) {
-                    POLARIS_LOG(ERROR) << rs.message();
-                    abort();
-                }
-#endif
-                static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1, MetricType::METRIC_L2,
-                                                          MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD, MetricType::METRIC_SPARSE_JACCARD,
-                                                          MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
-                                                          MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
-                                                          MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
-                rs = PropertySerializer::distance_type_export(p, distanceType, &allow_dis_set);
-                if(!rs.ok()) {
-                    POLARIS_LOG(ERROR) << rs.message();
-                    abort();
-                }
-
-                rs = PropertySerializer::index_type_export(p, indexType);
-                if(!rs.ok()) {
-                    POLARIS_LOG(ERROR) << rs.message();
-                    abort();
-                }
-
-                rs = PropertySerializer::database_type_export(p, databaseType);
-                if(!rs.ok()) {
-                    POLARIS_LOG(ERROR) << rs.message();
-                    abort();
-                }
-                rs = PropertySerializer::object_alignment_export(p, objectAlignment);
-                if(!rs.ok()) {
-                    POLARIS_LOG(ERROR) << rs.message();
-                    abort();
-                }
-                p.set("PathAdjustmentInterval", pathAdjustmentInterval);
-                p.set("PrefetchOffset", prefetchOffset);
-                p.set("PrefetchSize", prefetchSize);
-                p.set("AccuracyTable", accuracyTable);
-                p.set("MaxMagnitude", maxMagnitude);
-                p.set("NumberOfNeighborsForInsertionOrder", nOfNeighborsForInsertionOrder);
-                p.set("EpsilonForInsertionOrder", epsilonForInsertionOrder);
-            }
-
-            void importProperty(polaris::PropertySet &p) {
-                setDefault();
-                auto dmrs = PropertySerializer::dimension_import(p);
-                if(!dmrs.ok()) {
-                    POLARIS_LOG(ERROR) << dmrs.status().message();
-                    dimension = 0;
-                } else {
-                    dimension = dmrs.value();
-                }
-                threadPoolSize = p.getl("ThreadPoolSize", threadPoolSize);
-
-                static std::set<ObjectType> allow_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
-                auto otrs = PropertySerializer::object_type_import(p, &allow_object_set);
-                if(!otrs.ok()) {
-                    POLARIS_LOG(ERROR) << otrs.status().message();
-                    objectType = ObjectType::ObjectTypeNone;
-                }
-                objectType = otrs.value();
-#ifdef NGT_REFINEMENT
-                {
-                    static std::set<ObjectType> allow_refinement_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
-                    auto rtrs = PropertySerializer::object_type_import(p, &allow_refinement_object_set);
-                    if(!rtrs.ok()) {
-                        POLARIS_LOG(ERROR) << rtrs.status().message();
-                        refinementObjectType = ObjectType::ObjectTypeNone;
-                    }
-                    refinementObjectType = rtrs.value();
-                }
-#endif
-                static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1, MetricType::METRIC_L2,
-                                                          MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD, MetricType::METRIC_SPARSE_JACCARD,
-                                                          MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
-                                                          MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
-                                                          MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
-                auto drs = PropertySerializer::distance_type_import(p, &allow_dis_set);
-                if(!drs.ok()) {
-                    POLARIS_LOG(ERROR) << drs.status().message();
-                    distanceType = MetricType::METRIC_NONE;
-                }
-                distanceType = drs.value();
-                auto irs = PropertySerializer::index_type_import(p);
-                if(!irs.ok()) {
-                    POLARIS_LOG(ERROR) << irs.status().message();
-                    indexType = IndexType::INDEX_NONE;
-                } else {
-                    indexType = irs.value();
-                }
-                std::set<DatabaseType> allow_database_set = {DatabaseType::Memory, DatabaseType::MemoryMappedFile};
-                auto dbtrs = PropertySerializer::database_type_import(p, &allow_database_set);
-                if(!dbtrs.ok()) {
-                    POLARIS_LOG(ERROR) << dbtrs.status().message();
-                    databaseType = DatabaseType::DatabaseTypeNone;
-                } else {
-                    databaseType = dbtrs.value();
-                }
-                auto alrs = PropertySerializer::object_alignment_import(p);
-                if(!alrs.ok()) {
-                    POLARIS_LOG(ERROR) << alrs.status().message();
-                    objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
-                } else {
-                    objectAlignment = alrs.value();
-                }
-                pathAdjustmentInterval = p.getl("PathAdjustmentInterval", pathAdjustmentInterval);
-                prefetchOffset = p.getl("PrefetchOffset", prefetchOffset);
-                prefetchSize = p.getl("PrefetchSize", prefetchSize);
-                auto it = p.find("AccuracyTable");
-                if (it != p.end()) {
-                    accuracyTable = it->second;
-                }
-                it = p.find("SearchType");
-                if (it != p.end()) {
-                    searchType = it->second;
-                }
-                maxMagnitude = p.getf("MaxMagnitude", maxMagnitude);
-                nOfNeighborsForInsertionOrder = p.getl("NumberOfNeighborsForInsertionOrder",
-                                                       nOfNeighborsForInsertionOrder);
-                epsilonForInsertionOrder = p.getf("EpsilonForInsertionOrder", epsilonForInsertionOrder);
-            }
-
-            void set(polaris::Property &prop);
-
-            void get(polaris::Property &prop);
-
-            int dimension;
-            int threadPoolSize;
-            polaris::ObjectType objectType;
-            MetricType distanceType;
-            IndexType indexType;
-            DatabaseType databaseType;
-            ObjectAlignment objectAlignment;
-            int pathAdjustmentInterval;
-            int prefetchOffset;
-            int prefetchSize;
-            std::string accuracyTable;
-            std::string searchType;    // test
-            float maxMagnitude;
-            int nOfNeighborsForInsertionOrder;
-            float epsilonForInsertionOrder;
-#ifdef NGT_REFINEMENT
-            polaris::ObjectType	refinementObjectType;
-#endif
         };
 
         class InsertionOrder : public std::vector<uint32_t> {
@@ -372,16 +170,16 @@ namespace polaris {
 #endif
         }
 
-        NgtIndex(polaris::Property &prop);
+        NgtIndex(polaris::NgtParameters &prop);
 
         NgtIndex(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = NgtIndex::OpenTypeNone) : index(
                 0), redirect(false) { open(database, rdOnly, openType); }
 
-        NgtIndex(const std::string &database, polaris::Property &prop) : index(0), redirect(false) { open(database, prop); }
+        NgtIndex(const std::string &database, polaris::NgtParameters &prop) : index(0), redirect(false) { open(database, prop); }
 
         virtual ~NgtIndex() { close(); }
 
-        void open(const std::string &database, polaris::Property &prop) {
+        void open(const std::string &database, polaris::NgtParameters &prop) {
             open(database);
             setProperty(prop);
         }
@@ -415,18 +213,18 @@ namespace polaris {
             }
         }
 
-        static void create(const std::string &database, polaris::Property &prop, bool redirect = false) {
+        static void create(const std::string &database, polaris::NgtParameters &prop, bool redirect = false) {
             createGraphAndTree(database, prop, redirect);
         }
 
-        static void createGraphAndTree(const std::string &database, polaris::Property &prop, const std::string &dataFile,
+        static void createGraphAndTree(const std::string &database, polaris::NgtParameters &prop, const std::string &dataFile,
                                        size_t dataSize = 0, bool redirect = false);
 
-        static void createGraphAndTree(const std::string &database, polaris::Property &prop,
+        static void createGraphAndTree(const std::string &database, polaris::NgtParameters &prop,
                                        bool redirect = false) { createGraphAndTree(database, prop, "", redirect); }
 
         static void
-        createGraph(const std::string &database, polaris::Property &prop, const std::string &dataFile, size_t dataSize = 0,
+        createGraph(const std::string &database, polaris::NgtParameters &prop, const std::string &dataFile, size_t dataSize = 0,
                     bool redirect = false);
 
         template<typename T>
@@ -549,9 +347,9 @@ namespace polaris {
 
         virtual size_t getSizeOfElement() { return getIndex().getSizeOfElement(); }
 
-        virtual void setProperty(polaris::Property &prop) { getIndex().setProperty(prop); }
+        virtual void setProperty(polaris::NgtParameters &prop) { getIndex().setProperty(prop); }
 
-        virtual void getProperty(polaris::Property &prop) { getIndex().getProperty(prop); }
+        virtual void getProperty(polaris::NgtParameters &prop) { getIndex().getProperty(prop); }
 
         virtual void deleteObject(Object *po) { getIndex().deleteObject(po); }
 
@@ -670,11 +468,11 @@ namespace polaris {
 
         GraphIndex(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = NgtIndex::OpenTypeNone);
 
-        GraphIndex(polaris::Property &prop) : readOnly(false) {
+        GraphIndex(polaris::NgtParameters &prop) : readOnly(false) {
             initialize(prop);
         }
 
-        void initialize(polaris::Property &prop) {
+        void initialize(polaris::NgtParameters &prop) {
             constructObjectSpace(prop);
             setProperty(prop);
         }
@@ -684,7 +482,7 @@ namespace polaris {
             destructObjectSpace();
         }
 
-        void constructObjectSpace(polaris::Property &prop);
+        void constructObjectSpace(polaris::NgtParameters &prop);
 
         void destructObjectSpace() {
 #ifdef NGT_REFINEMENT
@@ -1299,9 +1097,9 @@ namespace polaris {
         ObjectSpace &getRefinementObjectSpace() { return *refinementObjectSpace; }
 #endif
 
-        void setupPrefetch(polaris::Property &prop);
+        void setupPrefetch(polaris::NgtParameters &prop);
 
-        void setProperty(polaris::Property &prop) {
+        void setProperty(polaris::NgtParameters &prop) {
             setupPrefetch(prop);
             GraphIndex::property.set(prop);
             NeighborhoodGraph::property.set(prop);
@@ -1309,14 +1107,14 @@ namespace polaris {
             accuracyTable.set(property.accuracyTable);
         }
 
-        void getProperty(polaris::Property &prop) {
+        void getProperty(polaris::NgtParameters &prop) {
             GraphIndex::property.get(prop);
             NeighborhoodGraph::property.get(prop);
         }
 
-        NeighborhoodGraph::Property &getGraphProperty() { return NeighborhoodGraph::property; }
+        NgtGraphParameters &getGraphProperty() { return NeighborhoodGraph::property; }
 
-        NgtIndex::Property &getGraphIndexProperty() { return GraphIndex::property; }
+        NgtIndexParameters &getGraphIndexProperty() { return GraphIndex::property; }
 
         virtual size_t getSharedMemorySize(std::ostream &os, SharedMemoryAllocator::GetMemorySizeType t) {
             size_t size = 0;
@@ -1326,7 +1124,7 @@ namespace polaris {
 
         float getEpsilonFromExpectedAccuracy(double accuracy) { return accuracyTable.getEpsilon(accuracy); }
 
-        NgtIndex::Property &getProperty() { return property; }
+        NgtIndexParameters &getProperty() { return property; }
 
         bool getReadOnly() { return readOnly; }
 
@@ -1393,7 +1191,7 @@ namespace polaris {
         }
 
     public:
-        NgtIndex::Property property;
+        NgtIndexParameters property;
 
     protected:
         bool readOnly;
@@ -1413,7 +1211,7 @@ namespace polaris {
             GraphAndTreeIndex::loadIndex(database, rdOnly);
         }
 
-        GraphAndTreeIndex(polaris::Property &prop) : GraphIndex(prop) {
+        GraphAndTreeIndex(polaris::NgtParameters &prop) : GraphIndex(prop) {
             DVPTree::objectSpace = GraphIndex::objectSpace;
         }
 
@@ -1914,59 +1712,6 @@ namespace polaris {
 
         bool verify(std::vector<uint8_t> &status, bool info, char mode);
 
-    };
-
-    class Property : public NgtIndex::Property, public NeighborhoodGraph::Property {
-    public:
-        void setDefault() {
-            NgtIndex::Property::setDefault();
-            NeighborhoodGraph::Property::setDefault();
-        }
-
-        void clear() {
-            NgtIndex::Property::clear();
-            NeighborhoodGraph::Property::clear();
-        }
-
-        void set(polaris::Property &p) {
-            NgtIndex::Property::set(p);
-            NeighborhoodGraph::Property::set(p);
-        }
-
-        void load(const std::string &file) {
-            polaris::PropertySet prop;
-            prop.load(file + "/prf");
-            NgtIndex::Property::importProperty(prop);
-            NeighborhoodGraph::Property::importProperty(prop);
-        }
-
-        void save(const std::string &file) {
-            polaris::PropertySet prop;
-            NgtIndex::Property::exportProperty(prop);
-            NeighborhoodGraph::Property::exportProperty(prop);
-            prop.save(file + "/prf");
-        }
-
-        static void save(GraphIndex &graphIndex, const std::string &file) {
-            polaris::PropertySet prop;
-            graphIndex.getGraphIndexProperty().exportProperty(prop);
-            graphIndex.getGraphProperty().exportProperty(prop);
-            prop.save(file + "/prf");
-        }
-
-        void importProperty(const std::string &file) {
-            polaris::PropertySet prop;
-            prop.load(file + "/prf");
-            NgtIndex::Property::importProperty(prop);
-            NeighborhoodGraph::Property::importProperty(prop);
-        }
-
-        static void exportProperty(GraphIndex &graphIndex, const std::string &file) {
-            polaris::PropertySet prop;
-            graphIndex.getGraphIndexProperty().exportProperty(prop);
-            graphIndex.getGraphProperty().exportProperty(prop);
-            prop.save(file + "/prf");
-        }
     };
 
 } // namespace polaris

@@ -25,7 +25,7 @@ main(int argc, char **argv) {
     size_t bitSize = 64;
     // index construction
     try {
-        polaris::Property property;
+        polaris::NgtParameters property;
         property.dimension = bitSize / 8;
         property.objectType = polaris::ObjectType::UINT8;
         property.distanceType = polaris::MetricType::METRIC_HAMMING;
@@ -65,7 +65,7 @@ main(int argc, char **argv) {
     // nearest neighbor search
     try {
         polaris::NgtIndex index(indexPath);
-        polaris::Property property;
+        polaris::NgtParameters property;
         index.getProperty(property);
         ifstream is(queryFile);
         string line;

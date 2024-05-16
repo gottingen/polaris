@@ -508,8 +508,8 @@ namespace NGTQG {
             static void createQuantizedGraphFrame(const std::string quantizedIndexPath, size_t dimension, size_t dimensionOfSubvector) {
 #endif
             NGTQ::Property property;
-            polaris::Property globalProperty;
-            polaris::Property localProperty;
+            polaris::NgtParameters globalProperty;
+            polaris::NgtParameters localProperty;
 
             property.threadSize = 24;
             property.globalRange = 0;
@@ -566,7 +566,7 @@ namespace NGTQG {
                 msg << "QuantizedGraph::create: Quantized graph is already existed. " << indexPath;
                 POLARIS_THROW_EX(msg);
             }
-            polaris::Property ngtProperty;
+            polaris::NgtParameters ngtProperty;
             index.getProperty(ngtProperty);
             //NGTQG::Command::CreateParameters createParameters(args, property.dimension);
 #ifdef NGTQ_QBG
@@ -631,7 +631,7 @@ namespace NGTQG {
         std::string quantizedIndexPath = indexPath + "/qg";
         struct stat st;
         if (stat(quantizedIndexPath.c_str(), &st) != 0) {
-          polaris::Property ngtProperty;
+          polaris::NgtParameters ngtProperty;
           index.getProperty(ngtProperty);
           createQuantizedGraphFrame(quantizedIndexPath, ngtProperty.dimension, dimensionOfSubvector);
           buildQuantizedObjects(quantizedIndexPath, objectSpace);

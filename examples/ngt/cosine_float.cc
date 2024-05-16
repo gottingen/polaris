@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 }
 void run_ann() {
     try {
-        polaris::Property property;
+        polaris::NgtParameters property;
         property.dimension = 128;
         property.objectType = polaris::ObjectType::FLOAT;
         property.distanceType = polaris::MetricType::METRIC_COSINE;
@@ -75,7 +75,7 @@ void run_ann() {
     // nearest neighbor search
     try {
         polaris::NgtIndex index(indexPath);
-        polaris::Property property;
+        polaris::NgtParameters property;
         index.getProperty(property);
         ifstream is(queryFile);
         string line;

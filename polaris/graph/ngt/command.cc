@@ -294,7 +294,7 @@ polaris::Command::create(Args &args) {
 
 
 void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t dataSize, char destination) {
-    polaris::Property prop;
+    polaris::NgtParameters prop;
     index.getProperty(prop);
 
     size_t id = index.getObjectRepositorySize();

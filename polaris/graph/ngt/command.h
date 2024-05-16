@@ -32,7 +32,7 @@ namespace polaris {
             std::string index;
             std::string objectPath;
             size_t numOfObjects;
-            polaris::Property property;
+            polaris::NgtParameters property;
             char indexType;
         };
 

@@ -17,6 +17,25 @@
 
 namespace polaris {
 
+    std::ostream &operator<<(std::ostream &os, const NgtGraphParameters &p) {
+        os << "truncationThreshold=" << p.truncationThreshold << std::endl;
+        os << "edgeSizeForCreation=" << p.edgeSizeForCreation << std::endl;
+        os << "edgeSizeForSearch=" << p.edgeSizeForSearch << std::endl;
+        os << "edgeSizeLimitForCreation=" << p.edgeSizeLimitForCreation << std::endl;
+        os << "insertionRadiusCoefficient=" << p.insertionRadiusCoefficient << std::endl;
+        os << "insertionRadiusCoefficient=" << p.insertionRadiusCoefficient << std::endl;
+        os << "seedSize=" << p.seedSize << std::endl;
+        os << "seedType=" << p.seedType << std::endl;
+        os << "truncationThreadPoolSize=" << p.truncationThreadPoolSize << std::endl;
+        os << "batchSizeForCreation=" << p.batchSizeForCreation << std::endl;
+        os << "graphType=" << p.graphType << std::endl;
+        os << "dynamicEdgeSizeBase=" << p.dynamicEdgeSizeBase << std::endl;
+        os << "dynamicEdgeSizeRate=" << p.dynamicEdgeSizeRate << std::endl;
+        os << "outgoingEdge=" << p.outgoingEdge << std::endl;
+        os << "incomingEdge=" << p.incomingEdge << std::endl;
+        return os;
+    }
+
     void NgtGraphParameters::set(polaris::NgtParameters &prop) {
         if (prop.truncationThreshold != -1) truncationThreshold = prop.truncationThreshold;
         if (prop.edgeSizeForCreation != -1) edgeSizeForCreation = prop.edgeSizeForCreation;

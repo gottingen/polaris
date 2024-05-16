@@ -266,7 +266,7 @@ namespace NGTQ {
                 std::cerr << "Quantization codebook: something wrong?" << std::endl;
                 delete index;
             }
-            polaris::Property property;
+            polaris::NgtParameters property;
             property.dimension = dimension;
             property.distanceType = polaris::MetricType::METRIC_L2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
@@ -2242,14 +2242,14 @@ namespace NGTQ {
         virtual ~Quantizer() {}
 
         virtual void create(const string &index,
-                            polaris::Property &globalPropertySet,
+                            polaris::NgtParameters &globalPropertySet,
 #ifdef NGTQ_QBG
-                            polaris::Property &localPropertySet,
+                            polaris::NgtParameters &localPropertySet,
                             std::vector<float> *rotation = 0,
                             const string &objectFile = "") = 0;
 
 #else
-        polaris::Property &localPropertySet) = 0;
+        polaris::NgtParameters &localPropertySet) = 0;
 #endif
 #ifdef NGTQ_QBG
 
@@ -2287,7 +2287,7 @@ namespace NGTQ {
         virtual void loadQuantizationCodebookAndRotation(const std::vector<std::vector<float>> &quantizationCodebook,
                                                          const std::vector<float> &rotation) = 0;
 
-        virtual void open(const string &index, polaris::Property &globalProperty, bool readOnly) = 0;
+        virtual void open(const string &index, polaris::NgtParameters &globalProperty, bool readOnly) = 0;
 
         virtual void open(const string &index, bool readOnly) = 0;
 
@@ -2801,13 +2801,13 @@ public:
         virtual ~QuantizerInstance() { close(); }
 
         void createEmptyIndex(const string &index,
-                              polaris::Property &globalProperty,
+                              polaris::NgtParameters &globalProperty,
 #ifdef NGTQ_QBG
-                              polaris::Property &localProperty,
+                              polaris::NgtParameters &localProperty,
                               std::vector<float> *rotation,
                               const string &objectFile)
 #else
-        polaris::Property &localProperty)
+        polaris::NgtParameters &localProperty)
 #endif
         {
             rootDirectory = index;
@@ -2900,7 +2900,7 @@ public:
             saveQuantizationCodebook(qc);
         }
 
-        void open(const string &index, polaris::Property &globalProperty, bool readOnly) {
+        void open(const string &index, polaris::NgtParameters &globalProperty, bool readOnly) {
             open(index, readOnly);
             globalCodebookIndex.setProperty(globalProperty);
         }
@@ -2974,7 +2974,7 @@ public:
                 }
             }
 #endif
-            polaris::Property globalProperty;
+            polaris::NgtParameters globalProperty;
             globalCodebookIndex.getProperty(globalProperty);
             size_t sizeoftype = 0;
             if (globalProperty.objectType == polaris::ObjectType::FLOAT ||
@@ -3658,7 +3658,7 @@ public:
 #ifdef NGTQ_QBG
 
         polaris::NgtIndex *buildGlobalCodebookWithQIDIndex() {
-            polaris::Property property;
+            polaris::NgtParameters property;
 
             property.dimension = globalCodebookIndex.getObjectSpace().getDimension() + 1;
             property.distanceType = polaris::MetricType::METRIC_L2;
@@ -4122,13 +4122,13 @@ public:
 #endif
 
         void create(const string &index,
-                    polaris::Property &globalProperty,
+                    polaris::NgtParameters &globalProperty,
 #ifdef NGTQ_QBG
-                    polaris::Property &localProperty,
+                    polaris::NgtParameters &localProperty,
                     std::vector<float> *rotation = 0,
                     const string &objectFile = ""
 #else
-                polaris::Property &localProperty
+                polaris::NgtParameters &localProperty
 #endif
         ) {
             if (property.localCentroidLimit > ((1UL << (sizeof(LOCAL_ID_TYPE) * 8)) - 1)) {
@@ -4138,8 +4138,8 @@ public:
                 POLARIS_THROW_EX(msg);
             }
 
-            polaris::Property gp;
-            polaris::Property lp;
+            polaris::NgtParameters gp;
+            polaris::NgtParameters lp;
 
             gp.setDefault();
             lp.setDefault();
@@ -4945,13 +4945,13 @@ public:
 
 
         static void create(const string &index, Property &property,
-                           polaris::Property &globalProperty,
+                           polaris::NgtParameters &globalProperty,
 #ifdef NGTQ_QBG
-                           polaris::Property &localProperty,
+                           polaris::NgtParameters &localProperty,
                            std::vector<float> *rotation = 0,
                            const std::string &objectFile = "") {
 #else
-            polaris::Property &localProperty) {
+            polaris::NgtParameters &localProperty) {
 #endif
             if (property.dimension == 0) {
                 POLARIS_THROW_EX("NGTQ::create: Error. The dimension is zero.");
@@ -5028,7 +5028,7 @@ public:
 
         void open(const string &index, bool readOnly = false) {
             close();
-            polaris::Property globalProperty;
+            polaris::NgtParameters globalProperty;
             globalProperty.clear();
             globalProperty.edgeSizeForSearch = 40;
             quantizer = getQuantizer(index, globalProperty, readOnly);
@@ -5153,7 +5153,7 @@ public:
         }
 
     protected:
-        static NGTQ::Quantizer *getQuantizer(const string &index, polaris::Property &globalProperty, bool readOnly) {
+        static NGTQ::Quantizer *getQuantizer(const string &index, polaris::NgtParameters &globalProperty, bool readOnly) {
             NGTQ::Property property;
             try {
                 property.load(index);
