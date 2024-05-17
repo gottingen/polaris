@@ -38,6 +38,8 @@ set(POLARIS_SRC
         core/random.cc
         core/search_condition.cc
         core/parameter/ngt_parameters.cc
+        core/parameter/vamana_parameters.cc
+        core/parameter/hnsw_parameters.cc
         distance/distance.cc
         distance/distance_impl.cc
         datasets/fvecs.cc
@@ -190,6 +192,9 @@ set(POLARIS_HEADERS
         core/random.h
         core/parameter/vamana_parameters.h
         core/parameter/basic.h
+        core/parameter/ngt_parameters.h
+        core/parameter/hnsw_parameters.h
+        core/parameters.h
         distance/cosine_similarity.h
         distance/distance_impl.h
         distance/primitive.h

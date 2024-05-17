@@ -56,7 +56,7 @@ namespace polaris {
             vstr << std::setprecision(precision);
         }
 
-        std::string get(const std::string &key) {
+        std::string get(const std::string &key) const {
             auto it = find(key);
             if (it != end()) {
                 return it->second;
@@ -64,7 +64,7 @@ namespace polaris {
             return "";
         }
 
-        float getf(const std::string &key, float defvalue) {
+        float getf(const std::string &key, float defvalue) const {
             auto it = find(key);
             if (it != end()) {
                 float val;
@@ -84,11 +84,29 @@ namespace polaris {
             }
         }
 
-        long getl(const std::string &key, long defvalue) {
+        long getl(const std::string &key, long defvalue) const {
             auto it = find(key);
             if (it != end()) {
                 long val;
                 auto b = turbo::simple_atoi(it->second, &val);
+                if (!b) {
+                    POLARIS_LOG(ERROR)<< "Warning: Illegal property. " << key << ":" << it->second;
+                    return defvalue;
+                }
+                return val;
+            }
+            return defvalue;
+        }
+
+        void setb(const std::string &key, bool value) {
+            set(key, value ? "true" : "false");
+        }
+
+        long getb(const std::string &key, bool defvalue) const {
+            auto it = find(key);
+            if (it != end()) {
+                bool val;
+                auto b = turbo::simple_atob(it->second, &val);
                 if (!b) {
                     POLARIS_LOG(ERROR)<< "Warning: Illegal property. " << key << ":" << it->second;
                     return defvalue;
@@ -114,7 +132,7 @@ namespace polaris {
             return save(st);
         }
 
-        [[nodiscard]] turbo::Status save(std::ofstream &os) {
+        [[nodiscard]] turbo::Status save(std::ofstream &os) const {
 
             try {
                 for (auto i = this->begin(); i != this->end(); i++) {

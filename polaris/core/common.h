@@ -491,8 +491,13 @@ namespace polaris {
         [[nodiscard]] static turbo::Status
         database_type_export(PropertySet &ps, DatabaseType type, std::set<DatabaseType> *allow_set = nullptr);
 
+        [[nodiscard]] static turbo::Status
+        database_type_export(PropertySet &ps, const std::string &key, DatabaseType type, std::set<DatabaseType> *allow_set = nullptr);
+
         static turbo::ResultStatus<DatabaseType>
         database_type_import(const PropertySet &ps, std::set<DatabaseType> *allow_set = nullptr);
+        static turbo::ResultStatus<DatabaseType>
+        database_type_import(const PropertySet &ps,  const std::string &key,std::set<DatabaseType> *allow_set = nullptr);
 
         [[nodiscard]] static turbo::Status object_alignment_export(PropertySet &ps, ObjectAlignment type);
         static turbo::ResultStatus<ObjectAlignment> object_alignment_import(const PropertySet &ps);

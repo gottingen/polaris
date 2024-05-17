@@ -150,6 +150,27 @@ namespace polaris {
         return turbo::ok_status();
     }
 
+    turbo::Status
+    PropertySerializer::database_type_export(PropertySet &ps, const std::string &key, DatabaseType type, std::set<DatabaseType> *allow_set) {
+        if (allow_set != nullptr && allow_set->find(type) == allow_set->end()) {
+            return turbo::make_status(turbo::kInvalidArgument, "Invalid database type");
+        }
+        switch (type) {
+            case DatabaseType::Memory:
+                ps.set(key, "Memory");
+                break;
+            case DatabaseType::MemoryMappedFile:
+                ps.set(key, "MemoryMappedFile");
+                break;
+            case DatabaseType::SSD:
+                ps.set(key, "SSD");
+                break;
+            default:
+                return turbo::make_status(turbo::kNotFound, "Unknown database type");
+        }
+        return turbo::ok_status();
+    }
+
     turbo::Status PropertySerializer::object_alignment_export(PropertySet &ps, ObjectAlignment type) {
         switch (type) {
             case ObjectAlignment::ObjectAlignmentNone:
@@ -259,6 +280,31 @@ namespace polaris {
     turbo::ResultStatus<DatabaseType>
     PropertySerializer::database_type_import(const PropertySet &ps, std::set<DatabaseType> *allow_set) {
         auto it = ps.find(DATABASE_TYPE);
+        DatabaseType databaseType = DatabaseType::DatabaseTypeNone;
+        if (it != ps.end()) {
+            if (it->second == "Memory") {
+                databaseType = DatabaseType::Memory;
+            } else if (it->second == "MemoryMappedFile") {
+                databaseType = DatabaseType::MemoryMappedFile;
+            } else if (it->second == "SSD") {
+                databaseType = DatabaseType::SSD;
+            } else {
+                POLARIS_LOG(ERROR) << "Invalid Database Type in the property. " << it->first << ":" << it->second;
+                return turbo::make_status(turbo::kInvalidArgument, "Invalid Database Type");
+            }
+        } else {
+            return turbo::make_status(turbo::kNotFound, "Database Type not found in the property");
+        }
+        if (allow_set != nullptr && allow_set->find(databaseType) == allow_set->end()) {
+            return turbo::make_status(turbo::kInvalidArgument, "not allow Database Type {}",
+                                      static_cast<int>(databaseType));
+        }
+        return databaseType;
+    }
+
+    turbo::ResultStatus<DatabaseType>
+    PropertySerializer::database_type_import(const PropertySet &ps, const std::string &key, std::set<DatabaseType> *allow_set) {
+        auto it = ps.find(key);
         DatabaseType databaseType = DatabaseType::DatabaseTypeNone;
         if (it != ps.end()) {
             if (it->second == "Memory") {
