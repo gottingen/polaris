@@ -17,6 +17,7 @@
 #pragma once
 
 #include <polaris/core/common.h>
+#include <polaris/core/parameter/basic.h>
 #include <polaris/core/log.h>
 #include <collie/meta/reflect.h>
 
@@ -96,19 +97,22 @@ namespace polaris {
 
     std::ostream &operator<<(std::ostream &os, const NgtGraphParameters &p);
 
-    class NgtIndexParameters {
+    class NgtIndexParameters : public BasicParameters {
     public:
 
-        NgtIndexParameters() { set_default(); }
+        NgtIndexParameters() {
+            BasicParameters::set_default();
+            set_default(); }
 
         void set_default() {
+            BasicParameters::set_default();
             dimension = 0;
-            threadPoolSize = 32;
-            objectType = ObjectType::FLOAT;
+            work_threads = 32;
+            object_type = ObjectType::FLOAT;
 #ifdef NGT_REFINEMENT
             refinementObjectType	= ObjectType::FLOAT;
 #endif
-            distanceType = MetricType::METRIC_L2;
+            metric = MetricType::METRIC_L2;
             indexType = IndexType::INDEX_NGT_GRAPH_AND_TREE;
             objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
             pathAdjustmentInterval = 0;
@@ -122,12 +126,12 @@ namespace polaris {
 
         void clear() {
             dimension = -1;
-            threadPoolSize = -1;
-            objectType = ObjectType::ObjectTypeNone;
+            work_threads = -1;
+            object_type = ObjectType::ObjectTypeNone;
 #ifdef NGT_REFINEMENT
             refinementObjectType	= ObjectSpace::ObjectTypeNone;
 #endif
-            distanceType = MetricType::METRIC_NONE;
+            metric = MetricType::METRIC_NONE;
             indexType = IndexType::INDEX_NONE;
             databaseType = DatabaseTypeNone;
             objectAlignment = ObjectAlignment::ObjectAlignmentNone;
@@ -148,13 +152,7 @@ namespace polaris {
 
         void get(polaris::NgtParameters &prop) const;
 
-        int dimension;
-        int threadPoolSize;
-        polaris::ObjectType objectType;
-        MetricType distanceType;
         IndexType indexType;
-        DatabaseType databaseType;
-        ObjectAlignment objectAlignment;
         int pathAdjustmentInterval;
         int prefetchOffset;
         int prefetchSize;
@@ -205,19 +203,6 @@ namespace polaris {
             NgtIndexParameters::import_property(prop);
             NgtGraphParameters::import_property(prop);
         }
-        /*static void save(GraphIndex &graphIndex, const std::string &file) {
-            polaris::PropertySet prop;
-            graphIndex.getGraphIndexProperty().exportProperty(prop);
-            graphIndex.getGraphProperty().exportProperty(prop);
-            prop.save(file + "/prf");
-        }
-         static void exportProperty(GraphIndex &graphIndex, const std::string &file) {
-            polaris::PropertySet prop;
-            graphIndex.getGraphIndexProperty().exportProperty(prop);
-            graphIndex.getGraphProperty().exportProperty(prop);
-            prop.save(file + "/prf");
-        }
-         */
 
     };
 

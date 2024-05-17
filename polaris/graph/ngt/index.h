@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <polaris/core/common.h>
-#include <polaris/core/ngt_parameters.h>
+#include <polaris/core/parameter/ngt_parameters.h>
 #include <polaris/utility/property_set.h>
 #include <polaris/graph/ngt/tree.h>
 #include <polaris/graph/ngt/thread.h>
@@ -496,20 +496,20 @@ namespace polaris {
             if (objectSpace == 0) {
                 return;
             }
-            if (property.objectType == polaris::ObjectType::FLOAT) {
+            if (property.object_type == polaris::ObjectType::FLOAT) {
                 ObjectSpaceRepository<float, double> *os = (ObjectSpaceRepository<float, double> *) objectSpace;
                 os->deleteAll();
                 delete os;
-            } else if (property.objectType == polaris::ObjectType::UINT8) {
+            } else if (property.object_type == polaris::ObjectType::UINT8) {
                 ObjectSpaceRepository<unsigned char, int> *os = (ObjectSpaceRepository<unsigned char, int> *) objectSpace;
                 os->deleteAll();
                 delete os;
-            } else if (property.objectType == polaris::ObjectType::FLOAT16) {
+            } else if (property.object_type == polaris::ObjectType::FLOAT16) {
                 ObjectSpaceRepository<float16, float> *os = (ObjectSpaceRepository<float16, float> *) objectSpace;
                 os->deleteAll();
                 delete os;
             } else {
-                std::cerr << "Cannot find Object Type in the property. " << property.objectType << std::endl;
+                std::cerr << "Cannot find Object Type in the property. " << property.object_type << std::endl;
                 return;
             }
             objectSpace = 0;

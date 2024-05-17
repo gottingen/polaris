@@ -191,7 +191,7 @@ int32_t ngt_get_property_object_type(NGTProperty prop, NGTError error) {
         operate_error_string_(ss, error);
         return -1;
     }
-    return (*static_cast<polaris::NgtParameters *>(prop)).objectType;
+    return (*static_cast<polaris::NgtParameters *>(prop)).object_type;
 }
 
 bool ngt_is_property_object_type_float(int32_t object_type) {
@@ -214,7 +214,7 @@ bool ngt_set_property_object_type_float(NGTProperty prop, NGTError error) {
         return false;
     }
 
-    (*static_cast<polaris::NgtParameters *>(prop)).objectType = polaris::ObjectType::FLOAT;
+    (*static_cast<polaris::NgtParameters *>(prop)).object_type = polaris::ObjectType::FLOAT;
     return true;
 }
 
@@ -226,7 +226,7 @@ bool ngt_set_property_object_type_float16(NGTProperty prop, NGTError error) {
         return false;
     }
 
-    (*static_cast<polaris::NgtParameters *>(prop)).objectType = polaris::ObjectType::FLOAT16;
+    (*static_cast<polaris::NgtParameters *>(prop)).object_type = polaris::ObjectType::FLOAT16;
     return true;
 }
 
@@ -238,7 +238,7 @@ bool ngt_set_property_object_type_integer(NGTProperty prop, NGTError error) {
         return false;
     }
 
-    (*static_cast<polaris::NgtParameters *>(prop)).objectType = polaris::ObjectType::UINT8;
+    (*static_cast<polaris::NgtParameters *>(prop)).object_type = polaris::ObjectType::UINT8;
     return true;
 }
 
@@ -250,7 +250,7 @@ bool ngt_set_property_distance_type(NGTProperty prop, polaris::MetricType type, 
         return false;
     }
 
-    (*static_cast<polaris::NgtParameters *>(prop)).distanceType = type;
+    (*static_cast<polaris::NgtParameters *>(prop)).metric = type;
     return true;
 }
 
@@ -1217,7 +1217,7 @@ int32_t ngt_get_property_distance_type(NGTProperty prop, NGTError error) {
         operate_error_string_(ss, error);
         return -1;
     }
-    return (*static_cast<polaris::NgtParameters *>(prop)).distanceType;
+    return (*static_cast<polaris::NgtParameters *>(prop)).metric;
 }
 
 NGTError ngt_create_error_object() {

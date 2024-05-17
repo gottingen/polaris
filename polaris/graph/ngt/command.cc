@@ -42,7 +42,7 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
     property.insertionRadiusCoefficient = args.getf("e", 0.1) + 1.0;
     property.truncationThreshold = args.getl("t", 0);
     property.dimension = args.getl("d", 0);
-    property.threadPoolSize = args.getl("p", 24);
+    property.work_threads = args.getl("p", 24);
     property.pathAdjustmentInterval = args.getl("P", 0);
     property.dynamicEdgeSizeBase = args.getl("B", 30);
     property.buildTimeLimit = args.getf("T", 0.0);
@@ -143,16 +143,16 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (objectType) {
         case 'f':
-            property.objectType = polaris::ObjectType::FLOAT;
+            property.object_type = polaris::ObjectType::FLOAT;
             break;
         case 'c':
-            property.objectType = polaris::ObjectType::UINT8;
+            property.object_type = polaris::ObjectType::UINT8;
             break;
         case 'h':
-            property.objectType = polaris::ObjectType::FLOAT16;
+            property.object_type = polaris::ObjectType::FLOAT16;
             break;
             case 'H':
-              property.objectType = polaris::ObjectType::BFLOAT16;
+              property.object_type = polaris::ObjectType::BFLOAT16;
               break;
         default:
             std::stringstream msg;
@@ -183,44 +183,44 @@ polaris::Command::CreateParameters::CreateParameters(Args &args) {
 
     switch (distanceType) {
         case '1':
-            property.distanceType = polaris::MetricType::METRIC_L1;
+            property.metric = polaris::MetricType::METRIC_L1;
             break;
         case '2':
         case 'e':
-            property.distanceType = polaris::MetricType::METRIC_L2;
+            property.metric = polaris::MetricType::METRIC_L2;
             break;
         case 'a':
-            property.distanceType = polaris::MetricType::METRIC_ANGLE;
+            property.metric = polaris::MetricType::METRIC_ANGLE;
             break;
         case 'A':
-            property.distanceType = polaris::MetricType::METRIC_NORMALIZED_ANGLE;
+            property.metric = polaris::MetricType::METRIC_NORMALIZED_ANGLE;
             break;
         case 'h':
-            property.distanceType = polaris::MetricType::METRIC_HAMMING;
+            property.metric = polaris::MetricType::METRIC_HAMMING;
             break;
         case 'j':
-            property.distanceType = polaris::MetricType::METRIC_JACCARD;
+            property.metric = polaris::MetricType::METRIC_JACCARD;
             break;
         case 'J':
-            property.distanceType = polaris::MetricType::METRIC_SPARSE_JACCARD;
+            property.metric = polaris::MetricType::METRIC_SPARSE_JACCARD;
             break;
         case 'c':
-            property.distanceType = polaris::MetricType::METRIC_COSINE;
+            property.metric = polaris::MetricType::METRIC_COSINE;
             break;
         case 'C':
-            property.distanceType = polaris::MetricType::METRIC_NORMALIZED_COSINE;
+            property.metric = polaris::MetricType::METRIC_NORMALIZED_COSINE;
             break;
         case 'E':
-            property.distanceType = polaris::MetricType::METRIC_NORMALIZED_L2;
+            property.metric = polaris::MetricType::METRIC_NORMALIZED_L2;
             break;
         case 'i':
-            property.distanceType = polaris::MetricType::METRIC_INNER_PRODUCT;
+            property.metric = polaris::MetricType::METRIC_INNER_PRODUCT;
             break;
         case 'p':  // added by Nyapicom
-            property.distanceType = polaris::MetricType::METRIC_POINCARE;
+            property.metric = polaris::MetricType::METRIC_POINCARE;
             break;
         case 'l':  // added by Nyapicom
-            property.distanceType = polaris::MetricType::METRIC_LORENTZ;
+            property.metric = polaris::MetricType::METRIC_LORENTZ;
             break;
         default:
             std::stringstream msg;
@@ -271,7 +271,7 @@ polaris::Command::create(Args &args) {
             cerr << "batch size=" << createParameters.property.batchSizeForCreation << endl;
             cerr << "graphType=" << createParameters.property.graphType << endl;
             cerr << "epsilon=" << createParameters.property.insertionRadiusCoefficient - 1.0 << endl;
-            cerr << "thread size=" << createParameters.property.threadPoolSize << endl;
+            cerr << "thread size=" << createParameters.property.work_threads << endl;
             cerr << "dimension=" << createParameters.property.dimension << endl;
             cerr << "indexType=" << createParameters.indexType << endl;
         }
@@ -316,7 +316,7 @@ void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t
         vector<string> tokens;
         polaris::Common::tokenize(line, tokens, "\t, ");
         for (auto &v: tokens) object.push_back(polaris::Common::strtod(v));
-        if (prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
+        if (prop.metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
             double mag = 0.0;
             for (auto &v: object) {
                 mag += v * v;
@@ -349,7 +349,7 @@ void appendTextVectors(polaris::NgtIndex &index, const std::string &data, size_t
             timer.reset_start_time();
         }
     }
-    if (prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
+    if (prop.metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
         polaris::ObjectSpace *rep = 0;
 #ifdef NGT_REFINEMENT
         if (destination == 'r') {

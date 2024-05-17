@@ -20,7 +20,7 @@
 
 #include <polaris/core/defines.h>
 #include <polaris/core/common.h>
-#include <polaris/core/ngt_parameters.h>
+#include <polaris/core/parameter/ngt_parameters.h>
 #include <polaris/graph/ngt/object_space_repository.h>
 #include <polaris/utility/hash_based_boolean_set.h>
 #include <polaris/utility/boolean_set.h>

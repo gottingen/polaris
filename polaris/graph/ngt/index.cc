@@ -103,7 +103,7 @@ polaris::NgtIndex::createGraphAndTree(const string &database, polaris::NgtParame
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
     try {
-        loadAndCreateIndex(*idx, database, dataFile, prop.threadPoolSize, dataSize);
+        loadAndCreateIndex(*idx, database, dataFile, prop.work_threads, dataSize);
     } catch (polaris::PolarisException &err) {
         delete idx;
         redirector.end();
@@ -126,7 +126,7 @@ polaris::NgtIndex::createGraph(const string &database, polaris::NgtParameters &p
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
     try {
-        loadAndCreateIndex(*idx, database, dataFile, prop.threadPoolSize, dataSize);
+        loadAndCreateIndex(*idx, database, dataFile, prop.work_threads, dataSize);
     } catch (polaris::PolarisException &err) {
         delete idx;
         redirector.end();
@@ -274,7 +274,7 @@ polaris::NgtIndex::searchUsingOnlyGraph(polaris::SearchQuery &searchQuery) {
 
 std::vector<float>
 polaris::NgtIndex::makeSparseObject(std::vector<uint32_t> &object) {
-    if (static_cast<polaris::GraphIndex &>(getIndex()).getProperty().distanceType !=
+    if (static_cast<polaris::GraphIndex &>(getIndex()).getProperty().metric !=
         polaris::MetricType::METRIC_SPARSE_JACCARD) {
         POLARIS_THROW_EX("polaris::NgtIndex::makeSparseObject: Not sparse jaccard.");
     }
@@ -305,7 +305,7 @@ polaris::NgtIndex::createIndex(size_t threadNumber, size_t sizeOfRepository) {
         InsertionOrder insertionOrder;
         polaris::NgtParameters prop;
         getProperty(prop);
-        if (prop.distanceType == MetricType::METRIC_INNER_PRODUCT) {
+        if (prop.metric == MetricType::METRIC_INNER_PRODUCT) {
             size_t beginId = 1;
             polaris::GraphRepository &graphRepository = static_cast<polaris::GraphIndex &>(getIndex()).repository;
             auto &graphNodes = static_cast<Repository<GraphNode> &>(graphRepository);
@@ -467,24 +467,24 @@ void
 polaris::GraphIndex::constructObjectSpace(polaris::NgtParameters &prop) {
     assert(prop.dimension != 0);
     size_t dimension = prop.dimension;
-    if (prop.distanceType == polaris::MetricType::METRIC_SPARSE_JACCARD ||
-        prop.distanceType == polaris::MetricType::METRIC_INNER_PRODUCT) {
+    if (prop.metric == polaris::MetricType::METRIC_SPARSE_JACCARD ||
+        prop.metric == polaris::MetricType::METRIC_INNER_PRODUCT) {
         dimension++;
     }
 
-    switch (prop.objectType) {
+    switch (prop.object_type) {
         case polaris::ObjectType::FLOAT :
-            objectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.distanceType);
+            objectSpace = new ObjectSpaceRepository<float, double>(dimension, typeid(float), prop.metric);
             break;
         case polaris::ObjectType::UINT8 :
-            objectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.distanceType);
+            objectSpace = new ObjectSpaceRepository<unsigned char, int>(dimension, typeid(uint8_t), prop.metric);
             break;
         case polaris::ObjectType::FLOAT16 :
-            objectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.distanceType);
+            objectSpace = new ObjectSpaceRepository<float16, float>(dimension, typeid(float16), prop.metric);
             break;
         default:
             stringstream msg;
-            msg << "Invalid Object Type in the property. " << prop.objectType;
+            msg << "Invalid Object Type in the property. " << prop.object_type;
             POLARIS_THROW_EX(msg);
     }
 #ifdef NGT_REFINEMENT
@@ -568,11 +568,11 @@ polaris::GraphIndex::GraphIndex(const string &database, bool rdOnly, polaris::Ng
     loadIndex(database, readOnly, openType);
 #ifdef NGT_GRAPH_READ_ONLY_GRAPH
     if (prop.searchType == "Large") {
-        searchUnupdatableGraph = NeighborhoodGraph::Search::getMethod(prop.distanceType, prop.objectType, 10000000);
+        searchUnupdatableGraph = NeighborhoodGraph::Search::getMethod(prop.metric, prop.object_type, 10000000);
     } else if (prop.searchType == "Small") {
-        searchUnupdatableGraph = NeighborhoodGraph::Search::getMethod(prop.distanceType, prop.objectType, 0);
+        searchUnupdatableGraph = NeighborhoodGraph::Search::getMethod(prop.metric, prop.object_type, 0);
     } else {
-        searchUnupdatableGraph = NeighborhoodGraph::Search::getMethod(prop.distanceType, prop.objectType,
+        searchUnupdatableGraph = NeighborhoodGraph::Search::getMethod(prop.metric, prop.object_type,
                                                                       objectSpace->getRepository().size());
     }
 #endif

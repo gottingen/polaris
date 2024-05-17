@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#include <polaris/core/ngt_parameters.h>
+#include <polaris/core/parameter/ngt_parameters.h>
 
 namespace polaris {
 
@@ -133,10 +133,12 @@ namespace polaris {
 
     [[nodiscard]] turbo::Status NgtIndexParameters::export_property(polaris::PropertySet &p) const {
         PropertySerializer::dimension_export(p, dimension);
-        p.set("ThreadPoolSize", threadPoolSize);
+        p.set("ThreadPoolSize", work_threads);
+        p.set("loadThreads", load_threads);
+        p.set("maxPoints", max_points);
         static std::set<ObjectType> allow_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16,
                                                  ObjectType::BFLOAT16};
-        auto rs = PropertySerializer::object_type_export(p, objectType, &allow_set);
+        auto rs = PropertySerializer::object_type_export(p, object_type, &allow_set);
         if(!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
@@ -154,7 +156,7 @@ namespace polaris {
                                                      MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
                                                      MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
                                                      MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
-        rs = PropertySerializer::distance_type_export(p, distanceType, &allow_dis_set);
+        rs = PropertySerializer::distance_type_export(p, metric, &allow_dis_set);
         if(!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
@@ -192,18 +194,22 @@ namespace polaris {
         if(!dmrs.ok()) {
             POLARIS_LOG(ERROR) << dmrs.status().message();
             dimension = 0;
+            return dmrs.status();
         } else {
             dimension = dmrs.value();
         }
-        threadPoolSize = p.getl("ThreadPoolSize", threadPoolSize);
+        work_threads = p.getl("ThreadPoolSize", work_threads);
+        load_threads = p.getl("loadThreads", load_threads);
+        max_points = p.getl("maxPoints", max_points);
 
         static std::set<ObjectType> allow_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
         auto otrs = PropertySerializer::object_type_import(p, &allow_object_set);
         if(!otrs.ok()) {
             POLARIS_LOG(ERROR) << otrs.status().message();
-            objectType = ObjectType::ObjectTypeNone;
+            object_type = ObjectType::ObjectTypeNone;
+            return otrs.status();
         }
-        objectType = otrs.value();
+        object_type = otrs.value();
 #ifdef NGT_REFINEMENT
         {
                     static std::set<ObjectType> allow_refinement_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
@@ -223,13 +229,15 @@ namespace polaris {
         auto drs = PropertySerializer::distance_type_import(p, &allow_dis_set);
         if(!drs.ok()) {
             POLARIS_LOG(ERROR) << drs.status().message();
-            distanceType = MetricType::METRIC_NONE;
+            metric = MetricType::METRIC_NONE;
+            return drs.status();
         }
-        distanceType = drs.value();
+        metric = drs.value();
         auto irs = PropertySerializer::index_type_import(p);
         if(!irs.ok()) {
             POLARIS_LOG(ERROR) << irs.status().message();
             indexType = IndexType::INDEX_NONE;
+            return irs.status();
         } else {
             indexType = irs.value();
         }
@@ -238,6 +246,7 @@ namespace polaris {
         if(!dbtrs.ok()) {
             POLARIS_LOG(ERROR) << dbtrs.status().message();
             databaseType = DatabaseType::DatabaseTypeNone;
+            return dbtrs.status();
         } else {
             databaseType = dbtrs.value();
         }
@@ -245,6 +254,7 @@ namespace polaris {
         if(!alrs.ok()) {
             POLARIS_LOG(ERROR) << alrs.status().message();
             objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
+            return alrs.status();
         } else {
             objectAlignment = alrs.value();
         }
@@ -270,12 +280,12 @@ namespace polaris {
     void
     NgtIndexParameters::set(polaris::NgtParameters &prop) {
         if (prop.dimension != -1) dimension = prop.dimension;
-        if (prop.threadPoolSize != -1) threadPoolSize = prop.threadPoolSize;
-        if (prop.objectType != ObjectType::ObjectTypeNone) objectType = prop.objectType;
+        if (prop.work_threads != -1) work_threads= prop.work_threads;
+        if (prop.object_type != ObjectType::ObjectTypeNone) object_type = prop.object_type;
 #ifdef NGT_REFINEMENT
         if (prop.refinementObjectType != ObjectSpace::ObjectTypeNone) refinementObjectType = prop.refinementObjectType;
 #endif
-        if (prop.distanceType != MetricType::METRIC_NONE) distanceType = prop.distanceType;
+        if (prop.metric != MetricType::METRIC_NONE) metric = prop.metric;
         if (prop.indexType != IndexType::INDEX_NONE) indexType = prop.indexType;
         if (prop.databaseType != DatabaseTypeNone) databaseType = prop.databaseType;
         if (prop.objectAlignment != ObjectAlignmentNone) objectAlignment = prop.objectAlignment;
@@ -291,12 +301,12 @@ namespace polaris {
     void
     NgtIndexParameters::get(polaris::NgtParameters &prop) const {
         prop.dimension = dimension;
-        prop.threadPoolSize = threadPoolSize;
-        prop.objectType = objectType;
+        prop.work_threads = work_threads;
+        prop.object_type = object_type;
 #ifdef NGT_REFINEMENT
         prop.refinementObjectType = refinementObjectType;
 #endif
-        prop.distanceType = distanceType;
+        prop.metric = metric;
         prop.indexType = indexType;
         prop.databaseType = databaseType;
         prop.pathAdjustmentInterval = pathAdjustmentInterval;

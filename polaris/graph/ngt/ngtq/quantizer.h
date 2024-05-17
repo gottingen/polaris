@@ -268,7 +268,7 @@ namespace NGTQ {
             }
             polaris::NgtParameters property;
             property.dimension = dimension;
-            property.distanceType = polaris::MetricType::METRIC_L2;
+            property.metric = polaris::MetricType::METRIC_L2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
             index = new polaris::NgtIndex("dummy", property);
             std::cerr << "Not implemented" << std::endl;
@@ -2977,8 +2977,8 @@ public:
             polaris::NgtParameters globalProperty;
             globalCodebookIndex.getProperty(globalProperty);
             size_t sizeoftype = 0;
-            if (globalProperty.objectType == polaris::ObjectType::FLOAT ||
-                globalProperty.objectType == polaris::ObjectType::FLOAT16) {
+            if (globalProperty.object_type == polaris::ObjectType::FLOAT ||
+                globalProperty.object_type == polaris::ObjectType::FLOAT16) {
                 if (property.localIDByteSize == 4) {
                     quantizedObjectDistance = new QuantizedObjectDistanceFloat<uint32_t>;
                 } else if (property.localIDByteSize == 2) {
@@ -2993,7 +2993,7 @@ public:
                 }
                 generateResidualObject = new GenerateResidualObjectFloat;
                 sizeoftype = sizeof(float);
-            } else if (globalProperty.objectType == polaris::ObjectType::UINT8) {
+            } else if (globalProperty.object_type == polaris::ObjectType::UINT8) {
                 if (property.localIDByteSize == 4) {
                     quantizedObjectDistance = new QuantizedObjectDistanceUint8<uint32_t>;
                 } else if (property.localIDByteSize == 2) {
@@ -3004,7 +3004,7 @@ public:
 #endif
                 } else {
                     std::cerr << "Inconsistent localIDByteSize and ObjectType. " << property.localIDByteSize << ":"
-                              << globalProperty.objectType << std::endl;
+                              << globalProperty.object_type << std::endl;
                     abort();
                 }
 #ifdef NGTQ_VECTOR_OBJECT
@@ -3015,7 +3015,7 @@ public:
       sizeoftype = sizeof(uint8_t);
 #endif
             } else {
-                cerr << "NGTQ::open: Fatal Inner Error: invalid object type. " << globalProperty.objectType << endl;
+                cerr << "NGTQ::open: Fatal Inner Error: invalid object type. " << globalProperty.object_type << endl;
                 cerr << "   check NGT version consistency between the caller and the library." << endl;
                 abort();
             }
@@ -3037,7 +3037,7 @@ public:
             generateResidualObject->set(globalCodebookIndex, localCodebookIndexes.data(), property.localDivisionNo,
                                         property.getLocalCodebookNo(), &objectList, &quantizationCodebook);
             localIDByteSize = property.localIDByteSize;
-            objectType = globalProperty.objectType;
+            objectType = globalProperty.object_type;
             divisionNo = property.localDivisionNo;
 #ifdef NGTQ_QBG
             {
@@ -3661,7 +3661,7 @@ public:
             polaris::NgtParameters property;
 
             property.dimension = globalCodebookIndex.getObjectSpace().getDimension() + 1;
-            property.distanceType = polaris::MetricType::METRIC_L2;
+            property.metric = polaris::MetricType::METRIC_L2;
 #ifdef NGTQ_SHARED_INVERTED_INDEX
         polaris::NgtIndex *index = new polaris::NgtIndex("dummy", property);
     std::cerr << "Not implemented" << std::endl;
@@ -4161,7 +4161,7 @@ public:
             gp.edgeSizeForSearch = 40;
             lp.edgeSizeForSearch = 40;
 
-            lp.objectType = polaris::ObjectType::FLOAT;
+            lp.object_type = polaris::ObjectType::FLOAT;
 #ifdef NGTQ_QBG
             if (property.genuineDimension > property.dimension) {
                 stringstream msg;
@@ -4190,13 +4190,13 @@ public:
 
             switch (property.dataType) {
                 case DataTypeFloat:
-                    gp.objectType = polaris::ObjectType::FLOAT;
+                    gp.object_type = polaris::ObjectType::FLOAT;
                     break;
                 case DataTypeFloat16:
-                    gp.objectType = polaris::ObjectType::FLOAT16;
+                    gp.object_type = polaris::ObjectType::FLOAT16;
                     break;
                 case DataTypeUint8:
-                    gp.objectType = polaris::ObjectType::UINT8;
+                    gp.object_type = polaris::ObjectType::UINT8;
                     break;
                 default: {
                     stringstream msg;
@@ -4207,8 +4207,8 @@ public:
 
             switch (property.distanceType) {
                 case polaris::MetricType::METRIC_L1:
-                    gp.distanceType = polaris::MetricType::METRIC_L1;
-                    lp.distanceType = polaris::MetricType::METRIC_L1;
+                    gp.metric = polaris::MetricType::METRIC_L1;
+                    lp.metric = polaris::MetricType::METRIC_L1;
                     break;
                 case polaris::MetricType::METRIC_L2:
 #ifdef NGTQ_DISTANCE_ANGLE
@@ -4218,12 +4218,12 @@ public:
 	POLARIS_THROW_EX(msg);
       }
 #endif
-                    gp.distanceType = polaris::MetricType::METRIC_L2;
-                    lp.distanceType = polaris::MetricType::METRIC_L2;
+                    gp.metric = polaris::MetricType::METRIC_L2;
+                    lp.metric = polaris::MetricType::METRIC_L2;
                     break;
                 case polaris::MetricType::METRIC_HAMMING:
-                    gp.distanceType = polaris::MetricType::METRIC_HAMMING;
-                    lp.distanceType = polaris::MetricType::METRIC_HAMMING;
+                    gp.metric = polaris::MetricType::METRIC_HAMMING;
+                    lp.metric = polaris::MetricType::METRIC_HAMMING;
                     break;
                 case polaris::MetricType::METRIC_ANGLE:
 #ifndef NGTQ_DISTANCE_ANGLE
@@ -4233,24 +4233,24 @@ public:
                     POLARIS_THROW_EX(msg);
                 }
 #endif
-                    gp.distanceType = polaris::MetricType::METRIC_ANGLE;
-                    lp.distanceType = polaris::MetricType::METRIC_ANGLE;
+                    gp.metric = polaris::MetricType::METRIC_ANGLE;
+                    lp.metric = polaris::MetricType::METRIC_ANGLE;
                     break;
                 case polaris::MetricType::METRIC_NORMALIZED_COSINE:
-                    gp.distanceType = polaris::MetricType::METRIC_NORMALIZED_COSINE;
-                    lp.distanceType = polaris::MetricType::METRIC_L2;
+                    gp.metric = polaris::MetricType::METRIC_NORMALIZED_COSINE;
+                    lp.metric = polaris::MetricType::METRIC_L2;
                     break;
                 case polaris::MetricType::METRIC_COSINE:
-                    gp.distanceType = polaris::MetricType::METRIC_COSINE;
-                    lp.distanceType = polaris::MetricType::METRIC_L2;
+                    gp.metric = polaris::MetricType::METRIC_COSINE;
+                    lp.metric = polaris::MetricType::METRIC_L2;
                     break;
                 case polaris::MetricType::METRIC_NORMALIZED_L2:
-                    gp.distanceType = polaris::MetricType::METRIC_NORMALIZED_L2;
-                    lp.distanceType = polaris::MetricType::METRIC_L2;
+                    gp.metric = polaris::MetricType::METRIC_NORMALIZED_L2;
+                    lp.metric = polaris::MetricType::METRIC_L2;
                     break;
                 case polaris::MetricType::METRIC_INNER_PRODUCT:
-                    gp.distanceType = polaris::MetricType::METRIC_L2;
-                    lp.distanceType = polaris::MetricType::METRIC_L2;
+                    gp.metric = polaris::MetricType::METRIC_L2;
+                    lp.metric = polaris::MetricType::METRIC_L2;
                     break;
                 default: {
                     stringstream msg;

@@ -37,8 +37,8 @@ void run_ann() {
     try {
         polaris::NgtParameters property;
         property.dimension = 128;
-        property.objectType = polaris::ObjectType::FLOAT;
-        property.distanceType = polaris::MetricType::METRIC_COSINE;
+        property.object_type = polaris::ObjectType::FLOAT;
+        property.metric = polaris::MetricType::METRIC_COSINE;
         polaris::NgtIndex::create(indexPath, property);
         polaris::NgtIndex index(indexPath);
         ifstream is(objectFile);

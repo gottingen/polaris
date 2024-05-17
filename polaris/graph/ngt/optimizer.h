@@ -1051,7 +1051,7 @@ namespace polaris {
 
 
         void outputObject(std::ostream &os, std::vector<float> &v, polaris::NgtParameters &prop) {
-            switch (prop.objectType) {
+            switch (prop.object_type) {
                 case polaris::ObjectType::UINT8: {
                     for (auto i = v.begin(); i != v.end(); ++i) {
                         int d = *i;
@@ -1089,7 +1089,7 @@ namespace polaris {
 
         std::vector<float> extractObject(size_t id, polaris::NgtParameters &prop) {
             std::vector<float> v;
-            switch (prop.objectType) {
+            switch (prop.object_type) {
                 case polaris::ObjectType::UINT8: {
                     auto *obj = static_cast<uint8_t *>(index.getObjectSpace().getObject(id));
                     for (int i = 0; i < prop.dimension; i++) {
@@ -1121,7 +1121,7 @@ namespace polaris {
 
         std::vector<float> meanObject(size_t id1, size_t id2, polaris::NgtParameters &prop) {
             std::vector<float> v;
-            switch (prop.objectType) {
+            switch (prop.object_type) {
                 case polaris::ObjectType::UINT8: {
                     auto *obj1 = static_cast<uint8_t *>(index.getObjectSpace().getObject(id1));
                     auto *obj2 = static_cast<uint8_t *>(index.getObjectSpace().getObject(id2));
