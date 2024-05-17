@@ -87,7 +87,7 @@ carbin_cc_binary(
         qg_capi.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris polaris::polaris_c
+        polaris::polaris_c polaris::polaris
         ${POLARIS_DEPS_LINKS}
 )
 
@@ -98,6 +98,6 @@ carbin_cc_binary(
         qg_l2_float.cc
         CXXOPTS ${POLARIS_CXX_OPTIONS} "-Wno-unused-variable"
         LINKS
-        polaris::polaris polaris::polaris_c
+        polaris::polaris #polaris::polaris_c
         ${POLARIS_DEPS_LINKS}
 )
