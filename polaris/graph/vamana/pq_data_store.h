@@ -88,11 +88,6 @@ namespace polaris {
         void get_distance(const ArrayView&preprocessed_query, const std::vector<location_t> &ids,
                                   std::vector<float> &distances, AbstractScratch<data_t> *scratch_space) const override;
 
-        // We are returning the distance function that is used for full precision
-        // vectors here, not the PQ distance function. This is because the callers
-        // all are expecting a Distance<T> not QuantizedDistance<T>.
-        Distance<data_t> *get_dist_fn() const override;
-
         location_t calculate_medoid() const override;
 
         size_t get_alignment_factor() const override;

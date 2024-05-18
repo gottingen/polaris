@@ -332,10 +332,6 @@ namespace polaris {
         return min_idx;
     }
 
-    template<typename data_t>
-    Distance<data_t> *InMemDataStore<data_t>::get_dist_fn() const {
-        return this->_distance_fn.get();
-    }
 
     template POLARIS_API
     class InMemDataStore<float>;

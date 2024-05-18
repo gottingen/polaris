@@ -120,11 +120,6 @@ namespace polaris {
         // in the dataset
         virtual location_t calculate_medoid() const = 0;
 
-        // REFACTOR PQ TODO: Each data store knows about its distance function, so this is
-        // redundant. However, we don't have an OptmizedDataStore yet, and to preserve code
-        // compability, we are exposing this function.
-        virtual Distance<data_t> *get_dist_fn() const = 0;
-
         // search helpers
         // if the base data is aligned per the request of the metric, this will tell
         // how to align the query vector in a consistent manner

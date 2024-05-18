@@ -75,8 +75,6 @@ namespace polaris {
 
         location_t calculate_medoid() const override;
 
-        Distance<data_t> *get_dist_fn() const override;
-
         size_t get_alignment_factor() const override;
 
     protected:

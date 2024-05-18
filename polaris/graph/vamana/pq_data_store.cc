@@ -214,11 +214,6 @@ namespace polaris {
     }
 
     template<typename data_t>
-    Distance<data_t> *PQDataStore<data_t>::get_dist_fn() const {
-        return _distance_fn.get();
-    }
-
-    template<typename data_t>
     turbo::ResultStatus<location_t> PQDataStore<data_t>::load_impl(const std::string &file_prefix) {
         if (_quantized_data != nullptr) {
             aligned_free(_quantized_data);
