@@ -45,7 +45,7 @@ polaris::NgtIndex::NgtIndex(polaris::NgtParameters &prop) : redirect(false) {
     if (prop.dimension == 0) {
         POLARIS_THROW_EX("NgtIndex::NgtIndex. Dimension is not specified.");
     }
-    NgtIndex *idx = 0;
+    NgtIndex *idx = nullptr;
     if (prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) {
         idx = new polaris::GraphAndTreeIndex(prop);
     } else if (prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH) {
@@ -53,7 +53,7 @@ polaris::NgtIndex::NgtIndex(polaris::NgtParameters &prop) : redirect(false) {
     } else {
         POLARIS_THROW_EX("NgtIndex::NgtIndex: Not found IndexType in property file.");
     }
-    if (idx == 0) {
+    if (idx == nullptr) {
         stringstream msg;
         msg << "NgtIndex::NgtIndex: Cannot construct. ";
         POLARIS_THROW_EX(msg);
@@ -71,7 +71,7 @@ void
 polaris::NgtIndex::open(const string &database, bool rdOnly, polaris::NgtIndex::OpenType openType) {
     polaris::NgtParameters prop;
     prop.load(database);
-    NgtIndex *idx = 0;
+    NgtIndex *idx = nullptr;
     if ((prop.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) &&
         ((openType & polaris::NgtIndex::OpenTypeGraphDisabled) == 0)) {
         idx = new polaris::GraphAndTreeIndex(database, rdOnly);
@@ -81,7 +81,7 @@ polaris::NgtIndex::open(const string &database, bool rdOnly, polaris::NgtIndex::
     } else {
         POLARIS_THROW_EX("NgtIndex::Open: Not found IndexType in property file.");
     }
-    if (idx == 0) {
+    if (idx == nullptr) {
         stringstream msg;
         msg << "NgtIndex::open: Cannot open. " << database;
         POLARIS_THROW_EX(msg);
@@ -97,9 +97,9 @@ polaris::NgtIndex::createGraphAndTree(const string &database, polaris::NgtParame
         POLARIS_THROW_EX("NgtIndex::createGraphAndTree. Dimension is not specified.");
     }
     prop.indexType = polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE;
-    NgtIndex *idx = 0;
+    NgtIndex *idx = nullptr;
     idx = new polaris::GraphAndTreeIndex(prop);
-    assert(idx != 0);
+    assert(idx != nullptr);
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
     try {
@@ -120,9 +120,9 @@ polaris::NgtIndex::createGraph(const string &database, polaris::NgtParameters &p
         POLARIS_THROW_EX("NgtIndex::createGraphAndTree. Dimension is not specified.");
     }
     prop.indexType = polaris::IndexType::INDEX_NGT_GRAPH;
-    NgtIndex *idx = 0;
+    NgtIndex *idx = nullptr;
     idx = new polaris::GraphIndex(prop);
-    assert(idx != 0);
+    assert(idx != nullptr);
     StdOstreamRedirector redirector(redirect);
     redirector.begin();
     try {
@@ -189,7 +189,7 @@ polaris::NgtIndex::append(const string &database, const float *data, size_t data
     polaris::NgtIndex index(database);
     polaris::Timer timer;
     timer.start();
-    if (data != 0 && dataSize != 0) {
+    if (data != nullptr && dataSize != 0) {
         index.append(data, dataSize);
     } else {
         POLARIS_THROW_EX("NgtIndex::append: No data.");
@@ -228,7 +228,7 @@ polaris::NgtIndex::remove(const string &database, vector<ObjectID> &objects, boo
 
 void
 polaris::NgtIndex::importIndex(const string &database, const string &file) {
-    NgtIndex *idx = 0;
+    NgtIndex *idx = nullptr;
     polaris::NgtParameters property;
     property.importProperty(file);
     polaris::Timer timer;
@@ -236,10 +236,10 @@ polaris::NgtIndex::importIndex(const string &database, const string &file) {
     property.databaseType = polaris::DatabaseType::Memory;
     if (property.indexType == polaris::IndexType::INDEX_NGT_GRAPH_AND_TREE) {
         idx = new polaris::GraphAndTreeIndex(property);
-        assert(idx != 0);
+        assert(idx != nullptr);
     } else if (property.indexType == polaris::IndexType::INDEX_NGT_GRAPH) {
         idx = new polaris::GraphIndex(property);
-        assert(idx != 0);
+        assert(idx != nullptr);
     } else {
         POLARIS_THROW_EX("NgtIndex::Open: Not found IndexType in property file.");
     }
@@ -733,7 +733,7 @@ GraphIndex::createIndexWithSingleThread() {
     size_t count = 0;
     BuildTimeController buildTimeController(*this, NeighborhoodGraph::property);
     for (; id < fr.size(); id++) {
-        if (id < anngRepo.size() && anngRepo[id] != 0) {
+        if (id < anngRepo.size() && anngRepo[id] != nullptr) {
             continue;
         }
         insert(id);
@@ -760,11 +760,11 @@ searchMultipleQueryForCreation(GraphIndex &neighborhoodGraph,
             break;
         }
         auto oid = insertionOrder.empty() ? id : insertionOrder.getID(id);
-        if (repo[oid] == 0) {
+        if (repo[oid] == nullptr) {
             continue;
         }
         if (neighborhoodGraph.NeighborhoodGraph::property.graphType != GraphType::GraphTypeBKNNG) {
-            if (oid < anngRepo.size() && anngRepo[oid] != 0) {
+            if (oid < anngRepo.size() && anngRepo[oid] != nullptr) {
                 continue;
             }
         }
@@ -937,7 +937,7 @@ GraphIndex::createIndexWithInsertionOrder(InsertionOrder &insertionOrder, size_t
 }
 
 void GraphIndex::setupPrefetch(polaris::NgtParameters &prop) {
-    assert(GraphIndex::objectSpace != 0);
+    assert(GraphIndex::objectSpace != nullptr);
     prop.prefetchOffset = GraphIndex::objectSpace->setPrefetchOffset(prop.prefetchOffset);
     prop.prefetchSize = GraphIndex::objectSpace->setPrefetchSize(prop.prefetchSize);
 }
@@ -964,11 +964,11 @@ polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char m
     size_t removedObjectCount = 0;
     bool valid = true;
     for (size_t id = 1; id < graph.size(); id++) {
-        if (repo[id] == 0) {
+        if (repo[id] == nullptr) {
             removedObjectCount++;
             continue;
         }
-        polaris::GraphNode *node = 0;
+        polaris::GraphNode *node = nullptr;
         try {
             node = outGraph.getNode(id);
         } catch (polaris::PolarisException &err) {
@@ -1026,10 +1026,10 @@ polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char m
     if (mode == 'a') {
         size_t count = 0;
         for (size_t id = 1; id < graph.size(); id++) {
-            if (repo[id] == 0) {
+            if (repo[id] == nullptr) {
                 continue;
             }
-            polaris::GraphNode *n = 0;
+            polaris::GraphNode *n = nullptr;
             try {
                 n = outGraph.getNode(id);
             } catch (polaris::PolarisException &err) {
@@ -1037,7 +1037,7 @@ polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char m
             }
             polaris::GraphNode &node = *n;
             for (size_t i = 0; i < node.size(); i++) {
-                polaris::GraphNode *nn = 0;
+                polaris::GraphNode *nn = nullptr;
                 try {
                     nn = outGraph.getNode(node[i].id);
                 } catch (polaris::PolarisException &err) {
@@ -1070,10 +1070,10 @@ polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char m
     size_t d10SkipCount = 0;
     const size_t dcsize = 10;
     for (size_t id = 1; id < graph.size(); id++) {
-        if (repo[id] == 0) {
+        if (repo[id] == nullptr) {
             continue;
         }
-        polaris::GraphNode *n = 0;
+        polaris::GraphNode *n = nullptr;
         try {
             n = outGraph.getNode(id);
         } catch (polaris::PolarisException &err) {
@@ -1125,10 +1125,10 @@ polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char m
     double sumOfSquareOfOutdegree = 0;
     double sumOfSquareOfIndegree = 0;
     for (size_t id = 1; id < graph.size(); id++) {
-        if (repo[id] == 0) {
+        if (repo[id] == nullptr) {
             continue;
         }
-        polaris::GraphNode *node = 0;
+        polaris::GraphNode *node = nullptr;
         try {
             node = outGraph.getNode(id);
         } catch (polaris::PolarisException &err) {
@@ -1146,7 +1146,7 @@ polaris::GraphIndex::showStatisticsOfGraph(polaris::GraphIndex &outGraph, char m
     size_t maxNumberOfIndegree = 0;
     size_t minNumberOfIndegree = INT64_MAX;
     for (size_t id = 1; id < graph.size(); id++) {
-        if (graph[id] == 0) {
+        if (graph[id] == nullptr) {
             continue;
         }
         if (indegreeCount[id] == 0) {
@@ -1424,7 +1424,7 @@ GraphAndTreeIndex::createIndex(const vector<pair<polaris::Object *, size_t> > &o
                             continue;
                         }
                         job.id = 0;
-                        job.results = 0;
+                        job.results = nullptr;
                         job.object = objects[idx].first;
                         job.batchIdx = ids.size();
                         // insert an empty entry to prepare.
@@ -1512,7 +1512,7 @@ GraphAndTreeIndex::createIndex(const vector<pair<polaris::Object *, size_t> > &o
                             POLARIS_THROW_EX(msg);
                         }
                     }
-                    if (job.results != 0) {
+                    if (job.results != nullptr) {
                         delete job.results;
                     }
                     output.pop_front();

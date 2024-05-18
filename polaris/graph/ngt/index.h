@@ -27,7 +27,7 @@
 
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <stdint.h>
+#include <cstdint>
 #include <polaris/core/common.h>
 #include <polaris/core/parameter/ngt_parameters.h>
 #include <polaris/utility/property_set.h>
@@ -83,11 +83,11 @@ namespace polaris {
 
             AccuracyTable(std::vector<std::pair<float, double>> &t) { set(t); }
 
-            AccuracyTable(std::string str) { set(str); }
+            AccuracyTable(const std::string &str) { set(str); }
 
             void set(std::vector<std::pair<float, double>> &t) { table = t; }
 
-            void set(std::string str) {
+            void set(const std::string &str) {
                 std::vector<std::string> tokens;
                 Common::tokenize(str, tokens, ",");
                 if (tokens.size() < 2) {
@@ -152,7 +152,7 @@ namespace polaris {
             std::vector<std::pair<float, double>> table;
         };
 
-        NgtIndex() : index(0) {
+        NgtIndex() : index(nullptr) {
 #if defined(NGT_AVX2)
             if (!CpuInfo::isAVX2()) {
                 std::stringstream msg;
@@ -172,10 +172,9 @@ namespace polaris {
 
         NgtIndex(polaris::NgtParameters &prop);
 
-        NgtIndex(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = NgtIndex::OpenTypeNone) : index(
-                0), redirect(false) { open(database, rdOnly, openType); }
+        NgtIndex(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = NgtIndex::OpenTypeNone) : index(nullptr), redirect(false) { open(database, rdOnly, openType); }
 
-        NgtIndex(const std::string &database, polaris::NgtParameters &prop) : index(0), redirect(false) { open(database, prop); }
+        NgtIndex(const std::string &database, polaris::NgtParameters &prop) : index(nullptr), redirect(false) { open(database, prop); }
 
         virtual ~NgtIndex() { close(); }
 
@@ -187,9 +186,9 @@ namespace polaris {
         void open(const std::string &database, bool rdOnly = false, NgtIndex::OpenType openType = OpenTypeNone);
 
         void close() {
-            if (index != 0) {
+            if (index != nullptr) {
                 delete index;
-                index = 0;
+                index = nullptr;
             }
             path.clear();
         }
@@ -329,7 +328,10 @@ namespace polaris {
 
         virtual void saveIndex(const std::string &ofile) { getIndex().saveIndex(ofile); }
 
-        virtual void loadIndex(const std::string &ofile) { getIndex().loadIndex(ofile); }
+        virtual void loadIndex(const std::string &ofile) {
+            std::cout<<1111111<<std::endl;
+            getIndex().loadIndex(ofile);
+        }
 
         virtual Object *allocateObject(const std::string &textLine, const std::string &sep) {
             return getIndex().allocateObject(textLine, sep);
@@ -400,7 +402,7 @@ namespace polaris {
         std::vector<float> makeSparseObject(std::vector<uint32_t> &object);
 
         NgtIndex &getIndex() {
-            if (index == 0) {
+            if (index == nullptr) {
                 POLARIS_THROW_EX("polaris::NgtIndex::getIndex: NgtIndex is unavailable.");
             }
             return *index;
@@ -431,12 +433,12 @@ namespace polaris {
     protected:
         Object *allocateQuery(polaris::QueryContainer &queryContainer) {
             auto *vec = queryContainer.getQuery();
-            if (vec == 0) {
+            if (vec == nullptr) {
                 std::stringstream msg;
                 msg << "polaris::NgtIndex::allocateObject: Object is not set. ";
                 POLARIS_THROW_EX(msg);
             }
-            Object *object = 0;
+            Object *object = nullptr;
             auto &objectType = queryContainer.getQueryType();
             if (objectType == typeid(float)) {
                 object = allocateObject(*static_cast<std::vector<float> *>(vec));
@@ -493,26 +495,26 @@ namespace polaris {
               refinementObjectSpace = 0;
             }
 #endif
-            if (objectSpace == 0) {
+            if (objectSpace == nullptr) {
                 return;
             }
             if (property.object_type == polaris::ObjectType::FLOAT) {
-                ObjectSpaceRepository<float, double> *os = (ObjectSpaceRepository<float, double> *) objectSpace;
+                auto *os = (ObjectSpaceRepository<float, double> *) objectSpace;
                 os->deleteAll();
                 delete os;
             } else if (property.object_type == polaris::ObjectType::UINT8) {
-                ObjectSpaceRepository<unsigned char, int> *os = (ObjectSpaceRepository<unsigned char, int> *) objectSpace;
+                auto *os = (ObjectSpaceRepository<unsigned char, int> *) objectSpace;
                 os->deleteAll();
                 delete os;
             } else if (property.object_type == polaris::ObjectType::FLOAT16) {
-                ObjectSpaceRepository<float16, float> *os = (ObjectSpaceRepository<float16, float> *) objectSpace;
+                auto *os = (ObjectSpaceRepository<float16, float> *) objectSpace;
                 os->deleteAll();
                 delete os;
             } else {
                 std::cerr << "Cannot find Object Type in the property. " << property.object_type << std::endl;
                 return;
             }
-            objectSpace = 0;
+            objectSpace = nullptr;
         }
 
         virtual void load(const std::string &ifile, size_t dataSize = 0) {
@@ -520,7 +522,7 @@ namespace polaris {
                 return;
             }
             std::istream *is;
-            std::ifstream *ifs = 0;
+            std::ifstream *ifs = nullptr;
             if (ifile == "-") {
                 is = &std::cin;
             } else {
@@ -551,7 +553,7 @@ namespace polaris {
                 return;
             }
             std::istream *is;
-            std::ifstream *ifs = 0;
+            std::ifstream *ifs = nullptr;
             if (ifile == "-") {
                 is = &std::cin;
             } else {
@@ -589,7 +591,7 @@ namespace polaris {
             try {
                 mkdir(ofile);
             } catch (...) {}
-            if (objectSpace != 0) {
+            if (objectSpace != nullptr) {
                 objectSpace->serialize(ofile + "/obj");
             } else {
                 std::cerr << "saveIndex::Warning! ObjectSpace is null. continue saving..." << std::endl;
@@ -866,7 +868,7 @@ namespace polaris {
                 ObjectID id
         ) {
             ObjectRepository &fr = objectSpace->getRepository();
-            if (fr[id] == 0) {
+            if (fr[id] == nullptr) {
                 std::cerr << "NGTIndex::insert empty " << id << std::endl;
                 return;
             }
@@ -891,7 +893,7 @@ namespace polaris {
             GraphRepository &repo = repository;
             ObjectRepository &fr = objectSpace->getRepository();
             for (size_t id = 0; id < fr.size(); id++) {
-                if (repo[id] == 0) {
+                if (repo[id] == nullptr) {
                     std::cerr << id << " empty" << std::endl;
                     continue;
                 }
@@ -910,8 +912,8 @@ namespace polaris {
                               << objects->size() << std::endl;
                 }
                 size_t count = 0;
-                ObjectDistances::iterator rsi = rs.begin();
-                for (GraphNode::iterator ri = objects->begin();
+                auto rsi = rs.begin();
+                for (auto ri = objects->begin();
                      ri != objects->end() && rsi != rs.end();) {
                     if ((*ri).distance == (*rsi).distance && (*ri).id == (*rsi).id) {
                         count++;
@@ -944,28 +946,28 @@ namespace polaris {
             status.clear();
             status.resize(fr.size(), 0);
             for (size_t id = 1; id < fr.size(); id++) {
-                status[id] |= repo[id] != 0 ? 0x02 : 0x00;
-                status[id] |= fr[id] != 0 ? 0x01 : 0x00;
+                status[id] |= repo[id] != nullptr ? 0x02 : 0x00;
+                status[id] |= fr[id] != nullptr ? 0x01 : 0x00;
             }
             for (size_t id = 1; id < fr.size(); id++) {
-                if (fr[id] == 0) {
-                    if (id < repo.size() && repo[id] != 0) {
+                if (fr[id] == nullptr) {
+                    if (id < repo.size() && repo[id] != nullptr) {
                         std::cerr << "Error! The node exists in the graph, but the object does not exist. " << id
                                   << std::endl;
                         valid = false;
                     }
                 }
-                if (fr[id] != 0 && repo[id] == 0) {
+                if (fr[id] != nullptr && repo[id] == nullptr) {
                     std::cerr << "Error. No." << id << " is not registerd in the graph." << std::endl;
                     valid = false;
                 }
                 if ((id % 1000000) == 0) {
                     std::cerr << "  verified " << id << " entries." << std::endl;
                 }
-                if (fr[id] != 0) {
+                if (fr[id] != nullptr) {
                     try {
                         Object *po = fr[id];
-                        if (po == 0) {
+                        if (po == nullptr) {
                             std::cerr << "Error! Cannot get the object. " << id << std::endl;
                             valid = false;
                             continue;
@@ -981,16 +983,16 @@ namespace polaris {
                               << std::endl;
                     valid = false;
                 }
-                if (id < repo.size() && repo[id] != 0) {
+                if (id < repo.size() && repo[id] != nullptr) {
                     try {
                         GraphNode *objects = getNode(id);
-                        if (objects == 0) {
+                        if (objects == nullptr) {
                             std::cerr << "Error! Cannot get the node. " << id << std::endl;
                             valid = false;
                         }
-                        for (GraphNode::iterator ri = objects->begin();
+                        for (auto ri = objects->begin();
                              ri != objects->end(); ++ri) {
-                            for (GraphNode::iterator rj = objects->begin() + std::distance(objects->begin(), ri);
+                            for (auto rj = objects->begin() + std::distance(objects->begin(), ri);
                                  rj != objects->end(); ++rj) {
                                 if ((*ri).id == (*rj).id &&
                                     std::distance(objects->begin(), ri) != std::distance(objects->begin(), rj)) {
@@ -1005,10 +1007,10 @@ namespace polaris {
                             if ((*ri).id == 0 || (*ri).id >= repo.size()) {
                                 std::cerr << "Error! Neighbor's ID of the node is out of range. ID=" << id << std::endl;
                                 valid = false;
-                            } else if (repo[(*ri).id] == 0) {
+                            } else if (repo[(*ri).id] == nullptr) {
                                 std::cerr << "Error! The neighbor ID of the node is invalid. ID=" << id
                                           << " Invalid ID=" << (*ri).id << std::endl;
-                                if (fr[(*ri).id] == 0) {
+                                if (fr[(*ri).id] == nullptr) {
                                     std::cerr << "The neighbor doesn't exist in the object repository as well. ID="
                                               << (*ri).id << std::endl;
                                 } else {
@@ -1044,7 +1046,7 @@ namespace polaris {
             GraphRepository &graphRepo = repository;
             size_t count = 0;
             for (polaris::ObjectID id = 1; id < repo.size() && id < graphRepo.size(); id++) {
-                if (repo[id] != 0 && graphRepo[id] != 0) {
+                if (repo[id] != nullptr && graphRepo[id] != nullptr) {
                     count++;
                 }
             }
@@ -1159,7 +1161,7 @@ namespace polaris {
                 while (!sc.workingResult.empty()) sc.workingResult.pop();
                 return;
             }
-            if (seeds.size() == 0) {
+            if (seeds.empty()) {
 #if !defined(NGT_GRAPH_READ_ONLY_GRAPH)
                 getSeedsFromGraph(repository, seeds);
 #else
@@ -1208,7 +1210,7 @@ namespace polaris {
     public:
 
         GraphAndTreeIndex(const std::string &database, bool rdOnly = false) : GraphIndex(database, rdOnly) {
-            GraphAndTreeIndex::loadIndex(database, rdOnly);
+            GraphAndTreeIndex::load_index(database, rdOnly);
         }
 
         GraphAndTreeIndex(polaris::NgtParameters &prop) : GraphIndex(prop) {
@@ -1259,16 +1261,16 @@ namespace polaris {
 
             objectCount = 1;
             std::vector<std::pair<uint32_t, uint32_t> > order;
-            for (size_t i = 0; i < leafNodeIDs.size(); i++) {
+            for (auto lid : leafNodeIDs) {
                 ObjectDistances objects;
-                DVPTree::getObjectIDsFromLeaf(leafNodeIDs[i], objects);
-                for (size_t j = 0; j < objects.size(); j++) {
-                    order.push_back(std::pair<uint32_t, uint32_t>(objects[j].id, objectCount));
+                DVPTree::getObjectIDsFromLeaf(lid, objects);
+                for (auto &obj : objects) {
+                    order.emplace_back(obj.id, objectCount);
                     objectCount++;
                 }
-                auto nei = notexist.equal_range(leafNodeIDs[i].getID());
+                auto nei = notexist.equal_range(lid.getID());
                 for (auto ii = nei.first; ii != nei.second; ++ii) {
-                    order.push_back(std::pair<uint32_t, uint32_t>((*ii).second, objectCount));
+                    order.emplace_back((*ii).second, objectCount);
                     objectCount++;
                 }
             }
@@ -1348,7 +1350,7 @@ namespace polaris {
             DVPTree::serialize(ost);
         }
 
-        void loadIndex(const std::string &ifile, bool readOnly) {
+        void load_index(const std::string &ifile, bool readOnly) {
             DVPTree::objectSpace = GraphIndex::objectSpace;
             std::ifstream ist(ifile + "/tre");
             DVPTree::deserialize(ist);
@@ -1378,7 +1380,7 @@ namespace polaris {
         }
 
         void remove(const ObjectID id, bool force = false) {
-            Object *obj = 0;
+            Object *obj = nullptr;
             try {
                 obj = GraphIndex::objectSpace->getRepository().get(id);
             } catch (polaris::PolarisException &err) {
@@ -1493,7 +1495,7 @@ namespace polaris {
 
         void insert(ObjectID id) {
             ObjectRepository &fr = GraphIndex::objectSpace->getRepository();
-            if (fr[id] == 0) {
+            if (fr[id] == nullptr) {
                 std::cerr << "GraphAndTreeIndex::insert empty " << id << std::endl;
                 return;
             }
@@ -1720,7 +1722,7 @@ template<typename T>
 size_t polaris::NgtIndex::append(const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
-    if (repo.size() == 0) {
+    if (repo.empty()) {
         repo.initialize();
     }
 
@@ -1751,7 +1753,7 @@ template<typename T>
 size_t polaris::NgtIndex::insert(const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
-    if (repo.size() == 0) {
+    if (repo.empty()) {
         repo.initialize();
     }
 
@@ -1765,7 +1767,7 @@ void polaris::NgtIndex::update(ObjectID id, const std::vector<T> &object) {
     auto &os = getObjectSpace();
     auto &repo = os.getRepository();
 
-    Object *obj = 0;
+    Object *obj = nullptr;
     try {
         obj = repo.get(id);
     } catch (polaris::PolarisException &err) {
@@ -1774,7 +1776,6 @@ void polaris::NgtIndex::update(ObjectID id, const std::vector<T> &object) {
         POLARIS_THROW_EX(msg);
     }
     repo.setObject(*obj, object);
-    return;
 }
 
 #ifdef NGT_REFINEMENT
