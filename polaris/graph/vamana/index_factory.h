@@ -23,7 +23,7 @@ namespace polaris {
     public:
         POLARIS_API explicit IndexFactory(const IndexConfig &config);
 
-        POLARIS_API std::unique_ptr<AbstractIndex> create_instance();
+        POLARIS_API collie::Result<std::unique_ptr<AbstractIndex>> create_instance();
 
         POLARIS_API static std::unique_ptr<AbstractGraphStore> construct_graphstore(
                 const GraphStoreStrategy stratagy, const size_t size, const size_t reserve_graph_degree);
@@ -49,9 +49,9 @@ namespace polaris {
         void check_config();
 
         template<typename data_type>
-        std::unique_ptr<AbstractIndex> create_instance();
+        collie::Result<std::unique_ptr<AbstractIndex>> create_instance();
 
-        std::unique_ptr<AbstractIndex> create_instance(ObjectType obj_type);
+        collie::Result<std::unique_ptr<AbstractIndex>> create_instance(ObjectType obj_type);
 
         std::unique_ptr<IndexConfig> _config;
     };

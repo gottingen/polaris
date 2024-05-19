@@ -620,9 +620,9 @@ namespace polaris {
             saveProperty(ofile);
         }
 
-        void saveProperty(const std::string &file);
+        collie::Status saveProperty(const std::string &file);
 
-        void exportProperty(const std::string &file);
+        collie::Status exportProperty(const std::string &file);
 
         static void loadGraph(const std::string &ifile, polaris::GraphRepository &graph);
 

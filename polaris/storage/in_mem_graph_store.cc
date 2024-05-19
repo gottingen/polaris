@@ -31,7 +31,7 @@ namespace polaris {
         return load_impl(index_path_prefix, num_points);
     }
 
-    int InMemGraphStore::store(const std::string &index_path_prefix, const size_t num_points,
+    collie::Result<int> InMemGraphStore::store(const std::string &index_path_prefix, const size_t num_points,
                                const size_t num_frozen_points, const uint32_t start) {
         return save_graph(index_path_prefix, num_points, num_frozen_points, start);
     }
@@ -132,10 +132,10 @@ namespace polaris {
         return std::make_tuple(nodes_read, start, file_frozen_pts);
     }
 
-    int InMemGraphStore::save_graph(const std::string &index_path_prefix, const size_t num_points,
+    collie::Result<int> InMemGraphStore::save_graph(const std::string &index_path_prefix, const size_t num_points,
                                     const size_t num_frozen_points, const uint32_t start) {
         std::ofstream out;
-        open_file_to_write(out, index_path_prefix);
+        COLLIE_RETURN_NOT_OK(open_file_to_write(out, index_path_prefix));
 
         size_t file_offset = 0;
         out.seekp(file_offset, out.beg);

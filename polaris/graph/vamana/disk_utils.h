@@ -68,7 +68,7 @@ namespace polaris {
     POLARIS_API void read_idmap(const std::string &fname, std::vector<uint32_t> &ivecs);
 
     template<typename T>
-    POLARIS_API T *load_warmup(const std::string &cache_warmup_file, uint64_t &warmup_num, uint64_t warmup_dim,
+    POLARIS_API collie::Result<T*> load_warmup(const std::string &cache_warmup_file, uint64_t &warmup_num, uint64_t warmup_dim,
                                uint64_t warmup_aligned_dim);
 
     POLARIS_API int merge_shards(const std::string &vamana_prefix, const std::string &vamana_suffix,

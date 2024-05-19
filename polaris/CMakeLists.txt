@@ -182,7 +182,6 @@ set(POLARIS_HEADERS
         core/common.h
         core/defines.h
         core/executor.h
-        core/index_build_params.h
         core/index_config.h
         core/lock.h
         core/log.h
@@ -190,6 +189,7 @@ set(POLARIS_HEADERS
         core/metric_type.h
         core/search_condition.h
         core/random.h
+        core/percentile_stats.h
         core/parameter/vamana_parameters.h
         core/parameter/basic.h
         core/parameter/ngt_parameters.h
@@ -236,7 +236,6 @@ set(POLARIS_HEADERS
         graph/vamana/math_utils.h
         graph/vamana/neighbor.h
         graph/vamana/partition.h
-        graph/vamana/percentile_stats.h
         graph/vamana/pq.h
         graph/vamana/pq_common.h
         graph/vamana/pq_data_store.h
@@ -328,7 +327,6 @@ set(POLARIS_HEADERS
         faiss/utils/extra_distances.h
         faiss/utils/hamming-inl.h
         faiss/utils/hamming.h
-        faiss/utils/prefetch.h
         faiss/utils/simdlib.h
         faiss/utils/simdlib_avx2.h
         faiss/utils/simdlib_emulated.h
@@ -340,7 +338,7 @@ set(POLARIS_HEADERS
         faiss/utils/approx_topk/avx2-inl.h
         faiss/utils/approx_topk/generic.h
         faiss/utils/approx_topk/mode.h
-        faiss/utils/approx_topk_hamming/approx_topk_hamming.h
+        faiss/utils/approx_topk_hamming/approx_topk_hamming.h`
         faiss/utils/transpose/transpose-avx2-inl.h
         faiss/utils/hamming_distance/common.h
         faiss/utils/hamming_distance/generic-inl.h
@@ -348,7 +346,7 @@ set(POLARIS_HEADERS
         faiss/utils/hamming_distance/neon-inl.h
         faiss/utils/hamming_distance/avx2-inl.h
         faiss/invlists/block_inverted_lists.h
-        faiss/invlists/direct_map.h`
+        faiss/invlists/direct_map.h
         faiss/invlists/inverted_lists.h
         faiss/invlists/inverted_lists_io_hook.h
         faiss/internal/code_packer.h
@@ -360,6 +358,7 @@ set(POLARIS_HEADERS
         faiss/internal/fp16-inl.h
         faiss/internal/fp16-arm.h
         faiss/internal/fp16.h
+        faiss/internal/prefetch.h
         faiss/internal/worker_thread.h
         faiss/internal/aligned_table.h
         faiss/internal/partitioning.h

@@ -387,7 +387,7 @@ namespace polaris {
     }
 
     template<typename T>
-    int
+    collie::Status
     retrieve_shard_data_from_ids(const std::string data_file, std::string idmap_filename, std::string data_filename) {
         size_t read_blk_size = 64 * 1024 * 1024;
         //  uint64_t write_blk_size = 64 * 1024 * 1024;
@@ -408,7 +408,7 @@ namespace polaris {
 
         uint32_t *shard_ids;
         uint64_t shard_size, tmp;
-        polaris::load_bin<uint32_t>(idmap_filename, shard_ids, shard_size, tmp);
+        COLLIE_RETURN_NOT_OK(polaris::load_bin<uint32_t>(idmap_filename, shard_ids, shard_size, tmp));
 
         uint32_t cur_pos = 0;
         uint32_t num_written = 0;
@@ -446,7 +446,7 @@ namespace polaris {
         shard_data_writer.write((char *) &num_written, sizeof(uint32_t));
         shard_data_writer.close();
         delete[] shard_ids;
-        return 0;
+        return collie::Status::ok_status();
     }
 
     // partitions a large base file into many shards using k-means hueristic
@@ -485,7 +485,7 @@ namespace polaris {
                            nullptr);
 
         polaris::cout << "Saving global k-center pivots" << std::endl;
-        COLLIE_ASSIGN_OR_RETURN(auto s, polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim));
+        COLLIE_RETURN_NOT_OK(polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim));
         // now pivots are ready. need to stream base points and assign them to
         // closest clusters.
 
@@ -632,15 +632,15 @@ namespace polaris {
                                                               double ram_budget, size_t graph_degree,
                                                               const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API int retrieve_shard_data_from_ids<float>(const std::string data_file,
+    template POLARIS_API collie::Status retrieve_shard_data_from_ids<float>(const std::string data_file,
                                                                  std::string idmap_filename,
                                                                  std::string data_filename);
 
-    template POLARIS_API int retrieve_shard_data_from_ids<uint8_t>(const std::string data_file,
+    template POLARIS_API collie::Status retrieve_shard_data_from_ids<uint8_t>(const std::string data_file,
                                                                    std::string idmap_filename,
                                                                    std::string data_filename);
 
-    template POLARIS_API int retrieve_shard_data_from_ids<int8_t>(const std::string data_file,
+    template POLARIS_API collie::Status retrieve_shard_data_from_ids<int8_t>(const std::string data_file,
                                                                   std::string idmap_filename,
                                                                   std::string data_filename);
 }  // namespace polaris

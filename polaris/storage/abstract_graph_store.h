@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <polaris/utility/types.h>
+#include <collie/utility/result.h>
 
 namespace polaris {
 
@@ -33,7 +34,7 @@ namespace polaris {
         virtual std::tuple<uint32_t, uint32_t, size_t> load(const std::string &index_path_prefix,
                                                             const size_t num_points) = 0;
 
-        virtual int store(const std::string &index_path_prefix, const size_t num_points, const size_t num_fz_points,
+        virtual collie::Result<int> store(const std::string &index_path_prefix, const size_t num_points, const size_t num_fz_points,
                           const uint32_t start) = 0;
 
         // not synchronised, user should use lock when necvessary.

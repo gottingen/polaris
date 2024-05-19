@@ -60,11 +60,15 @@ namespace polaris {
     public:
         // Constructor for Bulk operations and for creating the index object solely
         // for loading a prexisting index.
+        POLARIS_API VamanaIndex() : _query_scratch(nullptr) {}
+        /*
         POLARIS_API VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
                           std::unique_ptr<AbstractGraphStore> graph_store,
                           std::shared_ptr<AbstractDataStore<T>> pq_data_store = nullptr);
+                          */
 
         // Constructor for incremental index
+        /*
         POLARIS_API VamanaIndex(MetricType m, const size_t dim, const size_t max_points,
                           const std::shared_ptr<IndexWriteParameters> index_parameters,
                           const std::shared_ptr<IndexSearchParams> index_search_params,
@@ -72,6 +76,18 @@ namespace polaris {
                           const bool concurrent_consolidate = false,
                           const bool pq_dist_build = false, const size_t num_pq_chunks = 0,
                           const bool use_opq = false);
+                          */
+        POLARIS_API collie::Status initialize(MetricType m, const size_t dim, const size_t max_points,
+                                const std::shared_ptr<IndexWriteParameters> index_parameters,
+                                const std::shared_ptr<IndexSearchParams> index_search_params,
+                                const size_t num_frozen_pts = 0, const bool dynamic_index = false,
+                                const bool concurrent_consolidate = false,
+                                const bool pq_dist_build = false, const size_t num_pq_chunks = 0,
+                                const bool use_opq = false);
+
+        POLARIS_API collie::Status initialize(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
+                                std::unique_ptr<AbstractGraphStore> graph_store,
+                                std::shared_ptr<AbstractDataStore<T>> pq_data_store = nullptr);
 
         POLARIS_API ~VamanaIndex() override;
 
@@ -183,7 +199,7 @@ namespace polaris {
         // with iterate_to_fixed_point.
         std::vector<uint32_t> get_init_ids();
 
-        std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
+        collie::Result<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids,bool search_invocation);
 
         collie::Result<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
@@ -191,7 +207,7 @@ namespace polaris {
                                                              const BaseSearchCondition *condition,
                                                              bool search_invocation);
 
-        void search_for_point_and_prune(int location, uint32_t Lindex, std::vector<uint32_t> &pruned_list,
+        collie::Status search_for_point_and_prune(int location, uint32_t Lindex, std::vector<uint32_t> &pruned_list,
                                         InMemQueryScratch<T> *scratch,uint32_t filteredLindex = 0);
 
         void prune_neighbors(const uint32_t location, std::vector<Neighbor> &pool, std::vector<uint32_t> &pruned_list,
@@ -215,7 +231,7 @@ namespace polaris {
         void inter_insert(uint32_t n, std::vector<uint32_t> &pruned_list, InMemQueryScratch<T> *scratch);
 
         // Acquire exclusive _update_lock before calling
-        void link();
+        collie::Status link();
 
         // Acquire exclusive _tag_lock and _delete_lock before calling
         int reserve_location();
@@ -249,7 +265,7 @@ namespace polaris {
 
         // Do not call without acquiring appropriate locks
         // call public member functions save and load to invoke these.
-        POLARIS_API size_t save_graph(std::string filename);
+        POLARIS_API  collie::Result<size_t> save_graph(std::string filename);
 
         POLARIS_API collie::Result<size_t> save_data(std::string filename);
 
@@ -261,9 +277,9 @@ namespace polaris {
 
         POLARIS_API collie::Result<size_t> load_data(std::string filename0);
 
-        POLARIS_API size_t load_tags(const std::string tag_file_name);
+        POLARIS_API collie::Result<size_t> load_tags(const std::string tag_file_name);
 
-        POLARIS_API size_t load_delete_set(const std::string &filename);
+        POLARIS_API collie::Result<size_t> load_delete_set(const std::string &filename);
 
     private:
 

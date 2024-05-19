@@ -52,7 +52,7 @@ namespace polaris {
                                           const size_t dim, const size_t k_base, std::string prefix_path);
 
     template<typename T>
-    int
+    collie::Status
     retrieve_shard_data_from_ids(const std::string data_file, std::string idmap_filename, std::string data_filename);
 
     template<typename T>

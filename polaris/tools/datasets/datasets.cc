@@ -238,7 +238,10 @@ namespace polaris {
         gen_pq_f->add_option("-s, --sampling_rate", datasets_ctx.sampling_rate, "Sampling rate")->required(true);
         gen_pq_f->add_option("--opq", datasets_ctx.bias, "OPQ")->required(true);
         gen_pq_f->callback([&]() {
-            generate_pq_float(datasets_ctx.input, datasets_ctx.output, datasets_ctx.num_pq_chunks, datasets_ctx.sampling_rate, datasets_ctx.bias);
+            auto rs = generate_pq_float(datasets_ctx.input, datasets_ctx.output, datasets_ctx.num_pq_chunks, datasets_ctx.sampling_rate, datasets_ctx.bias);
+            if(!rs.ok()) {
+                std::cerr << rs.message() << std::endl;
+            }
         });
 
         /// generate_pq_int8
@@ -249,7 +252,10 @@ namespace polaris {
         gen_pq_i8->add_option("-s, --sampling_rate", datasets_ctx.sampling_rate, "Sampling rate")->required(true);
         gen_pq_i8->add_option("--opq", datasets_ctx.bias, "OPQ")->required(true);
         gen_pq_i8->callback([&]() {
-            generate_pq_int8(datasets_ctx.input, datasets_ctx.output, datasets_ctx.num_pq_chunks, datasets_ctx.sampling_rate, datasets_ctx.bias);
+            auto rs = generate_pq_int8(datasets_ctx.input, datasets_ctx.output, datasets_ctx.num_pq_chunks, datasets_ctx.sampling_rate, datasets_ctx.bias);
+            if(!rs.ok()) {
+                std::cerr << rs.message() << std::endl;
+            }
         });
 
         /// generate_pq_uint8
@@ -260,7 +266,10 @@ namespace polaris {
         gen_pq_u8->add_option("-s, --sampling_rate", datasets_ctx.sampling_rate, "Sampling rate")->required(true);
         gen_pq_u8->add_option("--opq", datasets_ctx.opq, "OPQ")->required(true);
         gen_pq_u8->callback([&]() {
-            generate_pq_uint8(datasets_ctx.input, datasets_ctx.output, datasets_ctx.num_pq_chunks, datasets_ctx.sampling_rate, datasets_ctx.opq);
+            auto rs = generate_pq_uint8(datasets_ctx.input, datasets_ctx.output, datasets_ctx.num_pq_chunks, datasets_ctx.sampling_rate, datasets_ctx.opq);
+            if(!rs.ok()) {
+                std::cerr << rs.message() << std::endl;
+            }
         });
 
         /// uin32_to_uint8_bin

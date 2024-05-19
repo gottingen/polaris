@@ -41,6 +41,7 @@
 namespace polaris {
     // Initialize an index with metric m, load the data of type T with filename
     // (bin), and initialize max_points
+    /*
     template<typename T>
     VamanaIndex<T>::VamanaIndex(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
                                 std::unique_ptr<AbstractGraphStore> graph_store,
@@ -106,8 +107,118 @@ namespace polaris {
                                          _indexingQueueSize, _indexingRange, _indexingMaxC, _data_store->get_dims());
             }
         }
+    }*/
+    template<typename T>
+    collie::Status VamanaIndex<T>::initialize(const IndexConfig &index_config, std::shared_ptr<AbstractDataStore<T>> data_store,
+                                std::unique_ptr<AbstractGraphStore> graph_store,
+                                std::shared_ptr<AbstractDataStore<T>> pq_data_store) {
+    _index_config = index_config;
+    _max_points = index_config.basic_config.max_points;
+    _num_frozen_pts = index_config.vamana_config.num_frozen_pts;
+    _dynamic_index = index_config.vamana_config.dynamic_index;
+    _indexingMaxC = DEFAULT_MAXC;
+    _pq_dist = index_config.vamana_config.pq_dist_build;
+    _use_opq = index_config.vamana_config.use_opq;
+    _num_pq_chunks = index_config.vamana_config.num_pq_chunks;
+    _delete_set.reset(new turbo::flat_hash_set<uint32_t>);
+        _conc_consolidate = index_config.vamana_config.concurrent_consolidate;
+        if (_pq_dist) {
+            if (_dynamic_index)
+                throw PolarisException("ERROR: Dynamic Indexing not supported with PQ distance based "
+                                       "index construction",
+                                       -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+            if (_index_config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT)
+                throw PolarisException("ERROR: Inner product metrics not yet supported "
+                                       "with PQ distance "
+                                       "base index",
+                                       -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
+        }
+
+        if (_dynamic_index && _num_frozen_pts == 0) {
+            _num_frozen_pts = 1;
+        }
+        // Sanity check. While logically it is correct, max_points = 0 causes
+        // downstream problems.
+        if (_max_points == 0) {
+            _max_points = 1;
+        }
+        const size_t total_internal_points = _max_points + _num_frozen_pts;
+
+        _start = (uint32_t) _max_points;
+
+        _data_store = data_store;
+        _pq_data_store = pq_data_store;
+        _graph_store = std::move(graph_store);
+
+        _locks = std::vector<non_recursive_mutex>(total_internal_points);
+        _location_to_tag.reserve(total_internal_points);
+        _tag_to_location.reserve(total_internal_points);
+        if (_dynamic_index) {
+            this->enable_delete(); // enable delete by default for dynamic index
+        }
+
+        if (index_config.vamana_config.index_write_params != nullptr) {
+            _indexingQueueSize = index_config.vamana_config.index_write_params->search_list_size;
+            _indexingRange = index_config.vamana_config.index_write_params->max_degree;
+            _indexingMaxC = index_config.vamana_config.index_write_params->max_occlusion_size;
+            _indexingAlpha = index_config.vamana_config.index_write_params->alpha;
+            _indexingThreads = index_config.vamana_config.index_write_params->num_threads;
+            _saturate_graph = index_config.vamana_config.index_write_params->saturate_graph;
+
+            if (index_config.vamana_config.index_search_params != nullptr) {
+                uint32_t num_scratch_spaces =
+                        index_config.vamana_config.index_search_params->num_search_threads + _indexingThreads;
+                COLLIE_RETURN_NOT_OK(initialize_query_scratch(num_scratch_spaces,
+                                         index_config.vamana_config.index_search_params->initial_search_list_size,
+                                         _indexingQueueSize, _indexingRange, _indexingMaxC, _data_store->get_dims()));
+            }
+        }
+        return collie::Status::ok_status();
     }
 
+    template<typename T>
+    collie::Status VamanaIndex<T>::initialize(MetricType m, const size_t dim, const size_t max_points,
+                                const std::shared_ptr<IndexWriteParameters> index_parameters,
+                                const std::shared_ptr<IndexSearchParams> index_search_params,
+                                const size_t num_frozen_pts,
+                                const bool dynamic_index, const bool concurrent_consolidate,
+                                const bool pq_dist_build, const size_t num_pq_chunks, const bool use_opq) {
+        COLLIE_RETURN_NOT_OK(initialize(
+                IndexConfigBuilder()
+                        .with_metric(m)
+                        .with_dimension(dim)
+                        .with_max_points(max_points)
+                        .vamana_with_index_write_params(index_parameters)
+                        .vamana_with_index_search_params(index_search_params)
+                        .vamana_with_num_frozen_pts(num_frozen_pts)
+                        .vamana_is_dynamic_index(dynamic_index)
+                        .vamana_is_concurrent_consolidate(concurrent_consolidate)
+                        .vamana_is_pq_dist_build(pq_dist_build)
+                        .vamana_with_num_pq_chunks(num_pq_chunks)
+                        .vamana_is_use_opq(use_opq)
+                        .with_data_type(polaris_type_to_name<T>())
+                        .build_vamana(),
+                IndexFactory::construct_datastore<T>(DataStoreStrategy::MEMORY,
+                                                     (max_points == 0 ? (size_t) 1 : max_points) +
+                                                     (dynamic_index && num_frozen_pts == 0 ? (size_t) 1 : num_frozen_pts),
+                                                     dim, m),
+                IndexFactory::construct_graphstore(GraphStoreStrategy::MEMORY,
+                                                   (max_points == 0 ? (size_t) 1 : max_points) +
+                                                   (dynamic_index && num_frozen_pts == 0 ? (size_t) 1 : num_frozen_pts),
+                                                   (size_t) ((index_parameters == nullptr ? 0
+                                                                                          : index_parameters->max_degree) *
+                                                             defaults::GRAPH_SLACK_FACTOR * 1.05))));
+        if (_pq_dist) {
+            _pq_data_store = IndexFactory::construct_pq_datastore<T>(DataStoreStrategy::MEMORY,
+                                                                     max_points + num_frozen_pts,
+                                                                     dim, m, num_pq_chunks, use_opq);
+        } else {
+            _pq_data_store = _data_store;
+        }
+        return collie::Status::ok_status();
+    }
+
+    /*
     template<typename T>
     VamanaIndex<T>::VamanaIndex(MetricType m, const size_t dim, const size_t max_points,
                                 const std::shared_ptr<IndexWriteParameters> index_parameters,
@@ -147,7 +258,7 @@ namespace polaris {
         } else {
             _pq_data_store = _data_store;
         }
-    }
+    }*/
 
     template<typename T>
     VamanaIndex<T>::~VamanaIndex() {
@@ -215,7 +326,7 @@ namespace polaris {
     // first store the number of neighbors, and then the neighbor list (each as
     // 4 byte uint32_t)
     template<typename T>
-    size_t VamanaIndex<T>::save_graph(std::string graph_file) {
+    collie::Result<size_t> VamanaIndex<T>::save_graph(std::string graph_file) {
         return _graph_store->store(graph_file, _nd + _num_frozen_pts, _num_frozen_pts, _start);
     }
 
@@ -262,7 +373,7 @@ namespace polaris {
             // the error code for delete_file, but will ignore now because
             // delete should succeed if save will succeed.
             collie::filesystem::remove(graph_file);
-            save_graph(graph_file);
+            COLLIE_RETURN_NOT_OK(save_graph(graph_file));
             collie::filesystem::remove(data_file);
             auto rs = save_data(data_file);
             if(!rs.ok()) {
@@ -293,7 +404,7 @@ namespace polaris {
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::load_tags(const std::string tag_filename) {
+    collie::Result<size_t> VamanaIndex<T>::load_tags(const std::string tag_filename) {
         if (!collie::filesystem::exists(tag_filename)) {
             polaris::cerr << "Tag file " << tag_filename << " does not exist!" << std::endl;
             throw polaris::PolarisException("Tag file " + tag_filename + " does not exist!", -1, __PRETTY_FUNCTION__,
@@ -303,7 +414,7 @@ namespace polaris {
 
         size_t file_dim, file_num_points;
         vid_t *tag_data;
-        load_bin<vid_t>(std::string(tag_filename), tag_data, file_num_points, file_dim);
+        COLLIE_RETURN_NOT_OK(load_bin<vid_t>(std::string(tag_filename), tag_data, file_num_points, file_dim));
 
         if (file_dim != 1) {
             std::stringstream stream;
@@ -349,7 +460,7 @@ namespace polaris {
 
         if (file_num_points > _max_points + _num_frozen_pts) {
             // update and tag lock acquired in load() before calling load_data
-            resize(file_num_points - _num_frozen_pts);
+            COLLIE_RETURN_NOT_OK(resize(file_num_points - _num_frozen_pts));
         }
 
         auto rs = _data_store->load(filename); // offset == 0.
@@ -360,11 +471,11 @@ namespace polaris {
     }
 
     template<typename T>
-    size_t VamanaIndex<T>::load_delete_set(const std::string &filename) {
+    collie::Result<size_t> VamanaIndex<T>::load_delete_set(const std::string &filename) {
         std::unique_ptr<uint32_t[]> delete_list;
         size_t npts, ndim;
 
-        polaris::load_bin<uint32_t>(filename, delete_list, npts, ndim);
+        COLLIE_RETURN_NOT_OK(polaris::load_bin<uint32_t>(filename, delete_list, npts, ndim));
         assert(ndim == 1);
         for (uint32_t i = 0; i < npts; i++) {
             _delete_set->insert(delete_list[i]);
@@ -396,9 +507,9 @@ namespace polaris {
             std::string graph_file = std::string(filename);
             COLLIE_ASSIGN_OR_RETURN(data_file_num_pts, load_data(data_file));
             if (collie::filesystem::exists(delete_set_file)) {
-                load_delete_set(delete_set_file);
+                COLLIE_RETURN_NOT_OK(load_delete_set(delete_set_file));
             }
-            tags_file_num_pts = load_tags(tags_file);
+            COLLIE_ASSIGN_OR_RETURN(tags_file_num_pts, load_tags(tags_file));
             graph_num_pts = load_graph(graph_file, data_file_num_pts);
         } else {
             POLARIS_LOG(ERROR) << "Single index file saving/loading support not yet "
@@ -527,7 +638,7 @@ namespace polaris {
 
         float *pq_dists = nullptr;
 
-        _pq_data_store->preprocess_query(aligned_query, scratch);
+        COLLIE_RETURN_NOT_OK(_pq_data_store->preprocess_query(aligned_query, scratch));
 
         if (!expanded_nodes.empty() || !id_scratch.empty()) {
             return collie::Status::invalid_argument("ERROR: Clear scratch space before passing.");
@@ -666,7 +777,7 @@ namespace polaris {
     }
 
     template<typename T>
-    std::pair<uint32_t, uint32_t> VamanaIndex<T>::iterate_to_fixed_point(
+    collie::Result<std::pair<uint32_t, uint32_t>> VamanaIndex<T>::iterate_to_fixed_point(
             InMemQueryScratch<T> *scratch, uint32_t Lsize, const std::vector<uint32_t> &init_ids,
             bool search_invocation) {
         std::vector<Neighbor> &expanded_nodes = scratch->pool();
@@ -682,7 +793,7 @@ namespace polaris {
 
         float *pq_dists = nullptr;
 
-        _pq_data_store->preprocess_query(aligned_query, scratch);
+        COLLIE_RETURN_NOT_OK(_pq_data_store->preprocess_query(aligned_query, scratch));
 
         if (expanded_nodes.size() > 0 || id_scratch.size() > 0) {
             throw PolarisException("ERROR: Clear scratch space before passing.", -1, __PRETTY_FUNCTION__, __FILE__,
@@ -799,12 +910,12 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::search_for_point_and_prune(int location, uint32_t Lindex,
+    collie::Status VamanaIndex<T>::search_for_point_and_prune(int location, uint32_t Lindex,
                                                     std::vector<uint32_t> &pruned_list,
                                                     InMemQueryScratch<T> *scratch, uint32_t filteredLindex) {
         const std::vector<uint32_t> init_ids = get_init_ids();
         _data_store->get_vector(location, scratch->aligned_query());
-        iterate_to_fixed_point(scratch, Lindex, init_ids, false);
+        COLLIE_RETURN_NOT_OK(iterate_to_fixed_point(scratch, Lindex, init_ids, false));
 
         auto &pool = scratch->pool();
 
@@ -824,6 +935,7 @@ namespace polaris {
 
         assert(!pruned_list.empty());
         assert(_graph_store->get_total_points() == _max_points + _num_frozen_pts);
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -997,7 +1109,7 @@ namespace polaris {
     }
 
     template<typename T>
-    void VamanaIndex<T>::link() {
+    collie::Status VamanaIndex<T>::link() {
         uint32_t num_threads = _indexingThreads;
         if (num_threads != 0)
             omp_set_num_threads(num_threads);
@@ -1032,7 +1144,10 @@ namespace polaris {
             ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
             auto scratch = manager.scratch_space();
             std::vector<uint32_t> pruned_list;
-            search_for_point_and_prune(node, _indexingQueueSize, pruned_list, scratch);
+            auto rs = search_for_point_and_prune(node, _indexingQueueSize, pruned_list, scratch);
+            if(!rs.ok()) {
+                POLARIS_LOG(ERROR) << "Error in search_for_point_and_prune for node " << node;
+            }
             assert(pruned_list.size() > 0);
 
             {
@@ -1080,6 +1195,7 @@ namespace polaris {
         if (_nd > 0) {
             POLARIS_LOG(INFO) << "done. Link time: " <<link_timer.elapsed().to_seconds<double>() << "s";
         }
+        return collie::Status::ok_status();
     }
 
     // REFACTOR
@@ -1169,7 +1285,7 @@ namespace polaris {
         }
 
         generate_frozen_point();
-        link();
+        COLLIE_RETURN_NOT_OK(link());
 
         size_t max = 0, min = SIZE_MAX, total = 0, cnt = 0;
         for (size_t i = 0; i < _nd; i++) {
@@ -1204,7 +1320,7 @@ namespace polaris {
             std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
             _nd = num_points_to_load;
 
-            _data_store->populate_data(reinterpret_cast<const T *>(data), (location_t) num_points_to_load);
+            COLLIE_RETURN_NOT_OK(_data_store->populate_data(reinterpret_cast<const T *>(data), (location_t) num_points_to_load));
         }
 
         return build_with_data_populated(tags);
@@ -1261,10 +1377,10 @@ namespace polaris {
             // there. The problem is that the VamanaIndex class gets the output folder prefix
             // only at the time of save(), by which time we are too late. So leaving it
             // as-is for now.
-            _pq_data_store->populate_data(filename, 0U);
+            COLLIE_RETURN_NOT_OK(_pq_data_store->populate_data(filename, 0U));
         }
 
-        _data_store->populate_data(filename, 0U);
+        COLLIE_RETURN_NOT_OK(_data_store->populate_data(filename, 0U));
         polaris::cout << "Using only first " << num_points_to_load << " from file.. " << std::endl;
 
         {
@@ -1287,7 +1403,7 @@ namespace polaris {
                 polaris::cout << "Loading tags from " << tag_filename << " for vamana index build" << std::endl;
                 vid_t *tag_data = nullptr;
                 size_t npts, ndim;
-                polaris::load_bin(tag_filename, tag_data, npts, ndim);
+                COLLIE_RETURN_NOT_OK(polaris::load_bin(tag_filename, tag_data, npts, ndim));
                 if (npts < num_points_to_load) {
                     return collie::Status::invalid_argument("Loaded {} tags, insufficient to populate tags for {} points to load",
                                                          npts, num_points_to_load);
@@ -1937,7 +2053,7 @@ namespace polaris {
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
         auto scratch = manager.scratch_space();
         std::vector<uint32_t> pruned_list; // it is the set best candidates to connect to this point
-        search_for_point_and_prune(location, _indexingQueueSize, pruned_list, scratch);
+        COLLIE_RETURN_NOT_OK(search_for_point_and_prune(location, _indexingQueueSize, pruned_list, scratch));
         assert(pruned_list.size() > 0); // should find atleast one neighbour (i.e frozen point acting as medoid)
 
         {

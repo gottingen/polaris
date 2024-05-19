@@ -20,7 +20,7 @@ namespace polaris {
     collie::Status Vamana::initialize(const IndexConfig &config) {
         config_ = config;
         auto index_factory = polaris::IndexFactory(config);
-        index_ = index_factory.create_instance();
+        COLLIE_ASSIGN_OR_RETURN(index_, index_factory.create_instance());
         if (index_ == nullptr) {
             return collie::Status::invalid_argument("Invalid object type");
         }
@@ -72,7 +72,7 @@ namespace polaris {
         if (index_ == nullptr) {
             return collie::Status::invalid_argument("Index not initialized");
         }
-        index_->save(index_path.c_str());
+        COLLIE_RETURN_NOT_OK(index_->save(index_path.c_str()));
         return collie::Status::ok_status();
     }
 

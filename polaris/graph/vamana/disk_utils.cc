@@ -38,30 +38,22 @@ namespace polaris {
     collie::Status add_new_file_to_single_index(std::string index_file, std::string new_file) {
         std::unique_ptr<uint64_t[]> metadata;
         uint64_t nr, nc;
-        polaris::load_bin<uint64_t>(index_file, metadata, nr, nc);
+        COLLIE_RETURN_NOT_OK(polaris::load_bin<uint64_t>(index_file, metadata, nr, nc));
         if (nc != 1) {
-            std::stringstream stream;
-            stream << "Error, index file specified does not have correct metadata. " << std::endl;
-            throw polaris::PolarisException(stream.str(), -1);
+            return collie::Status::data_loss("Error, index file specified does not have correct metadata. ");
         }
         size_t index_ending_offset = metadata[nr - 1];
         size_t read_blk_size = 64 * 1024 * 1024;
         cached_ofstream writer(index_file, read_blk_size);
         size_t check_file_size = collie::filesystem::file_size(index_file);
         if (check_file_size != index_ending_offset) {
-            std::stringstream stream;
-            stream << "Error, index file specified does not have correct metadata "
-                      "(last entry must match the filesize). "
-                   << std::endl;
-            throw polaris::PolarisException(stream.str(), -1);
+            return collie::Status::data_loss("Error, index file specified does not have correct metadata. (last entry must match the filesize). ");
         }
 
         cached_ifstream reader(new_file, read_blk_size);
         size_t fsize = reader.get_file_size();
         if (fsize == 0) {
-            std::stringstream stream;
-            stream << "Error, new file specified is empty. Not appending. " << std::endl;
-            throw polaris::PolarisException(stream.str(), -1);
+            return collie::Status::data_loss("Error, new file specified is empty. Not appending. ");
         }
 
         size_t num_blocks = DIV_ROUND_UP(fsize, read_blk_size);
@@ -153,14 +145,14 @@ namespace polaris {
 
 
     template<typename T>
-    T *load_warmup(const std::string &cache_warmup_file, uint64_t &warmup_num, uint64_t warmup_dim,
+    collie::Result<T*> load_warmup(const std::string &cache_warmup_file, uint64_t &warmup_num, uint64_t warmup_dim,
                    uint64_t warmup_aligned_dim) {
         T *warmup = nullptr;
         uint64_t file_dim, file_aligned_dim;
 
         std::error_code ec;
         if (collie::filesystem::exists(cache_warmup_file, ec)) {
-            polaris::load_aligned_bin<T>(cache_warmup_file, warmup, warmup_num, file_dim, file_aligned_dim);
+            COLLIE_RETURN_NOT_OK(polaris::load_aligned_bin<T>(cache_warmup_file, warmup, warmup_num, file_dim, file_aligned_dim));
             if (file_dim != warmup_dim || file_aligned_dim != warmup_aligned_dim) {
                 std::stringstream stream;
                 stream << "Mismatched dimensions in sample file. file_dim = " << file_dim
@@ -389,12 +381,13 @@ namespace polaris {
                     .with_saturate_graph(true)
                     .with_num_threads(num_threads)
                     .build();
-            polaris::VamanaIndex<T> _index(compareMetric, base_dim, base_num,
+            polaris::VamanaIndex<T> _index;
+            COLLIE_RETURN_NOT_OK(_index.initialize(compareMetric, base_dim, base_num,
                                            std::make_shared<polaris::IndexWriteParameters>(paras), nullptr,
                                            defaults::NUM_FROZEN_POINTS_STATIC, false, false,
-                                           build_pq_bytes > 0, build_pq_bytes, use_opq);
-            _index.build(base_file.c_str(), base_num);
-            _index.save(mem_index_path.c_str());
+                                           build_pq_bytes > 0, build_pq_bytes, use_opq));
+            COLLIE_RETURN_NOT_OK(_index.build(base_file.c_str(), base_num));
+            COLLIE_RETURN_NOT_OK(_index.save(mem_index_path.c_str()));
             std::remove(medoids_file.c_str());
             std::remove(centroids_file.c_str());
             return collie::Status::ok_status();
@@ -422,7 +415,7 @@ namespace polaris {
 
             std::string shard_ids_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_ids_uint32.bin";
 
-            retrieve_shard_data_from_ids<T>(base_file, shard_ids_file, shard_base_file);
+            COLLIE_RETURN_NOT_OK(retrieve_shard_data_from_ids<T>(base_file, shard_ids_file, shard_base_file));
 
             std::string shard_index_file = merged_index_prefix + "_subshard-" + std::to_string(p) + "_mem.index";
 
@@ -434,12 +427,13 @@ namespace polaris {
             uint64_t shard_base_dim, shard_base_pts;
             get_bin_metadata(shard_base_file, shard_base_pts, shard_base_dim);
 
-            polaris::VamanaIndex<T> _index(compareMetric, shard_base_dim, shard_base_pts,
+            polaris::VamanaIndex<T> _index;
+            COLLIE_RETURN_NOT_OK(_index.initialize(compareMetric, shard_base_dim, shard_base_pts,
                                            std::make_shared<polaris::IndexWriteParameters>(low_degree_params), nullptr,
                                            defaults::NUM_FROZEN_POINTS_STATIC, false, false, build_pq_bytes > 0,
-                                           build_pq_bytes, use_opq);
-            _index.build(shard_base_file.c_str(), shard_base_pts);
-            _index.save(shard_index_file.c_str());
+                                           build_pq_bytes, use_opq));
+            COLLIE_RETURN_NOT_OK(_index.build(shard_base_file.c_str(), shard_base_pts));
+            COLLIE_RETURN_NOT_OK(_index.save(shard_index_file.c_str()));
             std::remove(shard_base_file.c_str());
         }
         polaris::cout << timer.elapsed_seconds_for_step("building indices on shards") << std::endl;
@@ -716,13 +710,13 @@ namespace polaris {
                                                         const std::string output_file,
                                                         const std::string reorder_data_file);
 
-    template POLARIS_API int8_t *load_warmup<int8_t>(const std::string &cache_warmup_file, uint64_t &warmup_num,
+    template POLARIS_API collie::Result<int8_t*> load_warmup<int8_t>(const std::string &cache_warmup_file, uint64_t &warmup_num,
                                                      uint64_t warmup_dim, uint64_t warmup_aligned_dim);
 
-    template POLARIS_API uint8_t *load_warmup<uint8_t>(const std::string &cache_warmup_file, uint64_t &warmup_num,
+    template POLARIS_API collie::Result<uint8_t*> load_warmup<uint8_t>(const std::string &cache_warmup_file, uint64_t &warmup_num,
                                                        uint64_t warmup_dim, uint64_t warmup_aligned_dim);
 
-    template POLARIS_API float *load_warmup<float>(const std::string &cache_warmup_file, uint64_t &warmup_num,
+    template POLARIS_API collie::Result<float*> load_warmup<float>(const std::string &cache_warmup_file, uint64_t &warmup_num,
                                                    uint64_t warmup_dim, uint64_t warmup_aligned_dim);
 
     template POLARIS_API collie::Status build_merged_vamana_index<int8_t>(

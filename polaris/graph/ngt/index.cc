@@ -540,20 +540,22 @@ polaris::GraphIndex::loadIndex(const string &ifile, bool readOnly, polaris::NgtI
     }
 }
 
-void
+collie::Status
 polaris::GraphIndex::saveProperty(const std::string &file) {
     polaris::PropertySet prop;
-    this->getGraphIndexProperty().export_property(prop);
-    this->getGraphProperty().export_property(prop);
-    prop.save(file + "/prf");
+    COLLIE_RETURN_NOT_OK(this->getGraphIndexProperty().export_property(prop));
+    COLLIE_RETURN_NOT_OK(this->getGraphProperty().export_property(prop));
+    COLLIE_RETURN_NOT_OK(prop.save(file + "/prf"));
+    return collie::Status::ok_status();
 }
 
-void
+collie::Status
 polaris::GraphIndex::exportProperty(const std::string &file) {
     polaris::PropertySet prop;
-    this->getGraphIndexProperty().export_property(prop);
-    this->getGraphProperty().export_property(prop);
-    prop.save(file + "/prf");
+    COLLIE_RETURN_NOT_OK(this->getGraphIndexProperty().export_property(prop));
+    COLLIE_RETURN_NOT_OK(this->getGraphProperty().export_property(prop));
+    COLLIE_RETURN_NOT_OK(prop.save(file + "/prf"));
+    return collie::Status::ok_status();
 }
 
 

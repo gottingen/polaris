@@ -23,7 +23,7 @@ namespace polaris {
         check_config();
     }
 
-    std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
+    collie::Result<std::unique_ptr<AbstractIndex>> IndexFactory::create_instance() {
         return create_instance(_config->basic_config.object_type);
     }
 
@@ -109,7 +109,7 @@ namespace polaris {
     }
 
     template<typename data_type>
-    std::unique_ptr<AbstractIndex> IndexFactory::create_instance() {
+    collie::Result<std::unique_ptr<AbstractIndex>> IndexFactory::create_instance() {
         size_t num_points = _config->basic_config.max_points + _config->vamana_config.num_frozen_pts;
         size_t dim = _config->basic_config.dimension;
         // auto graph_store = construct_graphstore(_config->graph_strategy, num_points);
@@ -131,11 +131,12 @@ namespace polaris {
 
         // REFACTOR TODO: Must construct in-memory PQDatastore if strategy == ONDISK and must construct
         // in-mem and on-disk PQDataStore if strategy == ONDISK and diskPQ is required.
-        return std::make_unique<polaris::VamanaIndex<data_type>>(*_config, data_store,
-                                                                                 std::move(graph_store), pq_data_store);
+        auto ptr = std::make_unique<polaris::VamanaIndex<data_type>>();
+        COLLIE_RETURN_NOT_OK(ptr->initialize(*_config, data_store,std::move(graph_store), pq_data_store));
+        return ptr;
     }
 
-    std::unique_ptr<AbstractIndex>
+    collie::Result<std::unique_ptr<AbstractIndex>>
     IndexFactory::create_instance(ObjectType data_type) {
         if (data_type == ObjectType::FLOAT) {
             return create_instance<float>();
@@ -143,8 +144,10 @@ namespace polaris {
             return create_instance<uint8_t>();
         } else if (data_type == ObjectType::INT8) {
             return create_instance<int8_t>();
-        } else
-            throw PolarisException("Error: unsupported data_type please choose from [float/int8/uint8]", -1);
+        } else {
+            return collie::Status::invalid_argument("Error: unsupported data_type please choose from [float/int8/uint8]");
+        }
+
     }
 
 } // namespace polaris

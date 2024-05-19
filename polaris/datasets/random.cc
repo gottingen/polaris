@@ -27,7 +27,7 @@
 namespace polaris {
 
     template<typename T>
-    bool generate_pq(const std::string &data_path, const std::string &index_prefix_path, const size_t num_pq_centers,
+    collie::Status generate_pq(const std::string &data_path, const std::string &index_prefix_path, const size_t num_pq_centers,
                      const size_t num_pq_chunks, const float sampling_rate, const bool opq) {
         std::string pq_pivots_path = index_prefix_path + "_pq_pivots.bin";
         std::string pq_compressed_vectors_path = index_prefix_path + "_pq_compressed.bin";
@@ -39,42 +39,33 @@ namespace polaris {
         std::cout << "For computing pivots, loaded sample data of size " << train_size << std::endl;
 
         if (opq) {
-            polaris::generate_opq_pivots(train_data, train_size, (uint32_t) train_dim, (uint32_t) num_pq_centers,
-                                         (uint32_t) num_pq_chunks, pq_pivots_path, true);
+            COLLIE_RETURN_NOT_OK(polaris::generate_opq_pivots(train_data, train_size, (uint32_t) train_dim, (uint32_t) num_pq_centers,
+                                         (uint32_t) num_pq_chunks, pq_pivots_path, true));
         } else {
-            polaris::generate_pq_pivots(train_data, train_size, (uint32_t) train_dim, (uint32_t) num_pq_centers,
-                                        (uint32_t) num_pq_chunks, KMEANS_ITERS_FOR_PQ, pq_pivots_path);
+            COLLIE_RETURN_NOT_OK(polaris::generate_pq_pivots(train_data, train_size, (uint32_t) train_dim, (uint32_t) num_pq_centers,
+                                        (uint32_t) num_pq_chunks, KMEANS_ITERS_FOR_PQ, pq_pivots_path));
         }
         polaris::generate_pq_data_from_pivots<T>(data_path, (uint32_t) num_pq_centers, (uint32_t) num_pq_chunks,
                                                  pq_pivots_path, pq_compressed_vectors_path, true);
 
         delete[] train_data;
 
-        return 0;
+        return collie::Status::ok_status();
     }
 
     collie::Status
     generate_pq_float(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks,
                       float sampling_rate, bool opq) {
-        const std::string data_path(base_file);
-        const std::string index_prefix_path(output_prefix);
         const size_t num_pq_centers = 256;
-        generate_pq<float>(data_path, index_prefix_path, num_pq_centers, num_pq_chunks, sampling_rate, opq);
-        return collie::Status::ok_status();
+        return generate_pq<float>(base_file, output_prefix, num_pq_centers, num_pq_chunks, sampling_rate, opq);
     }
 
     collie::Status generate_pq_int8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq) {
-        const std::string data_path(base_file);
-        const std::string index_prefix_path(output_prefix);
         const size_t num_pq_centers = 256;
-        generate_pq<int8_t>(data_path, index_prefix_path, num_pq_centers, num_pq_chunks, sampling_rate, opq);
-        return collie::Status::ok_status();
+        return generate_pq<int8_t>(base_file, output_prefix, num_pq_centers, num_pq_chunks, sampling_rate, opq);
     }
     collie::Status generate_pq_uint8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq) {
-        const std::string data_path(base_file);
-        const std::string index_prefix_path(output_prefix);
         const size_t num_pq_centers = 256;
-        generate_pq<uint8_t>(data_path, index_prefix_path, num_pq_centers, num_pq_chunks, sampling_rate, opq);
-        return collie::Status::ok_status();
+        return generate_pq<uint8_t>(base_file, output_prefix, num_pq_centers, num_pq_chunks, sampling_rate, opq);
     }
 }  // namespace polaris
