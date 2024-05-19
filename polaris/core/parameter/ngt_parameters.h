@@ -74,9 +74,9 @@ namespace polaris {
 
         void get(polaris::NgtParameters &prop) const;
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
 
-        [[nodiscard]] turbo::Status import_property(polaris::PropertySet &p);
+        [[nodiscard]] collie::Status import_property(polaris::PropertySet &p);
 
         int16_t truncationThreshold;
         int16_t edgeSizeForCreation;
@@ -144,9 +144,9 @@ namespace polaris {
             epsilonForInsertionOrder = -1;
         }
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
 
-        [[nodiscard]] turbo::Status import_property(polaris::PropertySet &p);
+        [[nodiscard]] collie::Status import_property(polaris::PropertySet &p);
 
         void set(polaris::NgtParameters &prop);
 

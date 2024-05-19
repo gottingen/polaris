@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <unordered_set>
 #include <list>
-#include <turbo/status/result_status.h>
+#include <collie/utility/result.h>
 #include <polaris/core/search_context.h>
 
 namespace hnswlib {
@@ -75,29 +75,39 @@ namespace hnswlib {
         HierarchicalNSW(SpaceInterface<dist_t> *s) {
         }
 
+        ~HierarchicalNSW() {
+            free(data_level0_memory_);
+            for (tableint i = 0; i < cur_element_count; i++) {
+                if (element_levels_[i] > 0)
+                    free(linkLists_[i]);
+            }
+            free(linkLists_);
+            delete visited_list_pool_;
+        }
 
-        HierarchicalNSW(
+        collie::Status initialize(
                 SpaceInterface<dist_t> *s,
                 const std::string &location,
                 bool nmslib = false,
                 size_t max_elements = 0,
-                bool allow_replace_deleted = false)
-                : allow_replace_deleted_(allow_replace_deleted) {
-            load(location, s, max_elements);
+                bool allow_replace_deleted = false) {
+            allow_replace_deleted_ = allow_replace_deleted;
+            return load(location, s, max_elements);
         }
 
-
-        HierarchicalNSW(
+        collie::Status initialize(
                 SpaceInterface<dist_t> *s,
                 size_t max_elements,
                 size_t M = 16,
                 size_t ef_construction = 200,
                 size_t random_seed = 100,
-                bool allow_replace_deleted = false)
-                :label_op_locks_(MAX_LABEL_OPERATION_LOCKS),
-                 link_list_locks_(max_elements),
-                  element_levels_(max_elements),
-                  allow_replace_deleted_(allow_replace_deleted) {
+                bool allow_replace_deleted = false) {
+            std::vector<std::mutex> tmp_label_op_locks(MAX_LABEL_OPERATION_LOCKS);
+            label_op_locks_.swap(tmp_label_op_locks);
+            std::vector<std::mutex> tmp_link_list_locks(max_elements);
+            link_list_locks_.swap(tmp_link_list_locks);
+            element_levels_.resize(max_elements);
+            allow_replace_deleted_ = allow_replace_deleted;
             max_elements_ = max_elements;
             num_deleted_ = 0;
             data_size_ = s->get_data_size();
@@ -119,8 +129,9 @@ namespace hnswlib {
             offsetLevel0_ = 0;
 
             data_level0_memory_ = (char *) malloc(max_elements_ * size_data_per_element_);
-            if (data_level0_memory_ == nullptr)
-                throw std::runtime_error("Not enough memory");
+            if (data_level0_memory_ == nullptr) {
+                return collie::Status::resource_exhausted("Not enough memory");
+            }
 
             cur_element_count = 0;
 
@@ -131,24 +142,14 @@ namespace hnswlib {
             maxlevel_ = -1;
 
             linkLists_ = (char **) malloc(sizeof(void *) * max_elements_);
-            if (linkLists_ == nullptr)
-                throw std::runtime_error("Not enough memory: HierarchicalNSW failed to allocate linklists");
+            if (linkLists_ == nullptr) {
+                return collie::Status::resource_exhausted("Not enough memory: HierarchicalNSW failed to allocate linklists");
+            }
             size_links_per_element_ = maxM_ * sizeof(tableint) + sizeof(linklistsizeint);
             mult_ = 1 / log(1.0 * M_);
             revSize_ = 1.0 / mult_;
+            return collie::Status::ok_status();
         }
-
-
-        ~HierarchicalNSW() {
-            free(data_level0_memory_);
-            for (tableint i = 0; i < cur_element_count; i++) {
-                if (element_levels_[i] > 0)
-                    free(linkLists_[i]);
-            }
-            free(linkLists_);
-            delete visited_list_pool_;
-        }
-
 
         struct CompareByFirst {
             constexpr bool operator()(std::pair<dist_t, tableint> const &a,
@@ -297,7 +298,7 @@ namespace hnswlib {
         template<bool has_deletions, bool collect_metrics = false>
         std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst>
         search_base_layer_st(tableint ep_id, const void *data_point, size_t ef,
-                          polaris::BaseSearchCondition *condition) const {
+                             polaris::BaseSearchCondition *condition) const {
             VisitedList *vl = visited_list_pool_->getFreeVisitedList();
             vl_type *visited_array = vl->mass;
             vl_type visited_array_tag = vl->curV;
@@ -695,7 +696,7 @@ namespace hnswlib {
         }
 
 
-        turbo::Status saveIndex(const std::string &location) {
+        collie::Status saveIndex(const std::string &location) {
             std::ofstream output(location, std::ios::binary);
             std::streampos position;
 
@@ -723,15 +724,16 @@ namespace hnswlib {
                     output.write(linkLists_[i], linkListSize);
             }
             output.close();
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
 
-        turbo::Status load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) override {
+        collie::Status
+        load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) override {
             std::ifstream input(location, std::ios::binary);
 
             if (!input.is_open()) {
-                return turbo::make_status(turbo::kInvalidArgument, "Cannot open file");
+                return collie::Status::invalid_argument("Cannot open file");
             }
 
             // get file size:
@@ -769,7 +771,7 @@ namespace hnswlib {
             input.seekg(cur_element_count * size_data_per_element_, input.cur);
             for (size_t i = 0; i < cur_element_count; i++) {
                 if (input.tellg() < 0 || input.tellg() >= total_filesize) {
-                    return turbo::make_status(turbo::kInvalidArgument, "Index seems to be corrupted or unsupported");
+                    return collie::Status::invalid_argument("Index seems to be corrupted or unsupported");
                 }
 
                 unsigned int linkListSize;
@@ -781,7 +783,7 @@ namespace hnswlib {
 
             // throw exception if it either corrupted or old index
             if (input.tellg() != total_filesize) {
-                return turbo::make_status(turbo::kInvalidArgument, "Index seems to be corrupted or unsupported");
+                return collie::Status::invalid_argument("Index seems to be corrupted or unsupported");
             }
 
             input.clear();
@@ -791,8 +793,7 @@ namespace hnswlib {
 
             data_level0_memory_ = (char *) malloc(max_elements * size_data_per_element_);
             if (data_level0_memory_ == nullptr) {
-                return turbo::make_status(turbo::kResourceExhausted,
-                                          "Not enough memory: loadIndex failed to allocate level0");
+                return collie::Status::resource_exhausted("Not enough memory: loadIndex failed to allocate level0");
             }
             input.read(data_level0_memory_, cur_element_count * size_data_per_element_);
 
@@ -806,8 +807,7 @@ namespace hnswlib {
 
             linkLists_ = (char **) malloc(sizeof(void *) * max_elements);
             if (linkLists_ == nullptr) {
-                return turbo::make_status(turbo::kResourceExhausted,
-                                          "Not enough memory: loadIndex failed to allocate linklists");
+                return collie::Status::resource_exhausted("Not enough memory: loadIndex failed to allocate linklists");
             }
             element_levels_ = std::vector<int>(max_elements);
             revSize_ = 1.0 / mult_;
@@ -823,8 +823,8 @@ namespace hnswlib {
                     element_levels_[i] = linkListSize / size_links_per_element_;
                     linkLists_[i] = (char *) malloc(linkListSize);
                     if (linkLists_[i] == nullptr) {
-                        return turbo::make_status(turbo::kResourceExhausted,
-                                                  "Not enough memory: loadIndex failed to allocate linklist");
+                        return collie::Status::resource_exhausted(
+                                "Not enough memory: loadIndex failed to allocate linklist");
                     }
                     input.read(linkLists_[i], linkListSize);
                 }
@@ -839,10 +839,10 @@ namespace hnswlib {
 
             input.close();
 
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
-        turbo::Status get_vector(polaris::vid_t vid, void *vec) const {
+        collie::Status get_vector(polaris::vid_t vid, void *vec) const {
             std::unique_lock<std::mutex> lock_label(getLabelOpMutex(vid));
 
             std::unique_lock<std::mutex> lock_table(label_lookup_lock);
@@ -856,7 +856,7 @@ namespace hnswlib {
             char *data_ptrv = getDataByInternalId(internalId);
             size_t dim = *((size_t *) dist_func_param_);
             memcpy(vec, data_ptrv, dim * sizeof(float));
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
         size_t size() const {
@@ -891,14 +891,14 @@ namespace hnswlib {
         /*
         * Marks an element with the given label deleted, does NOT really change the current graph.
         */
-        [[nodiscard]] turbo::Status mark_delete(polaris::vid_t label) {
+        [[nodiscard]] collie::Status mark_delete(polaris::vid_t label) {
             // lock all operations with element by label
             std::unique_lock<std::mutex> lock_label(getLabelOpMutex(label));
 
             std::unique_lock<std::mutex> lock_table(label_lookup_lock);
             auto search = label_lookup_.find(label);
             if (search == label_lookup_.end()) {
-                return turbo::make_status(turbo::kNotFound, "Label not found");
+                return collie::Status::not_found("Label not found");
             }
             tableint internalId = search->second;
             lock_table.unlock();
@@ -911,9 +911,10 @@ namespace hnswlib {
         * Uses the last 16 bits of the memory for the linked list size to store the mark,
         * whereas maxM0_ has to be limited to the lower 16 bits, however, still large enough in almost all cases.
         */
-        [[nodiscard]] turbo::Status mark_deleted_internal(tableint internalId) {
-            if(internalId >= cur_element_count) {
-                return turbo::make_status(turbo::kInvalidArgument, "Internal id is out of range [{}:{}]", internalId, cur_element_count.load());
+        [[nodiscard]] collie::Status mark_deleted_internal(tableint internalId) {
+            if (internalId >= cur_element_count) {
+                return collie::Status::out_of_range("Internal id is out of range [{}:{}]", internalId,
+                                                    cur_element_count.load());
             }
             if (!isMarkedDeleted(internalId)) {
                 unsigned char *ll_cur = ((unsigned char *) get_linklist0(internalId)) + 2;
@@ -924,9 +925,9 @@ namespace hnswlib {
                     deleted_elements.insert(internalId);
                 }
             } else {
-                return turbo::make_status(turbo::kAlreadyExists, "The requested to delete element is already deleted");
+                return collie::Status::already_exists("The requested to delete element is already deleted");
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
 
@@ -994,9 +995,9 @@ namespace hnswlib {
         * Adds point. Updates the point if it is already in the index.
         * If replacement of deleted elements is enabled: replaces previously deleted point if any, updating it with new point
         */
-        turbo::Status addPoint(const void *data_point, polaris::vid_t label, bool replace_deleted = false) {
+        collie::Status addPoint(const void *data_point, polaris::vid_t label, bool replace_deleted = false) {
             if ((allow_replace_deleted_ == false) && (replace_deleted == true)) {
-                return turbo::make_status(turbo::kInvalidArgument, "Replacement of deleted elements is disabled in constructor");
+                return collie::Status::invalid_argument("Replacement of deleted elements is disabled in constructor");
             }
 
             // lock all operations with element by label
@@ -1031,7 +1032,7 @@ namespace hnswlib {
                 unmarkDeletedInternal(internal_id_replaced);
                 updatePoint(data_point, internal_id_replaced, 1.0);
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
 
@@ -1198,7 +1199,7 @@ namespace hnswlib {
         }
 
 
-        turbo::ResultStatus<tableint> addPoint(const void *data_point, polaris::vid_t label, int level) {
+        collie::Result<tableint> addPoint(const void *data_point, polaris::vid_t label, int level) {
             tableint cur_c = 0;
             {
                 // Checking if the element with the same label already exists
@@ -1209,8 +1210,8 @@ namespace hnswlib {
                     tableint existingInternalId = search->second;
                     if (allow_replace_deleted_) {
                         if (isMarkedDeleted(existingInternalId)) {
-                            return turbo::make_status(turbo::kInvalidArgument,
-                                                      "Can't use addPoint to update deleted elements if replacement of deleted elements is enabled.");
+                            return collie::Status::invalid_argument(
+                                    "Can't use addPoint to update deleted elements if replacement of deleted elements is enabled.");
                         }
                     }
                     lock_table.unlock();
@@ -1224,7 +1225,7 @@ namespace hnswlib {
                 }
 
                 if (cur_element_count >= max_elements_) {
-                    return turbo::make_status(turbo::kResourceExhausted, "The number of elements exceeds the specified limit");
+                    return collie::Status::resource_exhausted("The number of elements exceeds the specified limit");
                 }
 
                 cur_c = cur_element_count;
@@ -1254,8 +1255,10 @@ namespace hnswlib {
 
             if (curlevel) {
                 linkLists_[cur_c] = (char *) malloc(size_links_per_element_ * curlevel + 1);
-                if (linkLists_[cur_c] == nullptr)
-                    return turbo::make_status(turbo::kResourceExhausted, "Not enough memory: addPoint failed to allocate linklist");
+                if (linkLists_[cur_c] == nullptr) {
+                    return collie::Status::resource_exhausted(
+                            "Not enough memory: addPoint failed to allocate linklist");
+                }
                 memset(linkLists_[cur_c], 0, size_links_per_element_ * curlevel + 1);
             }
 
@@ -1274,8 +1277,9 @@ namespace hnswlib {
                             tableint *datal = (tableint *) (data + 1);
                             for (int i = 0; i < size; i++) {
                                 tableint cand = datal[i];
-                                if (cand < 0 || cand > max_elements_)
-                                    return turbo::make_status(turbo::kInvalidArgument, "cand error");
+                                if (cand < 0 || cand > max_elements_) {
+                                    return collie::Status::invalid_argument("cand error");
+                                }
                                 dist_t d = fstdistfunc_(data_point, getDataByInternalId(cand), dist_func_param_);
                                 if (d < curdist) {
                                     curdist = d;
@@ -1290,7 +1294,7 @@ namespace hnswlib {
                 bool epDeleted = isMarkedDeleted(enterpoint_copy);
                 for (int level = std::min(curlevel, maxlevelcopy); level >= 0; level--) {
                     if (level > maxlevelcopy || level < 0)  // possible?
-                        return turbo::make_status(turbo::kInvalidArgument, "Level error");
+                        return collie::Status::invalid_argument("Level error");
 
                     std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst> top_candidates = searchBaseLayer(
                             currObj, data_point, level);
@@ -1317,9 +1321,9 @@ namespace hnswlib {
             return cur_c;
         }
 
-        turbo::Status search(polaris::SearchContext&ctx) const override {
+        collie::Status search(polaris::SearchContext &ctx) const override {
             if (cur_element_count == 0) {
-                return turbo::ok_status();
+                return collie::Status::ok_status();
             }
 
             tableint currObj = enterpoint_node_;
@@ -1340,7 +1344,7 @@ namespace hnswlib {
                     for (int i = 0; i < size; i++) {
                         tableint cand = datal[i];
                         if (cand < 0 || cand > max_elements_) {
-                            return turbo::make_status(turbo::kInvalidArgument, "cand error");
+                            return collie::Status::invalid_argument("cand error");
                         }
                         dist_t d = fstdistfunc_(ctx.query, getDataByInternalId(cand), dist_func_param_);
 
@@ -1369,17 +1373,17 @@ namespace hnswlib {
                 std::pair<dist_t, tableint> rez = top_candidates.top();
                 ctx.top_k_queue.emplace_back(getExternalLabel(rez.second), rez.first);
                 top_candidates.pop();
-                if(ctx.with_local_ids) {
+                if (ctx.with_local_ids) {
                     ctx.local_ids.emplace_back(rez.second);
                 }
 
-                if(ctx.with_raw_vectors) {
-                    std::vector<uint8_t> raw_vector(*(size_t*)dist_func_param_);
+                if (ctx.with_raw_vectors) {
+                    std::vector<uint8_t> raw_vector(*(size_t *) dist_func_param_);
                     memcpy(raw_vector.data(), getDataByInternalId(rez.second), raw_vector.size());
                     ctx.raw_vectors.push_back(std::move(raw_vector));
                 }
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
 

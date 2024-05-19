@@ -63,7 +63,7 @@ set(POLARIS_DEPS_LINKS
         OpenMP::OpenMP_CXX
         ${MKL_LIBRARIES}
         ${CARBIN_DEPS_LINK}
-        turbo::turbo_shared
+        turbo::turbo_static
         aio
         )
 

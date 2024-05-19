@@ -16,7 +16,7 @@
 #pragma once
 
 #include <string>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 #include <polaris/graph/vamana/partition.h>
 
 namespace polaris {
@@ -38,8 +38,8 @@ namespace polaris {
         aux_gen<int8_t>(base_file, output_prefix, sampling_rate);
     }
 
-    turbo::Status generate_pq_float(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq);
-    turbo::Status generate_pq_int8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq);
-    turbo::Status generate_pq_uint8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq);
+    collie::Status generate_pq_float(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq);
+    collie::Status generate_pq_int8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq);
+    collie::Status generate_pq_uint8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq);
 
 }  // namespace polaris

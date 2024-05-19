@@ -16,7 +16,7 @@
 #pragma once
 
 #include <polaris/core/common.h>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 
 namespace polaris {
 
@@ -62,17 +62,17 @@ namespace polaris {
             objectAlignment = ObjectAlignment::ObjectAlignmentNone;
         }
 
-        turbo::Status validate() const {
+        collie::Status validate() const {
             if (metric == MetricType::METRIC_NONE) {
-                return turbo::make_status(turbo::kInvalidArgument, "metric is not set");
+                return collie::Status::invalid_argument("metric is not set");
             }
             if (object_type == ObjectType::ObjectTypeNone) {
-                return turbo::make_status(turbo::kInvalidArgument, "object_type is not set");
+                return collie::Status::invalid_argument("object_type is not set");
             }
             if (dimension == 0) {
-                return turbo::make_status(turbo::kInvalidArgument, "dimension is not set");
+                return collie::Status::invalid_argument("dimension is not set");
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
     };

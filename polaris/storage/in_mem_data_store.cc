@@ -49,18 +49,18 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> InMemDataStore<data_t>::load(const std::string &filename) {
+    collie::Result<location_t> InMemDataStore<data_t>::load(const std::string &filename) {
         return load_impl(filename);
     }
 
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> InMemDataStore<data_t>::load_impl(const std::string &filename) {
+    collie::Result<location_t> InMemDataStore<data_t>::load_impl(const std::string &filename) {
         size_t file_dim, file_num_points;
         if (!collie::filesystem::exists(filename)) {
             POLARIS_LOG(ERROR)<< "ERROR: data file " << filename << " does not exist.";
             aligned_free(_data);
-            return turbo::make_status(turbo::kInvalidArgument, "Data file does not exist.");
+            return collie::Status::invalid_argument("Data file does not exist.");
         }
         polaris::get_bin_metadata(filename, file_num_points, file_dim);
 
@@ -69,7 +69,7 @@ namespace polaris {
             POLARIS_LOG(ERROR) << "ERROR: Driver requests loading " << this->_dim << " dimension,"
                    << "but file has " << file_dim << " dimension.";
             aligned_free(_data);
-            return turbo::make_status(turbo::kInvalidArgument, "Dimension mismatch.");
+            return collie::Status::invalid_argument("Dimension mismatch.");
         }
 
         if (file_num_points > this->capacity()) {
@@ -90,41 +90,38 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<size_t> InMemDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
+    collie::Result<size_t> InMemDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
         return save_data_in_base_dimensions(filename, _data, num_points, this->get_dims(), this->get_aligned_dim(), 0U);
     }
 
     template<typename data_t>
-    turbo::Status InMemDataStore<data_t>::populate_data(const data_t *vectors, const location_t num_pts) {
+    collie::Status InMemDataStore<data_t>::populate_data(const data_t *vectors, const location_t num_pts) {
         memset(_data, 0, _aligned_dim * sizeof(data_t) * num_pts);
         for (location_t i = 0; i < num_pts; i++) {
             std::memmove(_data + i * _aligned_dim, vectors + i * this->_dim, this->_dim * sizeof(data_t));
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename data_t>
-    turbo::Status InMemDataStore<data_t>::populate_data(const std::string &filename, const size_t offset) {
+    collie::Status InMemDataStore<data_t>::populate_data(const std::string &filename, const size_t offset) {
         size_t npts, ndim;
-        auto rs = copy_aligned_data_from_file(filename.c_str(), _data, npts, ndim, _aligned_dim, offset);
-        if (!rs.ok()) {
-            return rs;
-        }
+        COLLIE_RETURN_NOT_OK(copy_aligned_data_from_file(filename.c_str(), _data, npts, ndim, _aligned_dim, offset));
 
         if ((location_t) npts > this->capacity()) {
             POLARIS_LOG(ERROR) << "Number of points in the file: " << filename
                << " is greater than the capacity of data store: " << this->capacity()
                << ". Must invoke resize before calling populate_data()";
-            return turbo::make_status(turbo::kInvalidArgument, "Number of points in the file is greater than the capacity of data store.");
+            return collie::Status::invalid_argument("Number of points in the file is greater than the capacity of data store.");
         }
 
         if ((location_t) ndim != this->get_dims()) {
             POLARIS_LOG(ERROR) << "Number of dimensions of a point in the file: " << filename
                << " is not equal to dimensions of data store: " << this->capacity() << ".";
-            return turbo::make_status(turbo::kInvalidArgument, "Number of dimensions of a point in the file is not equal to dimensions of data store.");
+            return collie::Status::invalid_argument("Number of dimensions of a point in the file is not equal to dimensions of data store.");
         }
 
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename data_t>
@@ -152,7 +149,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::Status InMemDataStore<data_t>::preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const {
+    collie::Status InMemDataStore<data_t>::preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const {
         /*
         if (query_scratch != nullptr) {
             memcpy(query_scratch->aligned_query_T(), query, sizeof(data_t) * this->get_dims());
@@ -160,7 +157,7 @@ namespace polaris {
             return turbo::make_status(turbo::kInvalidArgument, "Query scratch is null");
         }
          */
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename data_t>
@@ -196,11 +193,11 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> InMemDataStore<data_t>::expand(const location_t new_size) {
+    collie::Result<location_t> InMemDataStore<data_t>::expand(const location_t new_size) {
         if (new_size == this->capacity()) {
             return this->capacity();
         } else if (new_size < this->capacity()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Cannot expand datastore when new capacity < existing capacity");
+            return collie::Status::invalid_argument("Cannot expand datastore when new capacity < existing capacity");
         }
 #ifndef _WINDOWS
         data_t *new_data;
@@ -216,11 +213,11 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> InMemDataStore<data_t>::shrink(const location_t new_size) {
+    collie::Result<location_t> InMemDataStore<data_t>::shrink(const location_t new_size) {
         if (new_size == this->capacity()) {
             return this->capacity();
         } else if (new_size > this->capacity()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Cannot shrink datastore when new capacity > existing capacity");
+            return collie::Status::invalid_argument("Cannot shrink datastore when new capacity > existing capacity");
         }
 #ifndef _WINDOWS
         data_t *new_data;

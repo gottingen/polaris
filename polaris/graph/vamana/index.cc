@@ -168,7 +168,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
+    collie::Status VamanaIndex<T>::initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l,
                                                   uint32_t r, uint32_t maxc, size_t dim) {
         for (uint32_t i = 0; i < num_threads; i++) {
             auto scratch = new InMemQueryScratch<T>();
@@ -179,11 +179,11 @@ namespace polaris {
             }
             _query_scratch.push(scratch);
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::ResultStatus<size_t> VamanaIndex<T>::save_tags(std::string tags_file) {
+    collie::Result<size_t> VamanaIndex<T>::save_tags(std::string tags_file) {
         size_t tag_bytes_written;
         vid_t *tag_data = new vid_t[_nd + _num_frozen_pts];
         for (uint32_t i = 0; i < _nd; i++) {
@@ -198,17 +198,13 @@ namespace polaris {
         if (_num_frozen_pts > 0) {
             std::memset((char *) &tag_data[_start], 0, sizeof(vid_t) * _num_frozen_pts);
         }
-        auto rs = save_bin<vid_t>(tags_file, tag_data, _nd + _num_frozen_pts, 1);
-        if(!rs.ok()) {
-            return rs.status();
-        }
-        tag_bytes_written = rs.value();
+        COLLIE_ASSIGN_OR_RETURN(tag_bytes_written, save_bin<vid_t>(tags_file, tag_data, _nd + _num_frozen_pts, 1));
         delete[] tag_data;
         return tag_bytes_written;
     }
 
     template<typename T>
-    turbo::ResultStatus<size_t> VamanaIndex<T>::save_data(std::string data_file) {
+    collie::Result<size_t> VamanaIndex<T>::save_data(std::string data_file) {
         // Note: at this point, either _nd == _max_points or any frozen points have
         // been temporarily moved to _nd, so _nd + _num_frozen_pts is the valid
         // location limit.
@@ -224,7 +220,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::ResultStatus<size_t> VamanaIndex<T>::save_delete_list(const std::string &filename) {
+    collie::Result<size_t> VamanaIndex<T>::save_delete_list(const std::string &filename) {
         if (_delete_set->size() == 0) {
             return 0;
         }
@@ -237,7 +233,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::save(const char *filename, bool compact_before_save) {
+    collie::Status VamanaIndex<T>::save(const char *filename, bool compact_before_save) {
         polaris::Timer timer;
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -250,7 +246,7 @@ namespace polaris {
             compact_frozen_point();
         } else {
             if (!_data_compacted) {
-                return turbo::make_status(turbo::kInternal,
+                return collie::Status::internal(
                                           "VamanaIndex save for non-compacted index is not yet implemented");
             }
         }
@@ -293,7 +289,7 @@ namespace polaris {
         reposition_frozen_point_to_end();
 
         polaris::cout << "Time taken for save: " << timer.elapsed() / 1000000.0 << "s." << std::endl;
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -334,11 +330,11 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::ResultStatus<size_t> VamanaIndex<T>::load_data(std::string filename) {
+    collie::Result<size_t> VamanaIndex<T>::load_data(std::string filename) {
         size_t file_dim, file_num_points;
         if (!collie::filesystem::exists(filename)) {
             POLARIS_LOG(ERROR) << "ERROR: data file " << filename << " does not exist.";
-            return turbo::make_status(turbo::kInvalidArgument, "Data file {} does not exist", filename);
+            return collie::Status::invalid_argument("Data file {} does not exist", filename);
         }
         polaris::get_bin_metadata(filename, file_num_points, file_dim);
 
@@ -348,7 +344,7 @@ namespace polaris {
         if (file_dim != _index_config.basic_config.dimension) {
             POLARIS_LOG(ERROR) << "ERROR: Driver requests loading " << _index_config.basic_config.dimension << " dimension,"
                    << "but file has " << file_dim << " dimension.";
-            return turbo::make_status(turbo::kInvalidArgument, "Dimension mismatch: expected {}, got {}", _index_config.basic_config.dimension, file_dim);
+            return collie::Status::invalid_argument("Dimension mismatch: expected {}, got {}", _index_config.basic_config.dimension, file_dim);
         }
 
         if (file_num_points > _max_points + _num_frozen_pts) {
@@ -379,7 +375,7 @@ namespace polaris {
     // load the index from file and update the max_degree, cur (navigating
     // node loc), and _final_graph (adjacency list)
     template<typename T>
-    turbo::Status VamanaIndex<T>::load(const char *filename, uint32_t num_threads, uint32_t search_l) {
+    collie::Status VamanaIndex<T>::load(const char *filename, uint32_t num_threads, uint32_t search_l) {
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> cl(_consolidate_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -398,11 +394,7 @@ namespace polaris {
             std::string tags_file = std::string(filename) + ".tags";
             std::string delete_set_file = std::string(filename) + ".del";
             std::string graph_file = std::string(filename);
-            auto rs = load_data(data_file);
-            if(!rs.ok()) {
-                return rs.status();
-            }
-            data_file_num_pts = rs.value();
+            COLLIE_ASSIGN_OR_RETURN(data_file_num_pts, load_data(data_file));
             if (collie::filesystem::exists(delete_set_file)) {
                 load_delete_set(delete_set_file);
             }
@@ -411,14 +403,14 @@ namespace polaris {
         } else {
             POLARIS_LOG(ERROR) << "Single index file saving/loading support not yet "
                              "enabled. Not loading the index.";
-            return turbo::make_status(turbo::kInvalidArgument, "Single index file saving/loading not yet supported");
+            return collie::Status::invalid_argument("Single index file saving/loading not yet supported");
         }
 
         if (data_file_num_pts != graph_num_pts || (data_file_num_pts != tags_file_num_pts)) {
             POLARIS_LOG(ERROR) << "ERROR: When loading index, loaded " << data_file_num_pts << " points from datafile, "
                    << graph_num_pts << " from graph, and " << tags_file_num_pts
                    << " tags, with num_frozen_pts being set to " << _num_frozen_pts << " in constructor.";
-            return turbo::make_status(turbo::kInvalidArgument, "Mismatch in number of points loaded from data, graph and tags files");
+            return collie::Status::invalid_argument("Mismatch in number of points loaded from data, graph and tags files");
         }
 
         _nd = data_file_num_pts - _num_frozen_pts;
@@ -444,7 +436,7 @@ namespace polaris {
                 return rs;
             }
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -475,16 +467,16 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::get_vector_by_tag(vid_t &tag, void *vec) {
+    collie::Status VamanaIndex<T>::get_vector_by_tag(vid_t &tag, void *vec) {
         std::shared_lock<std::shared_timed_mutex> lock(_tag_lock);
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Tag {} does not exist", tag);
+            return collie::Status::invalid_argument( "Tag {} does not exist", tag);
         }
 
         location_t location = _tag_to_location[tag];
         _data_store->get_vector(location, static_cast<T *>(vec));
 
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -511,7 +503,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::ResultStatus<std::pair<uint32_t, uint32_t>>
+    collie::Result<std::pair<uint32_t, uint32_t>>
     VamanaIndex<T>::iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lsize,
                                            const std::vector<uint32_t> &init_ids,
                                            const BaseSearchCondition *condition,
@@ -524,11 +516,11 @@ namespace polaris {
         std::vector<uint32_t> &id_scratch = scratch->id_scratch();
         std::vector<float> &dist_scratch = scratch->dist_scratch();
         if (!id_scratch.empty()) {
-            return turbo::make_status(turbo::kInvalidArgument,
+            return collie::Status::invalid_argument(
                                       "ERROR: Clear scratch space before passing [id_scratch.size()].");
         }
         if (!condition) {
-            return turbo::make_status(turbo::kInvalidArgument, "ERROR: Condition is not provided.");
+            return collie::Status::invalid_argument( "ERROR: Condition is not provided.");
         }
 
         T *aligned_query = scratch->aligned_query();
@@ -538,7 +530,7 @@ namespace polaris {
         _pq_data_store->preprocess_query(aligned_query, scratch);
 
         if (!expanded_nodes.empty() || !id_scratch.empty()) {
-            return turbo::make_status(turbo::kInvalidArgument, "ERROR: Clear scratch space before passing.");
+            return collie::Status::invalid_argument("ERROR: Clear scratch space before passing.");
         }
 
         // Decide whether to use bitset or robin set to mark visited nodes
@@ -577,7 +569,7 @@ namespace polaris {
                                                 __LINE__);
             }
             if (!_location_to_tag.try_get(id, tmp_vid)) {
-                return turbo::make_status(turbo::kInvalidArgument, "ERROR: Tag not found for location.");
+                return collie::Status::invalid_argument("ERROR: Tag not found for location.");
             }
             if (condition->is_in_blacklist(tmp_vid)) {
                 continue;
@@ -622,7 +614,7 @@ namespace polaris {
                     assert(id < _max_points + _num_frozen_pts);
 
                     if (!_location_to_tag.try_get(id, tmp_vid)) {
-                        return turbo::make_status(turbo::kInvalidArgument, "ERROR: Tag not found for location.");
+                        return collie::Status::invalid_argument("ERROR: Tag not found for location.");
                     }
                     if (condition->is_in_blacklist(tmp_vid)) {
                         continue;
@@ -640,7 +632,7 @@ namespace polaris {
                     assert(id < _max_points + _num_frozen_pts);
 
                     if (!_location_to_tag.try_get(id, tmp_vid)) {
-                        return turbo::make_status(turbo::kInvalidArgument, "ERROR: Tag not found for location.");
+                        return collie::Status::invalid_argument("ERROR: Tag not found for location.");
                     }
                     if (condition->is_in_blacklist(tmp_vid)) {
                         continue;
@@ -1147,19 +1139,16 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::build_with_data_populated(const std::vector<vid_t> &tags) {
+    collie::Status VamanaIndex<T>::build_with_data_populated(const std::vector<vid_t> &tags) {
         polaris::cout << "Starting index build with " << _nd << " points... " << std::endl;
 
         if (_nd < 1) {
-            return turbo::make_status(turbo::kDataLoss, "Error: Trying to build an index with 0 points");
+            return collie::Status::invalid_argument("Error: Trying to build an index with 0 points");
         }
 
         if (tags.size() != _nd) {
-            std::stringstream stream;
-            stream << "ERROR: Driver requests loading " << _nd << " points from file,"
-                   << "but tags vector is of size " << tags.size() << "." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
-            return turbo::make_status(turbo::kDataLoss, stream.str());
+            return collie::Status::invalid_argument("ERROR: Driver requests loading {} points from file, but tags vector is of size {}.",
+                                                _nd, tags.size());
         }
         for (size_t i = 0; i < tags.size(); ++i) {
             _tag_to_location[tags[i]] = (uint32_t) i;
@@ -1196,17 +1185,17 @@ namespace polaris {
                       << "  min:" << min << "  count(deg<2):" << cnt << std::endl;
 
         _has_built = true;
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status
+    collie::Status
     VamanaIndex<T>::build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) {
         if (num_points_to_load == 0) {
-            return turbo::make_status(turbo::kInvalidArgument, "Do not call build with 0 points");
+            return collie::Status::invalid_argument("Do not call build with 0 points");
         }
         if (_pq_dist) {
-            return turbo::make_status(turbo::kInvalidArgument, "Do not use this build interface with PQ distance");
+            return collie::Status::invalid_argument("Do not use this build interface with PQ distance");
         }
 
         std::unique_lock<std::shared_timed_mutex> ul(_update_lock);
@@ -1222,7 +1211,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status
+    collie::Status
     VamanaIndex<T>::build(const std::string&filename, size_t num_points_to_load, const std::vector<vid_t> &tags) {
         // idealy this should call build_filtered_index based on params passed
 
@@ -1230,49 +1219,36 @@ namespace polaris {
 
         // error checks
         if (num_points_to_load == 0) {
-            return turbo::make_status(turbo::kInvalidArgument, "Do not call build with 0 points");
+            return collie::Status::invalid_argument("Do not call build with 0 points");
         }
 
         if (tags.size() != num_points_to_load) {
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "Number of tags does not match number of points to load");
+            return collie::Status::invalid_argument("Number of tags does not match number of points to load");
         }
 
         if (!collie::filesystem::exists(filename)) {
-            std::stringstream stream;
-            stream << "ERROR: Data file " << filename << " does not exist." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
-            return turbo::make_status(turbo::kInvalidArgument, stream.str());
+            return collie::Status::invalid_argument("ERROR: Data file {} does not exist.", filename);
         }
 
         size_t file_num_points, file_dim;
         if (filename.empty()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Can not build with an empty file");
+            return collie::Status::invalid_argument("Can not build with an empty file");
         }
 
         polaris::get_bin_metadata(filename, file_num_points, file_dim);
         if (file_num_points > _max_points) {
-            std::stringstream stream;
-            stream << "ERROR: Driver requests loading " << num_points_to_load << " points and file has "
-                   << file_num_points
-                   << " points, but "
-                   << "index can support only " << _max_points << " points as specified in constructor." << std::endl;
-            return turbo::make_status(turbo::kInvalidArgument, stream.str());
+            return collie::Status::invalid_argument("ERROR: Driver requests loading {} points and file has {} points.",
+                                                num_points_to_load, file_num_points);
         }
 
         if (num_points_to_load > file_num_points) {
-            std::stringstream stream;
-            stream << "ERROR: Driver requests loading " << num_points_to_load << " points and file has only "
-                   << file_num_points << " points." << std::endl;
-            return turbo::make_status(turbo::kInvalidArgument, stream.str());
+            return collie::Status::invalid_argument("ERROR: Driver requests loading {} points and file has only {} points.",
+                                                num_points_to_load, file_num_points);
         }
 
         if (file_dim != _index_config.basic_config.dimension) {
-            std::stringstream stream;
-            stream << "ERROR: Driver requests loading " << _index_config.basic_config.dimension << " dimension,"
-                   << "but file has " << file_dim << " dimension." << std::endl;
-            polaris::cerr << stream.str() << std::endl;
-            return turbo::make_status(turbo::kInvalidArgument, stream.str());
+            return collie::Status::invalid_argument("ERROR: Driver requests loading {} dimension, but file has {} dimension.",
+                                                _index_config.basic_config.dimension, file_dim);
         }
 
         // REFACTOR PQ TODO: We can remove this if and add a check in the InMemDataStore
@@ -1299,13 +1275,13 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status
+    collie::Status
     VamanaIndex<T>::build(const std::string &filename, size_t num_points_to_load, const std::string &tag_filename) {
         std::vector<vid_t> tags;
 
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
         if (tag_filename.empty()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Tag filename is null");
+            return collie::Status::invalid_argument("Tag filename is null");
         } else {
             if (collie::filesystem::exists(tag_filename)) {
                 polaris::cout << "Loading tags from " << tag_filename << " for vamana index build" << std::endl;
@@ -1313,18 +1289,15 @@ namespace polaris {
                 size_t npts, ndim;
                 polaris::load_bin(tag_filename, tag_data, npts, ndim);
                 if (npts < num_points_to_load) {
-                    std::stringstream sstream;
-                    sstream << "Loaded " << npts << " tags, insufficient to populate tags for "
-                            << num_points_to_load
-                            << "  points to load";
-                    return turbo::make_status(turbo::kInvalidArgument, sstream.str());
+                    return collie::Status::invalid_argument("Loaded {} tags, insufficient to populate tags for {} points to load",
+                                                         npts, num_points_to_load);
                 }
                 for (size_t i = 0; i < num_points_to_load; i++) {
                     tags.push_back(tag_data[i]);
                 }
                 delete[] tag_data;
             } else {
-                return turbo::make_status(turbo::kInvalidArgument, "Tag file: {} does not exist", tag_filename);
+                return collie::Status::invalid_argument("Tag file: {} does not exist", tag_filename);
             }
         }
 
@@ -1332,7 +1305,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::build(const std::string &data_file, size_t num_points_to_load) {
+    collie::Status VamanaIndex<T>::build(const std::string &data_file, size_t num_points_to_load) {
         size_t points_to_load = num_points_to_load == 0 ? _max_points : num_points_to_load;
         std::vector<vid_t> tags;
         tags.reserve(points_to_load);
@@ -1345,10 +1318,10 @@ namespace polaris {
 
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::search(SearchContext &ctx) {
+    collie::Status VamanaIndex<T>::search(SearchContext &ctx) {
         if (ctx.top_k > ctx.search_list) {
-            return turbo::make_status(turbo::kInvalidArgument, "Top K cannot be greater than search list ({}:{})",
-                                      ctx.top_k, ctx.search_list);
+            return collie::Status::invalid_argument("Top K cannot be greater than search list ({}:{})",
+                                                    ctx.top_k, ctx.search_list);
         }
 
         ScratchStoreManager<InMemQueryScratch<T>> manager(_query_scratch);
@@ -1367,10 +1340,8 @@ namespace polaris {
         const std::vector<uint32_t> init_ids = get_init_ids();
 
        scratch->set_query(reinterpret_cast<const T *>(ctx.query));
-        auto rs = iterate_to_fixed_point(scratch, ctx.search_list, init_ids, ctx.search_condition, true);
-        if (!rs.ok()) {
-            return rs.status();
-        }
+       std::pair<uint32_t, uint32_t> hops_cmps;
+        COLLIE_ASSIGN_OR_RETURN(hops_cmps, iterate_to_fixed_point(scratch, ctx.search_list, init_ids, ctx.search_condition, true));
 
         NeighborPriorityQueue &best_L_nodes = scratch->best_l_nodes();
         assert(best_L_nodes.size() <= ctx.search_list);
@@ -1409,9 +1380,9 @@ namespace polaris {
         }
 
         //return pos;
-        ctx.hops = rs.value().first;
-        ctx.cmps = rs.value().second;
-        return turbo::ok_status();
+        ctx.hops = hops_cmps.first;
+        ctx.cmps = hops_cmps.second;
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -1870,7 +1841,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::resize(size_t new_max_points) {
+    collie::Status VamanaIndex<T>::resize(size_t new_max_points) {
         const size_t new_internal_points = new_max_points + _num_frozen_pts;
         auto start = std::chrono::high_resolution_clock::now();
         assert(_empty_slots.size() == 0); // should not resize if there are empty slots.
@@ -1895,16 +1866,15 @@ namespace polaris {
 
         auto stop = std::chrono::high_resolution_clock::now();
         POLARIS_LOG(INFO) << "Resizing took: " << std::chrono::duration<double>(stop - start).count() << "s";
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::insert_point(const void *point, const vid_t tag) {
+    collie::Status VamanaIndex<T>::insert_point(const void *point, const vid_t tag) {
 
         assert(_has_built);
         if (tag == 0) {
-            return turbo::make_status(turbo::kInternal,
-                                      "Do not insert point with tag 0. That is reserved for points hidden from the user.");
+            return collie::Status::internal("Do not insert point with tag 0. That is reserved for points hidden from the user.");
         }
 
         std::shared_lock<std::shared_timed_mutex> shared_ul(_update_lock);
@@ -1946,7 +1916,7 @@ namespace polaris {
                                         -1, __PRETTY_FUNCTION__, __FILE__, __LINE__);
         }
 #else
-            return turbo::make_status(turbo::kInternal, "Cannot reserve location. Index is full.");
+            return collie::Status::internal("Cannot reserve location. Index is full.");
 #endif
         } // cant insert as active pts >= max_pts
         dl.unlock();
@@ -1954,7 +1924,7 @@ namespace polaris {
         // if tags are enabled and tag is already inserted. so we can't reuse that tag.
         if (_tag_to_location.find(tag) != _tag_to_location.end()) {
             release_location(location);
-            return turbo::make_status(turbo::kInternal, "Tag already exists");
+            return collie::Status::internal("Tag already exists");
         }
 
         _tag_to_location[tag] = location;
@@ -1994,29 +1964,29 @@ namespace polaris {
 
         inter_insert(location, pruned_list, scratch);
 
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::get_vector(vid_t tag, void *vec) const {
+    collie::Status VamanaIndex<T>::get_vector(vid_t tag, void *vec) const {
         std::shared_lock<std::shared_timed_mutex> tl(_tag_lock);
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
-            return turbo::make_status(turbo::kNotFound, "Tag({}) not found", tag);
+            return collie::Status::not_found("Tag({}) not found", tag);
         }
         auto location = _tag_to_location.at(tag);
         _data_store->get_vector(location, static_cast<T *>(vec));
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::lazy_delete(const vid_t &tag) {
+    collie::Status VamanaIndex<T>::lazy_delete(const vid_t &tag) {
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
         std::unique_lock<std::shared_timed_mutex> dl(_delete_lock);
         _data_compacted = false;
 
         if (_tag_to_location.find(tag) == _tag_to_location.end()) {
-            return turbo::make_status(turbo::kNotFound, "Tag({}) not found", tag);
+            return collie::Status::not_found("Tag({}) not found", tag);
         }
         assert(_tag_to_location[tag] < _max_points);
 
@@ -2024,13 +1994,13 @@ namespace polaris {
         _delete_set->insert(location);
         _location_to_tag.erase(location);
         _tag_to_location.erase(tag);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status VamanaIndex<T>::lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) {
+    collie::Status VamanaIndex<T>::lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) {
         if (failed_tags.size() > 0) {
-            return turbo::make_status(turbo::kInvalidArgument, "failed_tags should be passed as an empty list");
+            return collie::Status::invalid_argument("failed_tags should be passed as an empty list");
         }
         std::shared_lock<std::shared_timed_mutex> ul(_update_lock);
         std::unique_lock<std::shared_timed_mutex> tl(_tag_lock);
@@ -2047,7 +2017,7 @@ namespace polaris {
                 _tag_to_location.erase(tag);
             }
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>

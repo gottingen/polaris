@@ -19,7 +19,7 @@
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/core/lock.h>
 #include <polaris/core/search_context.h>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 #include <polaris/core/index_config.h>
 #include <polaris/core/percentile_stats.h>
 #include <polaris/core/report.h>
@@ -42,26 +42,26 @@ namespace polaris {
     public:
         virtual ~UnifiedIndex() = default;
 
-        virtual turbo::Status initialize(const IndexConfig &config) = 0;
+        virtual collie::Status initialize(const IndexConfig &config) = 0;
 
-        [[nodiscard]] virtual turbo::Status build(const UnifiedBuildParameters &parameters) = 0;
+        [[nodiscard]] virtual collie::Status build(const UnifiedBuildParameters &parameters) = 0;
 
-        [[nodiscard]] virtual turbo::Status load(const std::string &index_path) = 0;
+        [[nodiscard]] virtual collie::Status load(const std::string &index_path) = 0;
 
-        virtual turbo::Status save(const std::string &index_path) = 0;
+        virtual collie::Status save(const std::string &index_path) = 0;
 
-        virtual turbo::Status add(vid_t vid, const void *vec) = 0;
+        virtual collie::Status add(vid_t vid, const void *vec) = 0;
 
-        virtual turbo::Status lazy_remove(vid_t vid) = 0;
+        virtual collie::Status lazy_remove(vid_t vid) = 0;
 
-        virtual turbo::Status get_vector(vid_t vid, void *vec) const = 0;
+        virtual collie::Status get_vector(vid_t vid, void *vec) const = 0;
 
         virtual size_t size() const = 0;
 
-        virtual turbo::ResultStatus<consolidation_report>
+        virtual collie::Result<consolidation_report>
         consolidate_deletes(const IndexWriteParameters &parameters) = 0;
 
-        virtual turbo::Status search(SearchContext &context) = 0;
+        virtual collie::Status search(SearchContext &context) = 0;
 
         [[nodiscard]] virtual bool supports_dynamic() const = 0;
 
@@ -70,12 +70,12 @@ namespace polaris {
         [[nodiscard]] virtual uint64_t snapshot() const = 0;
 
         /// @brief Optimize the beam width for the index
-        virtual turbo::ResultStatus<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
+        virtual collie::Result<uint32_t> optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
                                                                   uint64_t tuning_sample_aligned_dim, uint32_t L,
                                                                   uint32_t nthreads,
                                                                   uint32_t start_bw = 2) = 0;
 
-        static turbo::ResultStatus<size_t> get_frozen_points(IndexType it, const std::string &index_path);
+        static collie::Result<size_t> get_frozen_points(IndexType it, const std::string &index_path);
 
         static UnifiedIndex *create_index(IndexType type);
     };

@@ -61,7 +61,7 @@ namespace polaris {
 
     POLARIS_API double get_memory_budget(double search_ram_budget_in_gb);
 
-    POLARIS_API turbo::Status add_new_file_to_single_index(std::string index_file, std::string new_file);
+    POLARIS_API collie::Status add_new_file_to_single_index(std::string index_file, std::string new_file);
 
     POLARIS_API size_t calculate_num_pq_chunks(double final_index_ram_limit, size_t points_num, uint32_t dim);
 
@@ -81,13 +81,13 @@ namespace polaris {
                                                  polaris::MetricType &distMetric);
 
     template<typename T>
-    POLARIS_API turbo::Status build_merged_vamana_index(std::string base_file, polaris::MetricType _compareMetric, uint32_t L,
+    POLARIS_API collie::Status build_merged_vamana_index(std::string base_file, polaris::MetricType _compareMetric, uint32_t L,
                                               uint32_t R, double sampling_rate, double ram_budget,
                                               std::string mem_index_path, std::string medoids_file,
                                               std::string centroids_file, size_t build_pq_bytes, bool use_opq,
                                               uint32_t num_threads);
     template<typename T>
-    POLARIS_API turbo::Status create_disk_layout(const std::string base_file, const std::string mem_index_file,
+    POLARIS_API collie::Status create_disk_layout(const std::string base_file, const std::string mem_index_file,
                                         const std::string output_file,
                                         const std::string reorder_data_file = std::string(""));
 

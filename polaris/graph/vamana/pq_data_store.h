@@ -40,22 +40,22 @@ namespace polaris {
         // Load quantized vectors from a set of files. Here filename is treated
         // as a prefix and the files are assumed to be named with DiskANN
         // conventions.
-        turbo::ResultStatus<location_t> load(const std::string &file_prefix) override;
+        collie::Result<location_t> load(const std::string &file_prefix) override;
 
         // Save quantized vectors to a set of files whose names start with
         // file_prefix.
         //  Currently, the plan is to save the quantized vectors to the quantized
         //  vectors file.
-        turbo::ResultStatus<size_t> save(const std::string &file_prefix, const location_t num_points) override;
+        collie::Result<size_t> save(const std::string &file_prefix, const location_t num_points) override;
 
         // Since base class function is pure virtual, we need to declare it here, even though alignent concept is not needed
         // for Quantized data stores.
         size_t get_aligned_dim() const override;
 
         // Populate quantized data from unaligned data using PQ functionality
-        turbo::Status populate_data(const data_t *vectors, const location_t num_pts) override;
+        collie::Status populate_data(const data_t *vectors, const location_t num_pts) override;
 
-        turbo::Status populate_data(const std::string &filename, const size_t offset) override;
+        collie::Status populate_data(const std::string &filename, const size_t offset) override;
 
         void extract_data_to_bin(const std::string &filename, const location_t num_pts) override;
 
@@ -71,7 +71,7 @@ namespace polaris {
         void
         copy_vectors(const location_t from_loc, const location_t to_loc, const location_t num_points) override;
 
-        turbo::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *scratch) const override;
+        collie::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *scratch) const override;
 
         float get_distance(const ArrayView&query, const location_t loc) const override;
 
@@ -93,11 +93,11 @@ namespace polaris {
         size_t get_alignment_factor() const override;
 
     protected:
-        turbo::ResultStatus<location_t> expand(const location_t new_size) override;
+        collie::Result<location_t> expand(const location_t new_size) override;
 
-        turbo::ResultStatus<location_t> shrink(const location_t new_size) override;
+        collie::Result<location_t> shrink(const location_t new_size) override;
 
-        turbo::ResultStatus<location_t> load_impl(const std::string &filename);
+        collie::Result<location_t> load_impl(const std::string &filename);
 
     private:
         uint8_t *_quantized_data = nullptr;

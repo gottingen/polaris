@@ -66,11 +66,11 @@ namespace polaris {
     void pq_dist_lookup(const uint8_t *pq_ids, const size_t n_pts, const size_t pq_nchunks, const float *pq_dists,
                         float *dists_out);
 
-    POLARIS_API turbo::Status generate_pq_pivots(const float *const train_data, size_t num_train, unsigned dim,
+    POLARIS_API collie::Status generate_pq_pivots(const float *const train_data, size_t num_train, unsigned dim,
                                        unsigned num_centers, unsigned num_pq_chunks, unsigned max_k_means_reps,
                                        std::string pq_pivots_path, bool make_zero_mean = false);
 
-    POLARIS_API turbo::Status generate_opq_pivots(const float *train_data, size_t num_train, unsigned dim, unsigned num_centers,
+    POLARIS_API collie::Status generate_opq_pivots(const float *train_data, size_t num_train, unsigned dim, unsigned num_centers,
                                         unsigned num_pq_chunks, std::string opq_pivots_path,
                                         bool make_zero_mean = false);
 

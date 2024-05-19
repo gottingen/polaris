@@ -25,7 +25,7 @@
 #include <polaris/utility/polaris_exception.h>
 #include <polaris/utility/utils.h>
 #include <polaris/core/log.h>
-#include <turbo/status/result_status.h>
+#include <collie/utility/result.h>
 #include <turbo/strings/numbers.h>
 #include <cstdint>
 
@@ -33,7 +33,7 @@ namespace polaris {
     class PropertySet : public std::map<std::string, std::string> {
     public:
         void set(const std::string &key, const std::string &value) {
-            iterator it = find(key);
+            auto it = find(key);
             if (it == end()) {
                 insert(std::pair<std::string, std::string>(key, value));
             } else {
@@ -116,35 +116,35 @@ namespace polaris {
             return defvalue;
         }
 
-        [[nodiscard]] turbo::Status load(const std::string &f) {
+        [[nodiscard]] collie::Status load(const std::string &f) {
             std::ifstream st(f);
             if (!st) {
-                return turbo::make_status(errno, "PropertySet::load: Cannot load the property file {}", f);
+                return collie::Status::from_errno(errno, "PropertySet::load: Cannot load the property file {}", f);
             }
             return load(st);
         }
 
-        [[nodiscard]] turbo::Status save(const std::string &f) {
+        [[nodiscard]] collie::Status save(const std::string &f) {
             std::ofstream st(f);
             if (!st) {
-                return turbo::make_status(errno, "PropertySet::save: Cannot save. {}", f);
+                return collie::Status::from_errno(errno, "PropertySet::save: Cannot save. {}", f);
             }
             return save(st);
         }
 
-        [[nodiscard]] turbo::Status save(std::ofstream &os) const {
+        [[nodiscard]] collie::Status save(std::ofstream &os) const {
 
             try {
                 for (auto i = this->begin(); i != this->end(); i++) {
                     os << i->first << "\t" << i->second << std::endl;
                 }
             } catch (std::exception &e) {
-                return turbo::make_status(errno, "PropertySet::save: {}", e.what());
+                return collie::Status::from_errno(errno, "PropertySet::save: {}", e.what());
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
-        [[nodiscard]] turbo::Status load(std::ifstream &is) {
+        [[nodiscard]] collie::Status load(std::ifstream &is) {
             std::string line;
             try {
             while (getline(is, line)) {
@@ -157,9 +157,9 @@ namespace polaris {
                 set(tokens[0], tokens[1]);
             }
             } catch (std::exception &e) {
-                return turbo::make_status(errno, "PropertySet::load: {}", e.what());
+                return collie::Status::from_errno(errno, "PropertySet::load: {}", e.what());
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
     };
 

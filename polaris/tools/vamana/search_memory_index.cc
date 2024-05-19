@@ -25,20 +25,21 @@
 
 
 template<typename T>
-int search_memory_index(polaris::MetricType &metric, const std::string &index_path, const std::string &result_path_prefix,
-                     const std::string &query_file, const std::string &truthset_file, const uint32_t num_threads,
-                     const uint32_t recall_at, const bool print_all_recalls, const std::vector<uint32_t> &Lvec,
-                     const bool dynamic, const bool show_qps_per_thread, const float fail_if_recall_below) {
+collie::Status
+search_memory_index(polaris::MetricType &metric, const std::string &index_path, const std::string &result_path_prefix,
+                    const std::string &query_file, const std::string &truthset_file, const uint32_t num_threads,
+                    const uint32_t recall_at, const bool print_all_recalls, const std::vector<uint32_t> &Lvec,
+                    const bool dynamic, const bool show_qps_per_thread, const float fail_if_recall_below) {
     // Load the query file
     T *query = nullptr;
     uint32_t *gt_ids = nullptr;
     float *gt_dists = nullptr;
     size_t query_num, query_dim, query_aligned_dim, gt_num, gt_dim;
-    polaris::load_aligned_bin<T>(query_file, query, query_num, query_dim, query_aligned_dim);
+    COLLIE_RETURN_NOT_OK(polaris::load_aligned_bin<T>(query_file, query, query_num, query_dim, query_aligned_dim));
 
     bool calc_recall_flag = false;
     if (truthset_file != std::string("null") && collie::filesystem::exists(truthset_file)) {
-        polaris::load_truthset(truthset_file, gt_ids, gt_dists, gt_num, gt_dim);
+        COLLIE_RETURN_NOT_OK(polaris::load_truthset(truthset_file, gt_ids, gt_dists, gt_num, gt_dim));
         if (gt_num != query_num) {
             std::cout << "Error. Mismatch in number of queries and ground truth data" << std::endl;
         }
@@ -46,12 +47,8 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     } else {
         polaris::cout << " Truthset file " << truthset_file << " not found. Not computing recall." << std::endl;
     }
-    auto num_frozen_pts_rs = polaris::UnifiedIndex::get_frozen_points(polaris::IndexType::INDEX_VAMANA, index_path);
-    if(!num_frozen_pts_rs.ok()) {
-        std::cerr << "Failed to get number of frozen points from index" << std::endl;
-        exit(-1);
-    }
-    const size_t num_frozen_pts = num_frozen_pts_rs.value();
+    COLLIE_ASSIGN_OR_RETURN(auto num_frozen_pts,
+                            polaris::UnifiedIndex::get_frozen_points(polaris::IndexType::INDEX_VAMANA, index_path));
 
     auto config = polaris::IndexConfigBuilder()
             .with_metric(metric)
@@ -69,13 +66,10 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             .vamana_with_num_frozen_pts(num_frozen_pts)
             .build_vamana();
 
-    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA));
-    unified_index->initialize(config);
-    auto lrs = unified_index->load(index_path);
-    if(!lrs.ok()) {
-        std::cerr << "Failed to load index from " << index_path << " error: " << lrs.message() << std::endl;
-        exit(-1);
-    }
+    std::unique_ptr<polaris::UnifiedIndex> unified_index(
+            polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA));
+    COLLIE_RETURN_NOT_OK(unified_index->initialize(config));
+    COLLIE_RETURN_NOT_OK(unified_index->load(index_path));
     std::cout << "VamanaIndex loaded" << std::endl;
 
 
@@ -84,9 +78,9 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     std::cout.precision(2);
     const std::string qps_title = show_qps_per_thread ? "QPS/thread" : "QPS";
     uint32_t table_width = 0;
-        std::cout << std::setw(4) << "Ls" << std::setw(12) << qps_title << std::setw(18) << "Avg dist cmps"
-                  << std::setw(20) << "Mean Latency (mus)" << std::setw(15) << "99.9 Latency";
-        table_width += 4 + 12 + 18 + 20 + 15;
+    std::cout << std::setw(4) << "Ls" << std::setw(12) << qps_title << std::setw(18) << "Avg dist cmps"
+              << std::setw(20) << "Mean Latency (mus)" << std::setw(15) << "99.9 Latency";
+    table_width += 4 + 12 + 18 + 20 + 15;
     uint32_t recalls_to_print = 0;
     const uint32_t first_recall = print_all_recalls ? 1 : recall_at;
     if (calc_recall_flag) {
@@ -112,7 +106,7 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             continue;
         }
         search_contexts[test_id].resize(query_num);
-        for(int i = 0; i < query_num; i++) {
+        for (int i = 0; i < query_num; i++) {
             search_contexts[test_id][i] = std::make_unique<polaris::SearchContext>();
         }
         std::vector<void *> res = std::vector<void *>();
@@ -124,13 +118,13 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
             auto qs = std::chrono::high_resolution_clock::now();
             auto &ctx = *search_contexts[test_id][i];
             ctx.set_meta(polaris::polaris_type_to_name<T>(), query_aligned_dim)
-            .set_query(query + i * query_aligned_dim)
+                    .set_query(query + i * query_aligned_dim)
                     .set_top_k(recall_at)
                     .set_search_list(L)
                     .set_with_local_ids(true);
             auto rs = unified_index->search(ctx);
-            if(!rs.ok()) {
-                std::cerr << "Search failed for query " << i <<" error: "<<rs.message()<< std::endl;
+            if (!rs.ok()) {
+                std::cerr << "Search failed for query " << i << " error: " << rs.message() << std::endl;
                 exit(-1);
             }
             cmp_stats[i] = ctx.cmps;
@@ -190,7 +184,8 @@ int search_memory_index(polaris::MetricType &metric, const std::string &index_pa
     }*/
 
     polaris::aligned_free(query);
-    return best_recall >= fail_if_recall_below ? 0 : -1;
+    return best_recall >= fail_if_recall_below ? collie::Status::ok_status() : collie::Status::resource_exhausted(
+            "Recall below threshold");
 }
 
 namespace polaris {
@@ -259,42 +254,35 @@ namespace polaris {
             exit(-1);
         }
 
-        int r = 0;
-        try {
-            if (ctx.data_type == std::string("int8")) {
-                r = search_memory_index<int8_t>(
-                        metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
-                        ctx.num_threads, ctx.K,
-                        ctx.print_all_recalls,
-                        ctx.Lvec, ctx.dynamic, ctx.show_qps_per_thread,
-                        ctx.fail_if_recall_below);
-            } else if (ctx.data_type == std::string("uint8")) {
-                r = search_memory_index<uint8_t>(
-                        metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
-                        ctx.num_threads, ctx.K,
-                        ctx.print_all_recalls,
-                        ctx.Lvec, ctx.dynamic,  ctx.show_qps_per_thread,
-                        ctx.fail_if_recall_below);
-            } else if (ctx.data_type == std::string("float")) {
-                r = search_memory_index<float>(metric, ctx.index_path_prefix, ctx.result_path,
-                                                ctx.query_file,
-                                                ctx.gt_file,
-                                                ctx.num_threads, ctx.K, ctx.print_all_recalls, ctx.Lvec,
-                                                ctx.dynamic,
-                                                ctx.show_qps_per_thread,
-                                                ctx.fail_if_recall_below);
-            } else {
-                std::cout << "Unsupported type. Use float/int8/uint8" << std::endl;
-                r = -1;
-            }
-            if (r != 0) {
-                std::cerr << "Search failed." << std::endl;
-                exit(-1);
-            }
+        collie::Status r;
+        if (ctx.data_type == std::string("int8")) {
+            r = search_memory_index<int8_t>(
+                    metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
+                    ctx.num_threads, ctx.K,
+                    ctx.print_all_recalls,
+                    ctx.Lvec, ctx.dynamic, ctx.show_qps_per_thread,
+                    ctx.fail_if_recall_below);
+        } else if (ctx.data_type == std::string("uint8")) {
+            r = search_memory_index<uint8_t>(
+                    metric, ctx.index_path_prefix, ctx.result_path, ctx.query_file, ctx.gt_file,
+                    ctx.num_threads, ctx.K,
+                    ctx.print_all_recalls,
+                    ctx.Lvec, ctx.dynamic, ctx.show_qps_per_thread,
+                    ctx.fail_if_recall_below);
+        } else if (ctx.data_type == std::string("float")) {
+            r = search_memory_index<float>(metric, ctx.index_path_prefix, ctx.result_path,
+                                           ctx.query_file,
+                                           ctx.gt_file,
+                                           ctx.num_threads, ctx.K, ctx.print_all_recalls, ctx.Lvec,
+                                           ctx.dynamic,
+                                           ctx.show_qps_per_thread,
+                                           ctx.fail_if_recall_below);
+        } else {
+            std::cout << "Unsupported type. Use float/int8/uint8" << std::endl;
+            r = collie::Status::invalid_argument("Unsupported type. Use float/int8/uint8");
         }
-        catch (std::exception &e) {
-            std::cout << std::string(e.what()) << std::endl;
-            polaris::cerr << "VamanaIndex search failed." << std::endl;
+        if (!r.ok()) {
+            std::cerr << "Search failed. " <<r.to_string()<< std::endl;
             exit(-1);
         }
 

@@ -98,8 +98,12 @@ int main() {
 
     // Initing index
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
-
+    auto alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, max_elements, M, ef_construction);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
     // Generate random data
     std::mt19937 rng;
     rng.seed(47);

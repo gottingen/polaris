@@ -21,7 +21,7 @@
 #include <polaris/unified_index.h>
 #include <polaris/core/common.h>
 #include <polaris/core/log.h>
-#include <assert.h>
+#include <cassert>
 
 #include <vector>
 #include <iostream>
@@ -77,13 +77,18 @@ void test() {
 
     hnswlib::L2Space space(d);
     hnswlib::AlgorithmInterface<float>* alg_brute  = new hnswlib::BruteforceSearch<float>(&space, 2 * n);
-    hnswlib::AlgorithmInterface<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, 2 * n);
+    auto * alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    rs = alg_hnsw->initialize(&space, 2 * n);
+    if(!rs.ok()) {
+        POLARIS_LOG(ERROR) << "Failed to initialize hnsw algorithm";
+        return;
+    }
     POLARIS_LOG(INFO) << "Index created";
     for (size_t i = 0; i < n; ++i) {
-        alg_brute->addPoint(data.data() + d * i, i);
-        alg_hnsw->addPoint(data.data() + d * i, i);
+        auto rb =alg_brute->addPoint(data.data() + d * i, i);
+        auto ra = alg_hnsw->addPoint(data.data() + d * i, i);
         rs = flat_index->add(i+1, data.data() + d * i);
-        if(!rs.ok()) {
+        if(!rs.ok() || !rb.ok() || !ra.ok()){
             POLARIS_LOG(ERROR) << "Failed to add data to flat index";
             return;
         }

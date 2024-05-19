@@ -19,7 +19,7 @@
 
 namespace polaris {
 
-    turbo::Status Hnsw::initialize(const IndexConfig &config) {
+    collie::Status Hnsw::initialize(const IndexConfig &config) {
         config_ = config;
         if (config_.basic_config.metric == MetricType::METRIC_L2) {
             l2space_ = std::make_unique<hnswlib::L2Space>(config_.basic_config.dimension);
@@ -29,49 +29,45 @@ namespace polaris {
             l2space_ = std::make_unique<hnswlib::InnerProductSpace>(config_.basic_config.dimension);
         }
         if (nullptr == l2space_) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid metric type");
+            return collie::Status::invalid_argument("Invalid metric type");
         }
 
-        try {
-            appr_alg_ = std::make_unique<hnswlib::HierarchicalNSW<float>>(l2space_.get(), config_.basic_config.max_points,
-                                                                config_.hnsw_config.m,
-                                                                config_.hnsw_config.ef_construction,
-                                                                config_.hnsw_config.random_seed);
-        } catch (std::exception &e) {
-            POLARIS_LOG(ERROR) << "HNSWLIB exception: " << e.what();
-            return turbo::make_status(turbo::kResourceExhausted, "HNSWLIB exception: {}", e.what());
-        } catch (...) {
-            POLARIS_LOG(ERROR) << "Unkown exception";
-            return turbo::make_status(turbo::kResourceExhausted, "Unkown exception");
+        appr_alg_ = std::make_unique<hnswlib::HierarchicalNSW<float>>(l2space_.get());
+        if(nullptr == appr_alg_) {
+            return collie::Status::resource_exhausted("Failed to create HNSW instance");
         }
 
+        COLLIE_RETURN_NOT_OK(appr_alg_->initialize(l2space_.get(), config_.basic_config.max_points,
+                                                                      config_.hnsw_config.m,
+                                                                      config_.hnsw_config.ef_construction,
+                                                                      config_.hnsw_config.random_seed));
         appr_alg_->ef_ = config_.hnsw_config.ef;
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status Hnsw::load(const std::string &index_path) {
+    collie::Status Hnsw::load(const std::string &index_path) {
         if (!appr_alg_) {
-            return turbo::make_status(turbo::kDataLoss, "index uninitialized");
+            return collie::Status::data_loss("index uninitialized");
         }
         return appr_alg_->load(index_path, l2space_.get());
     }
 
-    turbo::Status Hnsw::build(const UnifiedBuildParameters &parameters) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+    collie::Status Hnsw::build(const UnifiedBuildParameters &parameters) {
+        return collie::Status::unimplemented("Not implemented");
     }
 
-    turbo::Status Hnsw::save(const std::string &index_path) {
+    collie::Status Hnsw::save(const std::string &index_path) {
         if (!appr_alg_) {
-            return turbo::make_status(turbo::kDataLoss, "index uninitialized");
+            return collie::Status::data_loss("index uninitialized");
         }
         return appr_alg_->saveIndex(index_path);
     }
 
-    turbo::Status Hnsw::add(vid_t vid, const void* vec) {
+    collie::Status Hnsw::add(vid_t vid, const void* vec) {
         return appr_alg_->addPoint(vec, vid);
     }
 
-    turbo::Status Hnsw::get_vector(vid_t vid, void *vec) const {
+    collie::Status Hnsw::get_vector(vid_t vid, void *vec) const {
         return  appr_alg_->get_vector(vid, vec);
     }
 
@@ -82,18 +78,18 @@ namespace polaris {
         return appr_alg_->size();
     }
 
-    turbo::Status Hnsw::lazy_remove(vid_t vid) {
+    collie::Status Hnsw::lazy_remove(vid_t vid) {
         if (!appr_alg_) {
-            return turbo::make_status(turbo::kDataLoss, "index uninitialized");
+            return collie::Status::data_loss("index uninitialized");
         }
         return appr_alg_->mark_delete(vid);
     }
 
-    turbo::ResultStatus<consolidation_report> Hnsw::consolidate_deletes(const IndexWriteParameters &parameters) {
+    collie::Result<consolidation_report> Hnsw::consolidate_deletes(const IndexWriteParameters &parameters) {
         return consolidation_report{};
     }
 
-    turbo::Status Hnsw::search(SearchContext &context) {
+    collie::Status Hnsw::search(SearchContext &context) {
         auto rs = appr_alg_->search(context);
         return rs;
     }

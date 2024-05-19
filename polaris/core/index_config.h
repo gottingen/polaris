@@ -17,7 +17,7 @@
 #include <polaris/utility/common_includes.h>
 #include <polaris/core/common.h>
 #include <polaris/core/vamana_parameters.h>
-#include <turbo/status/result_status.h>
+#include <collie/utility/result.h>
 
 namespace polaris {
 

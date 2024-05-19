@@ -342,11 +342,11 @@ namespace polaris {
     // num_pq_chunks (if it divides dimension, else rounded) chunks, and runs
     // k-means in each chunk to compute the PQ pivots and stores in bin format in
     // file pq_pivots_path as a s num_centers*dim floating point binary file
-    turbo::Status generate_pq_pivots(const float *const passed_train_data, size_t num_train, uint32_t dim, uint32_t num_centers,
+    collie::Status generate_pq_pivots(const float *const passed_train_data, size_t num_train, uint32_t dim, uint32_t num_centers,
                            uint32_t num_pq_chunks, uint32_t max_k_means_reps, std::string pq_pivots_path,
                            bool make_zero_mean) {
         if (num_pq_chunks > dim) {
-            return turbo::make_status(turbo::kInvalidArgument, "Error: number of chunks more than dimension");
+            return collie::Status::invalid_argument("Error: number of chunks more than dimension");
         }
 
         std::unique_ptr<float[]> train_data = std::make_unique<float[]>(num_train * dim);
@@ -356,9 +356,9 @@ namespace polaris {
 
         if (collie::filesystem::exists(pq_pivots_path)) {
             size_t file_dim, file_num_centers;
-            polaris::load_bin<float>(pq_pivots_path, full_pivot_data, file_num_centers, file_dim, METADATA_SIZE);
+            COLLIE_RETURN_NOT_OK(polaris::load_bin<float>(pq_pivots_path, full_pivot_data, file_num_centers, file_dim, METADATA_SIZE));
             if (file_dim == dim && file_num_centers == num_centers) {
-                return turbo::make_status(turbo::kEAGAIN, "PQ pivot file exists. Not generating again");
+                return collie::Status::already_exists("PQ pivot file exists. Not generating again");
             }
         }
 
@@ -462,39 +462,28 @@ namespace polaris {
 
         std::vector<size_t> cumul_bytes(4, 0);
         cumul_bytes[0] = METADATA_SIZE;
-        auto rs = polaris::save_bin<float>(pq_pivots_path.c_str(), full_pivot_data.get(),
-                                           (size_t) num_centers, dim, cumul_bytes[0]);
-        if (!rs.ok()) {
-            return rs.status();
-        }
-        cumul_bytes[1] = cumul_bytes[0] + rs.value();
-        rs = polaris::save_bin<float>(pq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
-                                      cumul_bytes[1]);
-        if (!rs.ok()) {
-            return rs.status();
-        }
-        cumul_bytes[2] = cumul_bytes[1] + rs.value();
-        rs = polaris::save_bin<uint32_t>(pq_pivots_path.c_str(), chunk_offsets.data(),
-                                         chunk_offsets.size(), 1, cumul_bytes[2]);
-        if (!rs.ok()) {
-            return rs.status();
-        }
-        cumul_bytes[3] = cumul_bytes[2] + rs.value();
-        rs = polaris::save_bin<size_t>(pq_pivots_path.c_str(), cumul_bytes.data(), cumul_bytes.size(), 1, 0);
-        if (!rs.ok()) {
-            return rs.status();
-        }
+        size_t ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size, polaris::save_bin<float>(pq_pivots_path.c_str(), full_pivot_data.get(),
+                                           (size_t) num_centers, dim, cumul_bytes[0]));
+        cumul_bytes[1] = cumul_bytes[0] + ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size,polaris::save_bin<float>(pq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
+                                      cumul_bytes[1]));
+        cumul_bytes[2] = cumul_bytes[1] + ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size,polaris::save_bin<uint32_t>(pq_pivots_path.c_str(), chunk_offsets.data(),
+                                         chunk_offsets.size(), 1, cumul_bytes[2]));
+        cumul_bytes[3] = cumul_bytes[2] + ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size,polaris::save_bin<size_t>(pq_pivots_path.c_str(), cumul_bytes.data(), cumul_bytes.size(), 1, 0));
         polaris::cout << "Saved pq pivot data to " << pq_pivots_path << " of size "
                       << cumul_bytes[cumul_bytes.size() - 1]
                       << "B." << std::endl;
 
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status generate_opq_pivots(const float *passed_train_data, size_t num_train, uint32_t dim, uint32_t num_centers,
+    collie::Status generate_opq_pivots(const float *passed_train_data, size_t num_train, uint32_t dim, uint32_t num_centers,
                             uint32_t num_pq_chunks, std::string opq_pivots_path, bool make_zero_mean) {
         if (num_pq_chunks > dim) {
-            return turbo::make_status(turbo::kInvalidArgument, "Error: number of chunks more than dimension");
+            return collie::Status::invalid_argument("Error: number of chunks more than dimension");
         }
 
         std::unique_ptr<float[]> train_data = std::make_unique<float[]>(num_train * dim);
@@ -652,7 +641,7 @@ namespace polaris {
                                                          Umat.get(), (MKL_INT) dim, Vmat_T.get(), (MKL_INT) dim);
 
             if (errcode > 0) {
-                return turbo::make_status(turbo::kInternal, "SVD failed to converge");
+                return collie::Status::internal("SVD failed to converge");
             }
 
             // compute the new rotation matrix from the singular vectors as R^T = U
@@ -663,36 +652,23 @@ namespace polaris {
 
         std::vector<size_t> cumul_bytes(4, 0);
         cumul_bytes[0] = METADATA_SIZE;
-        auto rs = polaris::save_bin<float>(opq_pivots_path.c_str(), full_pivot_data.get(),
-                                           (size_t) num_centers, dim, cumul_bytes[0]);
-        if (!rs.ok()) {
-            return turbo::make_status(turbo::kInternal, "Error saving file cumul_bytes[0]");
-        }
-        cumul_bytes[1] = cumul_bytes[0] + rs.value();
-        rs = polaris::save_bin<float>(opq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
-                                      cumul_bytes[1]);
-        if (!rs.ok()) {
-            return turbo::make_status(turbo::kInternal, "Error saving file cumul_bytes[1");
-        }
-        cumul_bytes[2] = cumul_bytes[1] + rs.value();
-        rs = polaris::save_bin<uint32_t>(opq_pivots_path.c_str(), chunk_offsets.data(),
-                                         chunk_offsets.size(), 1, cumul_bytes[2]);
-        if (!rs.ok()) {
-            std::cout << "Error saving file" << std::endl;
-            return turbo::make_status(turbo::kInternal, "Error saving file cumul_bytes[2]");
-        }
-        cumul_bytes[3] = cumul_bytes[2] + rs.value();
-        rs = polaris::save_bin<size_t>(opq_pivots_path.c_str(), cumul_bytes.data(), cumul_bytes.size(), 1, 0);
-        if (!rs.ok()) {
-            return turbo::make_status(turbo::kInternal, "Error saving file cumul_bytes[3]");
-        }
-
+        size_t ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size, polaris::save_bin<float>(opq_pivots_path.c_str(), full_pivot_data.get(),
+                                           (size_t) num_centers, dim, cumul_bytes[0]));
+        cumul_bytes[1] = cumul_bytes[0] + ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size, polaris::save_bin<float>(opq_pivots_path.c_str(), centroid.get(), (size_t) dim, 1,
+                                      cumul_bytes[1]));
+        cumul_bytes[2] = cumul_bytes[1] + ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size, polaris::save_bin<uint32_t>(opq_pivots_path.c_str(), chunk_offsets.data(),
+                                         chunk_offsets.size(), 1, cumul_bytes[2]));
+        cumul_bytes[3] = cumul_bytes[2] + ret_size;
+        COLLIE_ASSIGN_OR_RETURN(ret_size, polaris::save_bin<size_t>(opq_pivots_path.c_str(), cumul_bytes.data(), cumul_bytes.size(), 1, 0));
         polaris::cout << "Saved opq pivot data to " << opq_pivots_path << " of size "
                       << cumul_bytes[cumul_bytes.size() - 1]
                       << "B." << std::endl;
 
         std::string rotmat_path = opq_pivots_path + "_rotation_matrix.bin";
-        rs = polaris::save_bin<float>(rotmat_path.c_str(), rotmat_tr.get(), dim, dim);
+        auto rs = polaris::save_bin<float>(rotmat_path.c_str(), rotmat_tr.get(), dim, dim);
 
         return rs.status();
     }

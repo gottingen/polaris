@@ -21,8 +21,8 @@
 namespace polaris {
 
     std::unique_ptr<LoggerConfig> logger_config;
-    std::shared_ptr<clog::logger> logger_raw = clog::default_logger();
-    std::shared_ptr<clog::logger> g_logger = logger_raw;
+    std::shared_ptr<collie::log::logger> logger_raw = collie::log::default_logger();
+    std::shared_ptr<collie::log::logger> g_logger = logger_raw;
 
     std::once_flag logger_init_flag;
     std::once_flag warn_logger_init_flag;
@@ -30,7 +30,7 @@ namespace polaris {
     void rotating_example() {
         // Create a file rotating logger with 5mb size max and 3 rotated files.
         auto rotating_logger =
-                clog::rotating_logger_mt("some_logger_name", "logs/rotating.txt", 1048576 * 5, 3);
+                collie::log::rotating_logger_mt("some_logger_name", "logs/rotating.txt", 1048576 * 5, 3);
     }
 
 
@@ -38,14 +38,14 @@ namespace polaris {
         std::call_once(logger_init_flag, [&config]() {
             logger_config = std::make_unique<LoggerConfig>();
             *logger_config = config;
-            g_logger = clog::rotating_logger_mt(config.log_name, config.log_path, config.max_size_mb * 1048576,
+            g_logger = collie::log::rotating_logger_mt(config.log_name, config.log_path, config.max_size_mb * 1048576,
                                                 config.max_files);
         });
     }
-    clog::logger *get_logger() {
+    collie::log::logger *get_logger() {
         std::call_once(warn_logger_init_flag, []() {
-            if(g_logger == clog::default_logger()) {
-                clog::warn("Logger is not initialized, using default logger");
+            if(g_logger == collie::log::default_logger()) {
+                collie::log::warn("Logger is not initialized, using default logger");
             }
         });
         return g_logger.get();

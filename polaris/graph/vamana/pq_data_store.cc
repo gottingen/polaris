@@ -47,12 +47,12 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> PQDataStore<data_t>::load(const std::string &filename) {
+    collie::Result<location_t> PQDataStore<data_t>::load(const std::string &filename) {
         return load_impl(filename);
     }
 
     template<typename data_t>
-    turbo::ResultStatus<size_t> PQDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
+    collie::Result<size_t> PQDataStore<data_t>::save(const std::string &filename, const location_t num_points) {
         return polaris::save_bin(filename, _quantized_data, this->capacity(), _num_chunks, 0);
     }
 
@@ -63,12 +63,12 @@ namespace polaris {
 
     // Populate quantized data from regular data.
     template<typename data_t>
-    turbo::Status PQDataStore<data_t>::populate_data(const data_t *vectors, const location_t num_pts) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented yet");
+    collie::Status PQDataStore<data_t>::populate_data(const data_t *vectors, const location_t num_pts) {
+        return collie::Status::unimplemented("Not implemented yet");
     }
 
     template<typename data_t>
-    turbo::Status PQDataStore<data_t>::populate_data(const std::string &filename, const size_t offset) {
+    collie::Status PQDataStore<data_t>::populate_data(const std::string &filename, const size_t offset) {
         if (_quantized_data != nullptr) {
             aligned_free(_quantized_data);
         }
@@ -88,13 +88,10 @@ namespace polaris {
 
         // REFACTOR TODO: Not sure of the alignment. Just copying from index.cpp
         alloc_aligned(((void **) &_quantized_data), file_num_points * _num_chunks * sizeof(uint8_t), 1);
-        auto rs = copy_aligned_data_from_file<uint8_t>(compressed_file.c_str(), _quantized_data, file_num_points, _num_chunks,
-                                             _num_chunks);
-        if (!rs.ok()) {
-            return rs;
-        }
+        COLLIE_RETURN_NOT_OK(copy_aligned_data_from_file<uint8_t>(compressed_file.c_str(), _quantized_data, file_num_points, _num_chunks,
+                                             _num_chunks));
         _pq_distance_fn->load_pivot_data(pivots_file.c_str(), _num_chunks);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename data_t>
@@ -145,19 +142,19 @@ namespace polaris {
     // REFACTOR TODO: Currently, we take aligned_query as parameter, but this
     // function should also do the alignment.
     template<typename data_t>
-    turbo::Status PQDataStore<data_t>::preprocess_query(const data_t *aligned_query, AbstractScratch<data_t> *scratch) const {
+    collie::Status PQDataStore<data_t>::preprocess_query(const data_t *aligned_query, AbstractScratch<data_t> *scratch) const {
         if (scratch == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Scratch space is null");
+            return collie::Status::invalid_argument("Scratch space is null");
         }
 
         PQScratch<data_t> *pq_scratch = scratch->pq_scratch();
 
         if (pq_scratch == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "PQScratch space has not been set in the scratch object.");
+            return collie::Status::invalid_argument("PQScratch space has not been set in the scratch object.");
         }
 
         _pq_distance_fn->preprocess_query(aligned_query, (location_t) this->get_dims(), *pq_scratch);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename data_t>
@@ -214,7 +211,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> PQDataStore<data_t>::load_impl(const std::string &file_prefix) {
+    collie::Result<location_t> PQDataStore<data_t>::load_impl(const std::string &file_prefix) {
         if (_quantized_data != nullptr) {
             aligned_free(_quantized_data);
         }
@@ -231,13 +228,13 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> PQDataStore<data_t>::expand(const location_t new_size) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented yet");
+    collie::Result<location_t> PQDataStore<data_t>::expand(const location_t new_size) {
+        return collie::Status::unimplemented("Not implemented yet");
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> PQDataStore<data_t>::shrink(const location_t new_size) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented yet");
+    collie::Result<location_t> PQDataStore<data_t>::shrink(const location_t new_size) {
+        return collie::Status::unimplemented("Not implemented yet");
     }
 
 

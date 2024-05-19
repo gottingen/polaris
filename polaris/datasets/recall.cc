@@ -20,7 +20,7 @@
 
 namespace polaris {
 
-    turbo::Status calculate_recall(const std::string &vecs_file, const std::string &bin_file, uint32_t r) {
+    collie::Status calculate_recall(const std::string &vecs_file, const std::string &bin_file, uint32_t r) {
         uint32_t *gold_std = NULL;
         float *gs_dist = nullptr;
         uint32_t *our_results = NULL;
@@ -28,14 +28,14 @@ namespace polaris {
         size_t points_num, points_num_gs, points_num_or;
         size_t dim_gs;
         size_t dim_or;
-        polaris::load_truthset(vecs_file, gold_std, gs_dist, points_num_gs, dim_gs);
-        polaris::load_truthset(bin_file, our_results, or_dist, points_num_or, dim_or);
+        COLLIE_RETURN_NOT_OK(polaris::load_truthset(vecs_file, gold_std, gs_dist, points_num_gs, dim_gs));
+        COLLIE_RETURN_NOT_OK(polaris::load_truthset(bin_file, our_results, or_dist, points_num_or, dim_or));
 
         if (points_num_gs != points_num_or) {
             std::cout << "Error. Number of queries mismatch in ground truth and "
                          "our results"
                       << std::endl;
-            return turbo::internal_error("Error. Number of queries mismatch in ground truth and our results");
+            return collie::Status::internal("Error. Number of queries mismatch in ground truth and our results");
         }
         points_num = points_num_gs;
 
@@ -45,8 +45,8 @@ namespace polaris {
             std::cout << "ground truth has size " << dim_gs << "; our set has " << dim_or
                       << " points. Asking for recall "
                       << recall_at << std::endl;
-            return turbo::internal_error(
-                    "Error. Recall at is greater than the number of points in the ground truth set");
+            return collie::Status::internal(
+                    "Error. Recall at is greater than the number of points in the ground` truth set");
         }
         std::cout << "Calculating recall@" << recall_at << std::endl;
         double recall_val = polaris::calculate_recall((uint32_t) points_num, gold_std, gs_dist, (uint32_t) dim_gs,
@@ -54,7 +54,7 @@ namespace polaris {
 
         //  double avg_recall = (recall*1.0)/(points_num*1.0);
         std::cout << "Avg. recall@" << recall_at << " is " << recall_val << "\n";
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 }  // namespace polaris
 

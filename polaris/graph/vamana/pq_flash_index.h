@@ -30,7 +30,7 @@
 #include <turbo/container/flat_hash_map.h>
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/utility/natural_number_map.h>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 #include <polaris/core/index_config.h>
 
 #define FULL_PRECISION_REORDER_MULTIPLIER 3
@@ -46,24 +46,24 @@ namespace polaris {
         POLARIS_API ~PQFlashIndex();
 
     public:
-        POLARIS_API static turbo::Status
+        POLARIS_API static collie::Status
         build(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
               const std::vector<vid_t> &tags,
               const std::string &codebook_prefix = "");
 
-        POLARIS_API static turbo::Status
+        POLARIS_API static collie::Status
         build(const char *dataFilePath, const char *indexFilePath, const std::string &tags_file,const IndexConfig &indexConfig,
               const std::string &codebook_prefix = "");
 
-        POLARIS_API static turbo::Status
+        POLARIS_API static collie::Status
         build(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
               const std::string &codebook_prefix = "");
 
     public:
         // load compressed data, and obtains the handle to the disk-resident index
-        POLARIS_API turbo::Status load(uint32_t num_threads, const char *index_prefix);
+        POLARIS_API collie::Status load(uint32_t num_threads, const char *index_prefix);
 
-        POLARIS_API turbo::Status load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
+        POLARIS_API collie::Status load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
                                                  const char *pivots_filepath, const char *compressed_filepath);
 
         POLARIS_API void load_cache_list(std::vector<uint32_t> &node_list);
@@ -81,9 +81,9 @@ namespace polaris {
                                           std::vector<float> &distances, const uint64_t min_beam_width,
                                           QueryStats *stats = nullptr);
 
-        POLARIS_API turbo::Status search(SearchContext &search_context);
+        POLARIS_API collie::Status search(SearchContext &search_context);
 
-        POLARIS_API turbo::Status get_vector(vid_t vid, void *vec) const;
+        POLARIS_API collie::Status get_vector(vid_t vid, void *vec) const;
 
         POLARIS_API size_t size() const;
 

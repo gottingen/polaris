@@ -26,7 +26,12 @@ int main() {
     // Initing index with allow_replace_deleted=true
     int seed = 100; 
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction, seed, true);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, max_elements, M, ef_construction, seed, true);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
 
     // Generate random data
     std::mt19937 rng;
@@ -39,7 +44,10 @@ int main() {
 
     // Add data to index
     for (int i = 0; i < max_elements; i++) {
-        alg_hnsw->addPoint(data + i * dim, i);
+        auto r = alg_hnsw->addPoint(data + i * dim, i);
+        if (!r.ok()) {
+            std::cerr << "Failed to add element " << i << std::endl;
+        }
     }
 
     // Mark first half of elements as deleted
@@ -62,7 +70,10 @@ int main() {
     // but we can replace the deleted ones by using replace_deleted=true
     for (int i = 0; i < num_deleted; i++) {
         polaris::vid_t label = max_elements + i;
-        alg_hnsw->addPoint(add_data + i * dim, label, true);
+        auto r = alg_hnsw->addPoint(add_data + i * dim, label, true);
+        if (!r.ok()) {
+            std::cerr << "Failed to replace deleted element " << i << std::endl;
+        }
     }
 
     delete[] data;

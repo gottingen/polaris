@@ -17,24 +17,24 @@
 
 namespace polaris {
 
-    turbo::Status Vamana::initialize(const IndexConfig &config) {
+    collie::Status Vamana::initialize(const IndexConfig &config) {
         config_ = config;
         auto index_factory = polaris::IndexFactory(config);
         index_ = index_factory.create_instance();
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid object type");
+            return collie::Status::invalid_argument("Invalid object type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status Vamana::build(const UnifiedBuildParameters &parameters) {
+    collie::Status Vamana::build(const UnifiedBuildParameters &parameters) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         if (parameters.data_file.empty() && parameters.data == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Data file not provided");
+            return collie::Status::invalid_argument("Data file not provided");
         }
-        turbo::Status rs;
+        collie::Status rs;
         if (!parameters.tags_file.empty()) {
             rs =  index_->build(parameters.data_file, parameters.num_points_to_load, parameters.tags_file);
         } else if (!parameters.tags.empty() && !parameters.data_file.empty()) {
@@ -44,7 +44,7 @@ namespace polaris {
         } else if (!parameters.data_file.empty()) {
             rs = index_->build(parameters.data_file, parameters.num_points_to_load);
         } else {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid build parameters");
+            return collie::Status::invalid_argument("Invalid build parameters");
         }
         if (!rs.ok()) {
             return rs;
@@ -52,9 +52,9 @@ namespace polaris {
         return save(parameters.output_path);
     }
 
-    turbo::Status Vamana::load(const std::string &index_path) {
+    collie::Status Vamana::load(const std::string &index_path) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         auto rs = index_->load(index_path.c_str(), config_.basic_config.load_threads, config_.basic_config.max_points);
         return rs;
@@ -68,46 +68,46 @@ namespace polaris {
 
     }
 
-    turbo::Status Vamana::save(const std::string &index_path) {
+    collie::Status Vamana::save(const std::string &index_path) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         index_->save(index_path.c_str());
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status Vamana::add(vid_t vid, const void*vec) {
+    collie::Status Vamana::add(vid_t vid, const void*vec) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         return index_->insert_point(vec, vid);
     }
 
-    turbo::Status Vamana::get_vector(vid_t vid, void *vec) const {
+    collie::Status Vamana::get_vector(vid_t vid, void *vec) const {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         return index_->get_vector(vid, vec);
 
     }
 
-    turbo::Status Vamana::lazy_remove(vid_t vid) {
+    collie::Status Vamana::lazy_remove(vid_t vid) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         return index_->lazy_delete(vid);
     }
 
-    turbo::ResultStatus<consolidation_report> Vamana::consolidate_deletes(const IndexWriteParameters &parameters) {
+    collie::Result<consolidation_report> Vamana::consolidate_deletes(const IndexWriteParameters &parameters) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         return index_->consolidate_deletes(parameters);
     }
 
-    turbo::Status Vamana::search(SearchContext &context) {
+    collie::Status Vamana::search(SearchContext &context) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         return index_->search(context);
     }

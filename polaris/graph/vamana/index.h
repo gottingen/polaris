@@ -76,29 +76,29 @@ namespace polaris {
         POLARIS_API ~VamanaIndex() override;
 
         // Saves graph, data, metadata and associated tags.
-        POLARIS_API turbo::Status save(const char *filename, bool compact_before_save) override;
+        POLARIS_API collie::Status save(const char *filename, bool compact_before_save) override;
         using AbstractIndex::save;
         // Load functions
         // Reads the number of frozen points from graph's metadata file section.
         POLARIS_API static size_t get_graph_num_frozen_points(const std::string &graph_file);
 
-        POLARIS_API [[nodiscard]] turbo::Status load(const char *index_file, uint32_t num_threads, uint32_t search_l) override;
+        POLARIS_API [[nodiscard]] collie::Status load(const char *index_file, uint32_t num_threads, uint32_t search_l) override;
         // get some private variables
         POLARIS_API size_t get_num_points();
 
         POLARIS_API size_t get_max_points();
 
         // Batch build from a file. Optionally pass tags vector.
-        POLARIS_API turbo::Status build(const std::string &filename, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
+        POLARIS_API collie::Status build(const std::string &filename, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
 
         // Batch build from a file. Optionally pass tags file.
-        POLARIS_API turbo::Status build(const std::string &filename, size_t num_points_to_load, const std::string&tag_filename) override;
+        POLARIS_API collie::Status build(const std::string &filename, size_t num_points_to_load, const std::string&tag_filename) override;
 
         // Batch build from a data array, which must pad vectors to aligned_dim
-        POLARIS_API turbo::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
+        POLARIS_API collie::Status build(const void *data, size_t num_points_to_load, const std::vector<vid_t> &tags) override;
 
         // Based on filter params builds a filtered or unfiltered index
-        POLARIS_API turbo::Status build(const std::string &data_file, size_t num_points_to_load) override;
+        POLARIS_API collie::Status build(const std::string &data_file, size_t num_points_to_load) override;
 
         // Set starting point of an index before inserting any points incrementally.
         // The data count should be equal to _num_frozen_pts * _aligned_dim.
@@ -108,23 +108,23 @@ namespace polaris {
         // to have higher consistency between index builds.
         POLARIS_API void set_start_points_at_random(const std::any &radius, uint32_t random_seed) override;
 
-        POLARIS_API turbo::Status search(SearchContext &ctx) override;
+        POLARIS_API collie::Status search(SearchContext &ctx) override;
 
         // Will fail if tag already in the index or if tag=0.
-        POLARIS_API turbo::Status insert_point(const void *point, const vid_t tag) override;
+        POLARIS_API collie::Status insert_point(const void *point, const vid_t tag) override;
 
-        POLARIS_API turbo::Status get_vector(vid_t tag, void *vec) const override;
+        POLARIS_API collie::Status get_vector(vid_t tag, void *vec) const override;
 
         // call this before issuing deletions to sets relevant flags
         POLARIS_API int enable_delete();
 
         // Record deleted point now and restructure graph later. Return -1 if tag
         // not found, 0 if OK.
-        POLARIS_API turbo::Status lazy_delete(const vid_t &tag) override;
+        POLARIS_API collie::Status lazy_delete(const vid_t &tag) override;
 
         // Record deleted points now and restructure graph later. Add to failed_tags
         // if tag not found.
-        POLARIS_API turbo::Status lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) override;
+        POLARIS_API collie::Status lazy_delete(const std::vector<vid_t> &tags, std::vector<vid_t> &failed_tags) override;
 
         // Call after a series of lazy deletions
         // Returns number of live points left after consolidation
@@ -148,7 +148,7 @@ namespace polaris {
         POLARIS_API void get_active_tags(turbo::flat_hash_set<vid_t> &active_tags) override;
 
         // memory should be allocated for vec before calling this function
-        POLARIS_API turbo::Status get_vector_by_tag(vid_t &tag, void *vec) override;
+        POLARIS_API collie::Status get_vector_by_tag(vid_t &tag, void *vec) override;
 
         POLARIS_API void print_status();
 
@@ -170,7 +170,7 @@ namespace polaris {
     protected:
         // Use after _data and _nd have been populated
         // Acquire exclusive _update_lock before calling
-        turbo::Status build_with_data_populated(const std::vector<vid_t> &tags);
+        collie::Status build_with_data_populated(const std::vector<vid_t> &tags);
 
         // generates 1 frozen point that will never be deleted from the graph
         // This is not visible to the user
@@ -186,7 +186,7 @@ namespace polaris {
         std::pair<uint32_t, uint32_t> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids,bool search_invocation);
 
-        turbo::ResultStatus<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
+        collie::Result<std::pair<uint32_t, uint32_t>> iterate_to_fixed_point(InMemQueryScratch<T> *scratch, uint32_t Lindex,
                                                              const std::vector<uint32_t> &init_ids,
                                                              const BaseSearchCondition *condition,
                                                              bool search_invocation);
@@ -227,7 +227,7 @@ namespace polaris {
 
         // Resize the index when no slots are left for insertion.
         // Acquire exclusive _update_lock and _tag_lock before calling.
-        turbo::Status resize(size_t new_max_points);
+        collie::Status resize(size_t new_max_points);
 
         // Acquire unique lock on _update_lock, _consolidate_lock, _tag_lock
         // and _delete_lock before calling these functions.
@@ -244,22 +244,22 @@ namespace polaris {
         void process_delete(const turbo::flat_hash_set<uint32_t> &old_delete_set, size_t loc, const uint32_t range,
                             const uint32_t maxc, const float alpha, InMemQueryScratch<T> *scratch);
 
-        [[nodiscard]] turbo::Status initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l, uint32_t r,
+        [[nodiscard]] collie::Status initialize_query_scratch(uint32_t num_threads, uint32_t search_l, uint32_t indexing_l, uint32_t r,
                                       uint32_t maxc, size_t dim);
 
         // Do not call without acquiring appropriate locks
         // call public member functions save and load to invoke these.
         POLARIS_API size_t save_graph(std::string filename);
 
-        POLARIS_API turbo::ResultStatus<size_t> save_data(std::string filename);
+        POLARIS_API collie::Result<size_t> save_data(std::string filename);
 
-        POLARIS_API turbo::ResultStatus<size_t> save_tags(std::string filename);
+        POLARIS_API collie::Result<size_t> save_tags(std::string filename);
 
-        POLARIS_API turbo::ResultStatus<size_t> save_delete_list(const std::string &filename);
+        POLARIS_API collie::Result<size_t> save_delete_list(const std::string &filename);
 
         POLARIS_API size_t load_graph(const std::string filename, size_t expected_num_points);
 
-        POLARIS_API turbo::ResultStatus<size_t> load_data(std::string filename0);
+        POLARIS_API collie::Result<size_t> load_data(std::string filename0);
 
         POLARIS_API size_t load_tags(const std::string tag_file_name);
 

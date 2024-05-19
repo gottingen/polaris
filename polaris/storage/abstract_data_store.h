@@ -22,7 +22,7 @@
 #include <polaris/utility/platform_macros.h>
 #include <polaris/distance/distance.h>
 #include <polaris/core/array_view.h>
-#include <turbo/status/result_status.h>
+#include <collie/utility/result.h>
 
 namespace polaris {
 
@@ -37,13 +37,13 @@ namespace polaris {
         virtual ~AbstractDataStore() = default;
 
         // Return number of points returned
-        virtual turbo::ResultStatus<location_t> load(const std::string &filename) = 0;
+        virtual collie::Result<location_t> load(const std::string &filename) = 0;
 
         // Why does store take num_pts? Since store only has capacity, but we allow
         // resizing we can end up in a situation where the store has spare capacity.
         // To optimize disk utilization, we pass the number of points that are "true"
         // points, so that the store can discard the empty locations before saving.
-        virtual turbo::ResultStatus<size_t> save(const std::string &filename, const location_t num_pts) = 0;
+        virtual collie::Result<size_t> save(const std::string &filename, const location_t num_pts) = 0;
 
         POLARIS_API virtual location_t capacity() const;
 
@@ -59,9 +59,9 @@ namespace polaris {
         // potentially after pre-processing the vectors if the metric deems so
         // e.g., normalizing vectors for cosine distance over floating-point vectors
         // useful for bulk or static index building.
-        [[nodiscard]] virtual turbo::Status populate_data(const data_t *vectors, const location_t num_pts) = 0;
+        [[nodiscard]] virtual collie::Status populate_data(const data_t *vectors, const location_t num_pts) = 0;
 
-        [[nodiscard]] virtual turbo::Status populate_data(const std::string &filename, const size_t offset) = 0;
+        [[nodiscard]] virtual collie::Status populate_data(const std::string &filename, const size_t offset) = 0;
 
         // save the first num_pts many vectors back to bin file
         // note: cannot undo the pre-processing done in populate data
@@ -75,7 +75,7 @@ namespace polaris {
         //   //PROCEED
         //  else
         //    //ERROR.
-        virtual turbo::ResultStatus<location_t> resize(const location_t new_num_points);
+        virtual collie::Result<location_t> resize(const location_t new_num_points);
 
         // operations on vectors
         // like populate_data function, but over one vector at a time useful for
@@ -100,7 +100,7 @@ namespace polaris {
         // With the PQ Data Store PR, we have also changed iterate_to_fixed_point to NOT take the query
         // from the scratch object. Therefore every data store has to implement preprocess_query which
         // at the least will be to copy the query into the scratch object. So making this pure virtual.
-        virtual turbo::Status preprocess_query(const data_t *aligned_query,
+        virtual collie::Status preprocess_query(const data_t *aligned_query,
                                       AbstractScratch<data_t> *query_scratch = nullptr) const = 0;
 
         // distance functions.
@@ -129,12 +129,12 @@ namespace polaris {
         // Expand the datastore to new_num_points. Returns the new capacity created,
         // which should be == new_num_points in the normal case. Implementers can also
         // return _capacity to indicate that there are not implementing this method.
-        virtual turbo::ResultStatus<location_t> expand(const location_t new_num_points) = 0;
+        virtual collie::Result<location_t> expand(const location_t new_num_points) = 0;
 
         // Shrink the datastore to new_num_points. It is NOT an error if shrink
         // doesn't reduce the capacity so callers need to check this correctly. See
         // also for "default" implementation
-        virtual turbo::ResultStatus<location_t> shrink(const location_t new_num_points) = 0;
+        virtual collie::Result<location_t> shrink(const location_t new_num_points) = 0;
 
         location_t _capacity;
         size_t _dim;

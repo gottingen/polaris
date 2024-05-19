@@ -72,8 +72,7 @@ inline void ParallelFor(size_t start, size_t end, size_t numThreads, Function fn
     }
 }
 
-
-int main() {
+collie::Status run_test() {
     std::cout << "Running multithread load test" << std::endl;
     int d = 16;
     int num_elements = 1000;
@@ -105,11 +104,16 @@ int main() {
 
     int iter = 0;
     while (iter < 200) {
-        hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, 16, 200, 123, true);
+        auto * alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+        COLLIE_RETURN_NOT_OK(alg_hnsw->initialize(&space, max_elements, 16, 200, 123, true));
 
         // add batch1 data
         ParallelFor(0, max_elements, num_threads, [&](size_t row, size_t threadId) {
-            alg_hnsw->addPoint((void*)(batch1 + d * row), row);
+            auto rs = alg_hnsw->addPoint((void*)(batch1 + d * row), row);
+            if(!rs.ok()) {
+                std::cerr << "Failed to add element " << row <<" "<<rs.to_string()<< std::endl;
+                exit(-1);
+            }
         });
 
         // delete half random elements of batch1 data
@@ -123,17 +127,29 @@ int main() {
         // replace deleted elements with batch2 data
         ParallelFor(0, num_elements, num_threads, [&](size_t row, size_t threadId) {
             int label = rand_labels[row] + max_elements;
-            alg_hnsw->addPoint((void*)(batch2 + d * row), label, true);
+            auto rs = alg_hnsw->addPoint((void*)(batch2 + d * row), label, true);
+            if(!rs.ok()) {
+                std::cerr << "Failed to add element " << label <<" "<<rs.to_string()<< std::endl;
+                exit(-1);
+            }
         });
 
         iter += 1;
 
         delete alg_hnsw;
     }
-    
+
     std::cout << "Finish" << std::endl;
 
     delete[] batch1;
     delete[] batch2;
+    return collie::Status::ok_status();
+}
+int main() {
+    auto rs = run_test();
+    if (!rs.ok()) {
+        std::cerr << "Failed to run test: " << rs.to_string() << std::endl;
+        return -1;
+    }
     return 0;
 }

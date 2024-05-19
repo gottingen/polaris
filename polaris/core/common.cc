@@ -27,10 +27,10 @@ namespace polaris {
     const std::string PropertySerializer::INDEX_TYPE = "IndexType";
     const std::string PropertySerializer::DIMENSION = "Dimension";
 
-    turbo::Status
+    collie::Status
     PropertySerializer::object_type_export(PropertySet &ps, ObjectType type, std::set<ObjectType> *allow_set) {
         if (allow_set != nullptr && allow_set->find(type) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid object type");
+            return collie::Status::invalid_argument("Invalid object type");
         }
         switch (type) {
             case ObjectType::INT8:
@@ -70,15 +70,15 @@ namespace polaris {
                 ps.set(OBJECT_TYPE, "Float-8");
                 break;
             default :
-                return turbo::make_status(turbo::kNotFound, "Unknown object type");
+                return collie::Status::not_found("Unknown object type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     PropertySerializer::distance_type_export(PropertySet &ps, MetricType diss, std::set<MetricType> *allow_set) {
         if (allow_set != nullptr && allow_set->find(diss) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid distance type");
+            return collie::Status::invalid_argument( "Invalid distance type");
         }
         switch (diss) {
             case MetricType::METRIC_NONE:
@@ -124,15 +124,15 @@ namespace polaris {
                 ps.set(DISTANCE_TYPE, "Lorentz");
                 break;  // added by Nyapicom
             default :
-                return turbo::make_status(turbo::kNotFound, "Unknown distance type");
+                return collie::Status::not_found("Unknown distance type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     PropertySerializer::database_type_export(PropertySet &ps, DatabaseType type, std::set<DatabaseType> *allow_set) {
         if (allow_set != nullptr && allow_set->find(type) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid database type");
+            return collie::Status::invalid_argument( "Invalid database type");
         }
         switch (type) {
             case DatabaseType::Memory:
@@ -145,15 +145,15 @@ namespace polaris {
                 ps.set(DATABASE_TYPE, "SSD");
                 break;
             default:
-                return turbo::make_status(turbo::kNotFound, "Unknown database type");
+                return collie::Status::not_found("Unknown database type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     PropertySerializer::database_type_export(PropertySet &ps, const std::string &key, DatabaseType type, std::set<DatabaseType> *allow_set) {
         if (allow_set != nullptr && allow_set->find(type) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid database type");
+            return collie::Status::invalid_argument("Invalid database type");
         }
         switch (type) {
             case DatabaseType::Memory:
@@ -166,12 +166,12 @@ namespace polaris {
                 ps.set(key, "SSD");
                 break;
             default:
-                return turbo::make_status(turbo::kNotFound, "Unknown database type");
+                return collie::Status::not_found("Unknown database type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status PropertySerializer::object_alignment_export(PropertySet &ps, ObjectAlignment type) {
+    collie::Status PropertySerializer::object_alignment_export(PropertySet &ps, ObjectAlignment type) {
         switch (type) {
             case ObjectAlignment::ObjectAlignmentNone:
                 ps.set(OBJECT_ALIGNMENT, "None");
@@ -183,12 +183,12 @@ namespace polaris {
                 ps.set(OBJECT_ALIGNMENT, "False");
                 break;
             default:
-                return turbo::make_status(turbo::kNotFound, "Unknown object alignment");
+                return collie::Status::not_found("Unknown object alignment");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::ResultStatus<ObjectType>
+    collie::Result<ObjectType>
     PropertySerializer::object_type_import(const PropertySet &ps, std::set<ObjectType> *allow_set) {
         auto it = ps.find(OBJECT_TYPE);
         ObjectType object_type = ObjectType::ObjectTypeNone;
@@ -220,18 +220,18 @@ namespace polaris {
             } else {
                 std::cerr << "Invalid Object Type in the property. " << it->first << ":" << it->second
                           << std::endl;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Object Type");
+                return collie::Status::invalid_argument( "Invalid Object Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Object Type not found in the property");
+            return collie::Status::not_found("Object Type not found in the property");
         }
         if (allow_set != nullptr && allow_set->find(object_type) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "not allow Object Type");
+            return collie::Status::invalid_argument( "not allow Object Type");
         }
         return object_type;
     }
 
-    turbo::ResultStatus<MetricType>
+    collie::Result<MetricType>
     PropertySerializer::distance_type_import(const PropertySet &ps, std::set<MetricType> *allow_set) {
         auto it = ps.find(DISTANCE_TYPE);
         MetricType distanceType = MetricType::METRIC_NONE;
@@ -266,18 +266,18 @@ namespace polaris {
                 distanceType = MetricType::METRIC_INNER_PRODUCT;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid distance_t Type in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid distance_t Type");
+                return collie::Status::invalid_argument( "Invalid distance_t Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "distance_t Type not found in the property");
+            return collie::Status::not_found("distance_t Type not found in the property");
         }
         if (allow_set != nullptr && allow_set->find(distanceType) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "not allow distance_t Type");
+            return collie::Status::invalid_argument( "not allow distance_t Type");
         }
         return distanceType;
     }
 
-    turbo::ResultStatus<DatabaseType>
+    collie::Result<DatabaseType>
     PropertySerializer::database_type_import(const PropertySet &ps, std::set<DatabaseType> *allow_set) {
         auto it = ps.find(DATABASE_TYPE);
         DatabaseType databaseType = DatabaseType::DatabaseTypeNone;
@@ -290,19 +290,19 @@ namespace polaris {
                 databaseType = DatabaseType::SSD;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid Database Type in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Database Type");
+                return collie::Status::invalid_argument( "Invalid Database Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Database Type not found in the property");
+            return collie::Status::not_found("Database Type not found in the property");
         }
         if (allow_set != nullptr && allow_set->find(databaseType) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "not allow Database Type {}",
+            return collie::Status::invalid_argument( "not allow Database Type {}",
                                       static_cast<int>(databaseType));
         }
         return databaseType;
     }
 
-    turbo::ResultStatus<DatabaseType>
+    collie::Result<DatabaseType>
     PropertySerializer::database_type_import(const PropertySet &ps, const std::string &key, std::set<DatabaseType> *allow_set) {
         auto it = ps.find(key);
         DatabaseType databaseType = DatabaseType::DatabaseTypeNone;
@@ -315,19 +315,19 @@ namespace polaris {
                 databaseType = DatabaseType::SSD;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid Database Type in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Database Type");
+                return collie::Status::invalid_argument( "Invalid Database Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Database Type not found in the property");
+            return collie::Status::not_found("Database Type not found in the property");
         }
         if (allow_set != nullptr && allow_set->find(databaseType) == allow_set->end()) {
-            return turbo::make_status(turbo::kInvalidArgument, "not allow Database Type {}",
+            return collie::Status::invalid_argument( "not allow Database Type {}",
                                       static_cast<int>(databaseType));
         }
         return databaseType;
     }
 
-    turbo::ResultStatus<ObjectAlignment> PropertySerializer::object_alignment_import(const PropertySet &ps) {
+    collie::Result<ObjectAlignment> PropertySerializer::object_alignment_import(const PropertySet &ps) {
         auto it = ps.find(OBJECT_ALIGNMENT);
         ObjectAlignment objectAlignment = ObjectAlignment::ObjectAlignmentNone;
         if (it != ps.end()) {
@@ -339,15 +339,15 @@ namespace polaris {
                 objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid Object Alignment in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Object Alignment");
+                return collie::Status::invalid_argument( "Invalid Object Alignment");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Object Alignment not found in the property");
+            return collie::Status::not_found("Object Alignment not found in the property");
         }
         return objectAlignment;
     }
 
-    turbo::Status PropertySerializer::graph_type_export(PropertySet &ps, GraphType type) {
+    collie::Status PropertySerializer::graph_type_export(PropertySet &ps, GraphType type) {
         switch (type) {
             case GraphType::GraphTypeANNG:
                 ps.set(GRAPH_TYPE, "ANNG");
@@ -380,11 +380,11 @@ namespace polaris {
                 ps.set(GRAPH_TYPE, "VAMANA");
                 break;
             default:
-                return turbo::make_status(turbo::kNotFound, "Unknown graph type");
+                return collie::Status::not_found("Unknown graph type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
-    turbo::ResultStatus<GraphType> PropertySerializer::graph_type_import(const PropertySet &ps) {
+    collie::Result<GraphType> PropertySerializer::graph_type_import(const PropertySet &ps) {
         auto it = ps.find(GRAPH_TYPE);
         GraphType graphType = GraphType::GraphTypeNone;
         if (it != ps.end()) {
@@ -410,16 +410,16 @@ namespace polaris {
                 graphType = GraphType::GraphTypeVAMANA;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid Graph Type in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Graph Type");
+                return collie::Status::invalid_argument( "Invalid Graph Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Graph Type not found in the property");
+            return collie::Status::not_found("Graph Type not found in the property");
         }
         return graphType;
     }
 
 
-    turbo::Status PropertySerializer::seed_type_export(PropertySet &ps, SeedType type) {
+    collie::Status PropertySerializer::seed_type_export(PropertySet &ps, SeedType type) {
         switch (type) {
             case SeedType::SeedTypeNone:
                 ps.set(SEED_TYPE, "None");
@@ -437,12 +437,12 @@ namespace polaris {
                 ps.set(SEED_TYPE, "AllLeafNodes");
                 break;
             default:
-                return turbo::make_status(turbo::kNotFound, "Unknown seed type");
+                return collie::Status::not_found( "Unknown seed type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::ResultStatus<SeedType> PropertySerializer::seed_type_import(const PropertySet &ps) {
+    collie::Result<SeedType> PropertySerializer::seed_type_import(const PropertySet &ps) {
         auto it = ps.find(SEED_TYPE);
         SeedType seedType = SeedType::SeedTypeNone;
         if (it != ps.end()) {
@@ -458,15 +458,15 @@ namespace polaris {
                 seedType = SeedType::SeedTypeAllLeafNodes;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid Seed Type in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Seed Type");
+                return collie::Status::invalid_argument( "Invalid Seed Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Seed Type not found in the property");
+            return collie::Status::not_found("Seed Type not found in the property");
         }
         return seedType;
     }
 
-    turbo::Status PropertySerializer::index_type_export(polaris::PropertySet &ps, polaris::IndexType type) {
+    collie::Status PropertySerializer::index_type_export(polaris::PropertySet &ps, polaris::IndexType type) {
         switch (type) {
             case IndexType::INDEX_NONE:
                 ps.set(INDEX_TYPE, "None");
@@ -505,12 +505,12 @@ namespace polaris {
                 ps.set(INDEX_TYPE, "hnsw");
                 break;
             default:
-                return turbo::make_status(turbo::kNotFound, "Unknown index type");
+                return collie::Status::not_found( "Unknown index type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::ResultStatus<IndexType> PropertySerializer::index_type_import(const polaris::PropertySet &ps) {
+    collie::Result<IndexType> PropertySerializer::index_type_import(const polaris::PropertySet &ps) {
         auto it = ps.find(INDEX_TYPE);
         IndexType indexType = IndexType::INDEX_NONE;
         if (it != ps.end()) {
@@ -540,10 +540,10 @@ namespace polaris {
                 indexType = IndexType::INDEX_HNSW;
             } else {
                 POLARIS_LOG(ERROR) << "Invalid Index Type in the property. " << it->first << ":" << it->second;
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid Index Type");
+                return collie::Status::invalid_argument( "Invalid Index Type");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Index Type not found in the property");
+            return collie::Status::not_found("Index Type not found in the property");
         }
         return indexType;
     }
@@ -551,7 +551,7 @@ namespace polaris {
     void PropertySerializer::dimension_export(PropertySet &ps, size_t dimension) {
         ps.set(DIMENSION, std::to_string(dimension));
     }
-    turbo::ResultStatus<size_t> PropertySerializer::dimension_import(const PropertySet &ps) {
+    collie::Result<size_t> PropertySerializer::dimension_import(const PropertySet &ps) {
         auto it = ps.find(DIMENSION);
         if (it != ps.end()) {
             uint64_t dimension = 0;
@@ -559,10 +559,10 @@ namespace polaris {
             if (r) {
                 return dimension;
             } else {
-                return turbo::make_status(turbo::kInvalidArgument, "Invalid dimension");
+                return collie::Status::invalid_argument( "Invalid dimension");
             }
         } else {
-            return turbo::make_status(turbo::kNotFound, "Dimension not found in the property");
+            return collie::Status::not_found("Dimension not found in the property");
         }
     }
 

@@ -28,7 +28,7 @@ namespace polaris {
 
     void init_logger(const LoggerConfig &config);
 
-    clog::logger *get_logger();
+    collie::log::logger *get_logger();
 }  // namespace polaris
 
 #define POLARIS_LOG(SEVERITY) LOG_LOGGER(SEVERITY, polaris::get_logger())

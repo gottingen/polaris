@@ -25,7 +25,12 @@ int main() {
 
     // Initing index
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, max_elements, M, ef_construction);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
 
     // Generate random data
     std::mt19937 rng;
@@ -38,7 +43,10 @@ int main() {
 
     // Add data to index
     for (int i = 0; i < max_elements; i++) {
-        alg_hnsw->addPoint(data + i * dim, i);
+        auto r = alg_hnsw->addPoint(data + i * dim, i);
+        if (!r.ok()) {
+            std::cerr << "Failed to add element " << i << std::endl;
+        }
     }
 
     // Query the elements for themselves and measure recall
@@ -53,11 +61,20 @@ int main() {
 
     // Serialize index
     std::string hnsw_path = "hnsw.bin";
-    alg_hnsw->saveIndex(hnsw_path);
+    rs = alg_hnsw->saveIndex(hnsw_path);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
     delete alg_hnsw;
 
     // Deserialize index and check recall
-    alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, hnsw_path);
+    alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    rs = alg_hnsw->initialize(&space, hnsw_path);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
     correct = 0;
     for (int i = 0; i < max_elements; i++) {
         std::priority_queue<std::pair<float, polaris::vid_t>> result = alg_hnsw->searchKnn(data + i * dim, 1);

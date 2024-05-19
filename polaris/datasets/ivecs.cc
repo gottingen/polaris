@@ -30,7 +30,7 @@ namespace polaris {
         writer.write((char *) write_buf, npts * ndims * sizeof(uint32_t));
     }
 
-    turbo::Status ivecs_to_bin(const std::string &vecs_file, const std::string &bin_file) {
+    collie::Status ivecs_to_bin(const std::string &vecs_file, const std::string &bin_file) {
         std::ifstream reader(vecs_file, std::ios::binary | std::ios::ate);
         size_t fsize = reader.tellg();
         reader.seekg(0, std::ios::beg);
@@ -63,16 +63,13 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status uint32_to_uint8_bin(const std::string &vecs_file, const std::string &bin_file) {
+    collie::Status uint32_to_uint8_bin(const std::string &vecs_file, const std::string &bin_file) {
         uint32_t *input;
         size_t npts, nd;
-        auto s = polaris::load_bin<uint32_t>(vecs_file, input, npts, nd);
-        if (!s.ok()) {
-            return s;
-        }
+        COLLIE_RETURN_NOT_OK(polaris::load_bin<uint32_t>(vecs_file, input, npts, nd));
         uint8_t *output = new uint8_t[npts * nd];
         polaris::convert_types<uint32_t, uint8_t>(input, output, npts, nd);
         auto rs = polaris::save_bin<uint8_t>(bin_file, output, npts, nd);

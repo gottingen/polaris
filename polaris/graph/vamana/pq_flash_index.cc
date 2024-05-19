@@ -178,7 +178,7 @@ namespace polaris {
     }
 
     template<typename T>
-    POLARIS_API turbo::Status
+    POLARIS_API collie::Status
     PQFlashIndex<T>::build(const char *dataFilePath, const char *indexFilePath, const IndexConfig &config,
                            const std::vector<vid_t> &tags,
                            const std::string &codebook_prefix) {
@@ -186,11 +186,8 @@ namespace polaris {
         if (!std::is_same<T, float>::value &&
             (config.basic_config.metric == polaris::MetricType::METRIC_INNER_PRODUCT ||
              config.basic_config.metric == polaris::MetricType::METRIC_COSINE)) {
-            std::stringstream stream;
-            stream << "Disk-index build currently only supports floating point data for Max "
-                      "Inner Product Search/ cosine similarity. "
-                   << std::endl;
-            return turbo::make_status(turbo::kInvalidArgument, stream.str());
+            return collie::Status::invalid_argument("Disk-index build currently only supports floating point data for "
+                                                    "Max Inner Product Search/ cosine similarity.");
         }
 
         // if there is a 6th parameter, it means we compress the disk index
@@ -261,13 +258,13 @@ namespace polaris {
 
         double final_index_ram_limit = get_memory_budget(config.disk_config.B);
         if (final_index_ram_limit <= 0) {
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "Insufficient memory budget (or string was not in right format). Should be > 0.");
+            return collie::Status::invalid_argument("Insufficient memory budget (or string was not in right format). "
+                                                    "Should be > 0.");
         }
         double indexing_ram_budget = config.disk_config.M;
         if (indexing_ram_budget <= 0) {
             std::cerr << "Not building index. Please provide more RAM budget" << std::endl;
-            return turbo::make_status(turbo::kInvalidArgument, "Not building index. Please provide more RAM budget");
+            return collie::Status::invalid_argument("Not building index. Please provide more RAM budget");
         }
         uint32_t num_threads = config.disk_config.num_threads;
 
@@ -345,21 +342,16 @@ namespace polaris {
         if (use_disk_pq)
             std::remove(disk_pq_compressed_vectors_path.c_str());
 
-        auto r = save_bin(tags_file, tags.data(), tags.size(), 1);
-        if (!r.ok()) {
-            return turbo::make_status(turbo::kInternal, "Failed to save tags file");
-        }
-
+        COLLIE_ASSIGN_OR_RETURN(auto unused_ret, save_bin(tags_file, tags.data(), tags.size(), 1));
         auto e = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> diff = e - s;
         POLARIS_LOG(INFO)<< "Indexing time: " << diff.count();
 
-        return turbo::ok_status();
-
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    POLARIS_API turbo::Status
+    POLARIS_API collie::Status
     PQFlashIndex<T>::build(const char *dataFilePath, const char *indexFilePath, const std::string &tags_file,
                            const IndexConfig &indexConfig,
                            const std::string &codebook_prefix
@@ -368,27 +360,27 @@ namespace polaris {
         if (!tags_file.empty()) {
             size_t file_dim, file_num_points;
             vid_t *tag_data;
-            load_bin<vid_t>(tags_file, tag_data, file_num_points, file_dim);
+            COLLIE_RETURN_NOT_OK(load_bin<vid_t>(tags_file, tag_data, file_num_points, file_dim));
             if (file_dim != 1) {
-                return turbo::make_status(turbo::kInvalidArgument, "Tags file must be a 1D array.");
+                return collie::Status::invalid_argument("Tags file must be a 1D array.");
             }
             tags.assign(tag_data, tag_data + file_num_points);
             delete[] tag_data;
         } else {
-            return turbo::make_status(turbo::kInvalidArgument, "Tags file must be provided.");
+            return collie::Status::invalid_argument("Tags file must be provided.");
         }
         return build(dataFilePath, indexFilePath, indexConfig, tags, codebook_prefix);
     }
 
     template<typename T>
-    POLARIS_API turbo::Status
+    POLARIS_API collie::Status
     PQFlashIndex<T>::build(const char *dataFilePath, const char *indexFilePath, const IndexConfig &indexConfig,
                            const std::string &codebook_prefix) {
         std::vector<vid_t> tags;
         size_t base_num, base_dim;
         polaris::get_bin_metadata(dataFilePath, base_num, base_dim);
         if (base_num <= 0) {
-            return turbo::make_status(turbo::kInvalidArgument, "Data file is empty.");
+            return collie::Status::invalid_argument("Data file is empty.");
         }
         tags.resize(base_num);
         for (size_t i = 0; i < base_num; i++) {
@@ -516,7 +508,7 @@ namespace polaris {
         turbo::flat_hash_set<uint32_t> node_set;
 
         // Do not cache more than 10% of the nodes in the index
-        uint64_t tenp_nodes = (uint64_t) (std::round(this->_num_points * 0.1));
+        auto tenp_nodes = (uint64_t) (std::round(this->_num_points * 0.1));
         if (num_nodes_to_cache > tenp_nodes) {
             POLARIS_LOG(INFO)<< "Reducing nodes to cache from: " << num_nodes_to_cache << " to: " << tenp_nodes
                           << "(10 percent of total nodes:" << this->_num_points << ")";
@@ -673,7 +665,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
+    collie::Status PQFlashIndex<T>::load(uint32_t num_threads, const char *index_prefix) {
         std::string pq_table_bin = std::string(index_prefix) + "_pq_pivots.bin";
         std::string pq_compressed_vectors = std::string(index_prefix) + "_pq_compressed.bin";
         std::string _disk_index_file = std::string(index_prefix) + "_disk.index";
@@ -682,7 +674,7 @@ namespace polaris {
         vid_t *tag_data;
         load_bin<vid_t>(std::string(tags_file), tag_data, file_num_points, file_dim);
         if (file_dim != 1) {
-            return turbo::make_status(turbo::kInvalidArgument, "Tags file should have 1 dimension.");
+            return collie::Status::invalid_argument("Tags file should have 1 dimension.");
         }
         _location_to_tag.reserve(file_num_points);
         for (uint32_t i = 0; i < (uint32_t) file_num_points; i++) {
@@ -700,7 +692,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status PQFlashIndex<T>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
+    collie::Status PQFlashIndex<T>::load_from_separate_paths(uint32_t num_threads, const char *index_filepath,
                                                             const char *pivots_filepath,
                                                             const char *compressed_filepath) {
         std::string pq_table_bin = pivots_filepath;
@@ -715,8 +707,7 @@ namespace polaris {
         this->_disk_index_file = _disk_index_file;
 
         if (pq_file_num_centroids != 256) {
-            return turbo::make_status(turbo::kInvalidArgument, "Number of PQ centroids:{} is not 256.",
-                                      pq_file_num_centroids);
+            return collie::Status::invalid_argument("Number of PQ centroids: {} should be 256.", pq_file_num_centroids);
         }
 
         this->_data_dim = pq_file_dim;
@@ -736,9 +727,8 @@ namespace polaris {
                           << " #dim: " << _data_dim << " #aligned_dim: " << _aligned_dim << " #chunks: " << _n_chunks;
 
         if (_n_chunks > MAX_PQ_CHUNKS) {
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "Error loading index. Ensure that max PQ bytes for in-memory PQ data does not exceed {}.",
-                                      MAX_PQ_CHUNKS);
+            return collie::Status::invalid_argument("Error loading index. Ensure that max PQ bytes for in-memory PQ data does not exceed {}.",
+                                                  MAX_PQ_CHUNKS);
         }
 
         std::string disk_pq_pivots_path = this->_disk_index_file + "_pq_pivots.bin";
@@ -770,9 +760,8 @@ namespace polaris {
             POLARIS_LOG(ERROR) << "Mismatch in #points for compressed data file and disk "
                                   "index file: "
                                << disk_nnodes << " vs " << _num_points;
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "Mismatch in #points for compressed data file and disk index file: {} vs {}",
-                                      disk_nnodes, _num_points);
+            return collie::Status::invalid_argument("Mismatch in #points for compressed data file and disk index file: {} vs {}",
+                                                  disk_nnodes, _num_points);
         }
 
         size_t medoid_id_on_file;
@@ -782,9 +771,8 @@ namespace polaris {
         _max_degree = ((_max_node_len - _disk_bytes_per_point) / sizeof(uint32_t)) - 1;
 
         if (_max_degree > defaults::MAX_GRAPH_DEGREE) {
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "Error loading index. Ensure that max graph degree (R) does not exceed {}.",
-                                      defaults::MAX_GRAPH_DEGREE);
+            return collie::Status::invalid_argument("Error loading index. Ensure that max graph degree (R) does not exceed {}.",
+                                                  defaults::MAX_GRAPH_DEGREE);
         }
 
         // setting up concept of frozen points in disk index for streaming-DiskANN
@@ -801,8 +789,7 @@ namespace polaris {
         READ_U64(index_metadata, this->_reorder_data_exists);
         if (this->_reorder_data_exists) {
             if (this->_use_disk_index_pq == false) {
-                return turbo::make_status(turbo::kInvalidArgument,
-                                          "Reordering is designed for used with disk PQ compression option.");
+                return collie::Status::invalid_argument("Reordering is designed for used with disk PQ compression option.");
             }
             READ_U64(index_metadata, this->_reorder_data_start_sector);
             READ_U64(index_metadata, this->_ndims_reorder_vecs);
@@ -824,8 +811,7 @@ namespace polaris {
             polaris::load_bin<uint32_t>(medoids_file, _medoids, _num_medoids, tmp_dim);
 
             if (tmp_dim != 1) {
-                return turbo::make_status(turbo::kInvalidArgument,
-                                          "Error loading medoids file. Expected bin format of m times 1 vector of uint32_t.");
+                return collie::Status::invalid_argument("Error loading medoids file. Expected bin format of m times 1 vector of uint32_t.");
             }
             if (!collie::filesystem::exists(centroids_file)) {
                 POLARIS_LOG(INFO) << "Centroid data file not found. Using corresponding vectors "
@@ -843,7 +829,7 @@ namespace polaris {
                               "medoids "
                               "in medoids file.";
                     POLARIS_LOG(ERROR) << stream.str();
-                    return turbo::make_status(turbo::kInvalidArgument, stream.str());
+                    return collie::Status::invalid_argument(stream.str());
                 }
             }
         } else {
@@ -863,7 +849,7 @@ namespace polaris {
             delete[] norm_val;
         }
         POLARIS_LOG(INFO) << "loading done..";
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -876,12 +862,11 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status PQFlashIndex<T>::search(SearchContext &sctx) {
+    collie::Status PQFlashIndex<T>::search(SearchContext &sctx) {
         auto *stats = sctx.stats;
         uint64_t num_sector_per_nodes = DIV_ROUND_UP(_max_node_len, defaults::SECTOR_LEN);
         if (sctx.vd_beam_width > num_sector_per_nodes * defaults::MAX_N_SECTOR_READS) {
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "Beamwidth can not be higher than defaults::MAX_N_SECTOR_READS");
+            return collie::Status::invalid_argument("Beamwidth can not be higher than defaults::MAX_N_SECTOR_READS");
         }
 
         ScratchStoreManager<SSDThreadData<T>> manager(this->_thread_data);
@@ -1060,7 +1045,7 @@ namespace polaris {
                                 query_float, (uint8_t *) node_fp_coords_copy);
                 }
                 if (!_location_to_tag.try_get(cached_nhood.first, tmp_id)) {
-                    return turbo::make_status(turbo::kInternal, "Error getting tag for node");
+                    return collie::Status::internal("Error getting tag for node");
                 }
                 if (!sctx.search_condition->is_in_blacklist(tmp_id)) {
                     full_retset.push_back(Neighbor((uint32_t) cached_nhood.first, cur_expanded_dist));
@@ -1103,7 +1088,7 @@ namespace polaris {
                         cur_expanded_dist = _disk_pq_table.l2_distance(query_float, (uint8_t *) data_buf);
                 }
                 if (!_location_to_tag.try_get(frontier_nhood.first, tmp_id)) {
-                    return turbo::make_status(turbo::kInternal, "Error getting tag for node");
+                    return collie::Status::internal("Error getting tag for node");
                 }
 
                 if (!sctx.search_condition->is_in_blacklist(tmp_id)) {
@@ -1215,12 +1200,12 @@ namespace polaris {
         if (stats != nullptr) {
             stats->total_us = query_timer.elapsed().to_microseconds<double>();
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status PQFlashIndex<T>::get_vector(vid_t vid, void *vec) const {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+    collie::Status PQFlashIndex<T>::get_vector(vid_t vid, void *vec) const {
+        return collie::Status::unimplemented("Not implemented");
     }
 
     template<typename T>

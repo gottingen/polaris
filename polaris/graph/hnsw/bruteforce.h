@@ -63,7 +63,7 @@ namespace hnswlib {
         }
 
 
-        turbo::Status addPoint(const void *datapoint, polaris::vid_t label, bool replace_deleted = false) {
+        collie::Status addPoint(const void *datapoint, polaris::vid_t label, bool replace_deleted = false) {
             int idx;
             {
                 std::unique_lock<std::mutex> lock(index_lock);
@@ -73,8 +73,7 @@ namespace hnswlib {
                     idx = search->second;
                 } else {
                     if (cur_element_count >= maxelements_) {
-                        return turbo::make_status(turbo::kResourceExhausted,
-                                                  "The number of elements exceeds the specified limit");
+                        return collie::Status::resource_exhausted("The number of elements exceeds the specified limit");
                     }
                     idx = cur_element_count;
                     dict_external_to_internal[label] = idx;
@@ -83,7 +82,7 @@ namespace hnswlib {
             }
             memcpy(data_ + size_per_element_ * idx + data_size_, &label, sizeof(polaris::vid_t));
             memcpy(data_ + size_per_element_ * idx, datapoint, data_size_);
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
         size_t size() const {
@@ -91,7 +90,7 @@ namespace hnswlib {
         }
 
 
-        turbo::Status mark_delete(polaris::vid_t cur_external) {
+        collie::Status mark_delete(polaris::vid_t cur_external) {
             size_t cur_c = dict_external_to_internal[cur_external];
 
             dict_external_to_internal.erase(cur_external);
@@ -102,16 +101,16 @@ namespace hnswlib {
                    data_ + size_per_element_ * (cur_element_count - 1),
                    data_size_ + sizeof(polaris::vid_t));
             cur_element_count--;
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
-        turbo::Status search(polaris::SearchContext &ctx) const override {
+        collie::Status search(polaris::SearchContext &ctx) const override {
             if (ctx.top_k >= cur_element_count) {
-                return turbo::make_status(turbo::kInvalidArgument, "k should be less than the number of elements");
+                return collie::Status::invalid_argument("k should be less than the number of elements");
             }
             std::priority_queue<std::pair<dist_t, int>> topResults;
             if (cur_element_count == 0) {
-                return turbo::ok_status();
+                return collie::Status::ok_status();
             }
             for (int i = 0; i < ctx.top_k; i++) {
                 dist_t dist = fstdistfunc_(ctx.query, data_ + size_per_element_ * i, dist_func_param_);
@@ -143,17 +142,17 @@ namespace hnswlib {
                 topResults.pop();
             }
 
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
-        turbo::Status get_vector(polaris::vid_t vid, void *vec) const {
+        collie::Status get_vector(polaris::vid_t vid, void *vec) const {
             auto search = dict_external_to_internal.find(vid);
             if (search == dict_external_to_internal.end()) {
-                return turbo::make_status(turbo::kNotFound, "Vector not found");
+                return collie::Status::not_found("Vector not found");
             }
             int idx = search->second;
             memcpy(vec, data_ + size_per_element_ * idx, data_size_);
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
         std::priority_queue<std::pair<dist_t, polaris::vid_t >>
@@ -188,7 +187,7 @@ namespace hnswlib {
         }
 
 
-        turbo::Status saveIndex(const std::string &location) {
+        collie::Status saveIndex(const std::string &location) {
             std::ofstream output(location, std::ios::binary);
             std::streampos position;
 
@@ -199,11 +198,11 @@ namespace hnswlib {
             output.write(data_, maxelements_ * size_per_element_);
 
             output.close();
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
 
-        turbo::Status load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) override {
+        collie::Status load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) override {
             std::ifstream input(location, std::ios::binary);
             std::streampos position;
 
@@ -217,13 +216,13 @@ namespace hnswlib {
             size_per_element_ = data_size_ + sizeof(polaris::vid_t);
             data_ = (char *) malloc(maxelements_ * size_per_element_);
             if (data_ == nullptr) {
-                return turbo::make_status(turbo::kResourceExhausted, "Not enough memory: loadIndex failed to allocate data");
+                return collie::Status::resource_exhausted("Not enough memory: loadIndex failed to allocate data");
             }
 
             input.read(data_, maxelements_ * size_per_element_);
 
             input.close();
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
     };
 }  // namespace hnswlib

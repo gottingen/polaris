@@ -19,37 +19,38 @@
 
 namespace polaris {
 
-    turbo::Status IndexWriteParameters::export_property(polaris::PropertySet &p) const {
+    collie::Status IndexWriteParameters::export_property(polaris::PropertySet &p) const {
         p.set("search_list_size", search_list_size);
         p.set("max_degree", max_degree);
         p.setb("saturate_graph", saturate_graph);
         p.set("max_occlusion_size", max_occlusion_size);
         p.set("alpha", alpha);
         p.set("num_threads", num_threads);
+        return collie::Status::ok_status();
     }
 
-    turbo::Status IndexWriteParameters::import_property(const polaris::PropertySet &p) {
+    collie::Status IndexWriteParameters::import_property(const polaris::PropertySet &p) {
         search_list_size = p.getl("search_list_size", search_list_size);
         max_degree = p.getl("max_degree", max_degree);
         saturate_graph = p.getb("saturate_graph", saturate_graph);
         max_occlusion_size = p.getl("max_occlusion_size", max_occlusion_size);
         alpha = p.getf("alpha", alpha);
         num_threads = p.getl("num_threads", num_threads);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
-    [[nodiscard]] turbo::Status IndexSearchParams::export_property(polaris::PropertySet &p) const {
+    [[nodiscard]] collie::Status IndexSearchParams::export_property(polaris::PropertySet &p) const {
         p.set("initial_search_list_size", initial_search_list_size);
         p.set("num_search_threads", num_search_threads);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status IndexSearchParams::import_property(const polaris::PropertySet &p) {
+    collie::Status IndexSearchParams::import_property(const polaris::PropertySet &p) {
         initial_search_list_size = p.getl("initial_search_list_size", initial_search_list_size);
         num_search_threads = p.getl("num_search_threads", num_search_threads);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status VamanaIndexConfig::export_property(polaris::PropertySet &p) const {
+    collie::Status VamanaIndexConfig::export_property(polaris::PropertySet &p) const {
         auto idxts = PropertySerializer::index_type_export(p, IndexType::INDEX_VAMANA);
         if (!idxts.ok()) {
             POLARIS_LOG(ERROR) << idxts.message();
@@ -112,65 +113,26 @@ namespace polaris {
                 return rs;
             }
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status VamanaIndexConfig::import_property(const polaris::PropertySet &p) {
-        auto idxts = PropertySerializer::index_type_import(p);
-        if (!idxts.ok()) {
-            POLARIS_LOG(ERROR) << idxts.status().message();
-            return idxts.status();
-        }
-        if (idxts.value() != IndexType::INDEX_VAMANA) {
-            return turbo::make_status(turbo::kEINVAL, "IndexType mismatch index_type: {} != INDEX_VAMANA", NAMEOF_ENUM(idxts.value()));
+    [[nodiscard]] collie::Status VamanaIndexConfig::import_property(const polaris::PropertySet &p) {
+        COLLIE_ASSIGN_OR_RETURN(auto index_type, PropertySerializer::index_type_import(p));
+        if (index_type != IndexType::INDEX_VAMANA) {
+            return collie::Status::invalid_argument("IndexType mismatch index_type: {} != INDEX_VAMANA", NAMEOF_ENUM(index_type));
         }
         /// basic parameters
-        auto drs = PropertySerializer::distance_type_import(p);
-        if (!drs.ok()) {
-            POLARIS_LOG(ERROR) << drs.status().message();
-            return drs.status();
-        }
-        metric = drs.value();
-        auto ors = PropertySerializer::object_type_import(p);
-        if (!ors.ok()) {
-            POLARIS_LOG(ERROR) << ors.status().message();
-            return ors.status();
-        }
-        object_type = ors.value();
-        auto dtrs = PropertySerializer::database_type_import(p);
-        if (!dtrs.ok()) {
-            POLARIS_LOG(ERROR) << dtrs.status().message();
-            return dtrs.status();
-        }
-        databaseType = dtrs.value();
-        auto ars = PropertySerializer::object_alignment_import(p);
-        if (!ars.ok()) {
-            POLARIS_LOG(ERROR) << ars.status().message();
-            return ars.status();
-        }
-        objectAlignment = ars.value();
-        auto  dmrs = PropertySerializer::dimension_import(p);
-        if (!dmrs.ok()) {
-            POLARIS_LOG(ERROR) << dmrs.status().message();
-            return dmrs.status();
-        }
-        dimension = dmrs.value();
+        COLLIE_ASSIGN_OR_RETURN(metric, PropertySerializer::distance_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(object_type, PropertySerializer::object_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(databaseType, PropertySerializer::database_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(objectAlignment, PropertySerializer::object_alignment_import(p));
+        COLLIE_ASSIGN_OR_RETURN(dimension, PropertySerializer::dimension_import(p));
         max_points = p.getl("max_points", max_points);
         load_threads = p.getl("load_threads", load_threads);
         work_threads = p.getl("work_threads", work_threads);
         /// data and graph strategy
-        auto rs = PropertySerializer::database_type_import(p, "data_strategy");
-        if (!rs.ok()) {
-            POLARIS_LOG(ERROR) << rs.status().message();
-            return rs.status();
-        }
-        data_strategy = rs.value();
-        auto grs = PropertySerializer::database_type_import(p, "graph_strategy");
-        if (!grs.ok()) {
-            POLARIS_LOG(ERROR) << grs.status().message();
-            return grs.status();
-        }
-        graph_strategy = grs.value();
+        COLLIE_ASSIGN_OR_RETURN(data_strategy, PropertySerializer::database_type_import(p, "data_strategy"));
+        COLLIE_ASSIGN_OR_RETURN(graph_strategy,PropertySerializer::database_type_import(p, "graph_strategy"));
 
         dynamic_index = p.getb("dynamic_index", dynamic_index);
         pq_dist_build = p.getb("pq_dist_build", pq_dist_build);
@@ -182,24 +144,16 @@ namespace polaris {
         bool has_index_search_params = p.getb("has_index_search_params", false);
         if (has_index_write_params) {
             index_write_params = std::make_shared<IndexWriteParameters>();
-            auto irs = index_write_params->import_property(p);
-            if (!rs.ok()) {
-                POLARIS_LOG(ERROR) << irs.message();
-                return irs;
-            }
+            COLLIE_RETURN_NOT_OK(index_write_params->import_property(p));
         }
         if (has_index_search_params) {
             index_search_params = std::make_shared<IndexSearchParams>();
-            auto irs = index_search_params->import_property(p);
-            if (!rs.ok()) {
-                POLARIS_LOG(ERROR) << irs.message();
-                return irs;
-            }
+            COLLIE_RETURN_NOT_OK(index_search_params->import_property(p));
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status VamanaDiskIndexConfig::export_property(polaris::PropertySet &p) const {
+    [[nodiscard]] collie::Status VamanaDiskIndexConfig::export_property(polaris::PropertySet &p) const {
         auto idxts = PropertySerializer::index_type_export(p, IndexType::INDEX_VAMANA_DISK);
         if (!idxts.ok()) {
             POLARIS_LOG(ERROR) << idxts.message();
@@ -255,49 +209,20 @@ namespace polaris {
         p.set("vdisk_pq_chunks", pq_chunks);
         p.setb("vdisk_use_opq", use_opq);
         p.set("vdisk_num_nodes_to_cache", num_nodes_to_cache);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status VamanaDiskIndexConfig::import_property(const polaris::PropertySet &p) {
-        auto idxts = PropertySerializer::index_type_import(p);
-        if (!idxts.ok()) {
-            POLARIS_LOG(ERROR) << idxts.status().message();
-            return idxts.status();
-        }
-        if (idxts.value() != IndexType::INDEX_VAMANA_DISK) {
-            return turbo::make_status(turbo::kEINVAL, "IndexType mismatch index_type: {} != INDEX_VAMANA_DISK", NAMEOF_ENUM(idxts.value()));
+    [[nodiscard]] collie::Status VamanaDiskIndexConfig::import_property(const polaris::PropertySet &p) {
+        COLLIE_ASSIGN_OR_RETURN(auto idt, PropertySerializer::index_type_import(p));
+        if (idt != IndexType::INDEX_VAMANA_DISK) {
+            return collie::Status::invalid_argument("IndexType mismatch index_type: {} != INDEX_VAMANA_DISK", NAMEOF_ENUM(idt));
         }
         /// basic parameters
-        auto drs = PropertySerializer::distance_type_import(p);
-        if (!drs.ok()) {
-            POLARIS_LOG(ERROR) << drs.status().message();
-            return drs.status();
-        }
-        metric = drs.value();
-        auto ors = PropertySerializer::object_type_import(p);
-        if (!ors.ok()) {
-            POLARIS_LOG(ERROR) << ors.status().message();
-            return ors.status();
-        }
-        object_type = ors.value();
-        auto dtrs = PropertySerializer::database_type_import(p);
-        if (!dtrs.ok()) {
-            POLARIS_LOG(ERROR) << dtrs.status().message();
-            return dtrs.status();
-        }
-        databaseType = dtrs.value();
-        auto ars = PropertySerializer::object_alignment_import(p);
-        if (!ars.ok()) {
-            POLARIS_LOG(ERROR) << ars.status().message();
-            return ars.status();
-        }
-        objectAlignment = ars.value();
-        auto  dmrs = PropertySerializer::dimension_import(p);
-        if (!dmrs.ok()) {
-            POLARIS_LOG(ERROR) << dmrs.status().message();
-            return dmrs.status();
-        }
-        dimension = dmrs.value();
+        COLLIE_ASSIGN_OR_RETURN(metric,PropertySerializer::distance_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(object_type,PropertySerializer::object_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(databaseType,PropertySerializer::database_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(objectAlignment,PropertySerializer::object_alignment_import(p));
+        COLLIE_ASSIGN_OR_RETURN(dimension,PropertySerializer::dimension_import(p));
         max_points = p.getl("max_points", max_points);
         load_threads = p.getl("load_threads", load_threads);
         work_threads = p.getl("work_threads", work_threads);
@@ -314,6 +239,6 @@ namespace polaris {
         pq_chunks = p.getl("vdisk_pq_chunks", pq_chunks);
         use_opq = p.getb("vdisk_use_opq", use_opq);
         num_nodes_to_cache = p.getl("vdisk_num_nodes_to_cache", num_nodes_to_cache);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 }  // namespace polaris

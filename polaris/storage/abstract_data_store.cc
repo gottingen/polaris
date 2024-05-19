@@ -34,7 +34,7 @@ namespace polaris {
     }
 
     template<typename data_t>
-    turbo::ResultStatus<location_t> AbstractDataStore<data_t>::resize(const location_t new_num_points) {
+    collie::Result<location_t> AbstractDataStore<data_t>::resize(const location_t new_num_points) {
         if (new_num_points > _capacity) {
             return expand(new_num_points);
         } else if (new_num_points < _capacity) {

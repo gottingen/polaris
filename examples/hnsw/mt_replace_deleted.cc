@@ -86,8 +86,12 @@ int main() {
     // Initing index with allow_replace_deleted=true
     int seed = 100; 
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction, seed, true);
-
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, max_elements, M, ef_construction, seed, true);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
     // Generate random data
     std::mt19937 rng;
     rng.seed(47);
@@ -99,7 +103,10 @@ int main() {
 
     // Add data to index
     ParallelFor(0, max_elements, num_threads, [&](size_t row, size_t threadId) {
-        alg_hnsw->addPoint((void*)(data + dim * row), row);
+        auto rs = alg_hnsw->addPoint((void*)(data + dim * row), row);
+        if (!rs.ok()) {
+            std::cerr << "Failed to add element " << row << std::endl;
+        }
     });
 
     // Mark first half of elements as deleted
@@ -122,7 +129,10 @@ int main() {
     // but we can replace the deleted ones by using replace_deleted=true
     ParallelFor(0, num_deleted, num_threads, [&](size_t row, size_t threadId) {
         polaris::vid_t label = max_elements + row;
-        alg_hnsw->addPoint((void*)(add_data + dim * row), label, true);
+        auto rs = alg_hnsw->addPoint((void*)(add_data + dim * row), label, true);
+        if (!rs.ok()) {
+            std::cerr << "Failed to add element " << label << std::endl;
+        }
     });
 
     delete[] data;

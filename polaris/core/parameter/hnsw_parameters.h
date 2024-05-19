@@ -49,7 +49,7 @@ namespace polaris {
             random_seed = 100;
         }
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
-        [[nodiscard]] turbo::Status import_property(polaris::PropertySet &p);
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status import_property(polaris::PropertySet &p);
     };
 }  // namespace polaris

@@ -53,7 +53,7 @@ namespace polaris {
         return file_frozen_pts;
     }
 
-    turbo::ResultStatus<size_t> UnifiedIndex::get_frozen_points(IndexType it, const std::string &index_path) {
+    collie::Result<size_t> UnifiedIndex::get_frozen_points(IndexType it, const std::string &index_path) {
         if(it == IndexType::INDEX_VAMANA) {
             return get_graph_num_frozen_points(index_path);
         }

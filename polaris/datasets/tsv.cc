@@ -70,7 +70,7 @@ namespace polaris {
         delete[] read_buf;
     }
 
-    turbo::Status
+    collie::Status
     tsv_to_float_bin(const std::string &tsv_file, const std::string &bin_file, uint32_t ndims, uint32_t npts) {
 
         std::ifstream reader(tsv_file, std::ios::binary | std::ios::ate);
@@ -95,10 +95,10 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     tsv_to_uint8_bin(const std::string &tsv_file, const std::string &bin_file, uint32_t ndims, uint32_t npts) {
         std::ifstream reader(tsv_file, std::ios::binary | std::ios::ate);
         //  size_t          fsize = reader.tellg();
@@ -122,10 +122,10 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     tsv_to_int8_bin(const std::string &tsv_file, const std::string &bin_file, uint32_t ndims, uint32_t npts) {
         std::ifstream reader(tsv_file, std::ios::binary | std::ios::ate);
         //  size_t          fsize = reader.tellg();
@@ -149,7 +149,7 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
 
@@ -168,7 +168,7 @@ namespace polaris {
         }
     }
 
-    turbo::Status
+    collie::Status
     int8_bin_to_tsv(const std::string &tsv_file, const std::string &bin_file) {
         std::ifstream reader(tsv_file, std::ios::binary);
         uint32_t npts_u32;
@@ -194,10 +194,10 @@ namespace polaris {
 
         writer.close();
         reader.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     uint8_bin_to_tsv(const std::string &tsv_file, const std::string &bin_file) {
         std::ifstream reader(tsv_file, std::ios::binary);
         uint32_t npts_u32;
@@ -223,10 +223,10 @@ namespace polaris {
 
         writer.close();
         reader.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status
+    collie::Status
     float_bin_to_tsv(const std::string &tsv_file, const std::string &bin_file) {
         std::ifstream reader(tsv_file, std::ios::binary);
         uint32_t npts_u32;
@@ -252,7 +252,7 @@ namespace polaris {
 
         writer.close();
         reader.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
 }  // namespace polaris

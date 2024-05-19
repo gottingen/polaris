@@ -39,12 +39,13 @@ void print_stats(std::string category, std::vector<float> percentiles, std::vect
 }
 
 template<typename T>
-int search_disk_index(polaris::MetricType &metric, const std::string &index_path_prefix,
-                      const std::string &result_output_prefix, const std::string &query_file, std::string &gt_file,
-                      const uint32_t num_threads, const uint32_t recall_at, const uint32_t beamwidth,
-                      const uint32_t num_nodes_to_cache, const uint32_t search_io_limit,
-                      const std::vector<uint32_t> &Lvec, const float fail_if_recall_below,
-                      const bool use_reorder_data = false) {
+collie::Status search_disk_index(polaris::MetricType &metric, const std::string &index_path_prefix,
+                                 const std::string &result_output_prefix, const std::string &query_file,
+                                 std::string &gt_file,
+                                 const uint32_t num_threads, const uint32_t recall_at, const uint32_t beamwidth,
+                                 const uint32_t num_nodes_to_cache, const uint32_t search_io_limit,
+                                 const std::vector<uint32_t> &Lvec, const float fail_if_recall_below,
+                                 const bool use_reorder_data = false) {
     polaris::cout << "Search parameters: #threads: " << num_threads << ", ";
     if (beamwidth <= 0)
         polaris::cout << "beamwidth to be optimized for each L value" << std::flush;
@@ -62,11 +63,11 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     uint32_t *gt_ids = nullptr;
     float *gt_dists = nullptr;
     size_t query_num, query_dim, query_aligned_dim, gt_num, gt_dim;
-    polaris::load_aligned_bin<T>(query_file, query, query_num, query_dim, query_aligned_dim);
+    COLLIE_RETURN_NOT_OK(polaris::load_aligned_bin<T>(query_file, query, query_num, query_dim, query_aligned_dim));
 
     bool calc_recall_flag = false;
     if (gt_file != std::string("null") && gt_file != std::string("NULL") && collie::filesystem::exists(gt_file)) {
-        polaris::load_truthset(gt_file, gt_ids, gt_dists, gt_num, gt_dim);
+        COLLIE_RETURN_NOT_OK(polaris::load_truthset(gt_file, gt_ids, gt_dists, gt_num, gt_dim));
         if (gt_num != query_num) {
             polaris::cout << "Error. Mismatch in number of queries and ground truth data" << std::endl;
         }
@@ -74,19 +75,16 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     }
 
     POLARIS_LOG(INFO) << "Loading index from " << index_path_prefix;
-    std::unique_ptr<polaris::UnifiedIndex> unified_index(polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA_DISK));
+    std::unique_ptr<polaris::UnifiedIndex> unified_index(
+            polaris::UnifiedIndex::create_index(polaris::IndexType::INDEX_VAMANA_DISK));
     polaris::IndexConfig config = polaris::IndexConfigBuilder()
             .with_load_threads(num_threads)
             .with_metric(metric)
             .with_data_type(polaris::polaris_type_to_name<T>())
             .vdisk_with_num_nodes_to_cache(num_nodes_to_cache)
             .build_vdisk();
-    unified_index->initialize(config);
-    auto res = unified_index->load(index_path_prefix.c_str());
-    if (!res.ok()) {
-        POLARIS_LOG(ERROR) << "Failed to load index: " << res.message();
-        return -1;
-    }
+    COLLIE_RETURN_NOT_OK(unified_index->initialize(config));
+    COLLIE_RETURN_NOT_OK(unified_index->load(index_path_prefix.c_str()));
 
     omp_set_num_threads(num_threads);
 
@@ -158,13 +156,9 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
 
         if (beamwidth <= 0) {
             polaris::cout << "Tuning beamwidth.." << std::endl;
-            auto rs = unified_index->optimize_beam_width(warmup, warmup_num, warmup_aligned_dim, L, optimized_beamwidth);
-            if(!rs.ok()) {
-                POLARIS_LOG(ERROR) << "Failed to optimize beamwidth";
-                exit(-1);
-            }
-            optimized_beamwidth = rs.value();
-
+            COLLIE_ASSIGN_OR_RETURN(optimized_beamwidth,
+                                    unified_index->optimize_beam_width(warmup, warmup_num, warmup_aligned_dim, L,
+                                                                       optimized_beamwidth));
         } else
             optimized_beamwidth = beamwidth;
 
@@ -212,8 +206,10 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
             best_recall = std::max(recall, best_recall);
         }
 
-        polaris::cout << std::setw(6) << L << std::setw(12) << optimized_beamwidth << std::setw(16) << static_cast<int>(qps)
-                      << std::setw(16) <<static_cast<int>( mean_latency) << std::setw(16) << static_cast<int>(latency_999) << std::setw(16) << mean_ios
+        polaris::cout << std::setw(6) << L << std::setw(12) << optimized_beamwidth << std::setw(16)
+                      << static_cast<int>(qps)
+                      << std::setw(16) << static_cast<int>( mean_latency) << std::setw(16)
+                      << static_cast<int>(latency_999) << std::setw(16) << mean_ios
                       << std::setw(16) << mean_cpuus;
         if (calc_recall_flag) {
             polaris::cout << std::setw(16) << recall << std::endl;
@@ -239,7 +235,8 @@ int search_disk_index(polaris::MetricType &metric, const std::string &index_path
     polaris::aligned_free(query);
     if (warmup != nullptr)
         polaris::aligned_free(warmup);
-    return best_recall >= fail_if_recall_below ? 0 : -1;
+    return best_recall >= fail_if_recall_below ? collie::Status::ok_status() : collie::Status::resource_exhausted(
+            "Recall below threshold");
 }
 
 namespace polaris {
@@ -323,42 +320,34 @@ namespace polaris {
             exit(-1);
         }
 
-
-        try {
-            int r;
-            if (ctx.data_type == std::string("float"))
-                r = search_disk_index<float>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
-                                             ctx.gt_file,
-                                             ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
-                                             ctx.search_io_limit,
-                                             ctx.Lvec,
-                                             ctx.fail_if_recall_below, ctx.use_reorder_data);
-            else if (ctx.data_type == std::string("int8"))
-                r = search_disk_index<int8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
-                                              ctx.gt_file,
-                                              ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
-                                              ctx.search_io_limit, ctx.Lvec,
-                                              ctx.fail_if_recall_below, ctx.use_reorder_data);
-            else if (ctx.data_type == std::string("uint8"))
-                r = search_disk_index<uint8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix,
-                                               ctx.query_file,
-                                               ctx.gt_file,
-                                               ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
-                                               ctx.search_io_limit, ctx.Lvec,
-                                               ctx.fail_if_recall_below, ctx.use_reorder_data);
-            else {
-                std::cerr << "Unsupported data type. Use float or int8 or uint8" << std::endl;
-                r = -1;
-            }
-
-            if (r != 0) {
-                exit(-1);
-            }
+        collie::Status r;
+        if (ctx.data_type == std::string("float"))
+            r = search_disk_index<float>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
+                                         ctx.gt_file,
+                                         ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
+                                         ctx.search_io_limit,
+                                         ctx.Lvec,
+                                         ctx.fail_if_recall_below, ctx.use_reorder_data);
+        else if (ctx.data_type == std::string("int8"))
+            r = search_disk_index<int8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix, ctx.query_file,
+                                          ctx.gt_file,
+                                          ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
+                                          ctx.search_io_limit, ctx.Lvec,
+                                          ctx.fail_if_recall_below, ctx.use_reorder_data);
+        else if (ctx.data_type == std::string("uint8"))
+            r = search_disk_index<uint8_t>(metric, ctx.index_path_prefix, ctx.result_path_prefix,
+                                           ctx.query_file,
+                                           ctx.gt_file,
+                                           ctx.num_threads, ctx.K, ctx.W, ctx.num_nodes_to_cache,
+                                           ctx.search_io_limit, ctx.Lvec,
+                                           ctx.fail_if_recall_below, ctx.use_reorder_data);
+        else {
+            std::cerr << "Unsupported data type. Use float or int8 or uint8" << std::endl;
+            r = collie::Status::invalid_argument("Unsupported data type");
         }
-        catch (const std::exception &e) {
-            std::cout << std::string(e.what()) << std::endl;
-            polaris::cerr << "VamanaIndex search failed." << std::endl;
-            exit(-1);
+
+        if (!r.ok()) {
+            std::cerr << "Error: " << r.to_string() << std::endl;
         }
     }
 }  // namespace polaris

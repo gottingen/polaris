@@ -17,7 +17,7 @@
 
 namespace polaris {
 
-    [[nodiscard]] turbo::Status HnswParameters::export_property(polaris::PropertySet &p) const {
+    [[nodiscard]] collie::Status HnswParameters::export_property(polaris::PropertySet &p) const {
         auto idxts = PropertySerializer::index_type_export(p, IndexType::INDEX_HNSW);
         if (!idxts.ok()) {
             POLARIS_LOG(ERROR) << idxts.message();
@@ -51,49 +51,20 @@ namespace polaris {
         p.set("hnsw_ef", ef);
         p.set("hnsw_ef_construction", ef_construction);
         p.set("hnsw_random_seed", random_seed);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status HnswParameters::import_property(polaris::PropertySet &p) {
-        auto idxts = PropertySerializer::index_type_import(p);
-        if (!idxts.ok()) {
-            POLARIS_LOG(ERROR) << idxts.status().message();
-            return idxts.status();
-        }
-        if(idxts.value() != IndexType::INDEX_HNSW) {
+    [[nodiscard]] collie::Status HnswParameters::import_property(polaris::PropertySet &p) {
+        COLLIE_ASSIGN_OR_RETURN(auto idxts, PropertySerializer::index_type_import(p));
+        if(idxts!= IndexType::INDEX_HNSW) {
             POLARIS_LOG(ERROR) << "Index type mismatch";
-            return turbo::make_status(turbo::kEINVAL, "Index type mismatch");
+            return collie::Status::invalid_argument("Index type mismatch");
         }
-        auto drs = PropertySerializer::distance_type_import(p);
-        if (!drs.ok()) {
-            POLARIS_LOG(ERROR) << drs.status().message();
-            return drs.status();
-        }
-        metric = drs.value();
-        auto ors = PropertySerializer::object_type_import(p);
-        if (!ors.ok()) {
-            POLARIS_LOG(ERROR) << ors.status().message();
-            return ors.status();
-        }
-        object_type = ors.value();
-        auto dtrs = PropertySerializer::database_type_import(p);
-        if (!dtrs.ok()) {
-            POLARIS_LOG(ERROR) << dtrs.status().message();
-            return dtrs.status();
-        }
-        databaseType = dtrs.value();
-        auto ars = PropertySerializer::object_alignment_import(p);
-        if (!ars.ok()) {
-            POLARIS_LOG(ERROR) << ars.status().message();
-            return ars.status();
-        }
-        objectAlignment = ars.value();
-        auto  dmrs = PropertySerializer::dimension_import(p);
-        if (!dmrs.ok()) {
-            POLARIS_LOG(ERROR) << dmrs.status().message();
-            return dmrs.status();
-        }
-        dimension = dmrs.value();
+        COLLIE_ASSIGN_OR_RETURN(metric, PropertySerializer::distance_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(object_type, PropertySerializer::object_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(databaseType, PropertySerializer::database_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(objectAlignment,PropertySerializer::object_alignment_import(p));
+        COLLIE_ASSIGN_OR_RETURN(dimension,PropertySerializer::dimension_import(p));
         max_points = p.getl("max_points", max_points);
         load_threads = p.getl("load_threads", load_threads);
         work_threads = p.getl("work_threads", work_threads);
@@ -101,6 +72,6 @@ namespace polaris {
         ef = p.getl("hnsw_ef", ef);
         ef_construction = p.getl("hnsw_ef_construction", ef_construction);
         random_seed = p.getl("hnsw_random_seed", random_seed);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 }  // namespace polaris

@@ -19,7 +19,7 @@
 #include <polaris/utility/serialize.h>
 #include <polaris/utility/polaris_assert.h>
 #include <polaris/core/memory.h>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 
 namespace polaris {
 
@@ -31,17 +31,17 @@ namespace polaris {
             polaris::Serializer::write(os, (uint8_t *) &(*this)[0], byteSize);
         }
 
-        turbo::Status deserialize(std::istream &is, size_t byteSize) {
+        collie::Status deserialize(std::istream &is, size_t byteSize) {
             if(&(*this)[0] == nullptr) {
-                return turbo::Status(turbo::kEINVAL, "BaseObject::deserialize: object is null");
+                return collie::Status::invalid_argument("BaseObject::deserialize: object is null");
             }
             polaris::Serializer::read(is, (uint8_t *) &(*this)[0], byteSize);
             if (is.eof()) {
-                return turbo::make_status(turbo::kEIO, "ObjectSpace::BaseObject: Fatal Error! Read beyond the end of the object file. The object file is corrupted?");
+                return collie::Status::io_error("ObjectSpace::BaseObject: Fatal Error! Read beyond the end of the object file. The object file is corrupted?");
             }
         }
 
-        turbo::Status serializeAsText(std::ostream &os, size_t dimension, ObjectType type) {
+        collie::Status serializeAsText(std::ostream &os, size_t dimension, ObjectType type) {
 
             void *ref = (void *) &(*this)[0];
             switch (type) {
@@ -79,15 +79,15 @@ namespace polaris {
                     polaris::Serializer::writeAsText(os, (float16 *) ref, dimension);
                     break;
                 default:
-                    return turbo::make_status(turbo::kEINVAL, "BaseObject::serializeAsText: not supported data type");
+                    return collie::Status::invalid_argument("BaseObject::serializeAsText: not supported data type");
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
-        turbo::Status deserializeAsText(std::ifstream &is, size_t dimension, ObjectType type) {
+        collie::Status deserializeAsText(std::ifstream &is, size_t dimension, ObjectType type) {
             void *ref = (void *) &(*this)[0];
             if(ref == nullptr) {
-                return turbo::make_status(turbo::kEINVAL, "BaseObject::deserializeAsText: object is null");
+                return collie::Status::invalid_argument("BaseObject::deserializeAsText: object is null");
             }
             switch (type) {
                 case ObjectType::UINT8:
@@ -124,16 +124,16 @@ namespace polaris {
                     polaris::Serializer::readAsText(is, (float16 *) ref, dimension);
                     break;
                 default:
-                    return turbo::make_status(turbo::kEINVAL, "BaseObject::deserializeAsText: not supported data type");
+                    return collie::Status::invalid_argument("BaseObject::deserializeAsText: not supported data type");
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
         template<typename T>
-        turbo::Status set(std::vector<T> &v, size_t dimension, ObjectType type) {
+        collie::Status set(std::vector<T> &v, size_t dimension, ObjectType type) {
             void *ref = (void *) &(*this)[0];
             if (ref == 0) {
-                return turbo::make_status(turbo::kEINVAL, "BaseObject::set: vector is null");
+                return collie::Status::invalid_argument("BaseObject::set: vector is null");
             }
             switch (type) {
                 case ObjectType::UINT8:
@@ -192,9 +192,9 @@ namespace polaris {
                     }
                     break;
                 default:
-                    return turbo::make_status(turbo::kEINVAL, "BaseObject::set: not supported data type");
+                    return collie::Status::invalid_argument("BaseObject::set: not supported data type");
             }
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
     };
 

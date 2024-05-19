@@ -65,12 +65,21 @@ void test_some_filtering(hnswlib::BaseFilterFunctor& filter_func, size_t div_num
 
     hnswlib::L2Space space(d);
     hnswlib::AlgorithmInterface<float>* alg_brute  = new hnswlib::BruteforceSearch<float>(&space, 2 * n);
-    hnswlib::AlgorithmInterface<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, 2 * n);
+    auto alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, 2 * n);
+    if(!rs.ok()) {
+        POLARIS_LOG(ERROR) << "Failed to initialize hnsw algorithm";
+        return;
+    }
 
     for (size_t i = 0; i < n; ++i) {
         // `label_id_start` is used to ensure that the returned IDs are labels and not internal IDs
-        alg_brute->addPoint(data.data() + d * i, label_id_start + i);
-        alg_hnsw->addPoint(data.data() + d * i, label_id_start + i);
+        auto ra = alg_brute->addPoint(data.data() + d * i, label_id_start + i);
+        auto rb = alg_hnsw->addPoint(data.data() + d * i, label_id_start + i);
+        if(!ra.ok() || !rb.ok()) {
+            POLARIS_LOG(ERROR) << "Failed to add element " << i;
+            return;
+        }
     }
 
     // test searchKnnCloserFirst of BruteforceSearch with filtering
@@ -127,12 +136,21 @@ void test_none_filtering(hnswlib::BaseFilterFunctor& filter_func, size_t label_i
 
     hnswlib::L2Space space(d);
     hnswlib::AlgorithmInterface<float>* alg_brute  = new hnswlib::BruteforceSearch<float>(&space, 2 * n);
-    hnswlib::AlgorithmInterface<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, 2 * n);
+    auto alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, 2 * n);
+    if(!rs.ok()) {
+        POLARIS_LOG(ERROR) << "Failed to initialize hnsw algorithm";
+        return;
+    }
 
     for (size_t i = 0; i < n; ++i) {
         // `label_id_start` is used to ensure that the returned IDs are labels and not internal IDs
-        alg_brute->addPoint(data.data() + d * i, label_id_start + i);
-        alg_hnsw->addPoint(data.data() + d * i, label_id_start + i);
+        auto ra = alg_brute->addPoint(data.data() + d * i, label_id_start + i);
+        auto rb = alg_hnsw->addPoint(data.data() + d * i, label_id_start + i);
+        if(!ra.ok() || !rb.ok()) {
+            POLARIS_LOG(ERROR) << "Failed to add element " << i;
+            return;
+        }
     }
 
     // test searchKnnCloserFirst of BruteforceSearch with filtering

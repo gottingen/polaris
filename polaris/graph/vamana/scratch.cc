@@ -22,14 +22,14 @@ namespace polaris {
 
 
     template<typename T>
-    turbo::Status
+    collie::Status
     InMemQueryScratch<T>::initialize(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
                                      size_t aligned_dim,
                                      size_t alignment_factor, bool init_pq_scratch) {
         if (search_l == 0 || indexing_l == 0 || r == 0 || dim == 0) {
-            return turbo::make_status(turbo::kInvalidArgument,
-                                      "In InMemQueryScratch, one of search_l = {}, indexing_l = {}, dim = {} or r = {} is zero.",
-                                      search_l, indexing_l, dim, r);
+            return collie::Status::invalid_argument(
+                    "In InMemQueryScratch, one of search_l = {}, indexing_l = {}, dim = {} or r = {} is zero.",
+                    search_l, indexing_l, dim, r);
         }
         _L = 0;
         _R = r;
@@ -51,7 +51,7 @@ namespace polaris {
         _id_scratch.reserve((size_t) std::ceil(1.5 * defaults::GRAPH_SLACK_FACTOR * _R));
         _dist_scratch.reserve((size_t) std::ceil(1.5 * defaults::GRAPH_SLACK_FACTOR * _R));
         resize_for_new_L(std::max(search_l, indexing_l));
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>

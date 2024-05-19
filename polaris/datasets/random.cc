@@ -53,28 +53,28 @@ namespace polaris {
         return 0;
     }
 
-    turbo::Status
+    collie::Status
     generate_pq_float(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks,
                       float sampling_rate, bool opq) {
         const std::string data_path(base_file);
         const std::string index_prefix_path(output_prefix);
         const size_t num_pq_centers = 256;
         generate_pq<float>(data_path, index_prefix_path, num_pq_centers, num_pq_chunks, sampling_rate, opq);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status generate_pq_int8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq) {
+    collie::Status generate_pq_int8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq) {
         const std::string data_path(base_file);
         const std::string index_prefix_path(output_prefix);
         const size_t num_pq_centers = 256;
         generate_pq<int8_t>(data_path, index_prefix_path, num_pq_centers, num_pq_chunks, sampling_rate, opq);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
-    turbo::Status generate_pq_uint8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq) {
+    collie::Status generate_pq_uint8(const std::string &base_file, const std::string &output_prefix, uint32_t num_pq_chunks, float sampling_rate, bool opq) {
         const std::string data_path(base_file);
         const std::string index_prefix_path(output_prefix);
         const size_t num_pq_centers = 256;
         generate_pq<uint8_t>(data_path, index_prefix_path, num_pq_centers, num_pq_chunks, sampling_rate, opq);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 }  // namespace polaris

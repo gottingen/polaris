@@ -19,7 +19,7 @@
 
 #include <turbo/container/flat_hash_set.h>
 #include <turbo/container/flat_hash_map.h>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 #include <polaris/core/vamana_parameters.h>
 #include <polaris/io/aligned_file_reader.h>
 #include <polaris/graph/vamana/abstract_scratch.h>
@@ -40,7 +40,7 @@ namespace polaris {
         InMemQueryScratch() = default;
         ~InMemQueryScratch() override;
 
-        turbo::Status initialize(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
+        collie::Status initialize(uint32_t search_l, uint32_t indexing_l, uint32_t r, uint32_t maxc, size_t dim,
                                  size_t aligned_dim,
                                  size_t alignment_factor, bool init_pq_scratch = false);
 

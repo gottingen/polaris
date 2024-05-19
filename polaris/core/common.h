@@ -476,43 +476,43 @@ namespace polaris {
         static const std::string INDEX_TYPE;
         static const std::string DIMENSION;
 
-        [[nodiscard]] static turbo::Status
+        [[nodiscard]] static collie::Status
         object_type_export(PropertySet &ps, ObjectType type, std::set<ObjectType> *allow_set = nullptr);
 
-        static turbo::ResultStatus<ObjectType>
+        static collie::Result<ObjectType>
         object_type_import(const PropertySet &ps, std::set<ObjectType> *allow_set = nullptr);
 
-        [[nodiscard]] static turbo::Status
+        [[nodiscard]] static collie::Status
         distance_type_export(PropertySet &ps, MetricType diss, std::set<MetricType> *allow_set = nullptr);
 
-        static turbo::ResultStatus<MetricType>
+        static collie::Result<MetricType>
         distance_type_import(const PropertySet &ps, std::set<MetricType> *allow_set = nullptr);
 
-        [[nodiscard]] static turbo::Status
+        [[nodiscard]] static collie::Status
         database_type_export(PropertySet &ps, DatabaseType type, std::set<DatabaseType> *allow_set = nullptr);
 
-        [[nodiscard]] static turbo::Status
+        [[nodiscard]] static collie::Status
         database_type_export(PropertySet &ps, const std::string &key, DatabaseType type, std::set<DatabaseType> *allow_set = nullptr);
 
-        static turbo::ResultStatus<DatabaseType>
+        static collie::Result<DatabaseType>
         database_type_import(const PropertySet &ps, std::set<DatabaseType> *allow_set = nullptr);
-        static turbo::ResultStatus<DatabaseType>
+        static collie::Result<DatabaseType>
         database_type_import(const PropertySet &ps,  const std::string &key,std::set<DatabaseType> *allow_set = nullptr);
 
-        [[nodiscard]] static turbo::Status object_alignment_export(PropertySet &ps, ObjectAlignment type);
-        static turbo::ResultStatus<ObjectAlignment> object_alignment_import(const PropertySet &ps);
+        [[nodiscard]] static collie::Status object_alignment_export(PropertySet &ps, ObjectAlignment type);
+        static collie::Result<ObjectAlignment> object_alignment_import(const PropertySet &ps);
 
-        [[nodiscard]] static turbo::Status graph_type_export(PropertySet &ps, GraphType type);
-        static turbo::ResultStatus<GraphType> graph_type_import(const PropertySet &ps);
+        [[nodiscard]] static collie::Status graph_type_export(PropertySet &ps, GraphType type);
+        static collie::Result<GraphType> graph_type_import(const PropertySet &ps);
 
-        [[nodiscard]] static turbo::Status seed_type_export(PropertySet &ps, SeedType type);
-        static turbo::ResultStatus<SeedType> seed_type_import(const PropertySet &ps);
+        [[nodiscard]] static collie::Status seed_type_export(PropertySet &ps, SeedType type);
+        static collie::Result<SeedType> seed_type_import(const PropertySet &ps);
 
-        [[nodiscard]] static turbo::Status index_type_export(PropertySet &ps, IndexType type);
-        static turbo::ResultStatus<IndexType> index_type_import(const PropertySet &ps);
+        [[nodiscard]] static collie::Status index_type_export(PropertySet &ps, IndexType type);
+        static collie::Result<IndexType> index_type_import(const PropertySet &ps);
 
         static void dimension_export(PropertySet &ps, size_t dimension);
-        static turbo::ResultStatus<size_t> dimension_import(const PropertySet &ps);
+        static collie::Result<size_t> dimension_import(const PropertySet &ps);
     };
 
 } // namespace polaris

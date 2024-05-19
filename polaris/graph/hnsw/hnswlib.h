@@ -50,7 +50,7 @@ static uint64_t xgetbv(unsigned int index) {
 // Adapted from https://github.com/Mysticial/FeatureDetector
 #define _XCR_XFEATURE_ENABLED_MASK  0
 
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 #include <polaris/core/search_context.h>
 #include <polaris/core/common.h>
 
@@ -161,7 +161,7 @@ class SpaceInterface {
 template<typename dist_t>
 class AlgorithmInterface {
  public:
-    virtual turbo::Status addPoint(const void *datapoint, polaris::vid_t label, bool replace_deleted = false) = 0;
+    virtual collie::Status addPoint(const void *datapoint, polaris::vid_t label, bool replace_deleted = false) = 0;
 
     virtual std::priority_queue<std::pair<dist_t, polaris::vid_t>>
         searchKnn(const void*, size_t, BaseFilterFunctor* isIdAllowed = nullptr) const = 0;
@@ -170,9 +170,9 @@ class AlgorithmInterface {
     virtual std::vector<std::pair<dist_t, polaris::vid_t>>
         searchKnnCloserFirst(const void* query_data, size_t k, BaseFilterFunctor* isIdAllowed = nullptr) const;
 
-    virtual turbo::Status saveIndex(const std::string &location) = 0;
-    virtual turbo::Status load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) = 0;
-    virtual turbo::Status search(polaris::SearchContext&ctx) const = 0;
+    virtual collie::Status saveIndex(const std::string &location) = 0;
+    virtual collie::Status load(const std::string &location, SpaceInterface<dist_t> *s, size_t max_elements_i = 0) = 0;
+    virtual collie::Status search(polaris::SearchContext&ctx) const = 0;
     virtual ~AlgorithmInterface(){
     }
 };

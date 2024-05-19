@@ -34,17 +34,17 @@ namespace polaris {
 
         ~InMemDataStore() override;
 
-        turbo::ResultStatus<location_t> load(const std::string &filename) override;
+        collie::Result<location_t> load(const std::string &filename) override;
 
-        turbo::ResultStatus<size_t> save(const std::string &filename, const location_t num_points) override;
+        collie::Result<size_t> save(const std::string &filename, const location_t num_points) override;
 
         size_t get_aligned_dim() const override;
 
         // Populate internal data from unaligned data while doing alignment and any
         // normalization that is required.
-        [[nodiscard]] turbo::Status populate_data(const data_t *vectors, const location_t num_pts) override;
+        [[nodiscard]] collie::Status populate_data(const data_t *vectors, const location_t num_pts) override;
 
-        [[nodiscard]] turbo::Status populate_data(const std::string &filename, const size_t offset) override;
+        [[nodiscard]] collie::Status populate_data(const std::string &filename, const size_t offset) override;
 
         void extract_data_to_bin(const std::string &filename, const location_t num_pts) override;
 
@@ -60,7 +60,7 @@ namespace polaris {
         void
         copy_vectors(const location_t from_loc, const location_t to_loc, const location_t num_points) override;
 
-        turbo::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const override;
+        collie::Status preprocess_query(const data_t *query, AbstractScratch<data_t> *query_scratch) const override;
 
         float get_distance(const ArrayView &preprocessed_query, const location_t loc) const override;
 
@@ -78,11 +78,11 @@ namespace polaris {
         size_t get_alignment_factor() const override;
 
     protected:
-        turbo::ResultStatus<location_t> expand(const location_t new_size) override;
+        collie::Result<location_t> expand(const location_t new_size) override;
 
-        turbo::ResultStatus<location_t> shrink(const location_t new_size) override;
+        collie::Result<location_t> shrink(const location_t new_size) override;
 
-        turbo::ResultStatus<location_t> load_impl(const std::string &filename);
+        collie::Result<location_t> load_impl(const std::string &filename);
 
     private:
         data_t *_data = nullptr;

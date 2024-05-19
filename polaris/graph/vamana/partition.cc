@@ -456,7 +456,7 @@ namespace polaris {
     // The total number of points across all shards will be k_base * num_points.
 
     template<typename T>
-    turbo::Status partition(const std::string &data_file, const float sampling_rate, size_t num_parts, size_t max_k_means_reps,
+    collie::Status partition(const std::string &data_file, const float sampling_rate, size_t num_parts, size_t max_k_means_reps,
                   const std::string &prefix_path, size_t k_base) {
         size_t train_dim;
         size_t num_train;
@@ -481,25 +481,22 @@ namespace polaris {
         polaris::cout << "Processing global k-means (kmeans_partitioning Step)" << std::endl;
         kmeans::kmeanspp_selecting_pivots(train_data_float, num_train, train_dim, pivot_data, num_parts);
 
-        kmeans::run_lloyds(train_data_float, num_train, train_dim, pivot_data, num_parts, max_k_means_reps, NULL, NULL);
+        kmeans::run_lloyds(train_data_float, num_train, train_dim, pivot_data, num_parts, max_k_means_reps, nullptr,
+                           nullptr);
 
         polaris::cout << "Saving global k-center pivots" << std::endl;
-        auto rs = polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim);
-        if(!rs.ok()) {
-            polaris::cout << "Error saving pivots: " << rs.status().message() << std::endl;
-            return rs.status();
-        }
+        COLLIE_ASSIGN_OR_RETURN(auto s, polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim));
         // now pivots are ready. need to stream base points and assign them to
         // closest clusters.
 
         shard_data_into_clusters<T>(data_file, pivot_data, num_parts, train_dim, k_base, prefix_path);
         delete[] pivot_data;
         delete[] train_data_float;
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::ResultStatus<int> partition_with_ram_budget(const std::string &data_file, double sampling_rate, double ram_budget,
+    collie::Result<int> partition_with_ram_budget(const std::string &data_file, double sampling_rate, double ram_budget,
                                   size_t graph_degree, const std::string &prefix_path, size_t k_base) {
         size_t train_dim;
         size_t num_train;
@@ -539,8 +536,8 @@ namespace polaris {
             polaris::cout << "Processing global k-means (kmeans_partitioning Step)" << std::endl;
             kmeans::kmeanspp_selecting_pivots(train_data_float, num_train, train_dim, pivot_data, num_parts);
 
-            kmeans::run_lloyds(train_data_float, num_train, train_dim, pivot_data, num_parts, max_k_means_reps, NULL,
-                               NULL);
+            kmeans::run_lloyds(train_data_float, num_train, train_dim, pivot_data, num_parts, max_k_means_reps, nullptr,
+                               nullptr);
 
             // now pivots are ready. need to stream base points and assign them to
             // closest clusters.
@@ -568,7 +565,7 @@ namespace polaris {
         }
 
         polaris::cout << "Saving global k-center pivots" << std::endl;
-        auto rs = polaris::save_bin<float>(output_file.c_str(), pivot_data, (size_t) num_parts, train_dim);
+        auto rs = polaris::save_bin<float>(output_file, pivot_data, (size_t) num_parts, train_dim);
         if(!rs.ok()) {
             polaris::cout << "Error saving pivots: " << rs.status().message() << std::endl;
             return rs.status();
@@ -609,29 +606,29 @@ namespace polaris {
     template void POLARIS_API gen_random_slice<int8_t>(const std::string &data_file, double p_val,
                                                        float *&sampled_data, size_t &slice_size, size_t &ndims);
 
-    template POLARIS_API turbo::Status partition<int8_t>(const std::string &data_file, float sampling_rate,
+    template POLARIS_API collie::Status partition<int8_t>(const std::string &data_file, float sampling_rate,
                                                size_t num_centers, size_t max_k_means_reps,
                                                const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API turbo::Status partition<uint8_t>(const std::string &data_file, float sampling_rate,
+    template POLARIS_API collie::Status partition<uint8_t>(const std::string &data_file, float sampling_rate,
                                                 size_t num_centers, size_t max_k_means_reps,
                                                 const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API turbo::Status partition<float>(const std::string &data_file, float sampling_rate,
+    template POLARIS_API collie::Status partition<float>(const std::string &data_file, float sampling_rate,
                                               size_t num_centers, size_t max_k_means_reps,
                                               const std::string &prefix_path, size_t k_base);
 
-    template POLARIS_API turbo::ResultStatus<int> partition_with_ram_budget<int8_t>(const std::string &data_file,
+    template POLARIS_API collie::Result<int> partition_with_ram_budget<int8_t>(const std::string &data_file,
                                                                double sampling_rate, double ram_budget,
                                                                size_t graph_degree, const std::string &prefix_path,
                                                                size_t k_base);
 
-    template POLARIS_API turbo::ResultStatus<int> partition_with_ram_budget<uint8_t>(const std::string &data_file,
+    template POLARIS_API collie::Result<int> partition_with_ram_budget<uint8_t>(const std::string &data_file,
                                                                 double sampling_rate, double ram_budget,
                                                                 size_t graph_degree, const std::string &prefix_path,
                                                                 size_t k_base);
 
-    template POLARIS_API turbo::ResultStatus<int> partition_with_ram_budget<float>(const std::string &data_file, double sampling_rate,
+    template POLARIS_API collie::Result<int> partition_with_ram_budget<float>(const std::string &data_file, double sampling_rate,
                                                               double ram_budget, size_t graph_degree,
                                                               const std::string &prefix_path, size_t k_base);
 

@@ -72,7 +72,7 @@ namespace polaris {
         prop.incomingEdge = incomingEdge;
     }
 
-    turbo::Status NgtGraphParameters::export_property(polaris::PropertySet &p) const {
+    collie::Status NgtGraphParameters::export_property(polaris::PropertySet &p) const {
         p.set("IncrimentalEdgeSizeLimitForTruncation", truncationThreshold);
         p.set("EdgeSizeForCreation", edgeSizeForCreation);
         p.set("EdgeSizeForSearch", edgeSizeForSearch);
@@ -89,18 +89,18 @@ namespace polaris {
         p.set("IncomingEdge", incomingEdge);
         auto rs = PropertySerializer::graph_type_export(p, graphType);
         if (!rs.ok()) {
-            POLARIS_LOG(ERROR)<< "Graph::exportProperty: Fatal error! Invalid Graph Type. " << NAMEOF_ENUM(graphType);
+            POLARIS_LOG(ERROR) << "Graph::exportProperty: Fatal error! Invalid Graph Type. " << NAMEOF_ENUM(graphType);
             return rs;
         }
         rs = PropertySerializer::seed_type_export(p, seedType);
         if (!rs.ok()) {
-            POLARIS_LOG(ERROR)<< "Graph::exportProperty: Fatal error! Invalid Seed Type. " << NAMEOF_ENUM(seedType);
+            POLARIS_LOG(ERROR) << "Graph::exportProperty: Fatal error! Invalid Seed Type. " << NAMEOF_ENUM(seedType);
             return rs;
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status NgtGraphParameters::import_property(polaris::PropertySet &p) {
+    [[nodiscard]] collie::Status NgtGraphParameters::import_property(polaris::PropertySet &p) {
         set_default();
         truncationThreshold = p.getl("IncrimentalEdgeSizeLimitForTruncation", truncationThreshold);
         edgeSizeForCreation = p.getl("EdgeSizeForCreation", edgeSizeForCreation);
@@ -116,22 +116,12 @@ namespace polaris {
         buildTimeLimit = p.getf("BuildTimeLimit", buildTimeLimit);
         outgoingEdge = p.getl("OutgoingEdge", outgoingEdge);
         incomingEdge = p.getl("IncomingEdge", incomingEdge);
-        auto grs = PropertySerializer::graph_type_import(p);
-        if (!grs.ok()) {
-            POLARIS_LOG(ERROR)<< "Graph::importProperty: Fatal error! Invalid Graph Type. " << grs.status().message();
-            return grs.status();
-        }
-        graphType = (GraphType) grs.value();
-        auto srs = PropertySerializer::seed_type_import(p);
-        if (!srs.ok()) {
-            POLARIS_LOG(ERROR)<< "Graph::importProperty: Fatal error! Invalid Seed Type. " << srs.status().message();
-            return srs.status();
-        }
-        seedType = (SeedType) srs.value();
-        return turbo::ok_status();
+        COLLIE_ASSIGN_OR_RETURN(graphType, PropertySerializer::graph_type_import(p));
+        COLLIE_ASSIGN_OR_RETURN(seedType, PropertySerializer::seed_type_import(p));
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status NgtIndexParameters::export_property(polaris::PropertySet &p) const {
+    [[nodiscard]] collie::Status NgtIndexParameters::export_property(polaris::PropertySet &p) const {
         PropertySerializer::dimension_export(p, dimension);
         p.set("ThreadPoolSize", work_threads);
         p.set("loadThreads", load_threads);
@@ -139,7 +129,7 @@ namespace polaris {
         static std::set<ObjectType> allow_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16,
                                                  ObjectType::BFLOAT16};
         auto rs = PropertySerializer::object_type_export(p, object_type, &allow_set);
-        if(!rs.ok()) {
+        if (!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
         }
@@ -151,30 +141,34 @@ namespace polaris {
                     return rrs;
                 }
 #endif
-        static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1, MetricType::METRIC_L2,
-                                                     MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD, MetricType::METRIC_SPARSE_JACCARD,
-                                                     MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
-                                                     MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
+        static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1,
+                                                     MetricType::METRIC_L2,
+                                                     MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD,
+                                                     MetricType::METRIC_SPARSE_JACCARD,
+                                                     MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE,
+                                                     MetricType::METRIC_NORMALIZED_ANGLE,
+                                                     MetricType::METRIC_NORMALIZED_COSINE,
+                                                     MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
                                                      MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
         rs = PropertySerializer::distance_type_export(p, metric, &allow_dis_set);
-        if(!rs.ok()) {
+        if (!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
         }
 
         rs = PropertySerializer::index_type_export(p, indexType);
-        if(!rs.ok()) {
+        if (!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
         }
 
         rs = PropertySerializer::database_type_export(p, databaseType);
-        if(!rs.ok()) {
+        if (!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
         }
         rs = PropertySerializer::object_alignment_export(p, objectAlignment);
-        if(!rs.ok()) {
+        if (!rs.ok()) {
             POLARIS_LOG(ERROR) << rs.message();
             return rs;
         }
@@ -185,79 +179,39 @@ namespace polaris {
         p.set("MaxMagnitude", maxMagnitude);
         p.set("NumberOfNeighborsForInsertionOrder", nOfNeighborsForInsertionOrder);
         p.set("EpsilonForInsertionOrder", epsilonForInsertionOrder);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    [[nodiscard]] turbo::Status NgtIndexParameters::import_property(polaris::PropertySet &p) {
+    [[nodiscard]] collie::Status NgtIndexParameters::import_property(polaris::PropertySet &p) {
         set_default();
-        auto dmrs = PropertySerializer::dimension_import(p);
-        if(!dmrs.ok()) {
-            POLARIS_LOG(ERROR) << dmrs.status().message();
-            dimension = 0;
-            return dmrs.status();
-        } else {
-            dimension = dmrs.value();
-        }
+        COLLIE_ASSIGN_OR_RETURN(dimension, PropertySerializer::dimension_import(p));
         work_threads = p.getl("ThreadPoolSize", work_threads);
         load_threads = p.getl("loadThreads", load_threads);
         max_points = p.getl("maxPoints", max_points);
 
-        static std::set<ObjectType> allow_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
-        auto otrs = PropertySerializer::object_type_import(p, &allow_object_set);
-        if(!otrs.ok()) {
-            POLARIS_LOG(ERROR) << otrs.status().message();
-            object_type = ObjectType::ObjectTypeNone;
-            return otrs.status();
-        }
-        object_type = otrs.value();
+        static std::set<ObjectType> allow_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16,
+                                                        ObjectType::BFLOAT16};
+        COLLIE_ASSIGN_OR_RETURN(object_type, PropertySerializer::object_type_import(p, &allow_object_set));
 #ifdef NGT_REFINEMENT
         {
                     static std::set<ObjectType> allow_refinement_object_set = {ObjectType::FLOAT, ObjectType::UINT8, ObjectType::FLOAT16, ObjectType::BFLOAT16};
-                    auto rtrs = PropertySerializer::object_type_import(p, &allow_refinement_object_set);
-                    if(!rtrs.ok()) {
-                        POLARIS_LOG(ERROR) << rtrs.status().message();
-                        refinementObjectType = ObjectType::ObjectTypeNone;
-                    }
-                    refinementObjectType = rtrs.value();
+                    COLLIE_ASSIGN_OR_RETURN(refinementObjectType, PropertySerializer::object_type_import(p, &allow_refinement_object_set));
                 }
 #endif
-        static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1, MetricType::METRIC_L2,
-                                                     MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD, MetricType::METRIC_SPARSE_JACCARD,
-                                                     MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE, MetricType::METRIC_NORMALIZED_ANGLE,
-                                                     MetricType::METRIC_NORMALIZED_COSINE, MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
+        static std::set<MetricType> allow_dis_set = {MetricType::METRIC_NONE, MetricType::METRIC_L1,
+                                                     MetricType::METRIC_L2,
+                                                     MetricType::METRIC_HAMMING, MetricType::METRIC_JACCARD,
+                                                     MetricType::METRIC_SPARSE_JACCARD,
+                                                     MetricType::METRIC_ANGLE, MetricType::METRIC_COSINE,
+                                                     MetricType::METRIC_NORMALIZED_ANGLE,
+                                                     MetricType::METRIC_NORMALIZED_COSINE,
+                                                     MetricType::METRIC_NORMALIZED_L2, MetricType::METRIC_INNER_PRODUCT,
                                                      MetricType::METRIC_POINCARE, MetricType::METRIC_LORENTZ};
-        auto drs = PropertySerializer::distance_type_import(p, &allow_dis_set);
-        if(!drs.ok()) {
-            POLARIS_LOG(ERROR) << drs.status().message();
-            metric = MetricType::METRIC_NONE;
-            return drs.status();
-        }
-        metric = drs.value();
-        auto irs = PropertySerializer::index_type_import(p);
-        if(!irs.ok()) {
-            POLARIS_LOG(ERROR) << irs.status().message();
-            indexType = IndexType::INDEX_NONE;
-            return irs.status();
-        } else {
-            indexType = irs.value();
-        }
+        COLLIE_ASSIGN_OR_RETURN(metric, PropertySerializer::distance_type_import(p, &allow_dis_set));
+        COLLIE_ASSIGN_OR_RETURN(indexType, PropertySerializer::index_type_import(p));
         std::set<DatabaseType> allow_database_set = {DatabaseType::Memory, DatabaseType::MemoryMappedFile};
-        auto dbtrs = PropertySerializer::database_type_import(p, &allow_database_set);
-        if(!dbtrs.ok()) {
-            POLARIS_LOG(ERROR) << dbtrs.status().message();
-            databaseType = DatabaseType::DatabaseTypeNone;
-            return dbtrs.status();
-        } else {
-            databaseType = dbtrs.value();
-        }
-        auto alrs = PropertySerializer::object_alignment_import(p);
-        if(!alrs.ok()) {
-            POLARIS_LOG(ERROR) << alrs.status().message();
-            objectAlignment = ObjectAlignment::ObjectAlignmentFalse;
-            return alrs.status();
-        } else {
-            objectAlignment = alrs.value();
-        }
+        COLLIE_ASSIGN_OR_RETURN(databaseType, PropertySerializer::database_type_import(p, &allow_database_set));
+        COLLIE_ASSIGN_OR_RETURN(objectAlignment,PropertySerializer::object_alignment_import(p));
         pathAdjustmentInterval = p.getl("PathAdjustmentInterval", pathAdjustmentInterval);
         prefetchOffset = p.getl("PrefetchOffset", prefetchOffset);
         prefetchSize = p.getl("PrefetchSize", prefetchSize);
@@ -273,14 +227,14 @@ namespace polaris {
         nOfNeighborsForInsertionOrder = p.getl("NumberOfNeighborsForInsertionOrder",
                                                nOfNeighborsForInsertionOrder);
         epsilonForInsertionOrder = p.getf("EpsilonForInsertionOrder", epsilonForInsertionOrder);
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
 
     void
     NgtIndexParameters::set(polaris::NgtParameters &prop) {
         if (prop.dimension != -1) dimension = prop.dimension;
-        if (prop.work_threads != -1) work_threads= prop.work_threads;
+        if (prop.work_threads != -1) work_threads = prop.work_threads;
         if (prop.object_type != ObjectType::ObjectTypeNone) object_type = prop.object_type;
 #ifdef NGT_REFINEMENT
         if (prop.refinementObjectType != ObjectSpace::ObjectTypeNone) refinementObjectType = prop.refinementObjectType;
@@ -294,7 +248,8 @@ namespace polaris {
         if (prop.prefetchSize != -1) prefetchSize = prop.prefetchSize;
         if (prop.accuracyTable != "") accuracyTable = prop.accuracyTable;
         if (prop.maxMagnitude != -1) maxMagnitude = prop.maxMagnitude;
-        if (prop.nOfNeighborsForInsertionOrder != -1) nOfNeighborsForInsertionOrder = prop.nOfNeighborsForInsertionOrder;
+        if (prop.nOfNeighborsForInsertionOrder != -1)
+            nOfNeighborsForInsertionOrder = prop.nOfNeighborsForInsertionOrder;
         if (prop.epsilonForInsertionOrder != -1) epsilonForInsertionOrder = prop.epsilonForInsertionOrder;
     }
 

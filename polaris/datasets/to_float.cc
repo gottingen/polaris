@@ -21,7 +21,7 @@
 
 namespace polaris {
 
-    turbo::Status int8_to_float(const std::string &input_file, const std::string &output_file) {
+    collie::Status int8_to_float(const std::string &input_file, const std::string &output_file) {
         int8_t *input;
         size_t npts, nd;
         auto s = polaris::load_bin<int8_t>(input_file, input, npts, nd);
@@ -50,7 +50,7 @@ namespace polaris {
         writer.write((char *) write_buf, npts * ndims * sizeof(float));
     }
 
-    turbo::Status
+    collie::Status
     int8_to_float_scalar(const std::string &input_file, const std::string &output_file, float bias, float scale) {
         std::ifstream reader(input_file, std::ios::binary);
         uint32_t npts_u32;
@@ -82,13 +82,13 @@ namespace polaris {
 
         writer.close();
         reader.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status uint8_to_float(const std::string &input_file, const std::string &output_file) {
+    collie::Status uint8_to_float(const std::string &input_file, const std::string &output_file) {
         uint8_t *input;
         size_t npts, nd;
-        polaris::load_bin<uint8_t>(input_file, input, npts, nd);
+        COLLIE_RETURN_NOT_OK(polaris::load_bin<uint8_t>(input_file, input, npts, nd));
         auto *output = new float[npts * nd];
         polaris::convert_types<uint8_t, float>(input, output, npts, nd);
         auto rs = polaris::save_bin<float>(output_file, output, npts, nd);

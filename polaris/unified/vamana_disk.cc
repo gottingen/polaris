@@ -51,20 +51,20 @@ namespace polaris {
         }
     }
 
-    turbo::Status VamanaDisk::initialize(const IndexConfig &config) {
+    collie::Status VamanaDisk::initialize(const IndexConfig &config) {
         if (index_ != nullptr) {
-            return turbo::make_status(turbo::kEAGAIN, "Index already initialized");
+            return collie::Status::failed_precondition("Index already initialized");
         }
         if (config.basic_config.object_type == ObjectType::ObjectTypeNone) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid object type");
+            return collie::Status::invalid_argument("Invalid object type");
         }
         if(config.basic_config.metric == MetricType::METRIC_NONE) {
-            return turbo::make_status(turbo::kInvalidArgument, "Invalid metric type");
+            return collie::Status::invalid_argument("Invalid metric type");
         }
         config_ = config;
         reader_ = std::make_shared<LinuxAlignedFileReader>();
         if (!reader_) {
-            return turbo::make_status(turbo::kResourceExhausted, "Failed to create reader");
+            return collie::Status::resource_exhausted("Failed to create reader");
         }
         switch (config.basic_config.object_type) {
             case ObjectType::UINT8:
@@ -86,18 +86,18 @@ namespace polaris {
             case ObjectType::FLOAT16:
             case ObjectType::BFLOAT16:
             default:
-                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+                return collie::Status::invalid_argument("Unsupported object type");
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status VamanaDisk::build(const UnifiedBuildParameters &parameters) {
+    collie::Status VamanaDisk::build(const UnifiedBuildParameters &parameters) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+            return collie::Status::failed_precondition("Index not initialized");
         }
 
         if(parameters.data_file.empty() || parameters.output_path.empty()) {
-            return turbo::make_status(turbo::kEINVAL, "Invalid build parameters");
+            return collie::Status::invalid_argument("Invalid build parameters");
         }
 
         switch (config_.basic_config.object_type) {
@@ -120,26 +120,26 @@ namespace polaris {
             case ObjectType::FLOAT16:
             case ObjectType::BFLOAT16:
             default:
-                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+                return collie::Status::invalid_argument("Unsupported object type");
         }
     }
     template <typename T>
-    inline turbo::Status vd_load(void *index, uint32_t num_threads, uint32_t num_nodes_to_cache,  const std::string &index_path) {
+    inline collie::Status vd_load(void *index, uint32_t num_threads, uint32_t num_nodes_to_cache,  const std::string &index_path) {
         if (index == nullptr) {
-            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
         auto ptr = (PQFlashIndex<T>*)index;
-        ptr->load(num_threads, index_path.c_str());
+        COLLIE_RETURN_NOT_OK(ptr->load(num_threads, index_path.c_str()));
         std::vector<uint32_t> node_list;
         ptr->cache_bfs_levels(num_nodes_to_cache, node_list);
         ptr->load_cache_list(node_list);
         node_list.clear();
         node_list.shrink_to_fit();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
-    turbo::Status VamanaDisk::load(const std::string &index_path) {
+    collie::Status VamanaDisk::load(const std::string &index_path) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
 
         switch (config_.basic_config.object_type) {
@@ -159,27 +159,27 @@ namespace polaris {
             case ObjectType::FLOAT16:
             case ObjectType::BFLOAT16:
             default:
-                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+                return collie::Status::invalid_argument("Unsupported object type");
         }
     }
 
-    turbo::Status VamanaDisk::save(const std::string &index_path) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+    collie::Status VamanaDisk::save(const std::string &index_path) {
+        return collie::Status::unimplemented("Not implemented");
     }
 
-    turbo::Status VamanaDisk::add(vid_t vid, const void *vec) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+    collie::Status VamanaDisk::add(vid_t vid, const void *vec) {
+        return collie::Status::unimplemented("Not implemented");
     }
 
     template <typename T>
-    inline turbo::Status vd_get_vector(void *index, vid_t vid, void *vec) {
+    inline collie::Status vd_get_vector(void *index, vid_t vid, void *vec) {
         auto ptr = (PQFlashIndex<T>*)index;
         return ptr->get_vector(vid, vec);
     }
 
-    turbo::Status VamanaDisk::get_vector(vid_t vid, void *vec) const {
+    collie::Status VamanaDisk::get_vector(vid_t vid, void *vec) const {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
 
         switch (config_.basic_config.object_type) {
@@ -199,11 +199,11 @@ namespace polaris {
             case ObjectType::FLOAT16:
             case ObjectType::BFLOAT16:
             default:
-                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+                return collie::Status::invalid_argument("Unsupported object type");
         }
     }
-    turbo::Status VamanaDisk::lazy_remove(vid_t vid) {
-        return turbo::make_status(turbo::kUnimplemented, "Not implemented");
+    collie::Status VamanaDisk::lazy_remove(vid_t vid) {
+        return collie::Status::unimplemented("Not implemented");
     }
 
     template <typename T>
@@ -238,13 +238,13 @@ if (index_ == nullptr) {
     }
 
     template <typename T>
-    inline turbo::Status vd_search(void *index,  SearchContext &context) {
+    inline collie::Status vd_search(void *index,  SearchContext &context) {
         auto ptr = (PQFlashIndex<T>*)index;
         return ptr->search(context);
     }
-    turbo::Status VamanaDisk::search(SearchContext &context) {
+    collie::Status VamanaDisk::search(SearchContext &context) {
         if (index_ == nullptr) {
-            return turbo::make_status(turbo::kEINVAL, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
 
         switch (config_.basic_config.object_type) {
@@ -264,7 +264,7 @@ if (index_ == nullptr) {
             case ObjectType::FLOAT16:
             case ObjectType::BFLOAT16:
             default:
-                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+                return collie::Status::invalid_argument("Unsupported object type");
         }
     }
 
@@ -275,11 +275,11 @@ if (index_ == nullptr) {
         auto ptr = (PQFlashIndex<T>*)index;
         return ptr->optimize_beamwidth((T*)tuning_sample, tuning_sample_num, tuning_sample_aligned_dim, L, nthreads, start_bw);
     }
-    turbo::ResultStatus<uint32_t> VamanaDisk::optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
+    collie::Result<uint32_t> VamanaDisk::optimize_beam_width(void *tuning_sample, uint64_t tuning_sample_num,
                                  uint64_t tuning_sample_aligned_dim, uint32_t L, uint32_t nthreads,
                                  uint32_t start_bw) {
         if (index_ == nullptr) {
-            return turbo::Status(turbo::kEINVAL, "Index not initialized");
+            return collie::Status::invalid_argument("Index not initialized");
         }
 
         switch (config_.basic_config.object_type) {
@@ -299,7 +299,7 @@ if (index_ == nullptr) {
             case ObjectType::FLOAT16:
             case ObjectType::BFLOAT16:
             default:
-                return turbo::make_status(turbo::kInvalidArgument, "Unsupported object type");
+                return collie::Status::invalid_argument("Unsupported object type");
         }
     }
 }  // namespace polaris

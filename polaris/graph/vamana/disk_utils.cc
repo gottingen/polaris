@@ -35,7 +35,7 @@
 
 namespace polaris {
 
-    turbo::Status add_new_file_to_single_index(std::string index_file, std::string new_file) {
+    collie::Status add_new_file_to_single_index(std::string index_file, std::string new_file) {
         std::unique_ptr<uint64_t[]> metadata;
         uint64_t nr, nc;
         polaris::load_bin<uint64_t>(index_file, metadata, nr, nc);
@@ -370,7 +370,7 @@ namespace polaris {
     }
 
     template<typename T>
-    turbo::Status build_merged_vamana_index(std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R,
+    collie::Status build_merged_vamana_index(std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R,
                                   double sampling_rate, double ram_budget, std::string mem_index_path,
                                   std::string medoids_file, std::string centroids_file, size_t build_pq_bytes,
                                   bool use_opq,
@@ -397,17 +397,15 @@ namespace polaris {
             _index.save(mem_index_path.c_str());
             std::remove(medoids_file.c_str());
             std::remove(centroids_file.c_str());
-            return turbo::ok_status();
+            return collie::Status::ok_status();
         }
 
         std::string merged_index_prefix = mem_index_path + "_tempFiles";
 
         Timer timer;
-        auto rs = partition_with_ram_budget<T>(base_file, sampling_rate, ram_budget, 2 * R / 3, merged_index_prefix, 2);
-        if (!rs.ok()) {
-            return rs.status();
-        }
-        int num_parts = rs.value();
+        int ret;
+        COLLIE_ASSIGN_OR_RETURN(ret, partition_with_ram_budget<T>(base_file, sampling_rate, ram_budget, 2 * R / 3, merged_index_prefix, 2));
+        int num_parts = ret;
 
         polaris::cout << timer.elapsed_seconds_for_step("partitioning data ") << std::endl;
 
@@ -463,11 +461,11 @@ namespace polaris {
             std::remove(shard_index_file.c_str());
             std::remove(shard_index_file_data.c_str());
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    turbo::Status  create_disk_layout(const std::string base_file, const std::string mem_index_file, const std::string output_file,
+    collie::Status  create_disk_layout(const std::string base_file, const std::string mem_index_file, const std::string output_file,
                        const std::string reorder_data_file) {
         uint32_t npts, ndims;
 
@@ -704,17 +702,17 @@ namespace polaris {
         return rs.status();
     }
 
-    template POLARIS_API turbo::Status create_disk_layout<int8_t>(const std::string base_file,
+    template POLARIS_API collie::Status create_disk_layout<int8_t>(const std::string base_file,
                                                          const std::string mem_index_file,
                                                          const std::string output_file,
                                                          const std::string reorder_data_file);
 
-    template POLARIS_API turbo::Status create_disk_layout<uint8_t>(const std::string base_file,
+    template POLARIS_API collie::Status create_disk_layout<uint8_t>(const std::string base_file,
                                                           const std::string mem_index_file,
                                                           const std::string output_file,
                                                           const std::string reorder_data_file);
 
-    template POLARIS_API turbo::Status create_disk_layout<float>(const std::string base_file, const std::string mem_index_file,
+    template POLARIS_API collie::Status create_disk_layout<float>(const std::string base_file, const std::string mem_index_file,
                                                         const std::string output_file,
                                                         const std::string reorder_data_file);
 
@@ -727,17 +725,17 @@ namespace polaris {
     template POLARIS_API float *load_warmup<float>(const std::string &cache_warmup_file, uint64_t &warmup_num,
                                                    uint64_t warmup_dim, uint64_t warmup_aligned_dim);
 
-    template POLARIS_API turbo::Status build_merged_vamana_index<int8_t>(
+    template POLARIS_API collie::Status build_merged_vamana_index<int8_t>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
             double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
             size_t build_pq_bytes, bool use_opq, uint32_t num_threads);
 
-    template POLARIS_API turbo::Status build_merged_vamana_index<float>(
+    template POLARIS_API collie::Status build_merged_vamana_index<float>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
             double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
             size_t build_pq_bytes, bool use_opq, uint32_t num_threads);
 
-    template POLARIS_API turbo::Status build_merged_vamana_index<uint8_t>(
+    template POLARIS_API collie::Status build_merged_vamana_index<uint8_t>(
             std::string base_file, polaris::MetricType compareMetric, uint32_t L, uint32_t R, double sampling_rate,
             double ram_budget, std::string mem_index_path, std::string medoids_path, std::string centroids_file,
             size_t build_pq_bytes, bool use_opq, uint32_t num_threads);

@@ -15,12 +15,12 @@
 #pragma once
 
 #include <string>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 
 namespace polaris {
 
-    turbo::Status ivecs_to_bin(const std::string &vecs_file, const std::string &bin_file);
+    collie::Status ivecs_to_bin(const std::string &vecs_file, const std::string &bin_file);
 
-    turbo::Status uint32_to_uint8_bin(const std::string &vecs_file, const std::string &bin_file);
+    collie::Status uint32_to_uint8_bin(const std::string &vecs_file, const std::string &bin_file);
 
 }  // namespace polaris

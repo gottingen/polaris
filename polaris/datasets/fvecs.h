@@ -15,15 +15,15 @@
 #pragma once
 
 #include <string>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 
 namespace polaris {
 
-    turbo::Status float_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file);
+    collie::Status float_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file);
 
-    turbo::Status uint8_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file);
+    collie::Status uint8_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file);
 
-    turbo::Status float_vecs_to_uint8_vecs(const std::string &vecs_file, const std::string &bin_file);
+    collie::Status float_vecs_to_uint8_vecs(const std::string &vecs_file, const std::string &bin_file);
 
-    turbo::Status float_bin_to_int8(const std::string &src, const std::string &dst, float bias, float scale);
+    collie::Status float_bin_to_int8(const std::string &src, const std::string &dst, float bias, float scale);
 }

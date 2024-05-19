@@ -40,7 +40,7 @@ namespace polaris {
         writer.write((char *) write_buf, npts * ndims * sizeof(uint8_t));
     }
 
-    turbo::Status float_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file) {
+    collie::Status float_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file) {
 
         int datasize = sizeof(float);
 
@@ -79,10 +79,10 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    turbo::Status uint8_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file) {
+    collie::Status uint8_vecs_to_bin(const std::string &vecs_file, const std::string &bin_file) {
 
         int datasize = sizeof(uint8_t);
 
@@ -121,7 +121,7 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     void block_convert(std::ifstream &reader, std::ofstream &writer, float *read_buf, uint8_t *write_buf, size_t npts,
@@ -135,7 +135,7 @@ namespace polaris {
         writer.write((char *) write_buf, npts * (ndims * 1 + 4));
     }
 
-    turbo::Status float_vecs_to_uint8_vecs(const std::string &vecs_file, const std::string &bin_file) {
+    collie::Status float_vecs_to_uint8_vecs(const std::string &vecs_file, const std::string &bin_file) {
         std::ifstream reader(vecs_file, std::ios::binary | std::ios::ate);
         size_t fsize = reader.tellg();
         reader.seekg(0, std::ios::beg);
@@ -164,7 +164,7 @@ namespace polaris {
 
         reader.close();
         writer.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     static void block_convert(std::ofstream &writer, int8_t *write_buf, std::ifstream &reader, float *read_buf, size_t npts,
@@ -181,7 +181,7 @@ namespace polaris {
         writer.write((char *)write_buf, npts * ndims);
     }
 
-    turbo::Status float_bin_to_int8(const std::string &src, const std::string &dst, float bias, float scale) {
+    collie::Status float_bin_to_int8(const std::string &src, const std::string &dst, float bias, float scale) {
 
         std::ifstream reader(src, std::ios::binary);
         uint32_t npts_u32;
@@ -212,6 +212,6 @@ namespace polaris {
 
         writer.close();
         reader.close();
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 } // namespace polaris

@@ -58,9 +58,9 @@ namespace polaris {
                   max_occlusion_size(max_occlusion_size), alpha(alpha), num_threads(num_threads) {
         }
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
 
-        [[nodiscard]] turbo::Status import_property(const polaris::PropertySet &p);
+        [[nodiscard]] collie::Status import_property(const polaris::PropertySet &p);
 
     };
 
@@ -74,9 +74,9 @@ namespace polaris {
         uint32_t initial_search_list_size{0}; // search L
         uint32_t num_search_threads{0};       // search threads
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
 
-        [[nodiscard]] turbo::Status import_property(const polaris::PropertySet &p);
+        [[nodiscard]] collie::Status import_property(const polaris::PropertySet &p);
     };
 
     struct VamanaIndexConfig : public BasicParameters {
@@ -94,9 +94,9 @@ namespace polaris {
         // Params for searching index
         std::shared_ptr<IndexSearchParams> index_search_params;
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
 
-        [[nodiscard]] turbo::Status import_property(const polaris::PropertySet &p);
+        [[nodiscard]] collie::Status import_property(const polaris::PropertySet &p);
     };
 
     struct VamanaDiskIndexConfig : public BasicParameters {
@@ -112,9 +112,9 @@ namespace polaris {
         bool use_opq{false};
         uint32_t num_nodes_to_cache{0};
 
-        [[nodiscard]] turbo::Status export_property(polaris::PropertySet &p) const;
+        [[nodiscard]] collie::Status export_property(polaris::PropertySet &p) const;
 
-        [[nodiscard]] turbo::Status import_property(const polaris::PropertySet &p);
+        [[nodiscard]] collie::Status import_property(const polaris::PropertySet &p);
     };
 
 }  // namespace polaris

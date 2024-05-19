@@ -17,8 +17,8 @@
 #pragma once
 
 #include <string>
-#include <turbo/status/status.h>
+#include <collie/utility/status.h>
 
 namespace polaris {
-    turbo::Status calculate_recall(const std::string &vecs_file, const std::string &bin_file, uint32_t r);
+    collie::Status calculate_recall(const std::string &vecs_file, const std::string &bin_file, uint32_t r);
 }

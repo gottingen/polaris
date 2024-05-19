@@ -26,7 +26,7 @@
 #include <turbo/container/flat_hash_set.h>
 #include <polaris/graph/vamana/utils.h>
 #include <polaris/utility/platform_macros.h>
-#include <turbo/status/result_status.h>
+#include <collie/utility/result.h>
 
 namespace polaris {
     template<typename T>
@@ -56,11 +56,11 @@ namespace polaris {
     retrieve_shard_data_from_ids(const std::string data_file, std::string idmap_filename, std::string data_filename);
 
     template<typename T>
-    turbo::Status partition(const std::string &data_file, float sampling_rate, size_t num_centers, size_t max_k_means_reps,
+    collie::Status partition(const std::string &data_file, float sampling_rate, size_t num_centers, size_t max_k_means_reps,
                   const std::string &prefix_path, size_t k_base);
 
     template<typename T>
-    turbo::ResultStatus<int> partition_with_ram_budget(const std::string &data_file, double sampling_rate, double ram_budget,
+    collie::Result<int> partition_with_ram_budget(const std::string &data_file, double sampling_rate, double ram_budget,
                                   size_t graph_degree, const std::string &prefix_path, size_t k_base);
 
 }  // namespace polaris

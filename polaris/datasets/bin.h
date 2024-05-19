@@ -24,7 +24,8 @@
 #include <polaris/core/memory.h>
 #include <polaris/io/utils.h>
 #include <polaris/io/cached_io.h>
-#include <turbo/status/result_status.h>
+#include <collie/utility/status.h>
+#include <collie/utility/result.h>
 
 namespace polaris {
 
@@ -62,7 +63,7 @@ namespace polaris {
     }
 
     template<typename T>
-    inline turbo::Status load_bin(const std::string &bin_file, T *&data, size_t &npts, size_t &dim, size_t offset = 0) {
+    inline collie::Status load_bin(const std::string &bin_file, T *&data, size_t &npts, size_t &dim, size_t offset = 0) {
         POLARIS_LOG(INFO) << "Reading bin file " << bin_file.c_str() << " ...";
         std::ifstream reader;
         reader.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -74,14 +75,14 @@ namespace polaris {
             load_bin_impl<T>(reader, data, npts, dim, offset);
         }
         catch (std::system_error &e) {
-            return turbo::make_status(errno,e.what());
+            return collie::Status::from_errno(errno, e.what());
         }
         POLARIS_LOG(INFO)<< "done.";
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    inline turbo::Status load_bin(const std::string &bin_file, std::unique_ptr<T[]> &data, size_t &npts, size_t &dim,
+    inline collie::Status load_bin(const std::string &bin_file, std::unique_ptr<T[]> &data, size_t &npts, size_t &dim,
                          size_t offset = 0) {
         T *ptr;
         auto r = load_bin<T>(bin_file, ptr, npts, dim, offset);
@@ -90,13 +91,9 @@ namespace polaris {
     }
 
     template<typename T>
-    inline turbo::ResultStatus<size_t> save_bin(const std::string &filename, T *data, size_t npts, size_t ndims, size_t offset = 0) {
+    inline collie::Result<size_t> save_bin(const std::string &filename, T *data, size_t npts, size_t ndims, size_t offset = 0) {
         std::ofstream writer;
-        auto rs = open_file_to_write(writer, filename);
-        if (!rs.ok()) {
-            return rs;
-        }
-
+        COLLIE_RETURN_NOT_OK(open_file_to_write(writer, filename));
         POLARIS_LOG(INFO) << "Writing bin: " << filename.c_str();
         writer.seekp(offset, writer.beg);
         int npts_i32 = (int) npts, ndims_i32 = (int) ndims;
@@ -111,18 +108,15 @@ namespace polaris {
         return bytes_written;
     }
 
-    inline turbo::Status load_tags(const std::string &tags_file, const std::string &base_file,std::vector<uint32_t> &location_to_tag) {
+    inline collie::Status load_tags(const std::string &tags_file, const std::string &base_file,std::vector<uint32_t> &location_to_tag) {
         const bool tags_enabled = tags_file.empty() ? false : true;
         if (tags_enabled) {
             size_t tag_file_ndims, tag_file_npts;
             std::uint32_t *tag_data;
-            auto rs =polaris::load_bin<std::uint32_t>(tags_file, tag_data, tag_file_npts, tag_file_ndims);
-            if (!rs.ok()) {
-                return rs;
-            }
+            COLLIE_RETURN_NOT_OK(polaris::load_bin<std::uint32_t>(tags_file, tag_data, tag_file_npts, tag_file_ndims));
             if (tag_file_ndims != 1) {
                 POLARIS_LOG(ERROR) << "tags file error";
-                return turbo::make_status(turbo::kInvalidArgument, "tags file error");
+                return collie::Status::invalid_argument("tags file error");
             }
 
             // check if the point count match
@@ -130,38 +124,35 @@ namespace polaris {
             polaris::get_bin_metadata(base_file, base_file_npts, base_file_ndims);
             if (base_file_npts != tag_file_npts) {
                 POLARIS_LOG(ERROR) << "point num in tags file mismatch";
-                return turbo::make_status(turbo::kInvalidArgument, "point num in tags file mismatch");
+                return collie::Status::invalid_argument("point num in tags file mismatch");
             }
 
             location_to_tag.assign(tag_data, tag_data + tag_file_npts);
             delete[] tag_data;
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
-    inline turbo::Status load_tags(const std::string &tags_file, size_t base_file_npts,std::vector<uint32_t> &location_to_tag) {
+    inline collie::Status load_tags(const std::string &tags_file, size_t base_file_npts,std::vector<uint32_t> &location_to_tag) {
         const bool tags_enabled = tags_file.empty() ? false : true;
         if (tags_enabled) {
             size_t tag_file_ndims, tag_file_npts;
             std::uint32_t *tag_data;
-            auto rs =polaris::load_bin<std::uint32_t>(tags_file, tag_data, tag_file_npts, tag_file_ndims);
-            if (!rs.ok()) {
-                return rs;
-            }
+            COLLIE_RETURN_NOT_OK(polaris::load_bin<std::uint32_t>(tags_file, tag_data, tag_file_npts, tag_file_ndims));
             if (tag_file_ndims != 1) {
                 POLARIS_LOG(ERROR) << "tags file error";
-                return turbo::make_status(turbo::kInvalidArgument, "tags file error");
+                return collie::Status::invalid_argument("tags file error");
             }
 
             if (base_file_npts != tag_file_npts) {
                 POLARIS_LOG(ERROR) << "point num in tags file mismatch";
-                return turbo::make_status(turbo::kInvalidArgument, "point num in tags file mismatch");
+                return collie::Status::invalid_argument("point num in tags file mismatch");
             }
 
             location_to_tag.assign(tag_data, tag_data + tag_file_npts);
             delete[] tag_data;
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename InType, typename OutType>
@@ -174,7 +165,7 @@ namespace polaris {
     }
 
     template<typename T>
-    inline turbo::Status load_aligned_bin_impl(std::basic_istream<char> &reader, size_t actual_file_size, T *&data, size_t &npts,
+    inline collie::Status load_aligned_bin_impl(std::basic_istream<char> &reader, size_t actual_file_size, T *&data, size_t &npts,
                                       size_t &dim, size_t &rounded_dim) {
         int npts_i32, dim_i32;
         reader.read((char *) &npts_i32, sizeof(int));
@@ -187,7 +178,7 @@ namespace polaris {
             POLARIS_LOG(ERROR) << "Error. File size mismatch. Actual size is " << actual_file_size << " while expected size is  "
                    << expected_actual_file_size << " npts = " << npts << " dim = " << dim << " size of <T>= "
                    << sizeof(T);
-            return turbo::make_status(turbo::kInvalidArgument, "File size mismatch");
+            return collie::Status::invalid_argument("File size mismatch");
         }
         rounded_dim = ROUND_UP(dim, 8);
         POLARIS_LOG(INFO)<< "Metadata: #pts = " << npts << ", #dims = " << dim << ", aligned_dim = " << rounded_dim
@@ -202,11 +193,11 @@ namespace polaris {
             memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
         }
         POLARIS_LOG(INFO) << " done.";
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
-    inline turbo::Status load_aligned_bin(const std::string &bin_file, T *&data, size_t &npts, size_t &dim, size_t &rounded_dim) {
+    inline collie::Status load_aligned_bin(const std::string &bin_file, T *&data, size_t &npts, size_t &dim, size_t &rounded_dim) {
         std::ifstream reader;
         reader.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         POLARIS_LOG(INFO) << "Reading (with alignment) bin file " << bin_file << " ...";
@@ -217,7 +208,7 @@ namespace polaris {
         return load_aligned_bin_impl(reader, fsize, data, npts, dim, rounded_dim);
     }
 
-    inline turbo::Status load_truthset(const std::string &bin_file, uint32_t *&ids, float *&dists, size_t &npts, size_t &dim) {
+    inline collie::Status load_truthset(const std::string &bin_file, uint32_t *&ids, float *&dists, size_t &npts, size_t &dim) {
         size_t read_blk_size = 64 * 1024 * 1024;
         cached_ifstream reader(bin_file, read_blk_size);
         POLARIS_LOG(INFO) << "Reading truthset file " << bin_file.c_str() << " ...";
@@ -249,7 +240,7 @@ namespace polaris {
                       "followed by npts*ngt distance values; actual size: "
                    << actual_file_size << ", expected: " << expected_file_size_with_dists << " or "
                    << expected_file_size_just_ids;
-            return turbo::make_status(turbo::kInvalidArgument, "File size mismatch");
+            return collie::Status::invalid_argument("File size mismatch");
         }
 
         ids = new uint32_t[npts * dim];
@@ -259,7 +250,7 @@ namespace polaris {
             dists = new float[npts * dim];
             reader.read((char *) dists, npts * dim * sizeof(float));
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
     template<typename T>
@@ -281,10 +272,10 @@ namespace polaris {
 
 
     template<typename T>
-    [[nodiscard]] inline turbo::Status copy_aligned_data_from_file(const char *bin_file, T *&data, size_t &npts, size_t &dim,
+    [[nodiscard]] inline collie::Status copy_aligned_data_from_file(const char *bin_file, T *&data, size_t &npts, size_t &dim,
                                             const size_t &rounded_dim, size_t offset = 0) {
         if (data == nullptr) {
-            return turbo::make_status(turbo::kInvalidArgument, "Null pointer passed to copy_aligned_data_from_file function");
+            return collie::Status::invalid_argument("Null pointer passed to copy_aligned_data_from_file function");
         }
         try {
             std::ifstream reader;
@@ -303,9 +294,9 @@ namespace polaris {
                 memset(data + i * rounded_dim + dim, 0, (rounded_dim - dim) * sizeof(T));
             }
         } catch (std::system_error &e) {
-            return turbo::make_status(errno,e.what());
+            return collie::Status::from_errno(errno,e.what());
         }
-        return turbo::ok_status();
+        return collie::Status::ok_status();
     }
 
 }  // namespace polaris

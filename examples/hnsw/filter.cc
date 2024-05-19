@@ -39,7 +39,12 @@ int main() {
 
     // Initing index
     hnswlib::L2Space space(dim);
-    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space);
+    auto rs = alg_hnsw->initialize(&space, max_elements, M, ef_construction);
+    if(!rs.ok()) {
+        std::cout << "Error: " << rs.to_string() << std::endl;
+        return 1;
+    }
 
     // Generate random data
     std::mt19937 rng;
@@ -52,7 +57,10 @@ int main() {
 
     // Add data to index
     for (int i = 0; i < max_elements; i++) {
-        alg_hnsw->addPoint(data + i * dim, i);
+        auto rs = alg_hnsw->addPoint(data + i * dim, i);
+        if(!rs.ok()) {
+            std::cerr << "Failed to add element " << i << std::endl;
+        }
     }
 
     // Create filter that allows only even labels
